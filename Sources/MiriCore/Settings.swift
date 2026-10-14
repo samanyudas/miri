@@ -7,6 +7,7 @@ public struct MiriSettings: Equatable, Sendable {
     /// The engine's exponential ease-out rate when animation is on. Unset in the engine means instant movement.
     public static let animationSpeed = 14.0
     public static let gapRuleName = "miri-gaps"
+    public static let floatingRuleName = "miri-settings"
 
     public var innerGap = 8
     public var outerGap = 8
@@ -56,7 +57,10 @@ public struct MiriSettings: Equatable, Sendable {
     public var edgePadding: Int { max(0, outerGap - windowPadding) }
 
     /// Writes these settings and the engine keys derived from them, changing only values that differ.
-    public func applied(to document: TOMLDocument, reduceMotion: Bool) throws -> TOMLDocument {
+    /// `appBundleIdentifier` names Miri's own app, whose windows always float.
+    public func applied(to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String) throws
+        -> TOMLDocument
+    {
         try validate()
         var result = document
         func set(_ value: TOMLValue, _ table: [String], _ key: String) throws {
@@ -81,6 +85,10 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.string(".*"), rule, "title")
         try set(.integer(Int64(windowPadding)), rule, "horizontal_padding")
         try set(.integer(Int64(windowPadding)), rule, "vertical_padding")
+        let floating = ["windows", Self.floatingRuleName]
+        try set(.string(".*"), floating, "title")
+        try set(.string(appBundleIdentifier), floating, "bundle_id")
+        try set(.boolean(true), floating, "floating")
         return result
     }
 

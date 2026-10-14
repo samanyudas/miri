@@ -39,6 +39,17 @@ enum WindowRestorer {
         return summary
     }
 
+    /// The titles of every open window of ordinary apps, so diagnostics can remove them.
+    static func openWindowTitles() -> [String] {
+        guard AXIsProcessTrusted() else { return [] }
+        return NSWorkspace.shared.runningApplications.filter { $0.activationPolicy == .regular }.flatMap { app in
+            let application = AXUIElementCreateApplication(app.processIdentifier)
+            AXUIElementSetMessagingTimeout(application, 0.25)
+            let windows = attribute(kAXWindowsAttribute, of: application) as? [AXUIElement] ?? []
+            return windows.compactMap { attribute(kAXTitleAttribute, of: $0) as? String }
+        }
+    }
+
     /// Standard windows that are neither minimized nor in native fullscreen.
     static func windows(of pid: pid_t) -> [AXUIElement] {
         let application = AXUIElementCreateApplication(pid)
@@ -82,7 +93,7 @@ enum WindowRestorer {
 
 /// Strands one window of a test fixture off-screen, recovers it, and reports the frames. It touches no other app.
 enum RecoverySelftest {
-    struct Report: Codable {
+    struct Report: Encodable {
         let schemaVersion = 1
         let trusted: Bool
         var original: CGRect?

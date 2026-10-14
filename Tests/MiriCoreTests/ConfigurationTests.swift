@@ -10,7 +10,7 @@ struct ConfigurationStoreTests {
     private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
 
     @Test func createsTheFileWithAcceptedDefaultsAndDerivedEngineKeys() throws {
-        let store = ConfigurationStore(url: url)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
         store.load(reduceMotion: false)
         #expect(store.issue == nil)
         #expect(store.settings == MiriSettings())
@@ -26,10 +26,16 @@ struct ConfigurationStoreTests {
         #expect(document.value(at: ["windows", "miri-gaps", "title"]) == .string(".*"))
         #expect(document.value(at: ["windows", "miri-gaps", "horizontal_padding"]) == .integer(4))
         #expect(document.value(at: ["windows", "miri-gaps", "vertical_padding"]) == .integer(4))
+        #expect(
+            document.value(at: ["windows", "miri-settings"])
+                == .table([
+                    "title": .string(".*"), "bundle_id": .string("io.github.samanyudas.miri"),
+                    "floating": .boolean(true),
+                ]))
     }
 
     @Test func loadingTwiceDoesNotRewriteTheFile() throws {
-        let store = ConfigurationStore(url: url)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
         store.load(reduceMotion: false)
         let first = try contents()
         let modified = try FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date
@@ -49,7 +55,7 @@ struct ConfigurationStoreTests {
             window_focus_west = "ctrl + alt - h"
             """
         try original.write(to: url, atomically: true, encoding: .utf8)
-        let store = ConfigurationStore(url: url)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
         store.load(reduceMotion: false)
         try store.update(reduceMotion: false) { $0.innerGap = 12 }
         let text = try contents()
@@ -62,7 +68,7 @@ struct ConfigurationStoreTests {
     }
 
     @Test func invalidTOMLKeepsTheLastValidSettingsAndTheFile() throws {
-        let store = ConfigurationStore(url: url)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
         store.load(reduceMotion: false)
         try store.update(reduceMotion: false) { $0.outerGap = 16 }
         let broken = try contents() + "\n[miri\n"
@@ -81,7 +87,7 @@ struct ConfigurationStoreTests {
     @Test func invalidValuesAreReportedByKey() throws {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try "[miri]\ninner_gap = 99\n".write(to: url, atomically: true, encoding: .utf8)
-        let store = ConfigurationStore(url: url)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
         store.load(reduceMotion: false)
         guard case .invalidValue(let key, _) = store.issue else {
             Issue.record("Expected an invalid value, got \(String(describing: store.issue))")
@@ -92,7 +98,7 @@ struct ConfigurationStoreTests {
     }
 
     @Test func rejectsInvalidChangesWithoutWriting() throws {
-        let store = ConfigurationStore(url: url)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
         store.load(reduceMotion: false)
         let before = try contents()
         #expect(throws: ConfigurationIssue.self) {
@@ -104,7 +110,7 @@ struct ConfigurationStoreTests {
     }
 
     @Test func refusesToOverwriteAFileThatChangedSinceItWasRead() throws {
-        let store = ConfigurationStore(url: url)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
         store.load(reduceMotion: false)
         let external = try contents() + "\n# edited elsewhere\n"
         try external.write(to: url, atomically: true, encoding: .utf8)
@@ -113,7 +119,7 @@ struct ConfigurationStoreTests {
     }
 
     @Test func animationFollowsTheSettingAndReduceMotion() throws {
-        let store = ConfigurationStore(url: url)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
         store.load(reduceMotion: true)
         #expect(try TOMLDocument(contents()).value(at: ["options", "animation_speed"]) == nil)
         store.load(reduceMotion: false)
@@ -125,7 +131,7 @@ struct ConfigurationStoreTests {
     @Test func reportsAFormMiriCannotRewrite() throws {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try "padding = { top = 1 }\n".write(to: url, atomically: true, encoding: .utf8)
-        let store = ConfigurationStore(url: url)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
         store.load(reduceMotion: false)
         guard case .notEditable(let message) = store.issue else {
             Issue.record("Expected notEditable, got \(String(describing: store.issue))")
