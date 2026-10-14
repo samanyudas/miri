@@ -25,15 +25,16 @@ The current milestone is the first production app slice: menu bar controls, engi
   - An engine supervisor with an isolated environment, bounded logs, and a three-crashes-in-five-minutes restart limit.
   - App-side window recovery after every engine exit, verified live against the fixture window.
   - A setup checker, redacted diagnostics with a preview, and the menu bar and Settings UI.
+- A live run on 15 October 2026 on the built-in display only confirmed Start, 8-point gaps on all sides and between windows, Stop, crash recovery and restart, the three-crash limit, manual restart, and Quit.
 
 ## Next
 
 1. Sam reviews the `feat/v1-app-core` PR.
-2. Run the app with the engine on Sam's desktop and confirm that Start manages windows, Stop recovers them, and Quit exits cleanly.
-   This was not done because a live start rearranges every open window.
-3. Patch the engine on the fork to hide its own menu bar item and to refuse fallback configuration when `PANERU_CONFIG` is missing.
+2. Patch the engine on the fork to hide its own menu bar item and to refuse fallback configuration when `PANERU_CONFIG` is missing.
    Today the engine shows a second menu bar item beside Miri's.
-4. Verify on screen that the gap mapping produces 8-point gaps between windows and at screen edges.
+3. Find out why T3 Code's existing window shrank from 2048 to 1024 points after the first focus change in the live run.
+   Existing windows should keep their widths.
+4. Repeat the live run with an external display connected.
 5. Resolve product question Q6 and the stacking scope question in [design tree status](decisions/design-tree-status.md).
 6. Build the remaining v1 controls: the shortcut recorder, the gesture test, and pointer-targeted swipes.
 7. Move to Rust 1.99 when the product is ready. Fix the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs` on the fork first, then repin. Branch `chore/rust-1.99-engine` holds the earlier attempt.
