@@ -25,13 +25,19 @@ final class PrototypeDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         let arguments = Array(CommandLine.arguments.dropFirst())
         guard !arguments.isEmpty else { return }
-        guard arguments.count == 4, arguments[0] == "--permission-observation",
+        guard arguments.count == 4, ["--permission-observation", "--recovery-selftest"].contains(arguments[0]),
             arguments[2] == "--target-pid", let pid = Int32(arguments[3]), pid > 0
         else {
             exit(2)
         }
         NSApplication.shared.setActivationPolicy(.accessory)
         let destination = URL(fileURLWithPath: arguments[1])
+        if arguments[0] == "--recovery-selftest" {
+            do {
+                try JSONEncoder().encode(RecoverySelftest.run(targetPid: pid)).write(to: destination, options: .atomic)
+            } catch { exit(1) }
+            exit(0)
+        }
         do {
             try Data(String(getpid()).utf8).write(to: destination.appendingPathExtension("pid"), options: .atomic)
         } catch { exit(1) }

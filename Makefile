@@ -55,6 +55,7 @@ test:
 
 e2e:
 	scripts/test-permission-prototype.sh
+	scripts/test-window-recovery.sh
 
 package:
 	scripts/package-dmg.sh
