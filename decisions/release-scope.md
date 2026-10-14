@@ -43,6 +43,11 @@ Sam enrolls in the Apple Developer Program before the first public release.
 Development builds use ad-hoc signing on Sam's Mac.
 
 The bundle ID is `io.github.samanyudas.miri`, and the engine helper uses `io.github.samanyudas.miri.engine`.
+Development builds are named **Miri Developer** and use `io.github.samanyudas.miri.dev` and `io.github.samanyudas.miri.dev.engine`.
+The separate identity keeps their Accessibility entry, preferences, and Launch Services identity apart from an installed release.
+A contributor can therefore keep the released Miri installed in Applications next to a development build.
+Development builds sign with a stable local identity when one exists, so their Accessibility grant survives rebuilds.
+Sam accepted this on 14 October 2026.
 
 The `samanyudas/miri` repository becomes public at the first working build.
 The GPL requires the source to be public by the time any binary is distributed.
