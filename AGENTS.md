@@ -81,5 +81,4 @@ Do not work around the guard with another command.
 - [CONTRIBUTING.md](CONTRIBUTING.md) covers the workflow, risk classes, and issue lifecycle.
 - [docs/AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md) covers evidence standards for agent work.
 - [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md), [triage labels](docs/agents/triage-labels.md), and [domain docs](docs/agents/domain.md) cover the tracker and vocabulary.
-- [docs/agents/harness-audit.md](docs/agents/harness-audit.md) records how this harness was verified.
 - [docs/prototypes/helper-permission.md](docs/prototypes/helper-permission.md) covers the permission selftest and its manual procedure.
