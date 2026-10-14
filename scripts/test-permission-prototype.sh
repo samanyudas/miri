@@ -15,7 +15,7 @@ import tempfile
 import time
 
 root = Path.cwd()
-app = root / '.build/prototype/Miri.app'
+app = root / '.build/prototype/Miri Developer.app'
 engine = app / 'Contents/Helpers/miri-engine'
 fixture = root / '.build/debug/AXFixture'
 evidence = Path(tempfile.mkdtemp(prefix='miri-permission-', dir='/tmp'))
@@ -88,8 +88,8 @@ metadata = {
     'appSignature': run('codesign', '-dvv', str(app)),
     'engineSignature': run('codesign', '-dvv', str(engine)),
 }
-assert 'Identifier=io.github.samanyudas.miri\n' in metadata['appSignature']
-assert 'Identifier=io.github.samanyudas.miri.engine\n' in metadata['engineSignature']
+assert 'Identifier=io.github.samanyudas.miri.dev\n' in metadata['appSignature']
+assert 'Identifier=io.github.samanyudas.miri.dev.engine\n' in metadata['engineSignature']
 run('codesign', '--verify', '--strict', str(app))
 run('codesign', '--verify', '--strict', str(engine))
 plist_dump = run('otool', '-X', '-s', '__TEXT', '__info_plist', str(engine))
@@ -99,7 +99,7 @@ for line in plist_dump.splitlines():
     if fields and re.fullmatch(r'[0-9a-f]{8,16}', fields[0]):
         sections.extend(field for field in fields[1:] if re.fullmatch(r'(?:[0-9a-f]{8}|[0-9a-f]{2})', field))
 embedded = plistlib.loads(b''.join(bytes.fromhex(word)[::-1] for word in sections).rstrip(b'\x00'))
-assert embedded['CFBundleIdentifier'] == 'io.github.samanyudas.miri.engine'
+assert embedded['CFBundleIdentifier'] == 'io.github.samanyudas.miri.dev.engine'
 metadata['engineEmbeddedPlist'] = embedded
 (evidence / 'provenance.json').write_text(json.dumps(metadata, indent=2))
 fixture_process = None
@@ -122,8 +122,8 @@ try:
         assert Path(result['bundlePath']).resolve(strict=True) == bundle.resolve(strict=True)
         assert result['engineRevision'] == metadata['engineSource']
         for key, identifier, executable in [
-            ('app', 'io.github.samanyudas.miri', bundle / 'Contents/MacOS/MiriPrototype'),
-            ('engine', 'io.github.samanyudas.miri.engine', bundle / 'Contents/Helpers/miri-engine'),
+            ('app', 'io.github.samanyudas.miri.dev', bundle / 'Contents/MacOS/MiriPrototype'),
+            ('engine', 'io.github.samanyudas.miri.dev.engine', bundle / 'Contents/Helpers/miri-engine'),
         ]:
             value = result[key]
             assert value['schemaVersion'] == 1 and value['targetPid'] == target
