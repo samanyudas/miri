@@ -1,0 +1,3 @@
+[submodule "vendor/paneru"]
+	path = vendor/paneru
+	url = https://github.com/samanyudas/paneru.git

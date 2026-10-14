@@ -89,6 +89,10 @@ The keybinding table now marks the tabbed-column command as v2 only.
 ## Engineering prerequisites
 
 The [helper-process ADR](../docs/adr/0009-run-the-engine-as-a-helper-process.md) requires a prototype of Accessibility permission attribution before other implementation.
+The [recorded prototype comparison](../docs/prototypes/helper-permission.md#recorded-development-bundle-result-on-14-october-2026) completes that prerequisite for the tested ad-hoc development bundle on macOS 27.0.
+Sam reported that enabling only Miri changed both processes from denied trust and reads to granted trust and successful reads.
+A fresh packaged check also verified granted trust and successful reads from both processes.
+Developer ID and notarized-release permission behavior remain unverified.
 The [earlier engine assessment](engine-assessment.md) reviewed a commit that is not the selected release dependency.
 The [pinned-release assessment](engine-v0.5.2-assessment.md) now reviews `v0.5.2` at `b1b6abbd3f1a4be138152b6f0389c9ff1b27a269`.
 This source inspection does not establish native or hardware behavior.
@@ -125,7 +129,7 @@ Those windows could leave the layout, which would conflict with the rule that wi
 
 ## Remaining engineering work
 
-- Prototype app and helper Accessibility attribution before other implementation, as required by ADR 0009.
+- Recheck app and helper Accessibility attribution with Developer ID signing and notarized distribution before release.
 - Complete the release source audit beyond the reviewed configuration, gesture, sizing, isolation, and clean-exit paths.
   Establish a reproducible app and helper build.
 - Verify configuration keys, accepted types and ranges, binding syntax, gesture support, and private API fallbacks.
