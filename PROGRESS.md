@@ -34,4 +34,4 @@ The current milestone is a verifiable development harness on top of the permissi
 
 ## Last verification
 
-See the verification section of the harness PR and [harness audit](docs/agents/harness-audit.md).
+See the verification section of #10.
