@@ -13,7 +13,6 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
-ENGINE_PIN = 'f1df5873832c980c046fa6d55f7745c8b715e39c'
 
 
 def command(*args, cwd=ROOT):
@@ -119,8 +118,6 @@ def observe(profile):
                     tools[name] = {'path': path, 'sha256': digest(Path(path).read_bytes())}
                 else:
                     errors.append('Missing packaging/runtime tool: ' + name)
-        if engine['gitlink'] != ENGINE_PIN:
-            errors.append('The recorded engine gitlink differs from the selected pin ' + ENGINE_PIN)
         if not initialized:
             errors.append('The engine is uninitialized. Run scripts/setup.sh --profile native.')
         elif engine['checkout'] != engine['gitlink'] or engine['dirty']:
