@@ -1,0 +1,58 @@
+name: Bug report
+description: Report a window, display, permission, or app problem in Miri
+labels: [bug, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        One problem per issue. A partial report is still useful.
+        Report security problems privately through [SECURITY.md](https://github.com/samanyudas/miri/blob/main/SECURITY.md) instead.
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Connect a second display to the right of the built-in display.
+        2. Press Control-Option-Command-D.
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: Include whether any window became unreachable or off-screen.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Miri version or commit
+      placeholder: 0.1.0, or the commit you built
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and Mac model
+      placeholder: macOS 27.0 (26A428), MacBook Air M3
+    validations:
+      required: true
+  - type: input
+    id: displays
+    attributes:
+      label: Displays and arrangement
+      description: Count, sizes, arrangement, and whether Displays have separate Spaces is on.
+      placeholder: Built-in plus 27-inch external to the right, separate Spaces on
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics or logs
+      description: Paste Copy diagnostics output if your version has it. Remove anything private first.
+      render: text

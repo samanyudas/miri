@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and support
+    url: https://github.com/samanyudas/miri/blob/main/SUPPORT.md
+    about: Where to ask questions and what to include.
+  - name: Security vulnerability
+    url: https://github.com/samanyudas/miri/security/advisories/new
+    about: Report security problems privately.
