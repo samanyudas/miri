@@ -66,16 +66,18 @@ Do not reset existing permissions to create an artificial clean state.
    .build/debug/AXFixture &
    fixture_pid=$!
    echo "$fixture_pid"
-   open ".build/app/Miri Developer.app"
+   open ".build/app/Miri Developer.app" --args -managementStopped YES
    ```
 
-2. Enter the fixture process ID in Miri.
+   The `-managementStopped YES` argument keeps the app from starting window management for this run.
+   It saves nothing to the app's preferences.
+2. Choose **Settings… > Diagnostics > Permission Experiment…** in Miri's menu bar menu, then enter the fixture process ID.
 3. Click **Check permission**.
 4. Record both trust values and raw AX read codes.
 5. Click **Open Accessibility Settings**.
 6. Record the exact visible permission entries and their current states.
 7. Explicitly grant the relevant Miri Developer app or engine entry yourself.
-8. Quit and reopen the same packaged app.
+8. Quit and reopen the same packaged app with the same argument.
 9. Repeat the check against the same fixture process.
 10. Record which entry changed, both new trust values, and both raw AX read codes.
 11. If a second relevant entry exists, repeat the comparison for that entry.
@@ -89,7 +91,6 @@ Do not reset existing permissions to create an artificial clean state.
 Record an existing grant as a limitation when it prevents the before-and-after comparison.
 Equal trust values alone do not prove that the app permission entry controls the engine.
 The prototype remains a prerequisite experiment until this manual comparison is complete for the bundle being evaluated.
-Production settings, menu bar controls, lifecycle recovery, and window management are outside this change.
 
 ## Recorded development-bundle result on 14 October 2026
 
