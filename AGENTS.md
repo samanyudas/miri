@@ -23,6 +23,10 @@ See `docs/agents/domain.md`.
 Read `decisions/release-scope.md` and `decisions/design-tree-status.md` before planning or building features.
 Read the other files when your work touches their topic, such as setup, configuration, keybindings, or acceptance checks.
 
+### Engine changes
+
+Read `docs/agents/engine-fork.md` before you change the Paneru engine or open a PR to the original Paneru project.
+
 ## Development checks
 
 Run `scripts/setup.sh --profile portable`, then `scripts/restore-state.sh` when starting work.
