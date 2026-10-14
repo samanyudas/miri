@@ -1,0 +1,17 @@
+[
+  {
+    "component": "Native app and permission boundary",
+    "paths": ["Sources/", "Package.swift", "scripts/build-prototype.sh", "scripts/test-permission-prototype.sh"],
+    "adr": "docs/adr/0009-run-the-engine-as-a-helper-process.md"
+  },
+  {
+    "component": "Pinned engine and licensing",
+    "paths": ["vendor/paneru", ".gitmodules", "LICENSE"],
+    "adr": "docs/adr/0003-bundle-a-pinned-paneru-engine.md"
+  },
+  {
+    "component": "Development tooling and verification evidence",
+    "paths": ["scripts/", ".github/", ".githooks/", ".claude/", "AGENTS.md"],
+    "adr": "docs/adr/0010-adopt-project-development-tooling.md"
+  }
+]

@@ -1,0 +1,36 @@
+name: Maintenance report
+on:
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+      - name: Report portable checks
+        shell: bash
+        run: |
+          mkdir -p .harness/maintenance
+          set -o pipefail
+          scripts/scan.sh 2>&1 | tee .harness/maintenance/scan.log
+      - name: Check preview runner documentation
+        if: always()
+        shell: bash
+        run: |
+          curl --fail --location --retry 2 --max-time 30 \
+            https://raw.githubusercontent.com/actions/runner-images/main/images/macos/xcode-27-arm64-Readme.md \
+            --output .harness/maintenance/xcode-27.md
+          test -s .harness/maintenance/xcode-27.md
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: maintenance-report
+          path: .harness/
+          include-hidden-files: true
+          retention-days: 14

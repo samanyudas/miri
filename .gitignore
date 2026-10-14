@@ -1,2 +1,6 @@
 .build/
 .swiftpm/
+.harness/
+.claude/settings.local.json
+__pycache__/
+*.pyc
