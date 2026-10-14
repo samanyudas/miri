@@ -17,7 +17,7 @@ An unchecked box names what is missing.
   `make check` runs docs, harness tests, ShellCheck, actionlint, compatibility, Swift lint, engine lint, build, 319 engine tests, the selftest, and DMG packaging.
   It exited 0 on macOS 27.0 arm64.
   CI runs `make lint` on `ubuntu-latest` to save macOS minutes, and the `make native` stages on the `xcode-27` runner.
-  Both jobs install the same checksummed ShellCheck and actionlint versions. RUN_PLACEHOLDER
+  Both jobs install the same checksummed ShellCheck and actionlint versions. Run [38567922720](https://github.com/samanyudas/miri/actions/runs/38567922720) passed both jobs.
 - [x] **A representative change has a definition of done, with tests before and after.**
   Issue #9 lists the acceptance criteria.
   Before the change, `scripts/check-docs.py` on `origin/main` reported `AGENTS.md: missing agent map` and `PROGRESS.md: missing handoff record`.
