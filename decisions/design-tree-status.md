@@ -5,7 +5,8 @@ The active product interview has one new open question about stacking scope.
 The complete release decision tree remains incomplete because Q6 is held.
 This report records observed documentation state and the accepted answers to Q1 through Q5 and Q7 through Q21.
 Sam skipped Q6, which remains unresolved.
-No app implementation or hardware validation exists in this checkout.
+No production app implementation or hardware validation exists yet.
+The only implementation is the [permission prototype](../docs/prototypes/helper-permission.md).
 
 ## Settled branches
 
@@ -168,12 +169,9 @@ Its placement, single-window click behavior, and exact dimming appearance remain
 
 ## Repository state
 
-At audit time, Git tracks only `README.md` and `assets/icon.svg`.
-The decision documents, glossary, ADRs, and license remain uncommitted local files.
-GitHub has no issues for this repository at audit time.
-Publishing the initial commit did not publish these local documents.
-
-These observations came from `git ls-files`, `git status --short --branch`, and `gh issue list --repo samanyudas/miri --state all`.
+[PROGRESS.md](../PROGRESS.md) records the current repository and task state.
+GitHub Issues record individual tasks.
+This document records only the state of product decisions.
 
 ## Completion rule
 
