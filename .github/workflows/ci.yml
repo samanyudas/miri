@@ -14,32 +14,8 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  lint:
-    name: Docs, harness, and compatibility
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          submodules: true
-          fetch-depth: 0
-      # Versions must match scripts/doctor.sh, which rejects any other version.
-      - name: Install actionlint 1.7.12 and ShellCheck 0.11.0
-        run: |
-          curl -fsSLo actionlint.tar.gz https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
-          curl -fsSLo shellcheck.tar.xz https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz
-          sha256sum --check <<'SUMS'
-          8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  actionlint.tar.gz
-          8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198  shellcheck.tar.xz
-          SUMS
-          tar -xzf actionlint.tar.gz -C "$RUNNER_TEMP" actionlint
-          tar -xJf shellcheck.tar.xz -C "$RUNNER_TEMP" --strip-components=1 shellcheck-v0.11.0/shellcheck
-          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
-      - run: make lint
-
-  native:
-    name: Build, test, and package on macOS 27
+  check:
+    name: Lint, build, test, and package on macOS 27
     runs-on: xcode-27
     timeout-minutes: 30
     steps:
@@ -50,7 +26,21 @@ jobs:
           fetch-depth: 0
       - name: Install pinned Rust
         run: rustup toolchain install
-      # These steps are the prerequisites of `make native`, run one by one for readable logs.
+      # Versions must match scripts/doctor.sh, which rejects any other version.
+      - name: Install actionlint 1.7.12 and ShellCheck 0.11.0
+        run: |
+          curl -fsSLo actionlint.tar.gz https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_darwin_arm64.tar.gz
+          curl -fsSLo shellcheck.tar.xz https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.darwin.aarch64.tar.xz
+          shasum -a 256 --check <<'SUMS'
+          aba9ced2dee8d27fecca3dc7feb1a7f9a52caefa1eb46f3271ea66b6e0e6953f  actionlint.tar.gz
+          56affdd8de5527894dca6dc3d7e0a99a873b0f004d7aabc30ae407d3f48b0a79  shellcheck.tar.xz
+          SUMS
+          tar -xzf actionlint.tar.gz -C "$RUNNER_TEMP" actionlint
+          tar -xJf shellcheck.tar.xz -C "$RUNNER_TEMP" --strip-components=1 shellcheck-v0.11.0/shellcheck
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      # These steps are the prerequisites of `make check`, run one by one for readable logs.
+      - name: Lint docs, scripts, workflows, and compatibility
+        run: make lint
       - name: Check prerequisites
         run: make doctor
       - name: Lint Swift and engine

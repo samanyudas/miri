@@ -37,7 +37,7 @@ If your change contradicts an ADR, say so explicitly instead of overriding it.
 | Command | Runs |
 | --- | --- |
 | `make setup` | Engine checkout, pinned Rust install, prerequisite report. |
-| `make lint` | Docs links and style, harness tests, ShellCheck, actionlint, version compatibility. Works on Linux. |
+| `make lint` | Docs links and style, harness tests, ShellCheck, actionlint, version compatibility. |
 | `make native` | Swift and engine lint, build, engine unit tests, end-to-end selftest, DMG packaging. Needs macOS 27 arm64. |
 | `make check` | `make lint` and `make native`. This is the gate before a PR. |
 | `make build`, `make test`, `make e2e`, `make package` | One stage of `make native`. |
