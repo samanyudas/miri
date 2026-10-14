@@ -1,0 +1,224 @@
+name: Issue fix status
+
+# Keeps a report open until its fix reaches the reporter in a stable release.
+#
+#   PR description uses Closes/Fixes #N    -> one comment asking for Refs #N instead
+#   merged PR says Refs #N                 -> issue labelled "fixed (pending release)"
+#   stable release published               -> label becomes "please confirm close" and the reporter is asked
+#   14 days without any reply              -> issue closed with a note on how to reopen
+#   a later comment on that closed issue   -> issue reopened for a human
+#
+# A closing keyword closes the issue on merge, before any release carries the fix, and the jobs
+# below skip closed issues, so the reporter would never hear about it.
+# A bare "#N" mention is never treated as a reference.
+# The release trigger works when Sam publishes a release. A release created by GITHUB_TOKEN does not
+# start workflows, so a future release workflow must trigger reporter-check through workflow_run.
+# No job checks out or executes pull request code. Bodies are read through the API and only grepped.
+
+on:
+  pull_request_target:
+    types: [opened, reopened, edited, closed]
+  release:
+    types: [published]
+  issue_comment:
+    types: [created]
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: issue-fix-status-${{ github.event.pull_request.number || github.event.release.tag_name || github.run_id }}
+  cancel-in-progress: false
+
+env:
+  GH_TOKEN: ${{ github.token }}
+  GH_REPO: ${{ github.repository }}
+  PENDING_LABEL: fixed (pending release)
+  CONFIRM_LABEL: please confirm close
+  CONFIRM_DAYS: 14
+
+jobs:
+  reference-hint:
+    name: Point out a reference that will not reach the reporter
+    if: >-
+      github.event_name == 'pull_request_target'
+      && github.event.action != 'closed'
+      && github.event.pull_request.user.type != 'Bot'
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Comment once on a closing keyword
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GH_REPO/pulls/$PR_NUMBER" --jq '.body // ""' > pr-body.txt
+          closing=$(grep -oiE '(close[sd]?|fix(es|ed)?|resolve[sd]?)[[:space:]]*:?[[:space:]]*#[0-9]+' pr-body.txt \
+                      | grep -oE '[0-9]+$' | sort -un) || true
+          [ -n "$closing" ] || { echo "No closing keyword"; exit 0; }
+          if gh api --paginate "repos/$GH_REPO/issues/$PR_NUMBER/comments" --jq '.[].body' \
+               | grep -q "miri-fix-status hint="; then
+            echo "Already commented"; exit 0
+          fi
+          : > hits.md
+          for number in $closing; do
+            issue=$(gh api "repos/$GH_REPO/issues/$number" 2>/dev/null) || continue
+            [ "$(jq 'has("pull_request")' <<<"$issue")" = false ] || continue
+            [ "$(jq -r .state <<<"$issue")" = open ] || continue
+            printf -- '- Refs #%s (%s)\n' "$number" "$(jq -r .title <<<"$issue")" >> hits.md
+          done
+          [ -s hits.md ] || { echo "No open issue named"; exit 0; }
+          {
+            echo "This description closes an issue with a keyword. GitHub closes the issue when this merges, before a release carries the fix, so the reporter is never asked whether it worked."
+            echo
+            echo "Use the plain reference form instead, one line each:"
+            echo
+            cat hits.md
+            echo
+            echo "The issue then stays open, gets labelled, and its reporter is asked to confirm on the release that carries the fix. It closes two weeks later if nobody replies."
+            echo
+            echo "<!-- miri-fix-status hint=$(echo "$closing" | paste -sd, -) -->"
+          } > comment.md
+          gh pr comment "$PR_NUMBER" --body-file comment.md
+
+  fixed-on-main:
+    name: Label the issues a merged PR referenced
+    if: >-
+      github.event_name == 'pull_request_target'
+      && github.event.action == 'closed'
+      && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Label referenced open issues
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GH_REPO/pulls/$PR_NUMBER" --jq '.body // ""' > pr-body.txt
+          refs=$(grep -oiE '(refs?|references?|related to|fixes|fixed|closes?|resolves?)[[:space:]]*:?[[:space:]]*#[0-9]+' pr-body.txt \
+                   | grep -oE '[0-9]+$' | sort -un) || true
+          [ -n "$refs" ] || { echo "#$PR_NUMBER references no issue"; exit 0; }
+          for number in $refs; do
+            issue=$(gh api "repos/$GH_REPO/issues/$number") || continue
+            [ "$(jq 'has("pull_request")' <<<"$issue")" = false ] || continue
+            [ "$(jq -r .state <<<"$issue")" = open ] || continue
+            jq -e --arg l "$PENDING_LABEL" 'any(.labels[]; .name == $l)' <<<"$issue" >/dev/null && continue
+            gh api "repos/$GH_REPO/issues/$number/labels" -f "labels[]=$PENDING_LABEL" --silent
+            if jq -e --arg l "$CONFIRM_LABEL" 'any(.labels[]; .name == $l)' <<<"$issue" >/dev/null; then
+              gh issue edit "$number" --remove-label "$CONFIRM_LABEL"
+            fi
+            cat > comment.md <<COMMENT
+          A fix for this was added in #$PR_NUMBER and will be included in a future release.
+
+          Nothing has changed on your Mac yet. When a release carries the fix, this issue gets a comment with the version to install, and you will have two weeks to say whether it solved the problem.
+
+          <!-- miri-fix-status sha=$MERGE_SHA pr=$PR_NUMBER -->
+          COMMENT
+            gh issue comment "$number" --body-file comment.md
+            echo "#$number labelled $PENDING_LABEL"
+          done
+
+  reporter-check:
+    name: Ask the reporters a stable release reached
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Ask each waiting reporter to confirm
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          PRERELEASE: ${{ github.event.release.prerelease }}
+        run: |
+          set -euo pipefail
+          if [ "$PRERELEASE" = true ] || ! grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$' <<<"$TAG"; then
+            echo "$TAG is not a stable release"; exit 0
+          fi
+          gh label create "$CONFIRM_LABEL" --color 048c23 \
+            --description "The fix is released; the reporter has two weeks to confirm" 2>/dev/null || true
+          gh issue list --state open --label "$PENDING_LABEL" --limit 500 --json number,author \
+            --jq '.[] | "\(.number) \(.author.login)"' > pending.txt
+          while read -r number login; do
+            [ -n "$number" ] || continue
+            gh api "repos/$GH_REPO/issues/$number/labels" -f "labels[]=$CONFIRM_LABEL" --silent
+            gh issue edit "$number" --remove-label "$PENDING_LABEL" || true
+            cat > comment.md <<COMMENT
+          The fix for this is out now, in **${TAG#v}**.
+
+          @$login, could you update to that version and say whether it fixed things on your Mac? Please say how much of it is fixed. If part of the problem remains, describe it here and the issue goes back for another look.
+
+          If nobody replies in two weeks, the issue will be closed as it stands. A comment reopens it at any time.
+
+          <!-- miri-fix-status confirm=$TAG -->
+          COMMENT
+            gh issue comment "$number" --body-file comment.md
+            echo "#$number asked about $TAG"
+          done < pending.txt
+
+  close-unanswered:
+    name: Close the checks nobody answered
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Close confirmations without a reply
+        run: |
+          set -euo pipefail
+          cutoff=$(date -u -d "$CONFIRM_DAYS days ago" +%Y-%m-%dT%H:%M:%SZ)
+          gh issue list --state open --label "$CONFIRM_LABEL" --limit 500 --json number \
+            --jq '.[].number' > waiting.txt
+          while read -r number; do
+            [ -n "$number" ] || continue
+            comments=$(gh api --paginate "repos/$GH_REPO/issues/$number/comments" \
+                         --jq '[.[] | {created_at, login: .user.login, body}]' | jq -s add)
+            ask=$(jq -c '[.[] | select(.body | test("miri-fix-status confirm="))] | last' <<<"$comments")
+            if [ "$ask" = null ]; then
+              echo "::warning::#$number has $CONFIRM_LABEL but no release question; left for a human"
+              continue
+            fi
+            asked=$(jq -r .created_at <<<"$ask")
+            if [[ "$asked" > "$cutoff" ]]; then
+              echo "#$number asked $asked, still waiting"; continue
+            fi
+            replies=$(jq --arg t "$asked" \
+              '[.[] | select(.created_at > $t and .login != "github-actions[bot]")] | length' <<<"$comments")
+            if [ "$replies" -gt 0 ]; then
+              echo "#$number answered, left for a human"; continue
+            fi
+            gh issue comment "$number" --body "Nobody replied in two weeks, so this is closed as it stands. If the release did not fix it, or fixed only part of it, comment here and the issue reopens. You do not need a new report. <!-- miri-fix-status closed -->"
+            gh issue close "$number" --reason completed
+            gh issue edit "$number" --remove-label "$CONFIRM_LABEL"
+            echo "#$number closed"
+          done < waiting.txt
+
+  reopen-on-reply:
+    name: Reopen an unconfirmed close when someone replies
+    if: >-
+      github.event_name == 'issue_comment'
+      && github.event.issue.state == 'closed'
+      && github.event.issue.pull_request == null
+      && github.event.comment.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Reopen when the bot closed it for silence
+        env:
+          NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          closed_by_bot=$(gh api --paginate "repos/$GH_REPO/issues/$NUMBER/comments" \
+            --jq '.[] | select(.user.login == "github-actions[bot]") | .body | test("miri-fix-status closed")' | tail -1)
+          if [ "$closed_by_bot" = true ]; then
+            gh issue reopen "$NUMBER"
+            gh issue edit "$NUMBER" --add-label needs-triage
+            echo "#$NUMBER reopened"
+          fi
