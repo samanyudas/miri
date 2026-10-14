@@ -9,6 +9,7 @@ SHELL_SCRIPTS := $(shell git ls-files '*.sh')
 setup:
 	git submodule update --init
 	rustup toolchain install
+	scripts/setup-signing.sh
 	scripts/doctor.sh all
 
 check: lint native
