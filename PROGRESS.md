@@ -16,12 +16,13 @@ The current milestone is a verifiable development harness on top of the permissi
 - The v1 specification and product decisions are merged (#3).
 - The Accessibility permission prototype is merged (#4).
   Enabling only the Miri entry authorizes both the app and its engine in the development build.
-- The development harness is in review on `chore/repo-harness`.
+- The development harness is in review in #10 on `chore/repo-harness`, tracked by #9.
   It adds `make check`, CI, issue lifecycle automation, the command guard, and contributor documents.
+  `make check` passes locally, and a live Claude session showed the guard blocking a push to `main`.
 
 ## Next
 
-1. Review and merge the harness PR.
+1. Sam reviews and merges #10. Then check that `pr-risk` and `issue-fix-status` run on the next PR, because `pull_request_target` workflows only run from `main`.
 2. Resolve product question Q6 and the stacking scope question in [design tree status](decisions/design-tree-status.md).
 3. Plan the first production app slice: menu bar controls, engine start and stop, and window recovery on quit.
 4. Move to Rust 1.99 when the product is ready. Fix the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs` on the fork first, then repin. Branch `chore/rust-1.99-engine` holds the earlier attempt.
