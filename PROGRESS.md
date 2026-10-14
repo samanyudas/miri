@@ -25,15 +25,16 @@ The current milestone is the first production app slice: menu bar controls, engi
   - An engine supervisor with an isolated environment, bounded logs, and a three-crashes-in-five-minutes restart limit.
   - App-side window recovery after every engine exit, verified live against the fixture window.
   - A setup checker, redacted diagnostics with a preview, and the menu bar and Settings UI.
+- The engine fork change samanyudas/paneru#5 hides the engine's menu bar item through `[decorations.menu].visible`, which Miri sets to `false`.
+  It also creates a missing `PANERU_CONFIG` file in place instead of falling back to standalone Paneru's files.
 - A live run on 15 October 2026 on the built-in display only confirmed Start, 8-point gaps on all sides and between windows, Stop, crash recovery and restart, the three-crash limit, manual restart, and Quit.
 
 ## Next
 
 1. Sam reviews the `feat/v1-app-core` PR.
-2. Patch the engine on the fork to hide its own menu bar item and to refuse fallback configuration when `PANERU_CONFIG` is missing.
-   Today the engine shows a second menu bar item beside Miri's.
-3. Find out why T3 Code's existing window shrank from 2048 to 1024 points after the first focus change in the live run.
-   Existing windows should keep their widths.
+2. Sam merges samanyudas/paneru#5 into `miri/v0.5.2`.
+   It hides the engine's menu bar item and makes `PANERU_CONFIG` final. `make compat` fails until it merges, because the pin `5bfe69c` is not yet on that branch.
+3. Reproduce #13, where an existing full-width window shrank to half width, on an empty Space with only test windows.
 4. Repeat the live run with an external display connected.
 5. Resolve product question Q6 and the stacking scope question in [design tree status](decisions/design-tree-status.md).
 6. Build the remaining v1 controls: the shortcut recorder, the gesture test, and pointer-targeted swipes.

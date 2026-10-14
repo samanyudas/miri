@@ -10,6 +10,7 @@ public final class ConfigurationStore {
         # Paneru keys keep their Paneru names. Miri-only settings are in [miri].
         # Miri derives [padding] and [windows.miri-gaps] from miri.inner_gap and miri.outer_gap.
         # [windows.miri-settings] keeps Miri's own windows floating.
+        # [decorations.menu] hides the engine's menu bar item, because Miri has its own.
 
         """
 
