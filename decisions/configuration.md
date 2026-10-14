@@ -28,14 +28,16 @@ The migration schema and backup mechanism remain engineering work.
 | Product setting | Miri default | Engine mapping |
 | --- | --- | --- |
 | Width presets | `[0.25, 0.33, 0.5, 0.66, 0.75]` | `[options].preset_column_widths`, cycled by Control-Option-R. |
-| Inner gap | `8` points | Mapping to per-window padding requires verification. |
-| Outer gap | `8` points | Mapping to `[padding]` requires coordinate verification. |
+| Inner gap | `8` points | `[miri].inner_gap`. Miri writes half of it as per-window padding in `[windows.miri-gaps]`. |
+| Outer gap | `8` points | `[miri].outer_gap`. Miri writes it minus the per-window padding to each `[padding]` side. |
 
 Paneru v0.5.2 has no `gap_inner` or `gap_outer` configuration keys.
 Its outer padding has separate top, right, bottom, and left fields.
 Its per-window padding contributes on both sides of adjacent windows.
 The accepted eight-point gap behavior remains unchanged.
-The final Miri validation range and key mapping are not yet selected.
+The app implements this mapping, but no one has checked the resulting coordinates on screen.
+The app provisionally accepts gaps from 0 to 32 points.
+The final Miri validation range is not yet selected.
 
 The preset list is editable.
 The fourth width preset is `0.66`.

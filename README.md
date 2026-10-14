@@ -11,9 +11,10 @@ Further quality-of-life candidates are recorded in the [V2 roadmap](decisions/v2
 
 ## Status
 
-Miri has no release and does not manage windows yet.
-The repository contains the product design and a native Accessibility permission prototype.
-The prototype makes read-only calls from the app and its bundled engine against a harmless fixture window.
+Miri has no release.
+The app runs from the menu bar, starts and stops the bundled engine, and owns its configuration file.
+It checks macOS setup, recovers stranded windows when the engine stops, and previews redacted diagnostics.
+Starting the engine through the app has not yet been tested on real hardware.
 [PROGRESS.md](PROGRESS.md) records the current work and next steps.
 
 ## Requirements
@@ -35,6 +36,10 @@ make build
 open ".build/app/Miri Developer.app"
 ```
 
+Opening the app starts window management when Accessibility permission is granted and no setup check blocks it.
+To open it without managing windows, run `open ".build/app/Miri Developer.app" --args -managementStopped YES`.
+The configuration file is `~/Library/Application Support/Miri Developer/config.toml`.
+
 `make setup` checks out the pinned engine, installs the pinned Rust, creates a local signing identity, and reports any missing prerequisite.
 `make build` produces `.build/app/Miri Developer.app`.
 Development builds use the name Miri Developer and their own bundle identifier, so they never replace or share permissions with an installed Miri release.
@@ -49,7 +54,7 @@ make check
 
 `make check` runs `make lint` and then `make native`.
 `make lint` checks documentation, harness tests, shell scripts, workflows, and declared version compatibility.
-`make native` lints Swift and the engine, builds the app, runs the Swift and engine unit tests, runs the end-to-end permission selftest, and packages a DMG.
+`make native` lints Swift and the engine, builds the app, runs the Swift and engine unit tests, runs the end-to-end permission and window recovery selftests, and packages a DMG.
 CI runs the same targets on every pull request.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow.
 
