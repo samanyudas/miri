@@ -1,2 +1,6 @@
 .build/
 .swiftpm/
+.DS_Store
+.audit/
+work/
+__pycache__/

@@ -1,0 +1,6 @@
+# Applies to cargo commands run from the repository root, including `cargo --manifest-path vendor/paneru/Cargo.toml`.
+# The engine pin f1df587 is Clippy-clean on 1.98.1 and fails on 1.99.0. Bump both together.
+[toolchain]
+channel = "1.98.1"
+components = ["clippy", "rustfmt"]
+profile = "minimal"
