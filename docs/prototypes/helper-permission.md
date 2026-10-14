@@ -2,7 +2,8 @@
 
 This prototype compares actual Accessibility calls from Miri and its bundled Paneru engine.
 It does not start window management or request permission.
-It leaves permission attribution unresolved until a manual comparison records the macOS permission entries and explicit grants.
+Each automated report leaves permission attribution unresolved because it cannot observe the macOS permission entries or explicit grants.
+The manual comparison recorded below resolves attribution for the tested development bundle.
 The development bundle uses ad-hoc signatures.
 Its observations do not establish Developer ID or notarized-release behavior.
 
@@ -84,5 +85,42 @@ Do not reset existing permissions to create an artificial clean state.
 
 Record an existing grant as a limitation when it prevents the before-and-after comparison.
 Equal trust values alone do not prove that the app permission entry controls the engine.
-The prototype remains a prerequisite experiment until this manual comparison is complete.
+The prototype remains a prerequisite experiment until this manual comparison is complete for the bundle being evaluated.
 Production settings, menu bar controls, lifecycle recovery, and window management are outside this change.
+
+## Recorded development-bundle result on 14 October 2026
+
+Sam tested the visible packaged app against fixture process `87151`.
+Sam confirmed that only **Miri** was enabled in Accessibility Settings during both grant attempts and that no other entry was enabled.
+The manual Settings observations and button results below are user-reported.
+
+| Observation | Miri trusted | Miri AX read | Miri role | Engine trusted | Engine AX read | Engine role |
+| --- | --- | --- | --- | --- | --- | --- |
+| Before the successful grant | `false` | `-25211` | none | `false` | `-25211` | none |
+| After enabling only Miri | `true` | `0` | `AXApplication` | `true` | `0` | `AXApplication` |
+
+The reported engine process changed from `89218` to `94087` between these observations.
+The denied observation takes precedence over an assumption that the earlier grant attempt had already taken effect.
+The comparison shows that enabling the Miri entry authorizes both the app and its bundled engine in this development setup.
+A separate engine grant was not required.
+This completes the development prototype prerequisite in ADR 0009.
+
+An agent-run `./scripts/test-permission-prototype.sh` then returned `observed-granted` and passed the missing-helper check.
+Its JSON report recorded `trusted: true`, `readCode: 0`, and `role: AXApplication` for both processes.
+The fresh fixture, app, and engine process IDs were `96518`, `96520`, and `96524`.
+The driver verified executable identities, signatures, and process termination.
+The fresh automated observation confirms successful reads after the grant but does not independently inspect Settings.
+
+The tested bundle was `.build/prototype/Miri.app` in `/Users/sam/.t3/worktrees/miri/helper-permission-prototype`.
+The source revision was `45b46ef43db75f5e071be70fdf6b3d716a42277f`.
+The bundled engine revision was `f1df5873832c980c046fa6d55f7745c8b715e39c`.
+The environment was arm64 macOS `27.0`, build `26A428`.
+Both executable signatures were ad-hoc, with identifiers `io.github.samanyudas.miri` and `io.github.samanyudas.miri.engine`.
+The app executable SHA-256 was `0bc1363700b5c20989bc6c05545c5aa151418cda1ab95e95be21cf17614139e9`.
+The engine executable SHA-256 was `d2a63337280d2e95061ae7d4c84a4158ff6d680e0d1523505e9953c4be8c2b77`.
+The driver retained `observation.json` and `provenance.json` in `/var/folders/t3/2vf22cfx5llfz64b8719044m0000gn/T/miri-permission-td9ngj7e`.
+That temporary evidence directory is local and may be removed by macOS.
+
+The interface still displays **Attribution unresolved** because each report describes only process-level results.
+The recorded manual comparison supplies the Settings evidence that the interface cannot obtain.
+Developer ID signing, notarized distribution, upgrades, and other macOS versions still require their own permission checks.
