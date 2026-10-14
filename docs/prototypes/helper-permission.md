@@ -4,7 +4,7 @@ This prototype compares actual Accessibility calls from Miri and its bundled Pan
 It does not start window management or request permission.
 Each automated report leaves permission attribution unresolved because it cannot observe the macOS permission entries or explicit grants.
 The manual comparison recorded below resolves attribution for the tested development bundle.
-The development bundle uses ad-hoc signatures.
+The development bundle uses a self-signed local identity or ad-hoc signatures.
 Its observations do not establish Developer ID or notarized-release behavior.
 
 ## Build the packaged prototype
@@ -23,9 +23,10 @@ The development exception records a `-dirty` suffix in the bundle and observatio
 It does not permit a different engine HEAD from the recorded submodule pin.
 Commit and pin the engine patch before delivering a reproducible build.
 
-The script builds without Lua and bundles the actual engine at `.build/prototype/Miri.app/Contents/Helpers/miri-engine`.
-It signs the engine with `io.github.samanyudas.miri.engine` before signing the app with `io.github.samanyudas.miri`.
+The script builds without Lua and bundles the actual engine at `.build/prototype/Miri Developer.app/Contents/Helpers/miri-engine`.
+It builds the engine with the `miri-developer` feature and signs it as `io.github.samanyudas.miri.dev.engine` before signing the app as `io.github.samanyudas.miri.dev`.
 The engine's embedded Info.plist uses the same engine identifier.
+It signs with the **Miri Developer Local Signing** identity from `scripts/setup-signing.sh` when it exists, and ad-hoc otherwise.
 The bundle includes Miri's GPL license and the engine's MIT notice.
 
 ## Read the automated observation
@@ -65,7 +66,7 @@ Do not reset existing permissions to create an artificial clean state.
    .build/debug/AXFixture &
    fixture_pid=$!
    echo "$fixture_pid"
-   open .build/prototype/Miri.app
+   open ".build/prototype/Miri Developer.app"
    ```
 
 2. Enter the fixture process ID in Miri.
@@ -73,7 +74,7 @@ Do not reset existing permissions to create an artificial clean state.
 4. Record both trust values and raw AX read codes.
 5. Click **Open Accessibility Settings**.
 6. Record the exact visible permission entries and their current states.
-7. Explicitly grant the relevant Miri app or engine entry yourself.
+7. Explicitly grant the relevant Miri Developer app or engine entry yourself.
 8. Quit and reopen the same packaged app.
 9. Repeat the check against the same fixture process.
 10. Record which entry changed, both new trust values, and both raw AX read codes.
@@ -91,6 +92,9 @@ The prototype remains a prerequisite experiment until this manual comparison is 
 Production settings, menu bar controls, lifecycle recovery, and window management are outside this change.
 
 ## Recorded development-bundle result on 14 October 2026
+
+This result predates the Miri Developer identity.
+The tested bundle used the release identifiers `io.github.samanyudas.miri` and `io.github.samanyudas.miri.engine`.
 
 Sam tested the visible packaged app against fixture process `87151`.
 Sam confirmed that only **Miri** was enabled in Accessibility Settings during both grant attempts and that no other entry was enabled.

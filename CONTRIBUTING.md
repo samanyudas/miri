@@ -7,6 +7,8 @@ The project is in its design and prototype stage, so check [PROGRESS.md](PROGRES
 
 Follow the requirements and build steps in the [README](README.md#requirements).
 Run `make setup` after every engine pin or toolchain change.
+It also creates the **Miri Developer Local Signing** identity in its own keychain, so your Accessibility grant survives rebuilds.
+Development builds are named Miri Developer with bundle identifier `io.github.samanyudas.miri.dev`, so they never replace an installed Miri release.
 It reports each missing prerequisite with the command that fixes it.
 
 ## Plan the change
@@ -34,7 +36,7 @@ CI runs the same targets, so a local pass predicts a CI pass.
 | `make swift-lint`, `make engine-lint` | Swift formatting, rustfmt, and Clippy with warnings as errors. |
 | `make build`, `make test` | The signed app bundle builds, and the engine unit tests pass. |
 | `make e2e` | The packaged app and engine run a real Accessibility observation through Launch Services. |
-| `make package` | The app packs into a DMG that mounts with valid signatures. |
+| `make package` | Miri Developer packs into a DMG that mounts with valid signatures. |
 
 `make e2e` reports `observed-ungranted` on a Mac without the Accessibility grant, which is a pass.
 It never establishes which permission entry controls the engine.

@@ -14,7 +14,7 @@ Read this map first, then the linked document for the area you touch.
 
 | Path | Contents |
 | --- | --- |
-| `Sources/MiriPrototype/` | SwiftUI permission prototype app. |
+| `Sources/MiriPrototype/` | SwiftUI permission prototype app. Builds as Miri Developer, `io.github.samanyudas.miri.dev`. |
 | `Sources/AXFixture/` | Harmless window that the selftest observes. |
 | `vendor/paneru/` | Engine submodule, pinned to a commit on `samanyudas/paneru` branch `miri/v0.5.2`. |
 | `scripts/` | Build, packaging, selftest, and repository checks, with tests in `scripts/tests/`. |
@@ -36,7 +36,7 @@ If your change contradicts an ADR, say so explicitly instead of overriding it.
 
 | Command | Runs |
 | --- | --- |
-| `make setup` | Engine checkout, pinned Rust install, prerequisite report. |
+| `make setup` | Engine checkout, pinned Rust install, local signing identity, prerequisite report. |
 | `make lint` | Docs links and style, harness tests, ShellCheck, actionlint, version compatibility. Works on Linux. |
 | `make native` | Swift and engine lint, build, engine unit tests, end-to-end selftest, DMG packaging. Needs macOS 27 arm64. |
 | `make check` | `make lint` and `make native`. This is the gate before a PR. |
