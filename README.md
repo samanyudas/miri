@@ -14,7 +14,8 @@ scripts/restore-state.sh
 scripts/verify.sh
 ```
 
-On an arm64 Mac with macOS 27, Swift 6.2 or later, and Rust 1.95 or later, run the native checks.
+On an arm64 Mac with macOS 27, Swift 6.2 or later, and rustup, run the native checks.
+Rustup installs the Rust version that `rust-toolchain.toml` pins.
 
 ```sh
 scripts/setup.sh --profile native

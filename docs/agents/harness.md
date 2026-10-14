@@ -16,9 +16,11 @@ Setup validates live tools and records their versions, paths, and input hashes i
 Run setup again after a tool, manifest, engine checkout, or setup script changes.
 Setup does not certify a build.
 
-For native development, use an arm64 Mac with macOS 27 or later, Swift 6.2 or later, and Rust 1.95 or later.
+For native development, use an arm64 Mac with macOS 27 or later, Swift 6.2 or later, and rustup.
 The active macOS SDK must be version 27 or later.
-Install Cargo, rustfmt, Clippy, and the Xcode packaging tools before running native setup.
+The root `rust-toolchain.toml` pins Rust, rustfmt, and Clippy so that new lints in a later release cannot break strict checks unexpectedly.
+Rustup installs the pinned toolchain on first use.
+Install the Xcode packaging tools before running native setup.
 Exact observed versions identify the environment but do not redefine these supported minimums.
 
 ```sh

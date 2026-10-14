@@ -48,6 +48,7 @@ Add a map entry when introducing another topic directory.
 | `.gitmodules` | Engine source location. |
 | `Sources/` | Native prototype and harmless Accessibility fixture. |
 | `vendor/paneru` | Pinned engine submodule. |
+| `rust-toolchain.toml` | Pinned Rust toolchain for engine checks. |
 | `assets/` | Project artwork. |
 | `decisions/` | Product direction and acceptance requirements. |
 | `docs/agents/` | Issue, domain, and development guidance. |

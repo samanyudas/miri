@@ -6,7 +6,7 @@
   },
   {
     "component": "Pinned engine and licensing",
-    "paths": ["vendor/paneru", ".gitmodules", "LICENSE"],
+    "paths": ["vendor/paneru", ".gitmodules", "rust-toolchain.toml", "LICENSE"],
     "adr": "docs/adr/0003-bundle-a-pinned-paneru-engine.md"
   },
   {

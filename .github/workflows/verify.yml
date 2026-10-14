@@ -32,6 +32,7 @@ jobs:
           persist-credentials: false
           submodules: true
           fetch-depth: 0
+      - run: rustup toolchain install
       - run: scripts/setup.sh --profile portable
       - run: scripts/setup.sh --profile native
       - run: scripts/verify.sh --level gui
