@@ -1,30 +1,55 @@
 import AppKit
+import MiriCore
 import SwiftUI
 
 @main
 struct MiriApp: App {
-    @NSApplicationDelegateAdaptor(PrototypeDelegate.self) private var delegate
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
     var body: some Scene {
-        WindowGroup("Miri permission experiment") {
-            ExperimentView(experiment: delegate.experiment)
-                .frame(width: 560, height: 360)
-        }
-        .windowResizability(.contentSize)
-        .commands {
-            CommandGroup(replacing: .appTermination) {
-                Button("Quit Miri", action: delegate.experiment.quit).keyboardShortcut("q")
-            }
+        MenuBarExtra {
+            MenuContent(model: delegate.model, presenter: delegate.presenter)
+        } label: {
+            Image(systemName: delegate.model.menuSymbol)
+                .accessibilityLabel("Miri")
         }
     }
 }
 
-final class PrototypeDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    let model = AppModel()
     let experiment = PermissionExperiment()
+    lazy var presenter = WindowPresenter(model: model, experiment: experiment)
+    private var quitting = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let arguments = Array(CommandLine.arguments.dropFirst())
-        guard !arguments.isEmpty else { return }
+        // Arguments that start with a single dash are user defaults overrides, such as `-managementStopped YES`.
+        guard let command = arguments.first, command.hasPrefix("--") else {
+            model.launch()
+            return
+        }
+        runSelftest(arguments)
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
+        if !hasVisibleWindows { presenter.show(.settings) }
+        return true
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        if case .checking = experiment.state {
+            experiment.quit()
+            return .terminateCancel
+        }
+        guard !quitting else { return .terminateLater }
+        quitting = true
+        model.prepareToQuit { sender.reply(toApplicationShouldTerminate: true) }
+        return .terminateLater
+    }
+
+    /// Selftest commands for scripts/test-permission-prototype.sh and scripts/test-window-recovery.sh.
+    private func runSelftest(_ arguments: [String]) {
         guard arguments.count == 4, ["--permission-observation", "--recovery-selftest"].contains(arguments[0]),
             arguments[2] == "--target-pid", let pid = Int32(arguments[3]), pid > 0
         else {
@@ -56,70 +81,7 @@ final class PrototypeDelegate: NSObject, NSApplicationDelegate {
             } catch {
                 exit(1)
             }
-            NSApplication.shared.terminate(nil)
+            exit(0)
         }
-    }
-
-    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        if case .checking = experiment.state {
-            experiment.quit()
-            return .terminateCancel
-        }
-        return .terminateNow
-    }
-}
-
-struct ExperimentView: View {
-    let experiment: PermissionExperiment
-    @State private var targetPid = ""
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Accessibility permission experiment").font(.title2).fontWeight(.semibold)
-            Text(
-                "Compare Miri and its bundled engine against a harmless fixture. Permission attribution remains unresolved until a manual grant comparison."
-            )
-            .foregroundStyle(.secondary)
-            HStack {
-                TextField("Fixture process ID", text: $targetPid).frame(width: 180)
-                Button("Check permission") {
-                    if let pid = Int32(targetPid), pid > 0 { experiment.check(targetPid: pid) }
-                }
-                .disabled((Int32(targetPid).map { $0 <= 0 } ?? true) || isChecking)
-            }
-            Group {
-                switch experiment.state {
-                case .idle: Text("Start AXFixture, then enter its process ID.")
-                case .checking: ProgressView("Checking app and engine...")
-                case .failed(let message): Text(message).foregroundStyle(.red)
-                case .observed(let report):
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(
-                            "Miri trusted: \(report.app.trusted.description). AX read: \(report.app.readCode). Role: \(report.app.role ?? "none")."
-                        )
-                        Text(
-                            "Engine trusted: \(report.engine.trusted.description). AX read: \(report.engine.readCode). Role: \(report.engine.role ?? "none")."
-                        )
-                        Text("Engine process \(report.engine.pid). Attribution unresolved.").foregroundStyle(.secondary)
-                    }.textSelection(.enabled)
-                }
-            }
-            Spacer(minLength: 0)
-            HStack {
-                Button("Open Accessibility Settings") {
-                    if let url = URL(
-                        string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
-                    {
-                        NSWorkspace.shared.open(url)
-                    }
-                }
-                Spacer()
-                Button("Quit", action: experiment.quit)
-            }
-        }.padding(24)
-    }
-
-    private var isChecking: Bool {
-        if case .checking = experiment.state { true } else { false }
     }
 }

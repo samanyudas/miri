@@ -9,17 +9,20 @@ public final class ConfigurationStore {
         # Miri Settings writes this file, and you can also edit it by hand. Valid edits apply immediately.
         # Paneru keys keep their Paneru names. Miri-only settings are in [miri].
         # Miri derives [padding] and [windows.miri-gaps] from miri.inner_gap and miri.outer_gap.
+        # [windows.miri-settings] keeps Miri's own windows floating.
 
         """
 
     public let url: URL
+    public let appBundleIdentifier: String
     public private(set) var settings = MiriSettings()
     public private(set) var issue: ConfigurationIssue?
     /// The current file, when it was read correctly. Writes require it.
     private var document: TOMLDocument?
 
-    public init(url: URL) {
+    public init(url: URL, appBundleIdentifier: String) {
         self.url = url
+        self.appBundleIdentifier = appBundleIdentifier
     }
 
     /// Reads the file, creating it with defaults when it is missing, then writes any derived engine keys it lacks.
@@ -79,7 +82,8 @@ public final class ConfigurationStore {
         guard let current = document else { return }
         let next: TOMLDocument
         do {
-            next = try settings.applied(to: current, reduceMotion: reduceMotion)
+            next = try settings.applied(
+                to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier)
         } catch let error as TOMLEditError {
             throw .notEditable(error.description)
         } catch let error as ConfigurationIssue {
