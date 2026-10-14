@@ -12,7 +12,10 @@ fi
 revision=$(git -C vendor/paneru rev-parse HEAD)
 pin=$(git ls-files --stage vendor/paneru | awk '{print $2}')
 [[ "$revision" == "$pin" ]] || { echo "Engine HEAD differs from the recorded submodule pin." >&2; exit 1; }
-git -C vendor/paneru merge-base --is-ancestor b1b6abbd3f1a4be138152b6f0389c9ff1b27a269 HEAD
+git -C vendor/paneru merge-base --is-ancestor b1b6abbd3f1a4be138152b6f0389c9ff1b27a269 HEAD || {
+    echo "The engine must descend from the required v0.5.2 base (b1b6abbd3f1a4be138152b6f0389c9ff1b27a269)." >&2
+    exit 1
+}
 if [[ -n "$(git -C vendor/paneru status --porcelain)" ]]; then
     $development || { echo "The engine checkout is dirty. Commit and pin the patch first." >&2; exit 1; }
     revision="${revision}-dirty"
@@ -22,6 +25,7 @@ env -u CARGO_BUILD_TARGET cargo build --manifest-path vendor/paneru/Cargo.toml \
     --target-dir "$PWD/vendor/paneru/target" --locked --bin paneru --no-default-features
 bin=$(swift build --show-bin-path)
 bundle="$PWD/.build/prototype/Miri.app"
+rm -rf "$bundle"
 mkdir -p "$bundle/Contents/MacOS" "$bundle/Contents/Helpers" "$bundle/Contents/Resources"
 cp "$bin/MiriPrototype" "$bundle/Contents/MacOS/MiriPrototype"
 cp vendor/paneru/target/debug/paneru "$bundle/Contents/Helpers/miri-engine"

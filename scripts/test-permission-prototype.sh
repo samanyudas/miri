@@ -64,6 +64,11 @@ def observe(bundle, name, target):
             result = json.loads(report.read_text())
             assert result['schemaVersion'] == 1
             assert result['permissionAttribution'] == 'unresolved'
+            reported_pid = result['appPid'] if 'failure' in result else result['app']['pid']
+            assert reported_pid == pid, 'The report app PID differs from the launched app'
+            end = time.monotonic() + 2
+            while alive(pid) and time.monotonic() < end:
+                time.sleep(.02)
             assert not alive(pid), 'The observed app survived its exit'
             return result
         finally:
