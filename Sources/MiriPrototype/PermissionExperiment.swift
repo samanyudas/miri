@@ -151,7 +151,9 @@ final class PermissionExperiment {
         }
         let engine = try JSONDecoder().decode(AXObservation.self, from: data)
         guard engine.schemaVersion == 1, engine.pid == process.processIdentifier,
-              engine.targetPid == targetPid, engine.executable == executable.path,
+              engine.targetPid == targetPid, engine.executable.hasPrefix("/"),
+              URL(fileURLWithPath: engine.executable).resolvingSymlinksInPath().path
+                  == executable.resolvingSymlinksInPath().path,
               engine.bundleIdentifier == "io.github.samanyudas.miri.engine" else {
             throw ExperimentError.failure("The engine response has an unexpected identity or schema.")
         }

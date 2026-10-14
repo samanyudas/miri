@@ -33,7 +33,9 @@ The bundle includes Miri's GPL license and the engine's MIT notice.
 The driver opens a harmless native fixture window and launches the packaged app through Launch Services.
 The app's diagnostic mode runs the same observation as **Check permission**, writes an atomic JSON report, and quits.
 The driver verifies the real process identities, executable paths, signatures, embedded engine identifier, raw AX results, and child termination.
-It also launches a freshly signed app copy whose engine is actually missing.
+Reported executable paths must resolve to the expected bundled executables.
+The driver also launches a signed bundle copy through both the macOS `/tmp` alias and its physical `/private/tmp` path.
+It verifies missing-engine failure with a freshly signed app copy whose engine is actually missing.
 No trust or AX result is substituted.
 
 The engine's `miri-ax-probe --target-pid <positive-pid>` command runs before logging, configuration discovery, services, sockets, or daemon startup.

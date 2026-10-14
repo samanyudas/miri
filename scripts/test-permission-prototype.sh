@@ -19,7 +19,7 @@ app = root / '.build/prototype/Miri.app'
 engine = app / 'Contents/Helpers/miri-engine'
 fixture = root / '.build/debug/AXFixture'
 evidence = Path(tempfile.mkdtemp(prefix='miri-permission-', dir='/tmp'))
-owned_apps = set()
+owned_apps = {}
 
 def run(*args):
     return subprocess.check_output(args, text=True, stderr=subprocess.STDOUT, timeout=20)
@@ -57,7 +57,7 @@ def observe(bundle, name, target):
             sidecar = report.with_suffix('.json.pid')
             wait_file(sidecar, launch)
             pid = int(sidecar.read_text())
-            owned_apps.add(pid)
+            owned_apps[pid] = bundle / 'Contents/Helpers/miri-engine'
             launch.wait(timeout=12)
             assert launch.returncode == 0, 'LaunchServices failed'
             assert report.exists(), 'The app exited without an observation report'
@@ -160,12 +160,13 @@ try:
     print(f'{status}. Attribution unresolved. Missing-helper and aliased-path checks passed.')
     print(f'Evidence {evidence}')
 finally:
-    for pid in owned_apps:
+    for pid, bundled_engine in owned_apps.items():
         if alive(pid):
-            children = run('ps', '-axo', 'pid=,ppid=,command=').splitlines()
+            children = run('ps', '-axo', 'pid=,ppid=,comm=').splitlines()
             for child in children:
                 fields = child.strip().split(maxsplit=2)
-                if len(fields) == 3 and int(fields[1]) == pid and str(engine) in fields[2]:
+                if (len(fields) == 3 and int(fields[1]) == pid
+                        and Path(fields[2]).resolve() == bundled_engine.resolve()):
                     stop(int(fields[0]))
             stop(pid)
     if fixture_process is not None:
