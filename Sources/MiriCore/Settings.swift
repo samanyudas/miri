@@ -85,6 +85,8 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.string(".*"), rule, "title")
         try set(.integer(Int64(windowPadding)), rule, "horizontal_padding")
         try set(.integer(Int64(windowPadding)), rule, "vertical_padding")
+        // Miri's own menu bar item replaces the engine's.
+        try set(.boolean(false), ["decorations", "menu"], "visible")
         let floating = ["windows", Self.floatingRuleName]
         try set(.string(".*"), floating, "title")
         try set(.string(appBundleIdentifier), floating, "bundle_id")

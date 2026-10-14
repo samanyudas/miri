@@ -26,6 +26,7 @@ struct ConfigurationStoreTests {
         #expect(document.value(at: ["windows", "miri-gaps", "title"]) == .string(".*"))
         #expect(document.value(at: ["windows", "miri-gaps", "horizontal_padding"]) == .integer(4))
         #expect(document.value(at: ["windows", "miri-gaps", "vertical_padding"]) == .integer(4))
+        #expect(document.value(at: ["decorations", "menu", "visible"]) == .boolean(false))
         #expect(
             document.value(at: ["windows", "miri-settings"])
                 == .table([
