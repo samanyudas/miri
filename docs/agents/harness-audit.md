@@ -16,7 +16,8 @@ An unchecked box names what is missing.
 - [x] **One command runs every check, and CI runs the same commands.**
   `make check` runs docs, harness tests, ShellCheck, actionlint, compatibility, Swift lint, engine lint, build, 319 engine tests, the selftest, and DMG packaging.
   It exited 0 on macOS 27.0 arm64.
-  CI run [38565101737](https://github.com/samanyudas/miri/actions/runs/38565101737) ran the same targets on the `xcode-27` runner, and every step passed.
+  CI runs `make lint` on `ubuntu-latest` to save macOS minutes, and the `make native` stages on the `xcode-27` runner.
+  Both jobs install the same checksummed ShellCheck and actionlint versions. RUN_PLACEHOLDER
 - [x] **A representative change has a definition of done, with tests before and after.**
   Issue #9 lists the acceptance criteria.
   Before the change, `scripts/check-docs.py` on `origin/main` reported `AGENTS.md: missing agent map` and `PROGRESS.md: missing handoff record`.
@@ -65,7 +66,7 @@ An unchecked box names what is missing.
 These defaults are in place. Each one is reversible.
 
 - **Scope.** This audit covers `samanyudas/miri` and issue #9 only.
-- **Platforms.** CI runs only on the `xcode-27` macOS runner. Hardware and multi-display checks stay manual.
+- **Platforms.** Lint runs on Linux to save cost. Build, tests, selftest, and packaging run on the `xcode-27` macOS runner. Hardware and multi-display checks stay manual.
 - **Durable state.** PROGRESS.md, updated by whoever ends a session. Issues stay the task authority.
 - **Risk.** Agents never merge. Sam reviews `risk: high` diffs and may merge `risk: low` on green CI.
 - **Review and follow-up.** CodeRabbit free plan only. Fix-status asks reporters on each stable release and closes after 14 silent days.
