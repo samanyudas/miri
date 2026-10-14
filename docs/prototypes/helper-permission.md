@@ -13,17 +13,17 @@ Use an arm64 Mac with macOS 27, Swift 6.2 or newer, Rust 1.95 or newer, Cargo, P
 
 ```sh
 git submodule update --init --recursive
-./scripts/build-prototype.sh
+./scripts/build-app.sh
 ./scripts/test-permission-prototype.sh
 ```
 
 The build requires the engine checkout to match the recorded submodule pin and have no local changes.
-During engine-patch development, use `./scripts/build-prototype.sh --allow-dirty-engine`.
+During engine-patch development, use `./scripts/build-app.sh --allow-dirty-engine`.
 The development exception records a `-dirty` suffix in the bundle and observation.
 It does not permit a different engine HEAD from the recorded submodule pin.
 Commit and pin the engine patch before delivering a reproducible build.
 
-The script builds without Lua and bundles the actual engine at `.build/prototype/Miri Developer.app/Contents/Helpers/miri-engine`.
+The script builds without Lua and bundles the actual engine at `.build/app/Miri Developer.app/Contents/Helpers/miri-engine`.
 It builds the engine with the `miri-developer` feature and signs it as `io.github.samanyudas.miri.dev.engine` before signing the app as `io.github.samanyudas.miri.dev`.
 The engine's embedded Info.plist uses the same engine identifier.
 It signs with the **Miri Developer Local Signing** identity from `scripts/setup-signing.sh` when it exists, and ad-hoc otherwise.
@@ -66,7 +66,7 @@ Do not reset existing permissions to create an artificial clean state.
    .build/debug/AXFixture &
    fixture_pid=$!
    echo "$fixture_pid"
-   open ".build/prototype/Miri Developer.app"
+   open ".build/app/Miri Developer.app"
    ```
 
 2. Enter the fixture process ID in Miri.

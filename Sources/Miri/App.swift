@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 @main
-struct MiriPrototypeApp: App {
+struct MiriApp: App {
     @NSApplicationDelegateAdaptor(PrototypeDelegate.self) private var delegate
 
     var body: some Scene {

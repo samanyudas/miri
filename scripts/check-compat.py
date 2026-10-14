@@ -27,7 +27,7 @@ def git(*args: str) -> subprocess.CompletedProcess:
 def main() -> int:
     problems = []
     package = (ROOT / "Package.swift").read_text()
-    build = (ROOT / "scripts/build-prototype.sh").read_text()
+    build = (ROOT / "scripts/build-app.sh").read_text()
     package_macos = re.search(r'\.macOS\("([\d.]+)"\)', package).group(1)
     plist_macos = re.search(r"<key>LSMinimumSystemVersion</key><string>([\d.]+)</string>", build).group(1)
     for name, value in [("Package.swift platform", package_macos), ("Info.plist minimum", plist_macos)]:
@@ -36,9 +36,9 @@ def main() -> int:
 
     # Development builds must never share the release identity, or they share its Accessibility grant.
     if f"<key>CFBundleIdentifier</key><string>{DEVELOPER_APP_ID}</string>" not in build:
-        problems.append(f"scripts/build-prototype.sh must give the app the developer identity {DEVELOPER_APP_ID}")
+        problems.append(f"scripts/build-app.sh must give the app the developer identity {DEVELOPER_APP_ID}")
     if f"--identifier {DEVELOPER_ENGINE_ID}" not in build or "--features miri-developer" not in build:
-        problems.append(f"scripts/build-prototype.sh must build and sign the engine as {DEVELOPER_ENGINE_ID}")
+        problems.append(f"scripts/build-app.sh must build and sign the engine as {DEVELOPER_ENGINE_ID}")
     release_scope = (ROOT / "decisions/release-scope.md").read_text()
     if f"The bundle ID is `{RELEASE_APP_ID}`" not in release_scope:
         problems.append(f"decisions/release-scope.md no longer names the release identity {RELEASE_APP_ID}")

@@ -32,11 +32,11 @@ git clone --recurse-submodules https://github.com/samanyudas/miri.git
 cd miri
 make setup
 make build
-open ".build/prototype/Miri Developer.app"
+open ".build/app/Miri Developer.app"
 ```
 
 `make setup` checks out the pinned engine, installs the pinned Rust, creates a local signing identity, and reports any missing prerequisite.
-`make build` produces `.build/prototype/Miri Developer.app`.
+`make build` produces `.build/app/Miri Developer.app`.
 Development builds use the name Miri Developer and their own bundle identifier, so they never replace or share permissions with an installed Miri release.
 The local signing identity keeps the Accessibility grant across rebuilds.
 The [permission procedure](docs/prototypes/helper-permission.md) explains what the prototype observes.
@@ -49,7 +49,7 @@ make check
 
 `make check` runs `make lint` and then `make native`.
 `make lint` checks documentation, harness tests, shell scripts, workflows, and declared version compatibility.
-`make native` lints Swift and the engine, builds the app, runs the engine unit tests, runs the end-to-end permission selftest, and packages a DMG.
+`make native` lints Swift and the engine, builds the app, runs the Swift and engine unit tests, runs the end-to-end permission selftest, and packages a DMG.
 CI runs the same targets on every pull request.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow.
 

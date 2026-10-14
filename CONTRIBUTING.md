@@ -34,7 +34,7 @@ CI runs the same targets, so a local pass predicts a CI pass.
 | `make shell`, `make actions` | Shell scripts and workflows pass ShellCheck and actionlint. |
 | `make compat` | Declared macOS minimums agree, the Rust pin satisfies the engine, and the engine pin is published on the fork branch. |
 | `make swift-lint`, `make engine-lint` | Swift formatting, rustfmt, and Clippy with warnings as errors. |
-| `make build`, `make test` | The signed app bundle builds, and the engine unit tests pass. |
+| `make build`, `make test` | The signed app bundle builds, and the Swift and engine unit tests pass. |
 | `make e2e` | The packaged app and engine run a real Accessibility observation through Launch Services. |
 | `make package` | Miri Developer packs into a DMG that mounts with valid signatures. |
 

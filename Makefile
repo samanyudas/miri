@@ -40,16 +40,17 @@ doctor:
 	scripts/doctor.sh native
 
 swift-lint:
-	swift format lint --strict --recursive Sources Package.swift
+	swift format lint --strict --recursive Sources Tests Package.swift
 
 engine-lint:
 	env -u CARGO_BUILD_TARGET cargo fmt --manifest-path vendor/paneru/Cargo.toml --check
 	env -u CARGO_BUILD_TARGET cargo clippy $(ENGINE) --all-targets -- -D warnings
 
 build:
-	scripts/build-prototype.sh
+	scripts/build-app.sh
 
 test:
+	swift test
 	env -u CARGO_BUILD_TARGET cargo test $(ENGINE)
 
 e2e:
@@ -59,4 +60,4 @@ package:
 	scripts/package-dmg.sh
 
 format:
-	swift format format --in-place --recursive Sources Package.swift
+	swift format format --in-place --recursive Sources Tests Package.swift
