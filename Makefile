@@ -1,4 +1,4 @@
-# One entry point for setup and verification. CI runs `make lint` on Linux and `make native` on macOS.
+# One entry point for setup and verification. CI runs the stages of `make check` on the macOS 27 runner.
 # Cargo runs from the repository root so rust-toolchain.toml selects the pinned Rust.
 .DEFAULT_GOAL := check
 ENGINE := --manifest-path vendor/paneru/Cargo.toml --target-dir vendor/paneru/target --locked --no-default-features
