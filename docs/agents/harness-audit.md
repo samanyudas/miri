@@ -55,7 +55,7 @@ An unchecked box names what is missing.
 ## Repository documentation
 
 - [x] README explains what Miri is and how to install, build, run, and verify it.
-- [x] AGENTS.md is a 90-line map. `make docs` fails above 120 lines.
+- [x] AGENTS.md is an 85-line map. `make docs` fails above 120 lines.
 - [x] Architecture decisions stay in `docs/adr/`, and AGENTS.md maps each directory. No ARCHITECTURE.md was needed.
 - [x] PROGRESS.md holds the handoff. `make docs` requires its sections and date.
 - [x] CONTRIBUTING, SECURITY, SUPPORT, and docs/AI-CONTRIBUTIONS exist. Issue forms and the PR template ask for reproduction steps, expected results, acceptance criteria, verification evidence, and release notes.
