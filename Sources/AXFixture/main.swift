@@ -4,8 +4,9 @@ final class FixtureDelegate: NSObject, NSApplicationDelegate {
     private var window: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 380, height: 140),
-                              styleMask: [.titled, .closable], backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 380, height: 140),
+            styleMask: [.titled, .closable], backing: .buffered, defer: false)
         window.title = "Miri harmless Accessibility fixture"
         window.contentView = NSTextField(labelWithString: "Read-only fixture. Process ID \(getpid()).")
         window.center()

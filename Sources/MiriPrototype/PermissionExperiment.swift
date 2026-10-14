@@ -92,20 +92,27 @@ final class PermissionExperiment {
             bundleIdentifier: Bundle.main.bundleIdentifier
         )
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false,
-                                               attributes: [.posixPermissions: 0o700])
+        try FileManager.default.createDirectory(
+            at: directory, withIntermediateDirectories: false,
+            attributes: [.posixPermissions: 0o700])
         defer { try? FileManager.default.removeItem(at: directory) }
         let output = directory.appendingPathComponent("stdout")
         let errors = directory.appendingPathComponent("stderr")
         for url in [output, errors] {
-            guard FileManager.default.createFile(atPath: url.path, contents: nil,
-                                                 attributes: [.posixPermissions: 0o600]) else {
+            guard
+                FileManager.default.createFile(
+                    atPath: url.path, contents: nil,
+                    attributes: [.posixPermissions: 0o600])
+            else {
                 throw ExperimentError.failure("Cannot create the engine output file.")
             }
         }
         let stdout = try FileHandle(forWritingTo: output)
         let stderr = try FileHandle(forWritingTo: errors)
-        defer { try? stdout.close(); try? stderr.close() }
+        defer {
+            try? stdout.close()
+            try? stderr.close()
+        }
         let process = Process()
         process.executableURL = executable
         process.arguments = ["miri-ax-probe", "--target-pid", String(targetPid)]
@@ -151,10 +158,11 @@ final class PermissionExperiment {
         }
         let engine = try JSONDecoder().decode(AXObservation.self, from: data)
         guard engine.schemaVersion == 1, engine.pid == process.processIdentifier,
-              engine.targetPid == targetPid, engine.executable.hasPrefix("/"),
-              URL(fileURLWithPath: engine.executable).resolvingSymlinksInPath().path
-                  == executable.resolvingSymlinksInPath().path,
-              engine.bundleIdentifier == "io.github.samanyudas.miri.engine" else {
+            engine.targetPid == targetPid, engine.executable.hasPrefix("/"),
+            URL(fileURLWithPath: engine.executable).resolvingSymlinksInPath().path
+                == executable.resolvingSymlinksInPath().path,
+            engine.bundleIdentifier == "io.github.samanyudas.miri.engine"
+        else {
             throw ExperimentError.failure("The engine response has an unexpected identity or schema.")
         }
         let revisionURL = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/engine-revision.txt")
