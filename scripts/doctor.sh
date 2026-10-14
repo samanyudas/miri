@@ -1,6 +1,5 @@
 #!/bin/bash
 # Reports missing or mismatched prerequisites. Usage: scripts/doctor.sh lint|native|all
-# shellcheck disable=SC2329 # The predicate functions below run through check "$@".
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 profile=${1:-all}
@@ -18,25 +17,27 @@ check() {
     fi
 }
 version() { "$1" --version 2>&1 | head -1; }
-engine_on_pin() { [[ "$(git -C vendor/paneru rev-parse HEAD)" == "$(git ls-files --stage vendor/paneru | awk '{print $2}')" ]]; }
-macos_27() { [[ "$(sw_vers -productVersion | cut -d. -f1)" -ge 27 ]]; }
-pinned=$(sed -n 's/^channel = "\(.*\)"/\1/p' rust-toolchain.toml)
-rust_pinned() { rustc --version | grep -q "^rustc $pinned "; }
+pin=$(git ls-files --stage vendor/paneru | awk '{print $2}')
+pinned_rust=$(sed -n 's/^channel = "\(.*\)"/\1/p' rust-toolchain.toml)
 
 check "git: $(version git)" "Install the Xcode command-line tools." command -v git
-check "engine checkout matches the pin" "git submodule update --init" engine_on_pin
+check "engine checkout matches the pin" "git submodule update --init" \
+    test "$(git -C vendor/paneru rev-parse HEAD 2>/dev/null)" = "$pin"
 
 if [[ "$profile" != native ]]; then
     check "python3 3.11+: $(version python3)" "brew install python" \
         python3 -c 'import sys; sys.exit(sys.version_info < (3, 11))'
-    check "shellcheck: $(version shellcheck | tail -1)" "brew install shellcheck" command -v shellcheck
-    check "actionlint: $(version actionlint)" "brew install actionlint" command -v actionlint
+    check "shellcheck 0.11.0" "brew install shellcheck, or match the version CI pins in .github/workflows/ci.yml" \
+        test "$(shellcheck --version 2>/dev/null | sed -n 's/^version: //p')" = 0.11.0
+    check "actionlint 1.7.12" "brew install actionlint, or match the version CI pins in .github/workflows/ci.yml" \
+        test "$(actionlint --version 2>/dev/null | head -1)" = 1.7.12
 fi
 
 if [[ "$profile" != lint ]]; then
     check "Apple silicon Mac" "Native checks need an arm64 Mac." test "$(uname -sm)" = "Darwin arm64"
-    check "macOS 27 or newer" "Update macOS." macos_27
+    check "macOS 27 or newer" "Update macOS." test "$(sw_vers -productVersion 2>/dev/null | cut -d. -f1)" -ge 27
     check "swift: $(version swift)" "Install Xcode 27 and run xcode-select --switch." command -v swift
-    check "rustc $pinned from rust-toolchain.toml" "rustup toolchain install" rust_pinned
+    check "rustc $pinned_rust from rust-toolchain.toml" "rustup toolchain install" \
+        test "$(rustc --version 2>/dev/null | cut -d" " -f2)" = "$pinned_rust"
 fi
 exit $((failures > 0))
