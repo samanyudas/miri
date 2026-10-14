@@ -31,6 +31,7 @@ jobs:
         with:
           persist-credentials: false
           submodules: true
+          fetch-depth: 0
       - run: scripts/setup.sh --profile portable
       - run: scripts/setup.sh --profile native
       - run: scripts/verify.sh --level gui

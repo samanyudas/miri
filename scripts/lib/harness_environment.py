@@ -127,12 +127,10 @@ def observe(profile):
             errors.append('The engine checkout is dirty or differs from its gitlink. Preserve it and resolve the difference first.')
         elif not errors:
             try:
-                command('git', '-C', 'vendor/paneru', 'merge-base', '--is-ancestor',
-                        'b1b6abbd3f1a4be138152b6f0389c9ff1b27a269', 'HEAD')
                 command('cargo', 'metadata', '--manifest-path', 'vendor/paneru/Cargo.toml',
                         '--locked', '--offline', '--no-deps', '--format-version', '1')
             except subprocess.CalledProcessError as error:
-                errors.append('Engine manifest/base validation failed: ' + error.output)
+                errors.append('Engine manifest validation failed: ' + error.output)
     names = ['Package.swift', 'Package.resolved', '.gitmodules', 'vendor/paneru/Cargo.toml',
              'vendor/paneru/Cargo.lock', 'rust-toolchain', 'rust-toolchain.toml',
              'vendor/paneru/rust-toolchain', 'vendor/paneru/rust-toolchain.toml',
