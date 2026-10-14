@@ -22,9 +22,9 @@ if [[ -n "$(git -C vendor/paneru status --porcelain)" ]]; then
 fi
 swift build
 env -u CARGO_BUILD_TARGET cargo build --manifest-path vendor/paneru/Cargo.toml \
-    --target-dir "$PWD/vendor/paneru/target" --locked --bin paneru --no-default-features
+    --target-dir "$PWD/vendor/paneru/target" --locked --bin paneru --no-default-features --features miri-developer
 bin=$(swift build --show-bin-path)
-bundle="$PWD/.build/prototype/Miri.app"
+bundle="$PWD/.build/prototype/Miri Developer.app"
 rm -rf "$bundle"
 mkdir -p "$bundle/Contents/MacOS" "$bundle/Contents/Helpers" "$bundle/Contents/Resources"
 cp "$bin/MiriPrototype" "$bundle/Contents/MacOS/MiriPrototype"
@@ -38,9 +38,9 @@ cat > "$bundle/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-<key>CFBundleIdentifier</key><string>io.github.samanyudas.miri</string>
-<key>CFBundleName</key><string>Miri</string>
-<key>CFBundleDisplayName</key><string>Miri permission experiment</string>
+<key>CFBundleIdentifier</key><string>io.github.samanyudas.miri.dev</string>
+<key>CFBundleName</key><string>Miri Developer</string>
+<key>CFBundleDisplayName</key><string>Miri Developer</string>
 <key>CFBundleExecutable</key><string>MiriPrototype</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleVersion</key><string>1</string>
@@ -49,8 +49,15 @@ cat > "$bundle/Contents/Info.plist" <<'PLIST'
 <key>NSHighResolutionCapable</key><true/>
 </dict></plist>
 PLIST
-codesign --force --sign - --identifier io.github.samanyudas.miri.engine "$bundle/Contents/Helpers/miri-engine"
-codesign --force --sign - "$bundle"
+# A stable identity keeps the Accessibility grant across rebuilds. Without one, ad-hoc signing still works.
+identity=-
+if security unlock-keychain -p miri-developer-signing "$HOME/Library/Keychains/miri-developer-signing.keychain-db" 2>/dev/null \
+    && security find-identity -p codesigning | grep -q '"Miri Developer Local Signing"'; then
+    identity="Miri Developer Local Signing"
+fi
+codesign --force --sign "$identity" --identifier io.github.samanyudas.miri.dev.engine "$bundle/Contents/Helpers/miri-engine"
+codesign --force --sign "$identity" "$bundle"
 codesign --verify --strict "$bundle/Contents/Helpers/miri-engine"
 codesign --verify --strict "$bundle"
-printf 'Built %s\nEngine source %s\n' "$bundle" "$revision"
+[[ "$identity" == - ]] && echo "Signed ad-hoc. Run scripts/setup-signing.sh to keep the Accessibility grant across rebuilds."
+printf 'Built %s\nEngine source %s\nSigned with %s\n' "$bundle" "$revision" "$identity"

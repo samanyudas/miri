@@ -161,7 +161,7 @@ final class PermissionExperiment {
             engine.targetPid == targetPid, engine.executable.hasPrefix("/"),
             URL(fileURLWithPath: engine.executable).resolvingSymlinksInPath().path
                 == executable.resolvingSymlinksInPath().path,
-            engine.bundleIdentifier == "io.github.samanyudas.miri.engine"
+            engine.bundleIdentifier == Bundle.main.bundleIdentifier.map({ "\($0).engine" })
         else {
             throw ExperimentError.failure("The engine response has an unexpected identity or schema.")
         }

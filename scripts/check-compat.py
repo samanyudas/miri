@@ -11,6 +11,9 @@ ENGINE = ROOT / "vendor/paneru"
 ENGINE_BASE = "b1b6abbd3f1a4be138152b6f0389c9ff1b27a269"
 ENGINE_BRANCH = "miri/v0.5.2"
 SUPPORTED_MACOS = "27.0"
+RELEASE_APP_ID = "io.github.samanyudas.miri"
+DEVELOPER_APP_ID = "io.github.samanyudas.miri.dev"
+DEVELOPER_ENGINE_ID = "io.github.samanyudas.miri.dev.engine"
 
 
 def version(text: str) -> tuple[int, ...]:
@@ -30,6 +33,18 @@ def main() -> int:
     for name, value in [("Package.swift platform", package_macos), ("Info.plist minimum", plist_macos)]:
         if value != SUPPORTED_MACOS:
             problems.append(f"{name} is macOS {value}; release scope supports macOS {SUPPORTED_MACOS} and later")
+
+    # Development builds must never share the release identity, or they share its Accessibility grant.
+    if f"<key>CFBundleIdentifier</key><string>{DEVELOPER_APP_ID}</string>" not in build:
+        problems.append(f"scripts/build-prototype.sh must give the app the developer identity {DEVELOPER_APP_ID}")
+    if f"--identifier {DEVELOPER_ENGINE_ID}" not in build or "--features miri-developer" not in build:
+        problems.append(f"scripts/build-prototype.sh must build and sign the engine as {DEVELOPER_ENGINE_ID}")
+    release_scope = (ROOT / "decisions/release-scope.md").read_text()
+    if f"The bundle ID is `{RELEASE_APP_ID}`" not in release_scope:
+        problems.append(f"decisions/release-scope.md no longer names the release identity {RELEASE_APP_ID}")
+    developer_plist = ENGINE / "assets/Info.developer.plist"
+    if not developer_plist.exists() or f"<string>{DEVELOPER_ENGINE_ID}</string>" not in developer_plist.read_text():
+        problems.append(f"the engine's assets/Info.developer.plist must embed {DEVELOPER_ENGINE_ID}")
 
     pinned_rust = tomllib.loads((ROOT / "rust-toolchain.toml").read_text())["toolchain"]["channel"]
     engine_rust = tomllib.loads((ENGINE / "Cargo.toml").read_text())["package"]["rust-version"]
