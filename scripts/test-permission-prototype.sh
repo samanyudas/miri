@@ -18,7 +18,7 @@ root = Path.cwd()
 app = root / '.build/prototype/Miri.app'
 engine = app / 'Contents/Helpers/miri-engine'
 fixture = root / '.build/debug/AXFixture'
-evidence = Path(tempfile.mkdtemp(prefix='miri-permission-'))
+evidence = Path(tempfile.mkdtemp(prefix='miri-permission-', dir='/tmp'))
 owned_apps = set()
 
 def run(*args):
@@ -110,22 +110,33 @@ try:
     wait_file(ready, fixture_process)
     target = int(ready.read_text())
     assert target == fixture_process.pid
-    result = observe(app, 'observation', target)
-    assert 'failure' not in result, result.get('failure')
-    assert result['bundlePath'] == str(app)
-    assert result['engineRevision'] == metadata['engineSource']
-    for key, identifier, executable in [
-        ('app', 'io.github.samanyudas.miri', str(app / 'Contents/MacOS/MiriPrototype')),
-        ('engine', 'io.github.samanyudas.miri.engine', str(engine)),
-    ]:
-        value = result[key]
-        assert value['schemaVersion'] == 1 and value['targetPid'] == target
-        assert type(value['trusted']) is bool and type(value['readCode']) is int
-        assert value['bundleIdentifier'] == identifier and value['executable'] == executable
-        assert value['pid'] != target
-        assert not alive(value['pid']), f'{key} process survived its observation'
-        if value['readCode'] == 0:
-            assert value['role'] == 'AXApplication'
+    tmp_app = evidence / 'PathAlias.app'
+    shutil.copytree(app, tmp_app)
+    assert tmp_app != tmp_app.resolve(), 'The regression requires the macOS /tmp path alias'
+    observations = []
+    for bundle, name in [(app, 'observation'), (tmp_app, 'tmp-path'),
+                         (tmp_app.resolve(), 'physical-tmp-path')]:
+        result = observe(bundle, name, target)
+        assert 'failure' not in result, f'{name}: {result.get("failure")}'
+        assert Path(result['bundlePath']).is_absolute()
+        assert Path(result['bundlePath']).resolve(strict=True) == bundle.resolve(strict=True)
+        assert result['engineRevision'] == metadata['engineSource']
+        for key, identifier, executable in [
+            ('app', 'io.github.samanyudas.miri', bundle / 'Contents/MacOS/MiriPrototype'),
+            ('engine', 'io.github.samanyudas.miri.engine', bundle / 'Contents/Helpers/miri-engine'),
+        ]:
+            value = result[key]
+            assert value['schemaVersion'] == 1 and value['targetPid'] == target
+            assert type(value['trusted']) is bool and type(value['readCode']) is int
+            assert value['bundleIdentifier'] == identifier
+            assert Path(value['executable']).is_absolute()
+            assert Path(value['executable']).resolve(strict=True) == executable.resolve(strict=True)
+            assert value['pid'] != target
+            assert not alive(value['pid']), f'{key} process survived its observation'
+            if value['readCode'] == 0:
+                assert value['role'] == 'AXApplication'
+        observations.append(result)
+    result = observations[0]
     hostile = os.environ.copy()
     hostile['PANERU_CONFIG'] = str(evidence / 'must-not-create-config' / 'hostile.toml')
     probe = subprocess.run([str(engine), 'miri-ax-probe', '--target-pid', str(target)],
@@ -146,7 +157,7 @@ try:
     failure = observe(broken, 'missing-helper', target)
     assert failure['failure'] == 'The bundled engine is missing or is not executable.'
     status = 'observed-granted' if result['app']['trusted'] and result['engine']['trusted'] else 'observed-ungranted'
-    print(f'{status}. Attribution unresolved. Missing-helper check passed.')
+    print(f'{status}. Attribution unresolved. Missing-helper and aliased-path checks passed.')
     print(f'Evidence {evidence}')
 finally:
     for pid in owned_apps:
