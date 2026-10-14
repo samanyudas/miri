@@ -24,12 +24,12 @@ swift build
 env -u CARGO_BUILD_TARGET cargo build --manifest-path vendor/paneru/Cargo.toml \
     --target-dir "$PWD/vendor/paneru/target" --locked --bin paneru --no-default-features --features miri-developer
 bin=$(swift build --show-bin-path)
-bundle="$PWD/.build/prototype/Miri Developer.app"
+bundle="$PWD/.build/app/Miri Developer.app"
 rm -rf "$bundle"
 mkdir -p "$bundle/Contents/MacOS" "$bundle/Contents/Helpers" "$bundle/Contents/Resources"
-cp "$bin/MiriPrototype" "$bundle/Contents/MacOS/MiriPrototype"
+cp "$bin/Miri" "$bundle/Contents/MacOS/Miri"
 cp vendor/paneru/target/debug/paneru "$bundle/Contents/Helpers/miri-engine"
-[[ "$(lipo -archs "$bundle/Contents/MacOS/MiriPrototype")" == arm64 ]]
+[[ "$(lipo -archs "$bundle/Contents/MacOS/Miri")" == arm64 ]]
 [[ "$(lipo -archs "$bundle/Contents/Helpers/miri-engine")" == arm64 ]]
 cp LICENSE "$bundle/Contents/Resources/Miri-GPL-3.0.txt"
 cp vendor/paneru/LICENSE.txt "$bundle/Contents/Resources/Paneru-MIT.txt"
@@ -41,7 +41,7 @@ cat > "$bundle/Contents/Info.plist" <<'PLIST'
 <key>CFBundleIdentifier</key><string>io.github.samanyudas.miri.dev</string>
 <key>CFBundleName</key><string>Miri Developer</string>
 <key>CFBundleDisplayName</key><string>Miri Developer</string>
-<key>CFBundleExecutable</key><string>MiriPrototype</string>
+<key>CFBundleExecutable</key><string>Miri</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleVersion</key><string>1</string>
 <key>CFBundleShortVersionString</key><string>0.0.1</string>

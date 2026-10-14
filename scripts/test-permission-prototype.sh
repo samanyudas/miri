@@ -15,7 +15,7 @@ import tempfile
 import time
 
 root = Path.cwd()
-app = root / '.build/prototype/Miri Developer.app'
+app = root / '.build/app/Miri Developer.app'
 engine = app / 'Contents/Helpers/miri-engine'
 fixture = root / '.build/debug/AXFixture'
 evidence = Path(tempfile.mkdtemp(prefix='miri-permission-', dir='/tmp'))
@@ -76,15 +76,15 @@ def observe(bundle, name, target):
                 launch.kill()
             launch.wait(timeout=5)
 
-assert engine.is_file() and fixture.is_file(), 'Run build-prototype.sh first'
+assert engine.is_file() and fixture.is_file(), 'Run build-app.sh first'
 metadata = {
     'macOS': run('sw_vers'), 'swift': run('swift', '--version'),
     'rust': run('rustc', '--version'), 'cargo': run('cargo', '--version'), 'appPath': str(app),
     'engineArchitecture': run('file', str(engine)),
-    'appArchitecture': run('file', str(app / 'Contents/MacOS/MiriPrototype')),
+    'appArchitecture': run('file', str(app / 'Contents/MacOS/Miri')),
     'engineSource': (app / 'Contents/Resources/engine-revision.txt').read_text().strip(),
     'engineSHA256': hashlib.sha256(engine.read_bytes()).hexdigest(),
-    'appSHA256': hashlib.sha256((app / 'Contents/MacOS/MiriPrototype').read_bytes()).hexdigest(),
+    'appSHA256': hashlib.sha256((app / 'Contents/MacOS/Miri').read_bytes()).hexdigest(),
     'appSignature': run('codesign', '-dvv', str(app)),
     'engineSignature': run('codesign', '-dvv', str(engine)),
 }
@@ -122,7 +122,7 @@ try:
         assert Path(result['bundlePath']).resolve(strict=True) == bundle.resolve(strict=True)
         assert result['engineRevision'] == metadata['engineSource']
         for key, identifier, executable in [
-            ('app', 'io.github.samanyudas.miri.dev', bundle / 'Contents/MacOS/MiriPrototype'),
+            ('app', 'io.github.samanyudas.miri.dev', bundle / 'Contents/MacOS/Miri'),
             ('engine', 'io.github.samanyudas.miri.dev.engine', bundle / 'Contents/Helpers/miri-engine'),
         ]:
             value = result[key]

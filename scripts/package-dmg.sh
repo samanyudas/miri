@@ -2,8 +2,8 @@
 # Packages the built prototype into a compressed disk image and checks the mounted copy.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-app=".build/prototype/Miri Developer.app"
-[[ -d "$app" ]] || { echo "Run scripts/build-prototype.sh first." >&2; exit 1; }
+app=".build/app/Miri Developer.app"
+[[ -d "$app" ]] || { echo "Run scripts/build-app.sh first." >&2; exit 1; }
 revision=$(git rev-parse --short HEAD)
 dmg=".build/Miri-Developer-$revision.dmg"
 staging=$(mktemp -d)

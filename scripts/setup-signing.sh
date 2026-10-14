@@ -50,4 +50,4 @@ done < <(security list-keychains -d user)
 security list-keychains -d user -s "$keychain" "${existing[@]}"
 
 can_sign || { echo "The identity was imported, but codesign cannot sign with it." >&2; exit 1; }
-echo "Created signing identity '$identity'. scripts/build-prototype.sh uses it automatically."
+echo "Created signing identity '$identity'. scripts/build-app.sh uses it automatically."
