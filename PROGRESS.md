@@ -19,16 +19,16 @@ The current milestone is a verifiable development harness on top of the permissi
 - The development harness is in review in #10 on `chore/repo-harness`, tracked by #9.
   It adds `make check`, CI, issue lifecycle automation, the command guard, and contributor documents.
   `make check` passes locally, and a live Claude session showed the guard blocking a push to `main`.
-- Development builds become **Miri Developer** (`io.github.samanyudas.miri.dev`) with a stable local signing identity. This is in review as the PR stacked on #10, with engine change samanyudas/paneru#4.
+- Development builds become **Miri Developer** (`io.github.samanyudas.miri.dev`) with a stable local signing identity. This is in review as #11, stacked on #10. Its engine change, samanyudas/paneru#4, is merged.
+  Sam's Accessibility grant for Miri Developer survived a rebuild that changed the app binary.
 
 ## Next
 
 1. Sam reviews and merges #10. Then check that `pr-risk` and `issue-fix-status` run on the next PR, because `pull_request_target` workflows only run from `main`.
-2. Sam merges samanyudas/paneru#4. CI on the Miri Developer PR stays red until then, because `make compat` requires the engine pin on `miri/v0.5.2`. Then merge that PR.
-3. Sam checks System Settings > Accessibility for a **Miri Developer** entry. The first selftest of the new identity reported `observed-granted` before any known grant, and the cause is unknown.
-4. Resolve product question Q6 and the stacking scope question in [design tree status](decisions/design-tree-status.md).
-5. Plan the first production app slice: menu bar controls, engine start and stop, and window recovery on quit.
-6. Move to Rust 1.99 when the product is ready. Fix the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs` on the fork first, then repin. Branch `chore/rust-1.99-engine` holds the earlier attempt.
+2. Sam merges the Miri Developer PR (#11) after #10.
+3. Resolve product question Q6 and the stacking scope question in [design tree status](decisions/design-tree-status.md).
+4. Plan the first production app slice: menu bar controls, engine start and stop, and window recovery on quit.
+5. Move to Rust 1.99 when the product is ready. Fix the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs` on the fork first, then repin. Branch `chore/rust-1.99-engine` holds the earlier attempt.
 
 ## Blockers
 
