@@ -27,20 +27,22 @@ The current milestone is the first production app slice: menu bar controls, engi
   - A setup checker, redacted diagnostics with a preview, and the menu bar and Settings UI.
 - The engine fork change samanyudas/paneru#5 hides the engine's menu bar item through `[decorations.menu].visible`, which Miri sets to `false`.
   It also creates a missing `PANERU_CONFIG` file in place instead of falling back to standalone Paneru's files.
+- The engine fork change samanyudas/paneru#6 makes stacking move only the focused window, in both directions, and adds pop-out to the left.
+  It also stops a stack command next to a fullscreen column from dropping windows out of the layout.
 - Sam decided on 15 October 2026 that stacking moves only the focused window, and deferred Q6 to the final pre-release check.
 - A live run on 15 October 2026 on the built-in display only confirmed Start, 8-point gaps on all sides and between windows, Stop, crash recovery and restart, the three-crash limit, manual restart, and Quit.
 
 ## Next
 
 1. Sam reviews the `feat/v1-app-core` PR.
-2. Sam merges samanyudas/paneru#5 into `miri/v0.5.2`.
-   It hides the engine's menu bar item and makes `PANERU_CONFIG` final. `make compat` fails until it merges, because the pin `5bfe69c` is not yet on that branch.
+2. Sam merges samanyudas/paneru#5 and then samanyudas/paneru#6 into `miri/v0.5.2`.
+   `make compat` fails until both merge, because the pin `cbf585c` is not yet on that branch.
 3. Reproduce #13, where an existing full-width window shrank to half width, on an empty Space with only test windows.
 4. Repeat the live run with an external display connected.
-5. Make engine stacking move only the focused window, and add stack-right and pop-left, as decided on 15 October 2026.
+5. Verify focused-window stacking in both directions on hardware.
 6. Build the remaining v1 controls: the shortcut recorder, the gesture test, and pointer-targeted swipes.
 7. Decide Q6, the release duration, at the final check before publishing v1.
-8. Move to Rust 1.99 when the product is ready. Fix the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs` on the fork first, then repin. Branch `chore/rust-1.99-engine` holds the earlier attempt.
+8. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
 
 ## Blockers
 

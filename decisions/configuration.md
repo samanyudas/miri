@@ -182,10 +182,10 @@ Additional proposed action identifiers are listed below.
 - `window_taller`
 - `window_shorter`
 - `window_equalize`
-- `window_stack`
-- `window_unstack`
-- `window_consume_east`
-- `window_expel_west`
+- `window_stack_west`
+- `window_stack_east`
+- `window_unstack_east`
+- `window_unstack_west`
 - `window_nextdisplay`
 
 These identifiers also require verification against the pinned engine.

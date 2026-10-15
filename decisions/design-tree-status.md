@@ -113,6 +113,8 @@ They are not questions for Sam to answer from memory.
 
 This finding comes from source inspection of `v0.5.2` at `b1b6abbd3f1a4be138152b6f0389c9ff1b27a269`.
 No one has run these commands against the engine or on hardware.
+The engine fork change samanyudas/paneru#6 resolves every finding in this section in unit tests.
+It adds `stack east` and `unstack west`, moves only the focused window, and checks for fullscreen columns before it changes the layout.
 
 The engine has two stacking commands only.
 `stack` merges into the column on the left, and `unstack` pops the window out to a new column on the right.
@@ -142,8 +144,9 @@ Those windows could leave the layout, which would conflict with the rule that wi
 - Map the accepted eight-point gaps to the source-backed padding fields and select Miri's validation range after coordinate checks.
 - Define command reconciliation, external configuration edit handling, and upgrade migrations under the selected product policies.
 - Establish window recovery that satisfies Q12 even when the engine cannot run a clean-shutdown handler.
-- Change engine stacking to move only the focused window, supply the missing stack-right and pop-left commands, and verify repeated stacking against the pinned engine.
-- Reproduce the fullscreen column loss in `LayoutStrip::stack`, then fix it in Miri or report it upstream.
+- Verify focused-window stacking in both directions on hardware.
+  The engine fork change samanyudas/paneru#6 implements it and adds the missing stack-right and pop-left commands.
+  Its unit tests reproduce and fix the fullscreen column loss in `LayoutStrip::stack`.
 - Build the native settings window, menu bar controls, helper lifecycle, setup checker, and diagnostics.
 - Define bounded log storage and a measurable engine memory-stability check.
 - Configure release signing, notarization, signed update feeds, disk image packaging, and Homebrew cask delivery.
