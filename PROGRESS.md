@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-16 by Claude on branch `fix/engine-exit-cleanup`
+Updated: 2026-10-16 by Claude on branch `fix/restore-floating-rules`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -33,12 +33,14 @@ The current milestone is the first production app slice: menu bar controls, engi
 - PR #12, the first production app slice, merged into `main` on 15 October 2026 with #13 still open.
 - samanyudas/paneru#7 merged into `miri/v0.5.2` on 16 October 2026 as engine `0341353`.
   It fixes #14: Stop and Quit no longer move floating, minimized, or hidden windows.
+- Sam decided on 16 October 2026 that a current floating rule wins over a saved tiled placement (#15).
+  samanyudas/paneru#8 makes the engine do this, and the `fix/restore-floating-rules` PR pins it.
 - A live run on 15 October 2026 on the built-in display only confirmed Start, 8-point gaps on all sides and between windows, Stop, crash recovery and restart, the three-crash limit, manual restart, and Quit.
 
 ## Next
 
-1. Decide #15: whether a saved tiled placement or a current `floating = true` rule wins at startup.
-   Until then, set `[restore] enabled = false` for any live test that relies on floating rules.
+1. Merge samanyudas/paneru#8 into `miri/v0.5.2`, then repin and merge the `fix/restore-floating-rules` PR.
+   `make compat` fails until paneru#8 merges, because the pin `245dda7` is not yet on that branch.
 2. Keep hunting #13 on an empty Space with trace logging.
    It reproduced once in 4 runs, with an Electron window in Window > Fill.
 3. Repeat the live run with an external display connected.

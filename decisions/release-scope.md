@@ -83,6 +83,8 @@ After repeated crashes, Miri stops retrying and shows the failure.
 The failure view provides logs and a manual restart control.
 Three crashes within five minutes count as repeated crashes.
 Paneru's startup session restore is on, so the layout returns after an engine start or crash restart.
+A current floating rule wins over a saved tiled placement, so a window that matches a floating rule floats after a restart even if it was tiled when the layout was saved.
+Sam decided this on 16 October 2026 in #15.
 A successful manual restart resets the count.
 
 ## Setup and conflicts
