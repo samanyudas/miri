@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-15 by Claude on branch `feat/v1-app-core`
+Updated: 2026-10-16 by Claude on branch `fix/engine-exit-cleanup`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -30,14 +30,18 @@ The current milestone is the first production app slice: menu bar controls, engi
 - The engine fork change samanyudas/paneru#6 makes stacking move only the focused window, in both directions, and adds pop-out to the left.
   It also stops a stack command next to a fullscreen column from dropping windows out of the layout.
 - Sam decided on 15 October 2026 that stacking moves only the focused window, and deferred Q6 to the final pre-release check.
+- PR #12, the first production app slice, merged into `main` on 15 October 2026 with #13 still open.
 - A live run on 15 October 2026 on the built-in display only confirmed Start, 8-point gaps on all sides and between windows, Stop, crash recovery and restart, the three-crash limit, manual restart, and Quit.
 
 ## Next
 
-1. Sam reviews the `feat/v1-app-core` PR.
-2. Sam merges samanyudas/paneru#5 and then samanyudas/paneru#6 into `miri/v0.5.2`.
-   `make compat` fails until both merge, because the pin `cbf585c` is not yet on that branch.
-3. Reproduce #13, where an existing full-width window shrank to half width, on an empty Space with only test windows.
+1. Sam merges samanyudas/paneru#7 into `miri/v0.5.2`, then the `fix/engine-exit-cleanup` PR.
+   `make compat` fails until paneru#7 merges, because the pin `ac23ecf` is not yet on that branch.
+   Paneru#7 fixes #14: Stop and Quit no longer move floating, minimized, or hidden windows.
+2. Decide #15: whether a saved tiled placement or a current `floating = true` rule wins at startup.
+   Until then, set `[restore] enabled = false` for any live test that relies on floating rules.
+3. Keep hunting #13 on an empty Space with trace logging.
+   It reproduced once in 4 runs, with an Electron window in Window > Fill.
 4. Repeat the live run with an external display connected.
 5. Verify focused-window stacking in both directions on hardware.
 6. Build the remaining v1 controls: the shortcut recorder, the gesture test, and pointer-targeted swipes.
