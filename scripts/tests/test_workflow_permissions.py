@@ -10,25 +10,27 @@ SCOPE_CALLS = [
     (re.compile(r"repos/\$GH_REPO/issues/|\bgh issue "), {"issues"}),
     (re.compile(r"\bgh label "), {"issues", "pull-requests"}),
 ]
+WRITES = re.compile(r"\bgh (issue|pr) (comment|create|edit|close|reopen)\b|\bgh label (create|edit|delete)\b"
+                    r"|\bgh api\b.* (-f|-F|--field|--raw-field|-X (POST|PATCH|PUT|DELETE))\b")
 
 
-def scopes(block: list[str], indent: int) -> set[str] | None:
+def scopes(block: list[str], indent: int) -> dict[str, str] | None:
     for index, line in enumerate(block):
         if line == " " * indent + "permissions:":
-            found = set()
+            found = {}
             for entry in block[index + 1:]:
                 match = re.fullmatch(r" {%d}([a-z-]+): (read|write)" % (indent + 2), entry)
                 if not match:
                     break
-                found.add(match.group(1))
+                found[match.group(1)] = match.group(2)
             return found
     return None
 
 
-def jobs(text: str) -> tuple[set[str], dict[str, list[str]]]:
+def jobs(text: str) -> tuple[dict[str, str], dict[str, list[str]]]:
     lines = text.splitlines()
     start = lines.index("jobs:")
-    workflow = scopes(lines[:start], 0) or set()
+    workflow = scopes(lines[:start], 0) or {}
     found: dict[str, list[str]] = {}
     for line in lines[start + 1:]:
         match = re.fullmatch(r"  ([a-z0-9_-]+):", line)
@@ -45,10 +47,13 @@ def missing_scopes(text: str) -> list[str]:
     for name, block in found.items():
         granted = scopes(block, 4)
         granted = workflow if granted is None else granted
-        body = "\n".join(block)
-        for call, accepted in SCOPE_CALLS:
-            if call.search(body) and not accepted & granted:
-                problems.append(f"{name}: needs {' or '.join(sorted(accepted))}")
+        for line in block:
+            level = "write" if WRITES.search(line) else "read"
+            for call, accepted in SCOPE_CALLS:
+                allowed = {scope for scope in accepted if granted.get(scope) in ("write", level)}
+                problem = f"{name}: needs {' or '.join(sorted(accepted))} {level}"
+                if call.search(line) and not allowed and problem not in problems:
+                    problems.append(problem)
     return problems
 
 
@@ -72,7 +77,19 @@ jobs:
     steps:
       - run: gh issue comment 1 --body hi
 """
-        self.assertEqual(missing_scopes(text), ["inherits: needs pull-requests", "overrides: needs issues"])
+        self.assertEqual(missing_scopes(text), ["inherits: needs pull-requests read", "overrides: needs issues write"])
+
+    def test_a_read_scope_does_not_allow_a_write(self):
+        text = """jobs:
+  labels:
+    permissions:
+      issues: read
+    steps:
+      - run: |
+          gh issue list --label bug
+          gh api "repos/$GH_REPO/issues/1/labels" -f "labels[]=bug" --silent
+"""
+        self.assertEqual(missing_scopes(text), ["labels: needs issues write"])
 
 
 if __name__ == "__main__":
