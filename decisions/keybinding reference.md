@@ -80,6 +80,8 @@ The width and height adjustment increment follows [Default shortcuts and layout]
 | Float or unfloat focused window | ⌃⌥T |
 
 Miri assigns `]` to stacking left and `[` to stacking right.
+Stacking moves only the focused window into the neighboring column, and the rest of its old stack stays in place.
+In the first or last column, stacking toward the edge does nothing.
 
 ## macOS commands used alongside the app
 
