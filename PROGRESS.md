@@ -31,22 +31,21 @@ The current milestone is the first production app slice: menu bar controls, engi
   It also stops a stack command next to a fullscreen column from dropping windows out of the layout.
 - Sam decided on 15 October 2026 that stacking moves only the focused window, and deferred Q6 to the final pre-release check.
 - PR #12, the first production app slice, merged into `main` on 15 October 2026 with #13 still open.
+- samanyudas/paneru#7 merged into `miri/v0.5.2` on 16 October 2026 as engine `0341353`.
+  It fixes #14: Stop and Quit no longer move floating, minimized, or hidden windows.
 - A live run on 15 October 2026 on the built-in display only confirmed Start, 8-point gaps on all sides and between windows, Stop, crash recovery and restart, the three-crash limit, manual restart, and Quit.
 
 ## Next
 
-1. Sam merges samanyudas/paneru#7 into `miri/v0.5.2`, then the `fix/engine-exit-cleanup` PR.
-   `make compat` fails until paneru#7 merges, because the pin `ac23ecf` is not yet on that branch.
-   Paneru#7 fixes #14: Stop and Quit no longer move floating, minimized, or hidden windows.
-2. Decide #15: whether a saved tiled placement or a current `floating = true` rule wins at startup.
+1. Decide #15: whether a saved tiled placement or a current `floating = true` rule wins at startup.
    Until then, set `[restore] enabled = false` for any live test that relies on floating rules.
-3. Keep hunting #13 on an empty Space with trace logging.
+2. Keep hunting #13 on an empty Space with trace logging.
    It reproduced once in 4 runs, with an Electron window in Window > Fill.
-4. Repeat the live run with an external display connected.
-5. Verify focused-window stacking in both directions on hardware.
-6. Build the remaining v1 controls: the shortcut recorder, the gesture test, and pointer-targeted swipes.
-7. Decide Q6, the release duration, at the final check before publishing v1.
-8. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
+3. Repeat the live run with an external display connected.
+4. Verify focused-window stacking in both directions on hardware.
+5. Build the remaining v1 controls: the shortcut recorder, the gesture test, and pointer-targeted swipes.
+6. Decide Q6, the release duration, at the final check before publishing v1.
+7. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
 
 ## Blockers
 
