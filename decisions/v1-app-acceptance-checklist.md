@@ -203,5 +203,5 @@ The intended gesture defaults and conflict policy are accepted.
 Gesture-test pass criteria and result invalidation are accepted.
 Supported gesture combinations still need engine and hardware verification.
 Configuration keys, validation ranges, and private API fallbacks require review against the actual pinned dependency.
-This checklist does not supply a memory-stability threshold or settle skipped Q6 about release duration.
+This checklist does not supply a memory-stability threshold or settle Q6 about release duration, which Sam decides at the final check before publishing v1.
 The [design tree status](design-tree-status.md) retains those open items.

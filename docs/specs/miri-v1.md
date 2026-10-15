@@ -47,7 +47,7 @@ The custom Miri dock and other deferred features remain outside v1.
 These stories express accepted v1 outcomes from the release scope, ADRs, accepted keybinding reference, configuration contract, and app acceptance checklist.
 The few additional planned setup details are identified below rather than assigned accepted status.
 They do not claim that a working app already exists.
-The stack-left action remains subject to the unresolved stacking-scope decision recorded in Further Notes.
+Stacking in either direction moves only the focused window, as Sam decided on 15 October 2026.
 Broader feature proposals are not promoted into accepted requirements.
 
 ### Installation, distribution, and system access
@@ -156,7 +156,7 @@ They describe documented intent, not separately accepted product choices or comp
 ### Stacks, floating windows, and native fullscreen
 
 The accepted bindings provide stacking and pop-out actions in both directions.
-The left-stacking story establishes the action's availability without deciding whether it moves only the focused window or its whole stack.
+Stacking in either direction moves only the focused window, and the rest of its old stack stays in place.
 That decision remains open.
 
 86. As a Miri user, I want the assigned stack-left command, so that I can combine windows with the neighboring column on the left.
@@ -398,7 +398,7 @@ The following table records the selected v1 defaults without claiming tested act
 - Full column width is distinct from native macOS fullscreen.
   macOS Space switching, fullscreen, app switching, closing, and ordinary app commands remain macOS or application interactions.
 - Stack-left uses `]`, and stack-right uses `[`, as selected in the reference.
-  The unresolved stack-left movement scope must not be decided implicitly by copying Paneru's behavior.
+  Stacking moves only the focused window, so Miri must change Paneru's whole-column behavior.
 - Supply stack-right and pop-left through Miri's integration because the selected engine source lacks those commands.
   Final action contracts, repeated-command behavior, and safe fullscreen interaction still need reconciliation.
 - Actions without selected bindings use Paneru's defaults, changed only where they clash with macOS.
@@ -521,7 +521,7 @@ The [app acceptance checklist](../../decisions/v1-app-acceptance-checklist.md) s
 6. Verify no standalone Paneru fallback reads or file modifications, the accepted defaults, backup-before-migration, preserved values, and unchanged originals after unsafe migration.
 7. Verify several bindings per action, AZERTY, QWERTZ, Dvorak, upgrade preservation, defaults only on free keys, and explicit reset.
 8. Exercise every v1 binding in the accepted reference, including numbered-column semantics, physical-direction monitor navigation, all stacking directions, and floating actions.
-   The unresolved stacking-scope expectation must be settled before the affected stacking assertions become final.
+   Stacking assertions expect only the focused window to move.
 9. Verify new-window-only 50% width, preserved existing widths, fixed five-percentage-point increments, size constraints, overflow-only centering, and visible Dock reservation.
    Verify fixed-size windows and Miri's Settings float automatically.
    Verify clicking and macOS window switching provide access to floating windows.
@@ -600,7 +600,7 @@ A single failure fails the release blocker.
 Failures include lost windows, wrong-display windows, macOS relocation of off-screen windows, and an engine that does not recover.
 After a fix, rerun the full checklist from the start.
 The release candidate must pass three consecutive full runs under the saved checklist.
-The conflict between that rule and one two-week daily-use period remains unresolved in Further Notes.
+The conflict between that rule and one two-week daily-use period is Q6, which Sam decides at the final check before publishing v1.
 This draft does not shorten either requirement.
 
 ### Confirmed testing seams
@@ -665,21 +665,21 @@ An accepted deferral does not commit every candidate to a future implementation.
 
 ### Unresolved product questions and documentation conflicts
 
-1. **Release duration remains unresolved as Q6.**
+1. **Release duration is deferred as Q6.**
    Release scope describes one two-week daily-use period across university and home.
    The release checklist requires three consecutive full runs, and each full run contains that two-week period.
    The status report records the resulting six-week interpretation and says Sam skipped Q6.
    This draft preserves both requirements without choosing a combined duration or changing the release gate.
-2. **Stack-left movement scope remains open.**
-   Decide whether the action moves only the focused window or its entire stack.
+   On 15 October 2026, Sam deferred Q6 to the final check before publishing v1.
+2. **Stack-left movement scope is decided.**
+   On 15 October 2026, Sam decided that stacking moves only the focused window.
    The selected engine source moves the entire column, even when the focused window is already stacked.
    Repeated presses merge successive columns toward the first column.
-   The source's no-action doc comment conflicts with the inspected implementation.
-   Do not infer an accepted Miri policy from either the action label or this engine behavior.
+   Miri must change this engine behavior.
 3. **The stacking action contract exceeds the selected engine's commands.**
    The accepted reference assigns stack-right and pop-left shortcuts, but the selected engine source has only stack-left and pop-right commands.
    Miri must supply the missing directions rather than remove the accepted bindings.
-   The integration must reconcile the open stacking scope and safe repeated-command behavior.
+   Each direction moves only the focused window, and repeated presses must stay safe.
 4. **Source inspection identifies possible fullscreen column loss during stacking.**
    The reviewed stack function removes columns before checking its internal fullscreen column type and can return without restoring them.
    This could conflict with the rule that windows remain reachable.

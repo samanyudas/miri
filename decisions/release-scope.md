@@ -144,6 +144,8 @@ Mixed arrangements need three displays, so Sam verifies them last, on a friend's
 The [v1 acceptance checklist](v1-acceptance-checklist.md) defines a quick check for everyday iteration and a release check for v1.
 V1 is released only after Sam uses Miri daily for 2 weeks across both locations without a lost window or repeated crashes.
 A bug that loses windows restarts the 2-week period.
+How this period combines with the checklist's three consecutive full runs is Q6.
+Sam decides Q6 at the final check before publishing v1.
 Scrolling behavior remains consistent and independent across all connected displays.
 Directional monitor navigation moves focus and windows between displays according to their physical positions.
 Strip scrolling and ordinary window navigation stay within the current display.

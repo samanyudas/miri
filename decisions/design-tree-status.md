@@ -1,10 +1,10 @@
 # Design tree status
 
-Status: updated after Sam's interview answers on 14 October 2026.
-The active product interview has one new open question about stacking scope.
-The complete release decision tree remains incomplete because Q6 is held.
+Status: updated after Sam's answers on 15 October 2026.
 This report records observed documentation state and the accepted answers to Q1 through Q5 and Q7 through Q21.
-Sam skipped Q6, which remains unresolved.
+Sam answered the stacking scope question on 15 October 2026.
+Sam deferred Q6 to the final check before publishing v1.
+No product question blocks implementation.
 No production app implementation or hardware validation exists yet.
 The only implementation is the [permission prototype](../docs/prototypes/helper-permission.md).
 
@@ -18,7 +18,12 @@ The only implementation is the [permission prototype](../docs/prototypes/helper-
 - Settings use isolated TOML configuration, apply immediately, and retain the last valid settings after errors.
 - Stop persists across launches, and repeated engine crashes stop automatic retries.
 - Signing, notarization, Sparkle updates, and a Homebrew cask belong to the release direction.
-- Numbered jumps select columns and focus the last-focused window within a selected stack.- New windows start at 50% of display width, while existing windows retain their widths.
+- Numbered jumps select columns and focus the last-focused window within a selected stack.
+- Stacking into the left or right column moves only the focused window.
+  The other windows of its old stack stay in place.
+  Each further press moves the window one more column in that direction.
+  In the first or last column, the command does nothing.
+- New windows start at 50% of display width, while existing windows retain their widths.
 - Resize commands change size by five percentage points of the display's corresponding dimension, subject to window size constraints.
 - Control-Option-Command with W, A, S, and D focuses monitors above, left, below, and right.
   Adding Shift moves the focused window in that monitor direction.
@@ -61,13 +66,11 @@ Accepted decisions do not establish tested behavior.
 
 ## Open product decisions
 
-Q6 remains skipped and unresolved.
-A source review on 14 October 2026 raised one new product decision about stacking scope.
-See [Stacking commands](#stacking-commands).
-
-- Decide whether **Stack focused window into left column** moves only the focused window or its whole stack.
-  The pinned engine moves the whole stack, so repeated presses merge every column up to the first column into one stack.
-Shared-understanding confirmation is still pending before acting on the design.
+Q6, the release duration, is deferred to the final check before publishing v1.
+Sam decides it then, together with the other release steps.
+Until then, the release scope and the release checklist both keep their current requirements.
+Q6 does not block implementation.
+See [Documentation inconsistencies](#documentation-inconsistencies).
 
 Sources: [Release scope](release-scope.md), [Configuration](configuration.md), [Keybinding reference](keybinding%20reference.md), [Setup](setup.md), and [Features and shortcuts](features%20and%20shortcuts.md).
 Questions about optional controls depend on whether those controls enter v1.
@@ -79,8 +82,8 @@ Actual gesture usability and reliable conflict detection remain engineering and 
 The [release checklist](v1-acceptance-checklist.md) requires three consecutive full runs.
 Each full run includes a two-week daily-use period.
 This implies six weeks, while [Release scope](release-scope.md) describes one two-week period.
-Sam skipped Q6 about this interpretation.
-The question remains unresolved, and the release requirements are unchanged.
+Sam deferred Q6 about this interpretation to the final check before publishing v1.
+The release requirements are unchanged until then.
 
 Release scope now distinguishes network-based update checks and downloads from prohibited telemetry and transmission of window-management data.
 This wording aligns the existing update and privacy policies.
@@ -121,6 +124,7 @@ Its doc comment says a window already in a stack causes no action, but the code 
 Repeated presses therefore move the growing stack left until it reaches the first column.
 For example, three presses on D in `A | B | C | D` produce one column `[A, B, C, D]`.
 In the first column, the command does nothing.
+This conflicts with the accepted rule that stacking moves only the focused window.
 Repeated `unstack` presses are safe.
 The first press pops the window out, and later presses do nothing because the window is no longer stacked.
 
@@ -138,7 +142,7 @@ Those windows could leave the layout, which would conflict with the rule that wi
 - Map the accepted eight-point gaps to the source-backed padding fields and select Miri's validation range after coordinate checks.
 - Define command reconciliation, external configuration edit handling, and upgrade migrations under the selected product policies.
 - Establish window recovery that satisfies Q12 even when the engine cannot run a clean-shutdown handler.
-- Supply the missing stack-right and pop-left commands, and verify repeated stacking against the pinned engine.
+- Change engine stacking to move only the focused window, supply the missing stack-right and pop-left commands, and verify repeated stacking against the pinned engine.
 - Reproduce the fullscreen column loss in `LayoutStrip::stack`, then fix it in Miri or report it upstream.
 - Build the native settings window, menu bar controls, helper lifecycle, setup checker, and diagnostics.
 - Define bounded log storage and a measurable engine memory-stability check.
