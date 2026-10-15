@@ -34,20 +34,19 @@ The current milestone is the first production app slice: menu bar controls, engi
 - samanyudas/paneru#7 merged into `miri/v0.5.2` on 16 October 2026 as engine `0341353`.
   It fixes #14: Stop and Quit no longer move floating, minimized, or hidden windows.
 - Sam decided on 16 October 2026 that a current floating rule wins over a saved tiled placement (#15).
-  samanyudas/paneru#8 makes the engine do this, and the `fix/restore-floating-rules` PR pins it.
+  samanyudas/paneru#8 merged into `miri/v0.5.2` on 16 October 2026 as engine `39def42`, which does this.
+  A live run on the built-in display confirmed that a floating rule now wins after a restart.
 - A live run on 15 October 2026 on the built-in display only confirmed Start, 8-point gaps on all sides and between windows, Stop, crash recovery and restart, the three-crash limit, manual restart, and Quit.
 
 ## Next
 
-1. Merge samanyudas/paneru#8 into `miri/v0.5.2`, then repin and merge the `fix/restore-floating-rules` PR.
-   `make compat` fails until paneru#8 merges, because the pin `245dda7` is not yet on that branch.
-2. Keep hunting #13 on an empty Space with trace logging.
+1. Keep hunting #13 on an empty Space with trace logging.
    It reproduced once in 4 runs, with an Electron window in Window > Fill.
-3. Repeat the live run with an external display connected.
-4. Verify focused-window stacking in both directions on hardware.
-5. Build the remaining v1 controls: the shortcut recorder, the gesture test, and pointer-targeted swipes.
-6. Decide Q6, the release duration, at the final check before publishing v1.
-7. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
+2. Repeat the live run with an external display connected.
+3. Verify focused-window stacking in both directions on hardware.
+4. Build the remaining v1 controls: the shortcut recorder, the gesture test, and pointer-targeted swipes.
+5. Decide Q6, the release duration, at the final check before publishing v1.
+6. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
 
 ## Blockers
 
