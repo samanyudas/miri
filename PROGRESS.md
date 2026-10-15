@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-16 by Claude on branch `fix/restore-floating-rules`
+Updated: 2026-10-16 by Claude on branch `fix/issue-status-permissions`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -36,6 +36,8 @@ The current milestone is the first production app slice: menu bar controls, engi
 - Sam decided on 16 October 2026 that a current floating rule wins over a saved tiled placement (#15).
   samanyudas/paneru#8 merged into `miri/v0.5.2` on 16 October 2026 as engine `39def42`, which does this.
   A live run on the built-in display confirmed that a floating rule now wins after a restart.
+- The issue lifecycle job that labels issues a merged PR references failed with HTTP 403 on every merge until `fix/issue-status-permissions`.
+  Its token lacked `pull-requests: read`. A harness test now checks each workflow job's scopes against its API calls.
 - A live run on 15 October 2026 on the built-in display only confirmed Start, 8-point gaps on all sides and between windows, Stop, crash recovery and restart, the three-crash limit, manual restart, and Quit.
 
 ## Next
