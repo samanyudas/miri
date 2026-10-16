@@ -61,10 +61,24 @@ public struct MiriSettings: Equatable, Sendable {
     public func applied(to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String) throws
         -> TOMLDocument
     {
+        try applying(to: document, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier).document
+    }
+
+    /// Like `applied`, but leaves each key the file defines in a form Miri does not rewrite, such as an inline table,
+    /// and returns those keys in `skipped` instead of failing.
+    func applying(to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String) throws
+        -> (document: TOMLDocument, skipped: Set<String>)
+    {
         try validate()
         var result = document
+        var skipped = Set<String>()
+        func edit(_ change: () throws -> TOMLDocument) throws {
+            do { result = try change() } catch TOMLEditError.notEditable(let path) { skipped.insert(path) }
+        }
         func set(_ value: TOMLValue, _ table: [String], _ key: String) throws {
-            if result.value(at: table + [key]) != value { result = try result.setting(value, table: table, key: key) }
+            if result.value(at: table + [key]) != value {
+                try edit { try result.setting(value, table: table, key: key) }
+            }
         }
         try set(.integer(Int64(innerGap)), ["miri"], "inner_gap")
         try set(.integer(Int64(outerGap)), ["miri"], "outer_gap")
@@ -76,7 +90,7 @@ public struct MiriSettings: Equatable, Sendable {
                 try set(.float(Self.animationSpeed), ["options"], "animation_speed")
             }
         } else {
-            result = try result.removing(table: ["options"], key: "animation_speed")
+            try edit { try result.removing(table: ["options"], key: "animation_speed") }
         }
         for side in ["top", "right", "bottom", "left"] {
             try set(.integer(Int64(edgePadding)), ["padding"], side)
@@ -91,7 +105,7 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.string(".*"), floating, "title")
         try set(.string(appBundleIdentifier), floating, "bundle_id")
         try set(.boolean(true), floating, "floating")
-        return try DefaultBinding.adding(to: result)
+        return (try DefaultBinding.adding(to: result), skipped)
     }
 
     private static func gap(_ value: TOMLValue, key: String) throws(ConfigurationIssue) -> Int {
