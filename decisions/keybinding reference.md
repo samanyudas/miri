@@ -53,7 +53,7 @@ Directional monitor commands use W, A, S, and D.
 
 Numbered jumps select columns rather than individual windows.
 Within a stack, the selected column's last-focused window receives focus.
-Directional monitor bindings preserve the previously selected shortcuts.
+The W, A, S, and D monitor shortcuts keep the choice made in an earlier design round.
 The pinned engine has no directional monitor commands, so Miri leaves these eight shortcuts unbound for now.
 
 ## Width, height, and centering
