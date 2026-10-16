@@ -48,9 +48,11 @@ The current milestone is the first production app slice: menu bar controls, engi
   After a screen lock, three windows were at exactly half width, and no engine had run since their last check.
   macOS tiling is the main suspect, but Sam may have moved them, so this is not confirmed.
 - `feat/default-bindings` writes the accepted default shortcuts to `[bindings]` from one table in `Sources/MiriCore/Bindings.swift`.
-  A new install gets the full set, and an existing file gets each default whose action is unbound and whose chords are free.
+  A new install gets the full set.
+  An existing file gets each default whose engine command it does not bind under any alias, with only the default's free chords.
   `[miri].default_bindings_version` records the offer, so Miri never re-adds a binding the user deleted.
-  A live run on 16 October 2026 sent all 43 bound chords as synthetic key events, and the engine performed each command.
+  A live run on 16 October 2026 sent all 43 bound chords as synthetic key events, and the engine ran each command.
+  The engine's behavior differed from the accepted behavior only where the engine mapping records it, such as a numbered jump into a stacked column focusing the top window instead of the last-focused one.
   Some actions stay unbound or behave differently, as the [engine mapping](decisions/keybinding%20reference.md#engine-mapping) records.
 - A live run on 15 October 2026 on the built-in display only confirmed Start, 8-point gaps on all sides and between windows, Stop, crash recovery and restart, the three-crash limit, manual restart, and Quit.
 
