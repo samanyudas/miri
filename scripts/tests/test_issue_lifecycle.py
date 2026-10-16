@@ -43,12 +43,17 @@ def take(flag):
 
 def emit(value):
     jq = take("--jq")
-    text = json.dumps(value)
-    if jq:
-        text = subprocess.run(["jq", "-r", jq[0]], input=text, capture_output=True, text=True, check=True).stdout
-    else:
-        text += "\n"
-    sys.stdout.write(text)
+    # Real gh applies --jq to each page separately, which is what the scripts' jq -s has to undo.
+    pages = [value]
+    if paginate and isinstance(value, list):
+        pages = [value[i:i + 2] for i in range(0, len(value), 2)] or [[]]
+    for page in pages:
+        text = json.dumps(page)
+        if jq:
+            text = subprocess.run(["jq", "-r", jq[0]], input=text, capture_output=True, text=True, check=True).stdout
+        else:
+            text += "\n"
+        sys.stdout.write(text)
 
 
 def issue(number):
@@ -57,6 +62,7 @@ def issue(number):
     return state["issues"][str(number)]
 
 
+paginate = "--paginate" in args
 args = [a for a in args if a not in ("--silent", "--paginate")]
 
 if args[:2] == ["issue", "list"]:
@@ -153,7 +159,8 @@ def job_script(job: str) -> str:
 
 
 def issue(author="reporter", state="open", labels=(), comments=(), closed_by=None):
-    return {"state": state, "author": author, "labels": list(labels), "comments": list(comments), "closed_by": closed_by}
+    return {"state": state, "state_reason": None, "author": author, "labels": list(labels), "comments": list(comments),
+            "closed_by": closed_by}
 
 
 def comment(created_at, login, body):
@@ -215,12 +222,15 @@ class IssueLifecycleTest(unittest.TestCase):
 
     def test_an_unanswered_question_closes_after_two_weeks(self):
         waiting = {
-            "21": issue(labels=[CONFIRM], comments=[comment(days_ago(15), BOT, ASK),
+            "21": issue(labels=[CONFIRM], comments=[comment(days_ago(40), BOT, "Fixed in #2."),
+                                                    comment(days_ago(15), BOT, ASK),
                                                     comment(days_ago(10), "reporter", "Still broken on Sonoma.")]),
             "22": issue(labels=[CONFIRM], comments=[comment(days_ago(3), BOT, ASK)]),
             "23": issue(labels=[CONFIRM], comments=[comment(days_ago(30), BOT, "Unrelated note.")]),
         }
-        state = repo({"20": issue(labels=["bug", CONFIRM], comments=[comment(days_ago(15), BOT, ASK),
+        state = repo({"20": issue(labels=["bug", CONFIRM], comments=[comment(days_ago(40), BOT, "Fixed in #2."),
+                                                                     comment(days_ago(39), "reporter", "Thanks."),
+                                                                     comment(days_ago(15), BOT, ASK),
                                                                      comment(days_ago(14.5), BOT, "Bot echo.")])}
                      | copy.deepcopy(waiting))
 
