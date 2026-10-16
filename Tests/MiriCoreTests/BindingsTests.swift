@@ -150,6 +150,12 @@ struct DefaultBindingsTests {
         }
         #expect(try String(contentsOf: url, encoding: .utf8) == saved.text)
         #expect(store.settings.innerGap == 8)
+        #expect(
+            throws: ConfigurationIssue.notEditable(TOMLEditError.notEditable(path: "miri.launch_at_login").description)
+        ) {
+            try store.update(reduceMotion: false) { $0.launchAtLogin = false }
+        }
+        #expect(store.settings.launchAtLogin)
         store.load(reduceMotion: false)
         #expect(store.issue == nil)
         #expect(try String(contentsOf: url, encoding: .utf8) == saved.text)
