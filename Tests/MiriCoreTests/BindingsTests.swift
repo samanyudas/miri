@@ -135,6 +135,81 @@ struct DefaultBindingsTests {
         #expect(try String(contentsOf: url, encoding: .utf8) == saved.text)
     }
 
+    @Test(arguments: [
+        ("window_resize", ["window_grow"]),
+        ("window_resize_grow", ["window_resize", "window_grow"]),
+        ("window_resize_shrink", ["window_shrink"]),
+        ("window_vertical_resize", ["window_vertical_grow"]),
+        ("window_vertical_resize_shrink", ["window_vertical_shrink"]),
+        ("window_stack", ["window_stack_west"]),
+        ("window_unstack", ["window_unstack_east"]),
+        ("window_focus_01", ["window_focus_1"]),
+        ("window_focus_+9", ["window_focus_9"]),
+        ("window_center_now", ["window_center"]),
+    ])
+    func anAliasCountsAsTheCommandItNames(alias: String, unbound: [String]) throws {
+        let (store, document) = try load("[bindings]\n\"\(alias)\" = \"fn-f1\"\n")
+        #expect(store.issue == nil)
+        let bindings = document.value(at: ["bindings"])
+        #expect(bindings?[alias] == .string("fn-f1"))
+        for command in unbound { #expect(bindings?[command] == nil) }
+        #expect(bindings?["window_manage"] == .string("ctrl+alt-t"))
+    }
+
+    @Test func aRowWhoseChordsAreAllTakenStaysUnbound() throws {
+        let (store, document) = try load("[bindings]\nquit = [\"ctrl+alt-leftarrow\", \"ctrl+alt-h\"]\n")
+        #expect(store.issue == nil)
+        #expect(document.value(at: ["bindings", "window_focus_west"]) == nil)
+        #expect(
+            document.value(at: ["bindings", "window_focus_east"])
+                == .array([
+                    .string("ctrl+alt-rightarrow"), .string("ctrl+alt-l"),
+                ]))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(1))
+    }
+
+    @Test func aVersionAboveTheCurrentOneAddsNothing() throws {
+        let (store, document) = try load("[miri]\ndefault_bindings_version = 7\n")
+        #expect(store.issue == nil)
+        #expect(document.value(at: ["bindings"]) == nil)
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(7))
+    }
+
+    @Test(arguments: [
+        ("window_grow", "window_resize_grow"),
+        ("window_resize", "window_resize_grow"),
+        ("window_resize_grow_extra", "window_resize_grow"),
+        ("window_shrink", "window_resize_shrink"),
+        ("window_vertical", "window_vertical_resize_grow"),
+        ("window_vertical_grow", "window_vertical_resize_grow"),
+        ("window_vertical_resize_shrink", "window_vertical_resize_shrink"),
+        ("window_stack", "window_stack_west"),
+        ("window_unstack", "window_unstack_east"),
+        ("window_focus_01", "window_focus_1"),
+        ("window_focus_east", "window_focus_east"),
+        ("window_focus_unmanaged", "window_focus_unmanaged"),
+        ("window_virtual_2", "window_virtualnum_2"),
+        ("window_virtualsend_east", "window_virtualsend_east"),
+        ("window_virtualmove_02", "window_virtualmovenum_2"),
+        ("mouse_nextdisplay", "mouse_nextdisplay"),
+        ("quit_now", "quit"),
+    ])
+    func readsABindingsKeyAsTheEngineDoes(key: String, canonical: String) {
+        #expect(EngineCommand.canonical(key) == canonical)
+    }
+
+    @Test(arguments: [
+        "window_focus_0", "window_focus", "window_focus_", "window_focus_-1", "window_swap_2", "window_resize_up",
+        "window_stack_north", "window_virtual_0", "window", "Window_center", "window__center", "mouse", "",
+    ])
+    func rejectsBindingsKeysTheEngineRejects(key: String) {
+        #expect(EngineCommand.canonical(key) == nil)
+    }
+
+    @Test func theEngineAcceptsEveryDefaultCommand() {
+        for row in DefaultBinding.table { #expect(EngineCommand.canonical(row.command) != nil, "\(row.command)") }
+    }
+
     @Test func noTwoDefaultsShareAChord() {
         let chords = DefaultBinding.table.flatMap(\.chords)
         #expect(Set(chords).count == chords.count)

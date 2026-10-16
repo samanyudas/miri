@@ -133,7 +133,7 @@ public struct DefaultBinding: Sendable {
         Chord(Set([.control, .option] + extra), key)
     }
 
-    /// Adds each default newer than the recorded version whose action has no binding and whose chords are free.
+    /// Adds each default newer than the recorded version whose engine command has no binding, with its free chords.
     ///
     /// A user binding is never changed. A default is offered once, so a binding the user deletes stays deleted.
     /// When the file defines `[bindings]` or `[miri]` in a form Miri does not rewrite, such as an inline table, Miri
@@ -161,7 +161,9 @@ public struct DefaultBinding: Sendable {
         var result = document
         let existing = document.value(at: ["bindings"])
         var taken = Set(boundChords(in: existing))
-        for row in table where row.version > offered && existing?[row.command] == nil {
+        // Only the file's own bindings count, so two default rows for one engine command both get written.
+        let bound = Set(boundCommands(in: existing))
+        for row in table where row.version > offered && !bound.contains(EngineCommand.canonical(row.command)!) {
             let free = row.chords.filter { !taken.contains($0) }
             guard !free.isEmpty else { continue }
             taken.formUnion(free)
@@ -170,6 +172,13 @@ public struct DefaultBinding: Sendable {
             result = try result.setting(value, table: ["bindings"], key: row.command)
         }
         return try result.setting(.integer(Int64(currentVersion)), table: ["miri"], key: "default_bindings_version")
+    }
+
+    /// Each bound command in the engine's own spelling, so that an alias such as `window_resize` counts as
+    /// `window_grow`. A key the engine rejects keeps its own spelling.
+    private static func boundCommands(in bindings: TOMLValue?) -> [String] {
+        guard case .table(let entries) = bindings else { return [] }
+        return entries.keys.map { EngineCommand.canonical($0) ?? $0 }
     }
 
     private static func boundChords(in bindings: TOMLValue?) -> [Chord] {
