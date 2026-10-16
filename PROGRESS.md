@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-16 by Claude on branch `fix/issue-status-permissions`
+Updated: 2026-10-16 by Claude on branch `test/issue-lifecycle-scripts`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -36,15 +36,22 @@ The current milestone is the first production app slice: menu bar controls, engi
 - Sam decided on 16 October 2026 that a current floating rule wins over a saved tiled placement (#15).
   samanyudas/paneru#8 merged into `miri/v0.5.2` on 16 October 2026 as engine `39def42`, which does this.
   A live run on the built-in display confirmed that a floating rule now wins after a restart.
-- The issue lifecycle job that labels issues a merged PR references failed with HTTP 403 on every merge until `fix/issue-status-permissions`.
+- The issue lifecycle job that labels issues a merged PR references failed with HTTP 403 on every merge until #18.
   Its token lacked `pull-requests: read`. A harness test now checks each workflow job's scopes against its API calls.
+- The release, timed-close, and reopen stages of the issue lifecycle have not run live, because no stable release exists.
+  A harness test runs their real job scripts against a fake `gh`, and a dispatched run of the close job passed on `main` on 16 October 2026.
+- On 16 October 2026, `make check` passed on `main`, and a live headless Claude session showed the guard block a push to `main`, a force push, a PR merge, a release, `tccutil reset`, and `defaults write`.
+- #13 shrank a window in 1 of 35 runs, across the built-in display and a 2560 x 1440 external display.
+  The engine requested only height changes in every run.
+  After a screen lock, three windows were at exactly half width, and no engine had run since their last check.
+  macOS tiling is the main suspect, but Sam may have moved them, so this is not confirmed.
 - A live run on 15 October 2026 on the built-in display only confirmed Start, 8-point gaps on all sides and between windows, Stop, crash recovery and restart, the three-crash limit, manual restart, and Quit.
 
 ## Next
 
-1. Keep hunting #13 on an empty Space with trace logging.
-   It reproduced once in 4 runs, with an Electron window in Window > Fill.
-2. Repeat the live run with an external display connected.
+1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
+   To see every engine resize, log the old and new size in `WindowOS::resize` in `vendor/paneru/src/manager/windows.rs`.
+2. Repeat the full live app run with an external display connected.
 3. Verify focused-window stacking in both directions on hardware.
 4. Build the remaining v1 controls: the shortcut recorder, the gesture test, and pointer-targeted swipes.
 5. Decide Q6, the release duration, at the final check before publishing v1.
