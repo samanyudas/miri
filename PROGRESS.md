@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-16 by Claude on branch `test/issue-lifecycle-scripts`
+Updated: 2026-10-16 by Claude on branch `feat/default-bindings`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -47,6 +47,11 @@ The current milestone is the first production app slice: menu bar controls, engi
   The engine requested only height changes in every run.
   After a screen lock, three windows were at exactly half width, and no engine had run since their last check.
   macOS tiling is the main suspect, but Sam may have moved them, so this is not confirmed.
+- `feat/default-bindings` writes the accepted default shortcuts to `[bindings]` from one table in `Sources/MiriCore/Bindings.swift`.
+  A new install gets the full set, and an existing file gets each default whose action is unbound and whose chords are free.
+  `[miri].default_bindings_version` records the offer, so Miri never re-adds a binding the user deleted.
+  A live run on 16 October 2026 sent all 43 bound chords as synthetic key events, and the engine performed each command.
+  Some actions stay unbound or behave differently, as the [engine mapping](decisions/keybinding%20reference.md#engine-mapping) records.
 - A live run on 15 October 2026 on the built-in display only confirmed Start, 8-point gaps on all sides and between windows, Stop, crash recovery and restart, the three-crash limit, manual restart, and Quit.
 
 ## Next
@@ -54,10 +59,13 @@ The current milestone is the first production app slice: menu bar controls, engi
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
    To see every engine resize, log the old and new size in `WindowOS::resize` in `vendor/paneru/src/manager/windows.rs`.
 2. Repeat the full live app run with an external display connected.
-3. Verify focused-window stacking in both directions on hardware.
-4. Build the remaining v1 controls: the shortcut recorder, the gesture test, and pointer-targeted swipes.
-5. Decide Q6, the release duration, at the final check before publishing v1.
-6. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
+3. Verify focused-window stacking in both directions on hardware, starting from a stack of three windows.
+   The 16 October shortcut run covered stacking and pop-out in both directions with single-window columns only.
+4. Build the remaining v1 controls: the shortcut recorder and reset action, the gesture test, and pointer-targeted swipes.
+5. Add the engine commands that the unbound and differing default bindings need: directional display focus and move (#23), five-point resize steps (#22), and a jump that restores a stack's last-focused window (#24).
+   Give Stop an app-owned shortcut (#25), because the engine `quit` command makes the app restart the engine.
+6. Decide Q6, the release duration, at the final check before publishing v1.
+7. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
 
 ## Blockers
 
