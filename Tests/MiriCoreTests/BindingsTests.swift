@@ -226,12 +226,12 @@ struct DefaultBindingsTests {
         ("ctrl+alt-]", "ctrl+alt-rightbracket"),
         ("tab", "tab"),
     ])
-    func readsTheEngineChordSyntax(text: String, normalized: String) {
+    func normalizesChordSpellingsToFindTakenChords(text: String, normalized: String) {
         #expect(Chord(engineText: text)?.description == normalized)
     }
 
     @Test(arguments: ["ctrl+alt-", "a-b-c", "hyper-h", ""])
-    func rejectsChordsTheEngineRejects(text: String) {
+    func ignoresTextThatNamesNoChord(text: String) {
         #expect(Chord(engineText: text) == nil)
     }
 }

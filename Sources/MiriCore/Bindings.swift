@@ -36,7 +36,12 @@ public struct Chord: Hashable, Sendable, CustomStringConvertible {
         self.key = key
     }
 
-    /// Reads a chord in the engine's syntax. Returns `nil` for text the engine would also reject.
+    /// Reads a chord in the engine's syntax to find which chords a file already uses.
+    ///
+    /// This is deliberately more lenient than the engine. It ignores case, so it reads `Ctrl-H` as `ctrl-h` where
+    /// the engine rejects the modifier (`vendor/paneru/src/config.rs` line 1709) and finds no key named `H`
+    /// (line 1691). A near miss therefore still counts as taking its chord, and Miri adds no second binding for it.
+    /// Returns `nil` for text that names no single chord, such as an empty key or an unknown modifier.
     public init?(engineText: String) {
         let parts = engineText.split(separator: "-", omittingEmptySubsequences: false).map {
             $0.trimmingCharacters(in: .whitespaces)
