@@ -70,6 +70,9 @@ def main() -> int:
         if git("merge-base", "--is-ancestor", pin, f"origin/{ENGINE_BRANCH}").returncode != 0:
             problems.append(f"engine pin {pin} is not published on the fork's {ENGINE_BRANCH} branch")
 
+    if "let argv = command.split('_')" not in (ENGINE / "src/config.rs").read_text():
+        problems.append("the engine no longer splits [bindings] keys on '_' in src/config.rs; "
+                        "update Sources/MiriCore/EngineCommand.swift to match")
     for name, digest in MIRRORED_PARSER.items():
         source = ENGINE / name
         if not source.exists() or hashlib.sha256(source.read_bytes()).hexdigest() != digest:
