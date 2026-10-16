@@ -77,7 +77,7 @@ elif args[:2] == ["issue", "edit"]:
     for label in take("--remove-label"):
         labels[:] = [l for l in labels if l != label]
 elif args[:2] == ["issue", "close"]:
-    issue(args[2]).update(state="closed", state_reason=take("--reason")[0])
+    issue(args[2]).update(state="closed", state_reason=take("--reason")[0], closed_by="github-actions[bot]")
 elif args[:2] == ["issue", "reopen"]:
     issue(args[2]).update(state="open", state_reason=None)
 elif args[:2] == ["label", "create"]:
@@ -104,7 +104,8 @@ elif args[:1] == ["api"]:
     elif kind == "issues" and not tail:
         i = issue(number)
         emit({"number": int(number), "state": i["state"], "title": f"Issue {number}",
-              "labels": [{"name": l} for l in i["labels"]]})
+              "labels": [{"name": l} for l in i["labels"]],
+              "closed_by": {"login": i["closed_by"]} if i.get("closed_by") else None})
     else:
         fail("unsupported api call")
 else:
@@ -151,8 +152,8 @@ def job_script(job: str) -> str:
     return textwrap.dedent("\n".join(block[start:end]))
 
 
-def issue(author="reporter", state="open", labels=(), comments=()):
-    return {"state": state, "author": author, "labels": list(labels), "comments": list(comments)}
+def issue(author="reporter", state="open", labels=(), comments=(), closed_by=None):
+    return {"state": state, "author": author, "labels": list(labels), "comments": list(comments), "closed_by": closed_by}
 
 
 def comment(created_at, login, body):
@@ -237,14 +238,25 @@ class IssueLifecycleTest(unittest.TestCase):
         silence = [comment(days_ago(20), BOT, ASK),
                    comment(days_ago(5), BOT, "Nobody replied. <!-- miri-fix-status closed -->"), reply]
         human = [comment(days_ago(5), BOT, "Fixed in #3. <!-- miri-fix-status sha=abc pr=3 -->"), reply]
-        state = repo({"30": issue(state="closed", labels=["bug"], comments=silence),
-                      "31": issue(state="closed", labels=["bug"], comments=human)})
+        state = repo({"30": issue(state="closed", labels=["bug"], comments=silence, closed_by=BOT),
+                      "31": issue(state="closed", labels=["bug"], comments=human, closed_by="sam")})
 
         after = self.run_job("reopen-on-reply", copy.deepcopy(state), NUMBER="30")
         self.assertEqual((after["issues"]["30"]["state"], after["issues"]["30"]["labels"]), ("open", ["bug", "needs-triage"]))
 
         after = self.run_job("reopen-on-reply", copy.deepcopy(state), NUMBER="31")
         self.assertEqual(after, state)
+
+    def test_a_maintainer_close_after_a_reopen_sticks(self):
+        state = repo({"32": issue(labels=[CONFIRM], comments=[comment(days_ago(15), BOT, ASK)])})
+        state = self.run_job("close-unanswered", state)
+        state["issues"]["32"]["comments"].append(comment(days_ago(0), "reporter", "Still happens."))
+        state = self.run_job("reopen-on-reply", state, NUMBER="32")
+        self.assertEqual(state["issues"]["32"]["state"], "open")
+        state["issues"]["32"].update(state="closed", state_reason="not_planned", closed_by="sam")
+        state["issues"]["32"]["comments"].append(comment(days_ago(0), "reporter", "Thanks anyway."))
+
+        self.assertEqual(self.run_job("reopen-on-reply", copy.deepcopy(state), NUMBER="32"), state)
 
     def test_a_merged_reference_labels_the_open_issue(self):
         untouched = {"42": issue(), "43": issue(state="closed")}
