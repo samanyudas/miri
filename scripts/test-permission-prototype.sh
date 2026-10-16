@@ -59,7 +59,8 @@ def observe(bundle, name, target):
             pid = int(sidecar.read_text())
             owned_apps[pid] = bundle / 'Contents/Helpers/miri-engine'
             launch.wait(timeout=12)
-            assert launch.returncode == 0, 'LaunchServices failed'
+            assert launch.returncode == 0, (f'LaunchServices failed for {name} with exit code {launch.returncode}: '
+                                            f'{(evidence / f"{name}-launch.log").read_text().strip()}')
             assert report.exists(), 'The app exited without an observation report'
             result = json.loads(report.read_text())
             assert result['schemaVersion'] == 1
