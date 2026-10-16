@@ -57,9 +57,15 @@ def emit(value):
 
 
 def issue(number):
-    if str(number) not in state["issues"]:
+    found = state["issues"].get(str(number)) or state["pulls"].get(str(number))
+    if found is None:
         fail("no such issue")
-    return state["issues"][str(number)]
+    return found
+
+
+def add_comment(thread):
+    body = take("--body") or [open(f).read() for f in take("--body-file")]
+    thread["comments"].append({"created_at": state["now"], "login": "github-actions[bot]", "body": body[0]})
 
 
 paginate = "--paginate" in args
@@ -72,8 +78,9 @@ if args[:2] == ["issue", "list"]:
           for n, i in sorted(state["issues"].items(), key=lambda item: int(item[0]))
           if i["state"] == wanted and label in i["labels"]])
 elif args[:2] == ["issue", "comment"]:
-    body = take("--body") or [open(f).read() for f in take("--body-file")]
-    issue(args[2])["comments"].append({"created_at": state["now"], "login": "github-actions[bot]", "body": body[0]})
+    add_comment(state["issues"][args[2]])
+elif args[:2] == ["pr", "comment"]:
+    add_comment(state["pulls"][args[2]])
 elif args[:2] == ["issue", "edit"]:
     labels = issue(args[2])["labels"]
     for label in take("--add-label"):
@@ -107,6 +114,8 @@ elif args[:1] == ["api"]:
     elif tail == "/comments":
         emit([{"created_at": c["created_at"], "user": {"login": c["login"]}, "body": c["body"]}
               for c in issue(number)["comments"]])
+    elif kind == "issues" and not tail and number in state["pulls"]:
+        emit({"number": int(number), "state": "open", "pull_request": {}})
     elif kind == "issues" and not tail:
         i = issue(number)
         emit({"number": int(number), "state": i["state"], "title": f"Issue {number}",
@@ -165,6 +174,10 @@ def issue(author="reporter", state="open", labels=(), comments=(), closed_by=Non
 
 def comment(created_at, login, body):
     return {"created_at": created_at, "login": login, "body": body}
+
+
+def pull(body):
+    return {"body": body, "comments": []}
 
 
 def repo(issues, pulls=None, now=None):
@@ -271,7 +284,7 @@ class IssueLifecycleTest(unittest.TestCase):
     def test_a_merged_reference_labels_the_open_issue(self):
         untouched = {"42": issue(), "43": issue(state="closed")}
         state = repo({"41": issue(labels=["bug"]), "44": issue(labels=[CONFIRM])} | copy.deepcopy(untouched),
-                     pulls={"40": {"body": "Refs #41\nalso see #42\nFixes #43\nRefs: #44"}})
+                     pulls={"40": pull("Refs #41\nalso see #42\nFixes #43\nRefs: #44\nRefs #98")})
 
         after = self.run_job("fixed-on-main", state, PR_NUMBER="40", MERGE_SHA="abc123")
 
@@ -285,8 +298,27 @@ class IssueLifecycleTest(unittest.TestCase):
                     "<!-- miri-fix-status sha=abc123 pr=40 -->"))
         self.assertEqual({n: after["issues"][n] for n in untouched}, untouched)
 
+    def test_a_closing_keyword_gets_one_hint(self):
+        issues = {"51": issue(), "52": issue(state="closed")}
+        state = repo(copy.deepcopy(issues), pulls={"50": pull("Fixes #51\nCloses #52\nresolves #53")})
+
+        state = self.run_job("reference-hint", state, PR_NUMBER="50")
+        state = self.run_job("reference-hint", state, PR_NUMBER="50")
+
+        self.assertEqual([c["login"] for c in state["pulls"]["50"]["comments"]], [BOT])
+        hint = state["pulls"]["50"]["comments"][0]["body"]
+        self.assertEqual(re.findall(r"^- .*", hint, re.M), ["- Refs #51 (Issue 51)"])
+        self.assertTrue(hint.rstrip().endswith("<!-- miri-fix-status hint=51,52,53 -->"), hint)
+        self.assertEqual(state["issues"], issues)
+
+    def test_a_plain_reference_or_a_missing_issue_gets_no_hint(self):
+        for body in ["Refs #51", "Fixes #99"]:
+            with self.subTest(body=body):
+                state = repo({"51": issue()}, pulls={"50": pull(body)})
+                self.assertEqual(self.run_job("reference-hint", copy.deepcopy(state), PR_NUMBER="50"), state)
+
     def test_a_fix_travels_from_merge_to_release_to_timed_close_and_back(self):
-        state = repo({"7": issue("dana", labels=["bug"])}, pulls={"8": {"body": "Refs #7"}}, now=days_ago(20))
+        state = repo({"7": issue("dana", labels=["bug"])}, pulls={"8": pull("Refs #7")}, now=days_ago(20))
         state = self.run_job("fixed-on-main", state, PR_NUMBER="8", MERGE_SHA="f00d")
         state["now"] = days_ago(15)
         state = self.run_job("reporter-check", state, TAG="v2.0.0", PRERELEASE="false")
