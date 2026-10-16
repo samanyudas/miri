@@ -148,6 +148,9 @@ Those windows could leave the layout, which would conflict with the rule that wi
   The engine fork change samanyudas/paneru#6 implements it and adds the missing stack-right and pop-left commands.
   Its unit tests reproduce and fix the fullscreen column loss in `LayoutStrip::stack`.
 - Build the native settings window, menu bar controls, helper lifecycle, setup checker, and diagnostics.
+- Add engine commands for the default bindings that Miri leaves unbound or that differ, as [Engine mapping](keybinding%20reference.md#engine-mapping) records.
+  These are directional display focus and move, five-point width and height steps, and a jump that restores a stack's last-focused window.
+  Stop also needs an app-owned shortcut, because the engine `quit` command makes the app restart the engine.
 - Define bounded log storage and a measurable engine memory-stability check.
 - Configure release signing, notarization, signed update feeds, disk image packaging, and Homebrew cask delivery.
 - Verify clean installation, upgrades, app behavior, and the real-hardware multi-monitor checklist.

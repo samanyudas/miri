@@ -155,41 +155,25 @@ Conflict handling during recording follows [Binding customization](keybinding%20
 The selected defaults are in [Keybinding reference](keybinding%20reference.md).
 Actions not covered there use Paneru's defaults, changed only where they clash with macOS.
 
-The following TOML `[bindings]` example is proposed syntax, not a verified Miri configuration.
-Confirm the action identifiers and binding syntax against the pinned Paneru engine before adopting it.
+Miri writes the default set to `[bindings]`, with the engine's command names as keys and its chord syntax as values.
+The engine reads each key as command words split on `_`, so `window_focus_3` means `window focus 3`.
+An unknown command name makes the engine reject the whole file, so Miri writes only names the pinned engine parses.
+A short excerpt of the written table follows.
 
 ```toml
 [bindings]
-window_focus_west = ["ctrl + alt - leftarrow", "ctrl + alt - h"]
-window_focus_east = ["ctrl + alt - rightarrow", "ctrl + alt - l"]
-window_swap_west = ["ctrl + alt + shift - leftarrow", "ctrl + alt + shift - h"]
-window_swap_east = ["ctrl + alt + shift - rightarrow", "ctrl + alt + shift - l"]
-window_resize = "ctrl + alt - r"
-window_fullwidth = "ctrl + alt - f"
-window_center = "ctrl + alt - c"
-window_tabbed = "ctrl + alt + shift - t"
-window_manage = "ctrl + alt - t"
+window_focus_west = ["ctrl+alt-leftarrow", "ctrl+alt-h"]
+window_focus_3 = "ctrl+alt-3"
+window_grow = "ctrl+alt-equal"
+window_stack_west = "ctrl+alt-rightbracket"
+window_manage = "ctrl+alt-t"
 ```
 
-Additional proposed action identifiers are listed below.
-
-- `window_focus_first`
-- `window_focus_last`
-- `window_swap_first`
-- `window_swap_last`
-- `window_wider`
-- `window_narrower`
-- `window_taller`
-- `window_shorter`
-- `window_equalize`
-- `window_stack_west`
-- `window_stack_east`
-- `window_unstack_east`
-- `window_unstack_west`
-- `window_nextdisplay`
-
-These identifiers also require verification against the pinned engine.
-The `window_tabbed` example describes v2 work and does not expand v1 scope.
+`Sources/MiriCore/Bindings.swift` holds the full table, and [Engine mapping](keybinding%20reference.md#engine-mapping) lists the differences.
+`[miri].default_bindings_version` records which defaults Miri has offered.
+Miri adds a default only when the action has no binding and every chord it adds is free, and it never changes a user binding.
+Miri offers each default once, so a binding the user deletes stays deleted.
+The proposed `window_tabbed`, `window_wider`, `window_narrower`, `window_taller`, and `window_shorter` names are not engine commands.
 
 ## App settings and lifecycle
 

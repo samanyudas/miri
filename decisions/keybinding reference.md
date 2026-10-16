@@ -4,7 +4,9 @@ Status: accepted as Miri's default bindings on 14 October 2026.
 Actions this reference does not cover use Paneru's defaults, changed only where they clash with macOS.
 
 These bindings define Miri's default set for new installations.
-The repository has no app implementation, so these bindings have not been tested in Miri.
+Miri writes them to `[bindings]` from one table in `Sources/MiriCore/Bindings.swift`.
+On 16 October 2026 a live run on macOS 27 against engine `39def42` sent each bound shortcut as a synthetic key event, and each one performed its engine command.
+Some actions have no engine command or differ from the accepted behavior, as [Engine mapping](#engine-mapping) records.
 
 ## Modifier keys
 
@@ -50,7 +52,7 @@ Directional monitor commands use W, A, S, and D.
 Numbered jumps select columns rather than individual windows.
 Within a stack, the selected column's last-focused window receives focus.
 Directional monitor bindings preserve the previously selected shortcuts.
-These bindings require verification against the pinned engine and macOS.
+The pinned engine has no directional monitor commands, so Miri leaves these eight shortcuts unbound for now.
 
 ## Width, height, and centering
 
@@ -105,6 +107,26 @@ Launch apps through the Dock, Spotlight, Raycast, or Alfred.
 V1 requires directional monitor navigation for focus and window movement, as recorded in [Release scope](release-scope.md).
 The directional monitor bindings appear in the navigation table above.
 Clicking a window on another display also changes focus.
+
+## Engine mapping
+
+This table maps each accepted action to the command that the pinned engine `39def42` runs.
+A blank engine command means that Miri leaves the action unbound.
+Any action not listed here maps directly, and the live run confirmed it.
+
+| Action | Engine command | Difference from the accepted behavior |
+| --- | --- | --- |
+| Focus window above or below within column | `window_focus_north`, `window_focus_south` | At the top or bottom of a column, focus moves to a display above or below. |
+| Move window up or down within column | `window_swap_north`, `window_swap_south` | At the top or bottom of a column, the window moves to the next display. |
+| Focus first or last column | `window_focus_first`, `window_focus_last` | In a stack, the top window gets focus, not the last-focused window. |
+| Jump to column 1 through 9 | `window_focus_1` through `window_focus_9` | The engine counts columns, as accepted. In a stack, the top window gets focus, not the last-focused window. |
+| Make column wider or narrower | `window_grow`, `window_shrink` | The width moves to the next preset instead of five percentage points, and it wraps around at the last preset. |
+| Make window taller or shorter | `window_vertical_grow`, `window_vertical_shrink` | The height moves to the next stack-height preset instead of five percentage points, and it wraps around. It changes only windows in a stack. |
+| Centre column | `window_center` | The engine also moves the pointer to the centre of the display. |
+| Focus monitor above, left, below, or right | | The engine has no directional display focus command. |
+| Move focused window to monitor above, left, below, or right | | The engine has no directional display move command. |
+| Stop window manager | | The engine `quit` command ends the engine, and the app treats that exit as a crash and restarts the engine. Stop must be an app action. |
+| Toggle column between stacked and tabbed | | This action is deferred to v2. |
 
 ## Binding customization
 
