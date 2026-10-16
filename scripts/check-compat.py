@@ -17,8 +17,8 @@ DEVELOPER_APP_ID = "io.github.samanyudas.miri.dev"
 DEVELOPER_ENGINE_ID = "io.github.samanyudas.miri.dev.engine"
 # Sources/MiriCore/EngineCommand.swift mirrors the engine's command parser, so a change to it needs a review there.
 MIRRORED_PARSER = {
-    "src/types/argv.rs": "7d0d718fbc34bb8c5d07a485cc6a4767d9de85ab61ce2d4d6038f0fed07469d7",
-    "src/types/commands.rs": "e6c31dd813fe1446dc5ecefbe8148252c7e8043a6bd83c5400149cf9549436a4",
+    "src/types/argv.rs": "b0475b2724ec3e7bf09a8032a163b468c74bac66e8f004bd28e02b84575318ca",
+    "src/types/commands.rs": "538abaaac6d9fa5b17ca2696f6c7b7bbf44cb4071ac8feff28047d2848b228fa",
 }
 
 
@@ -28,6 +28,25 @@ def version(text: str) -> tuple[int, ...]:
 
 def git(*args: str) -> subprocess.CompletedProcess:
     return subprocess.run(["git", "-C", str(ENGINE), *args], capture_output=True, text=True)
+
+
+def key_name_problems() -> list[str]:
+    """Sources/MiriCore/EngineKey.swift lists the engine's key and modifier names, so they must match the engine."""
+    engine = (ENGINE / "src/config.rs").read_text()
+    swift = (ROOT / "Sources/MiriCore/EngineKey.swift").read_text()
+    problems = []
+    for engine_function, swift_list in [("virtual_keycode", "layoutKeyNames"), ("literal_keycode", "fixedKeyNames"),
+                                        ("parse_modifiers", "modifierNames")]:
+        body = re.search(rf"\nfn {engine_function}\(.*?\n}}\n", engine, re.S)
+        listed = re.search(rf"static let {swift_list}: Set<String> = \[(.*?)\]", swift, re.S)
+        if not body or not listed:
+            problems.append(f"cannot find {engine_function} in the engine or {swift_list} in EngineKey.swift")
+            continue
+        pattern = r'^\s*"(\w+)" => Modifiers::' if engine_function == "parse_modifiers" else r'\("(\w+)", 0x'
+        names = set(re.findall(pattern, body.group(0), re.M))
+        if names != set(re.findall(r'"(\w+)"', listed.group(1))):
+            problems.append(f"EngineKey.{swift_list} no longer matches the engine's {engine_function} in src/config.rs")
+    return problems
 
 
 def main() -> int:
@@ -78,6 +97,8 @@ def main() -> int:
         if not source.exists() or hashlib.sha256(source.read_bytes()).hexdigest() != digest:
             problems.append(f"the engine's {name} changed; check that Sources/MiriCore/EngineCommand.swift still "
                             "mirrors it, then update MIRRORED_PARSER in scripts/check-compat.py")
+
+    problems += key_name_problems()
 
     for problem in problems:
         print(problem)

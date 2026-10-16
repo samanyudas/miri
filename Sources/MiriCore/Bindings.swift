@@ -39,8 +39,8 @@ public struct Chord: Hashable, Sendable, CustomStringConvertible {
     /// Reads a chord in the engine's syntax to find which chords a file already uses.
     ///
     /// This is deliberately more lenient than the engine. It ignores case, so it reads `Ctrl-H` as `ctrl-h` where
-    /// the engine rejects the modifier (`vendor/paneru/src/config.rs` line 1709) and finds no key named `H`
-    /// (line 1691). A near miss therefore still counts as taking its chord, and Miri adds no second binding for it.
+    /// the engine rejects the modifier (`vendor/paneru/src/config.rs` line 1736) and finds no key named `H`
+    /// (line 1718). A near miss therefore still counts as taking its chord, and Miri adds no second binding for it.
     /// Returns `nil` for text that names no single chord, such as an empty key or an unknown modifier.
     public init?(engineText: String) {
         let parts = engineText.split(separator: "-", omittingEmptySubsequences: false).map {
@@ -116,13 +116,29 @@ public struct DefaultBinding: Sendable {
                 "Move column to first position", "window_swap_first", ctrlAlt("leftarrow", .command, .shift)),
             DefaultBinding("Move column to last position", "window_swap_last", ctrlAlt("rightarrow", .command, .shift)),
             DefaultBinding("Send focused window to next display", "window_nextdisplay", ctrlAlt("n")),
+            DefaultBinding("Focus monitor above", "window_focusdisplay_north", ctrlAlt("w", .command), version: 2),
+            DefaultBinding("Focus monitor left", "window_focusdisplay_west", ctrlAlt("a", .command), version: 2),
+            DefaultBinding("Focus monitor below", "window_focusdisplay_south", ctrlAlt("s", .command), version: 2),
+            DefaultBinding("Focus monitor right", "window_focusdisplay_east", ctrlAlt("d", .command), version: 2),
+            DefaultBinding(
+                "Move focused window to monitor above", "window_movedisplay_north", ctrlAlt("w", .command, .shift),
+                version: 2),
+            DefaultBinding(
+                "Move focused window to monitor left", "window_movedisplay_west", ctrlAlt("a", .command, .shift),
+                version: 2),
+            DefaultBinding(
+                "Move focused window to monitor below", "window_movedisplay_south", ctrlAlt("s", .command, .shift),
+                version: 2),
+            DefaultBinding(
+                "Move focused window to monitor right", "window_movedisplay_east", ctrlAlt("d", .command, .shift),
+                version: 2),
             DefaultBinding("Cycle preset widths forward", "window_resize", ctrlAlt("r")),
             DefaultBinding("Make column full width", "window_fullwidth", ctrlAlt("f")),
             DefaultBinding("Centre column", "window_center", ctrlAlt("c")),
-            DefaultBinding("Make column wider", "window_grow", ctrlAlt("equal")),
-            DefaultBinding("Make column narrower", "window_shrink", ctrlAlt("minus")),
-            DefaultBinding("Make window taller", "window_vertical_grow", ctrlAlt("equal", .shift)),
-            DefaultBinding("Make window shorter", "window_vertical_shrink", ctrlAlt("minus", .shift)),
+            DefaultBinding("Make column wider", "window_step_grow", ctrlAlt("equal"), version: 2),
+            DefaultBinding("Make column narrower", "window_step_shrink", ctrlAlt("minus"), version: 2),
+            DefaultBinding("Make window taller", "window_vertical_step_grow", ctrlAlt("equal", .shift), version: 2),
+            DefaultBinding("Make window shorter", "window_vertical_step_shrink", ctrlAlt("minus", .shift), version: 2),
             DefaultBinding("Equalize window heights within column", "window_equalize", ctrlAlt("0")),
             DefaultBinding("Stack focused window into left column", "window_stack_west", ctrlAlt("rightbracket")),
             DefaultBinding("Stack focused window into right column", "window_stack_east", ctrlAlt("leftbracket")),
@@ -133,6 +149,20 @@ public struct DefaultBinding: Sendable {
 
     /// The newest version in the table. Miri records it after offering the defaults.
     public static let currentVersion = table.map(\.version).max() ?? 0
+
+    /// Defaults that a later version replaced, as Miri wrote them, with the version that replaced each one.
+    ///
+    /// Version 2 moved the four resize shortcuts from the preset-cycling commands to five-point steps (miri#22).
+    static let retired: [(command: String, chord: Chord, version: Int)] = [
+        ("window_grow", ctrlAlt("equal"), 2),
+        ("window_shrink", ctrlAlt("minus"), 2),
+        ("window_vertical_grow", ctrlAlt("equal", .shift), 2),
+        ("window_vertical_shrink", ctrlAlt("minus", .shift), 2),
+    ]
+
+    /// Stop window manager. Miri owns this shortcut instead of the engine, because the engine's `quit` makes Miri
+    /// restart the engine (miri#25).
+    public static let stopChord = ctrlAlt("q")
 
     private static func ctrlAlt(_ key: String, _ extra: ChordModifier...) -> Chord {
         Chord(Set([.control, .option] + extra), key)
@@ -164,7 +194,14 @@ public struct DefaultBinding: Sendable {
         guard offered < currentVersion else { return document }
 
         var result = document
-        let existing = document.value(at: ["bindings"])
+        // A retired default that still has exactly the value Miri wrote is Miri's, so the new default replaces it.
+        // Any other value is the user's, and stays.
+        for old in retired where old.version > offered {
+            if case .string(let text) = document.value(at: ["bindings", old.command]), text == old.chord.description {
+                result = try result.removing(table: ["bindings"], key: old.command)
+            }
+        }
+        let existing = result.value(at: ["bindings"])
         var taken = Set(boundChords(in: existing))
         // Only the file's own bindings count, so two default rows for one engine command both get written.
         let bound = Set(boundCommands(in: existing))
@@ -184,6 +221,33 @@ public struct DefaultBinding: Sendable {
     private static func boundCommands(in bindings: TOMLValue?) -> [String] {
         guard case .table(let entries) = bindings else { return [] }
         return entries.keys.map { EngineCommand.canonical($0) ?? $0 }
+    }
+
+    /// Whether the file binds `chord` to an engine command, in which case that binding wins over a Miri shortcut.
+    public static func binds(_ chord: Chord, in document: TOMLDocument) -> Bool {
+        boundChords(in: document.value(at: ["bindings"])).contains(chord)
+    }
+
+    /// The first binding whose text the engine cannot read as a chord, as a configuration issue, or `nil`.
+    ///
+    /// The engine drops a binding whose key name it does not know, and rejects the whole file for a bad modifier or
+    /// an extra dash, so Miri reports each of these where the user can see it.
+    static func firstUnreadableBinding(in document: TOMLDocument) -> ConfigurationIssue? {
+        guard case .table(let entries) = document.value(at: ["bindings"]) else { return nil }
+        for (command, value) in entries.sorted(by: { $0.key < $1.key }) {
+            let texts: [String] =
+                switch value {
+                case .string(let text): [text]
+                case .array(let items): items.compactMap { if case .string(let text) = $0 { text } else { nil } }
+                default: []
+                }
+            for text in texts {
+                if let problem = EngineKey.problem(in: text) {
+                    return .invalidValue(key: "bindings.\(command)", message: "bindings.\(command): \(problem)")
+                }
+            }
+        }
+        return nil
     }
 
     private static func boundChords(in bindings: TOMLValue?) -> [Chord] {

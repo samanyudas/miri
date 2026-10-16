@@ -20,7 +20,7 @@ struct DefaultBindingsTests {
     @Test func aNewInstallGetsTheAcceptedDefaultSet() throws {
         let (store, document) = try load()
         #expect(store.issue == nil)
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(1))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(2))
         let expected: [String: TOMLValue] = [
             "window_focus_west": .array([.string("ctrl+alt-leftarrow"), .string("ctrl+alt-h")]),
             "window_focus_east": .array([.string("ctrl+alt-rightarrow"), .string("ctrl+alt-l")]),
@@ -44,13 +44,21 @@ struct DefaultBindingsTests {
             "window_swap_first": .string("ctrl+alt+cmd+shift-leftarrow"),
             "window_swap_last": .string("ctrl+alt+cmd+shift-rightarrow"),
             "window_nextdisplay": .string("ctrl+alt-n"),
+            "window_focusdisplay_north": .string("ctrl+alt+cmd-w"),
+            "window_focusdisplay_west": .string("ctrl+alt+cmd-a"),
+            "window_focusdisplay_south": .string("ctrl+alt+cmd-s"),
+            "window_focusdisplay_east": .string("ctrl+alt+cmd-d"),
+            "window_movedisplay_north": .string("ctrl+alt+cmd+shift-w"),
+            "window_movedisplay_west": .string("ctrl+alt+cmd+shift-a"),
+            "window_movedisplay_south": .string("ctrl+alt+cmd+shift-s"),
+            "window_movedisplay_east": .string("ctrl+alt+cmd+shift-d"),
             "window_resize": .string("ctrl+alt-r"),
             "window_fullwidth": .string("ctrl+alt-f"),
             "window_center": .string("ctrl+alt-c"),
-            "window_grow": .string("ctrl+alt-equal"),
-            "window_shrink": .string("ctrl+alt-minus"),
-            "window_vertical_grow": .string("ctrl+alt+shift-equal"),
-            "window_vertical_shrink": .string("ctrl+alt+shift-minus"),
+            "window_step_grow": .string("ctrl+alt-equal"),
+            "window_step_shrink": .string("ctrl+alt-minus"),
+            "window_vertical_step_grow": .string("ctrl+alt+shift-equal"),
+            "window_vertical_step_shrink": .string("ctrl+alt+shift-minus"),
             "window_equalize": .string("ctrl+alt-0"),
             "window_stack_west": .string("ctrl+alt-rightbracket"),
             "window_stack_east": .string("ctrl+alt-leftbracket"),
@@ -77,7 +85,7 @@ struct DefaultBindingsTests {
         // ctrl+alt-l is taken by the user's window_center, so only the arrow default is added.
         #expect(bindings?["window_focus_east"] == .string("ctrl+alt-rightarrow"))
         // The only default chord for wider is taken, so the action stays unbound.
-        #expect(bindings?["window_grow"] == nil)
+        #expect(bindings?["window_step_grow"] == nil)
         #expect(bindings?["window_focus_north"] == .array([.string("ctrl+alt-uparrow"), .string("ctrl+alt-k")]))
     }
 
@@ -102,7 +110,7 @@ struct DefaultBindingsTests {
         let (_, document) = try load(original)
         #expect(document.text.hasPrefix("[miri]\ninner_gap = 8\n"))
         #expect(document.value(at: ["bindings", "window_manage"]) == .string("ctrl+alt-t"))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(1))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(2))
     }
 
     @Test func rejectsAnInvalidVersionWithoutWriting() throws {
@@ -182,6 +190,76 @@ struct DefaultBindingsTests {
         #expect(bindings?["window_manage"] == .string("ctrl+alt-t"))
     }
 
+    /// Version 2 moved the resize shortcuts to five-point steps (miri#22) and added the display shortcuts (miri#23).
+    @Test func aVersionOneFileMovesUnchangedResizeDefaultsAndKeepsChangedOnes() throws {
+        let original = """
+            [bindings]
+            window_grow = "ctrl+alt-equal"
+            window_shrink = "alt-minus"
+            window_vertical_grow = ["ctrl+alt+shift-equal", "fn-f1"]
+            window_vertical_shrink = "ctrl+alt+shift-minus"
+            window_focus_west = "ctrl+alt-leftarrow"
+
+            [miri]
+            default_bindings_version = 1
+            """
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        let bindings = document.value(at: ["bindings"])
+        // Unchanged since Miri wrote them, so the step commands take their chords.
+        #expect(bindings?["window_grow"] == nil)
+        #expect(bindings?["window_step_grow"] == .string("ctrl+alt-equal"))
+        #expect(bindings?["window_vertical_shrink"] == nil)
+        #expect(bindings?["window_vertical_step_shrink"] == .string("ctrl+alt+shift-minus"))
+        // Changed by the user, so they stay, and a step command gets only a free chord.
+        #expect(bindings?["window_shrink"] == .string("alt-minus"))
+        #expect(bindings?["window_step_shrink"] == .string("ctrl+alt-minus"))
+        #expect(bindings?["window_vertical_grow"] == .array([.string("ctrl+alt+shift-equal"), .string("fn-f1")]))
+        #expect(bindings?["window_vertical_step_grow"] == nil)
+        // Version 1 rows are not offered again.
+        #expect(bindings?["window_focus_east"] == nil)
+        #expect(bindings?["window_focusdisplay_west"] == .string("ctrl+alt+cmd-a"))
+        #expect(bindings?["window_movedisplay_east"] == .string("ctrl+alt+cmd+shift-d"))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(2))
+    }
+
+    @Test(arguments: [
+        ("ctrl+alt-lefarrow", "names the key \"lefarrow\""),
+        ("ctrl+alt-", "names the key \"\""),
+        ("ctrl+alt-H", "names the key \"H\""),
+        ("hyper-h", "names the modifier \"hyper\""),
+        ("Ctrl-h", "names the modifier \"Ctrl\""),
+        ("ctrl-alt-h", "has more than one dash"),
+    ])
+    func reportsABindingTheEngineCannotReadWithoutWriting(chord: String, problem: String) throws {
+        let original = "[bindings]\nwindow_focus_west = [\"ctrl+alt-h\", \"\(chord)\"]\n"
+        let (store, _) = try load(original)
+        guard case .invalidValue(let key, let message) = store.issue else {
+            Issue.record("expected an invalid value, got \(String(describing: store.issue))")
+            return
+        }
+        #expect(key == "bindings.window_focus_west")
+        #expect(message.contains(problem), "\(message)")
+        #expect(try String(contentsOf: url, encoding: .utf8) == original)
+    }
+
+    @Test(arguments: ["ctrl+alt-=", "ctrl + lalt - leftarrow", "f5", "cmd+fn-keypad7", "shift-ü"])
+    func acceptsBindingsTheEngineReads(chord: String) throws {
+        let (store, _) = try load("[bindings]\nquit = \"\(chord)\"\n")
+        #expect(store.issue == nil)
+    }
+
+    @Test func theStopShortcutYieldsToABindingOnItsChord() throws {
+        let (free, _) = try load()
+        #expect(free.stopShortcutIsFree)
+        let (taken, _) = try load("[bindings]\nquit = \"ctrl + alt - q\"\n")
+        #expect(!taken.stopShortcutIsFree)
+    }
+
+    @Test func noDefaultUsesTheStopChord() {
+        #expect(!DefaultBinding.table.flatMap(\.chords).contains(DefaultBinding.stopChord))
+    }
+
     @Test func aRowWhoseChordsAreAllTakenStaysUnbound() throws {
         let (store, document) = try load("[bindings]\nquit = [\"ctrl+alt-leftarrow\", \"ctrl+alt-h\"]\n")
         #expect(store.issue == nil)
@@ -191,7 +269,7 @@ struct DefaultBindingsTests {
                 == .array([
                     .string("ctrl+alt-rightarrow"), .string("ctrl+alt-l"),
                 ]))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(1))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(2))
     }
 
     @Test func aVersionAboveTheCurrentOneAddsNothing() throws {
@@ -218,6 +296,12 @@ struct DefaultBindingsTests {
         ("window_virtualsend_east", "window_virtualsend_east"),
         ("window_virtualmove_02", "window_virtualmovenum_2"),
         ("mouse_nextdisplay", "mouse_nextdisplay"),
+        ("window_step", "window_step_grow"),
+        ("window_step_shrink", "window_step_shrink"),
+        ("window_vertical_step", "window_vertical_step_grow"),
+        ("window_vertical_step_shrink_now", "window_vertical_step_shrink"),
+        ("window_focusdisplay_north", "window_focusdisplay_north"),
+        ("window_movedisplay_east", "window_movedisplay_east"),
         ("quit_now", "quit"),
     ])
     func readsABindingsKeyAsTheEngineDoes(key: String, canonical: String) {
@@ -227,6 +311,8 @@ struct DefaultBindingsTests {
     @Test(arguments: [
         "window_focus_0", "window_focus", "window_focus_", "window_focus_-1", "window_swap_2", "window_resize_up",
         "window_stack_north", "window_virtual_0", "window", "Window_center", "window__center", "mouse", "",
+        "window_step_up", "window_vertical_step_up", "window_focusdisplay_first", "window_focusdisplay",
+        "window_movedisplay_2",
     ])
     func rejectsBindingsKeysTheEngineRejects(key: String) {
         #expect(EngineCommand.canonical(key) == nil)

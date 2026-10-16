@@ -158,13 +158,15 @@ Actions not covered there use Paneru's defaults, changed only where they clash w
 Miri writes the default set to `[bindings]`, with the engine's command names as keys and its chord syntax as values.
 The engine reads each key as command words split on `_`, so `window_focus_3` means `window focus 3`.
 An unknown command name makes the engine reject the whole file, so Miri writes only names the pinned engine parses.
+A binding whose key name the engine does not know does nothing, and a bad modifier or an extra dash makes the engine reject the whole file.
+Miri reports each of these as a configuration error in Settings and the menu bar, and changes nothing in the file until the user fixes it.
 A short excerpt of the written table follows.
 
 ```toml
 [bindings]
 window_focus_west = ["ctrl+alt-leftarrow", "ctrl+alt-h"]
 window_focus_3 = "ctrl+alt-3"
-window_grow = "ctrl+alt-equal"
+window_step_grow = "ctrl+alt-equal"
 window_stack_west = "ctrl+alt-rightbracket"
 window_manage = "ctrl+alt-t"
 ```

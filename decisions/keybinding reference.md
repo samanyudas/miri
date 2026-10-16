@@ -6,9 +6,9 @@ Actions this reference does not cover use Paneru's defaults, changed only where 
 These bindings define Miri's default set for new installations.
 Miri writes them to `[bindings]` from one table in `Sources/MiriCore/Bindings.swift`.
 On 16 October 2026 a live run on macOS 27 against engine `39def42` sent each bound shortcut as a synthetic key event, and each one ran its engine command.
-The engine's behavior differed from the accepted behavior only where [Engine mapping](#engine-mapping) records it.
-For example, a numbered jump into a stacked column focuses the top window, not the last-focused window.
-Some actions have no engine command or differ from the accepted behavior, as [Engine mapping](#engine-mapping) records.
+Engine `a409c79` adds the commands that run was missing: five-point resize steps, directional display focus and move, and column jumps that return to a stack's last-focused window.
+Stop window manager is Miri's own shortcut, not an engine binding.
+The remaining differences from the accepted behavior are in [Engine mapping](#engine-mapping).
 
 ## Modifier keys
 
@@ -54,7 +54,12 @@ Directional monitor commands use W, A, S, and D.
 Numbered jumps select columns rather than individual windows.
 Within a stack, the selected column's last-focused window receives focus.
 The W, A, S, and D monitor shortcuts keep the choice made in an earlier design round.
-The pinned engine has no directional monitor commands, so Miri leaves these eight shortcuts unbound for now.
+They choose the display that lies in that direction in the physical arrangement in **System Settings > Displays**.
+Focus and movement within a column stay on the current display at the column's top or bottom edge.
+Only the W, A, S, and D monitor shortcuts and ⌃⌥N cross to another display.
+[Release scope](release-scope.md#multiple-monitors) requires this split, which settles the question in miri#23.
+Stop window manager runs the same Stop as the menu bar, and Miri registers it itself.
+If `[bindings]` assigns ⌃⌥Q to an engine command, that binding wins and Miri leaves Stop without a shortcut.
 
 ## Width, height, and centering
 
@@ -112,24 +117,25 @@ Clicking a window on another display also changes focus.
 
 ## Engine mapping
 
-This table maps each accepted action to the command that the pinned engine `39def42` runs.
+This table maps each accepted action to the command that the pinned engine `a409c79` runs.
 A blank engine command means that Miri leaves the action unbound.
 Any action not listed here maps directly, and the live run confirmed it.
 
 | Action | Engine command | Difference from the accepted behavior |
 | --- | --- | --- |
-| Focus window above or below within column | `window_focus_north`, `window_focus_south` | At the top or bottom of a column, focus moves to a display above or below. |
-| Move window up or down within column | `window_swap_north`, `window_swap_south` | At the top or bottom of a column, the window moves to the next display. |
-| Focus first or last column | `window_focus_first`, `window_focus_last` | In a stack, the top window gets focus, not the last-focused window. |
-| Jump to column 1 through 9 | `window_focus_1` through `window_focus_9` | The engine counts columns, as accepted. In a stack, the top window gets focus, not the last-focused window. |
-| Cycle preset widths forward | `window_resize` | The engine reads `window_resize` as the same command as `window_grow`, so this shortcut and Make column wider do the same thing. Miri binds both on purpose. |
-| Make column wider or narrower | `window_grow`, `window_shrink` | The width moves to the next preset instead of five percentage points, and it wraps around at the last preset. The wrap comes from the engine option `window_resize_cycle`, which defaults to true (`vendor/paneru/src/config.rs` line 811). The five-point step in [Release scope](release-scope.md#default-shortcuts-and-layout) is not met yet and needs an engine command. |
-| Make window taller or shorter | `window_vertical_grow`, `window_vertical_shrink` | The height moves to the next stack-height preset instead of five percentage points, and it wraps around. It changes only windows in a stack. |
+| Focus first or last column, Jump to column 1 through 9 | `window_focus_first`, `window_focus_last`, `window_focus_1` through `window_focus_9` | None. The engine counts columns, and in a stack it focuses the window that last had focus in that column. |
+| Cycle preset widths forward | `window_resize` | None. |
+| Make column wider or narrower | `window_step_grow`, `window_step_shrink` | None. Each press changes the width by `window_resize_step` of the display, 0.05 by default, and stops at full width without wrapping. |
+| Make window taller or shorter | `window_vertical_step_grow`, `window_vertical_step_shrink` | The height changes only for a window in a stack, because a column's only window always fills the display height. The neighbouring window absorbs the change and keeps at least 200 points. |
 | Centre column | `window_center` | The engine also moves the pointer to the centre of the display. |
-| Focus monitor above, left, below, or right | | The engine has no directional display focus command. |
-| Move focused window to monitor above, left, below, or right | | The engine has no directional display move command. |
-| Stop window manager | | The engine `quit` command ends the engine, and the app treats that exit as a crash and restarts the engine. Stop must be an app action. |
+| Focus monitor above, left, below, or right | `window_focusdisplay_north`, `_west`, `_south`, `_east` | None. Focus goes to the display's last-focused window when it is visible, otherwise to its most visible window. |
+| Move focused window to monitor above, left, below, or right | `window_movedisplay_north`, `_west`, `_south`, `_east` | None. Focus follows the window. |
+| Stop window manager | | Miri's own shortcut, because the engine `quit` command ends the engine, and the app treats that exit as a crash and restarts it. |
 | Toggle column between stacked and tabbed | | This action is deferred to v2. |
+
+Miri version 2 of the default set replaced the version 1 bindings `window_grow`, `window_shrink`, `window_vertical_grow`, and `window_vertical_shrink`.
+On upgrade, Miri removes each of those four only while it still has the exact value Miri wrote, and then adds the step command.
+A binding the user changed stays, and the step command gets only its free chords.
 
 ## Binding customization
 

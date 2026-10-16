@@ -24,6 +24,7 @@ import ServiceManagement
     @ObservationIgnored private var supervisor: EngineSupervisor!
     @ObservationIgnored private var watcher: ConfigurationWatcher?
     @ObservationIgnored private var setupPoll: Task<Void, Never>?
+    @ObservationIgnored private var stopShortcut: StopShortcut?
     @ObservationIgnored private let defaults = UserDefaults.standard
 
     init(bundle: Bundle = .main) {
@@ -46,6 +47,7 @@ import ServiceManagement
 
     /// Loads the configuration, watches it, and starts management unless the user stopped it.
     func launch() {
+        stopShortcut = StopShortcut { [weak self] in self?.stopFromShortcut() }
         reloadConfiguration()
         watcher = ConfigurationWatcher(url: paths.configuration) { [weak self] in self?.reloadConfiguration() }
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -59,6 +61,7 @@ import ServiceManagement
         store.load(reduceMotion: reduceMotion)
         settings = store.settings
         configurationIssue = store.issue
+        stopShortcut?.setEnabled(store.stopShortcutIsFree)
     }
 
     func update(_ change: (inout MiriSettings) -> Void) {
@@ -104,6 +107,12 @@ import ServiceManagement
         defaults.set(true, forKey: Self.stoppedKey)
         cancelSetupPoll()
         supervisor.stop()
+    }
+
+    /// The Stop shortcut runs the same Stop as the menu, and does nothing once the user has stopped management.
+    func stopFromShortcut() {
+        guard !stoppedByUser else { return }
+        stop()
     }
 
     func restart() {

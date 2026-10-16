@@ -20,6 +20,8 @@ public final class ConfigurationStore {
     public let appBundleIdentifier: String
     public private(set) var settings = MiriSettings()
     public private(set) var issue: ConfigurationIssue?
+    /// Whether Miri's own Stop shortcut is free, because no `[bindings]` entry uses its chord.
+    public private(set) var stopShortcutIsFree = true
     /// The current file, when it was read correctly. Writes require it.
     private var document: TOMLDocument?
 
@@ -42,6 +44,7 @@ public final class ConfigurationStore {
             let parsed: TOMLDocument
             do { parsed = try TOMLDocument(text) } catch { throw .invalidTOML(error) }
             let read = try MiriSettings(document: parsed)
+            if let unreadable = DefaultBinding.firstUnreadableBinding(in: parsed) { throw unreadable }
             document = parsed
             settings = read
             issue = nil
@@ -49,6 +52,7 @@ public final class ConfigurationStore {
         } catch {
             issue = error
         }
+        if let document { stopShortcutIsFree = !DefaultBinding.binds(DefaultBinding.stopChord, in: document) }
     }
 
     /// Validates and saves a change. On failure the file and the current settings stay unchanged.

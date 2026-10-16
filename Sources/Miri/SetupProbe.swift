@@ -39,7 +39,9 @@ enum SetupProbe {
         var names = Set<String>()
         var buffer = [CChar](repeating: 0, count: Int(MAXPATHLEN))
         for pid in pids.prefix(Int(max(0, filled))) where pid > 0 && pid != getpid() {
-            if proc_name(pid, &buffer, UInt32(buffer.count)) > 0 { names.insert(String(cString: buffer)) }
+            let length = Int(proc_name(pid, &buffer, UInt32(buffer.count)))
+            guard length > 0 else { continue }
+            names.insert(String(decoding: buffer.prefix(length).map { UInt8(bitPattern: $0) }, as: UTF8.self))
         }
         return names
     }
