@@ -112,6 +112,29 @@ struct DefaultBindingsTests {
         #expect(try String(contentsOf: url, encoding: .utf8) == original)
     }
 
+    @Test(arguments: [
+        "bindings = { window_focus_west = \"alt-h\" }\n",
+        "bindings.window_focus_west = \"alt-h\"\n",
+        "[bindings.window_focus_west]\n",
+    ])
+    func leavesBindingsMiriCannotEditAloneAndStillSaves(original: String) throws {
+        let bindings = try TOMLDocument(original).value(at: ["bindings"])
+        let (store, loaded) = try load(original)
+        #expect(store.issue == nil)
+        #expect(loaded.text.hasPrefix(original))
+        #expect(loaded.value(at: ["bindings"]) == bindings)
+        #expect(loaded.value(at: ["miri", "default_bindings_version"]) == nil)
+        try store.update(reduceMotion: false) { $0.innerGap = 12 }
+        let saved = try TOMLDocument(String(contentsOf: url, encoding: .utf8))
+        #expect(saved.value(at: ["miri", "inner_gap"]) == .integer(12))
+        #expect(saved.text.hasPrefix(original))
+        #expect(saved.value(at: ["bindings"]) == bindings)
+        #expect(saved.value(at: ["miri", "default_bindings_version"]) == nil)
+        store.load(reduceMotion: false)
+        #expect(store.issue == nil)
+        #expect(try String(contentsOf: url, encoding: .utf8) == saved.text)
+    }
+
     @Test func noTwoDefaultsShareAChord() {
         let chords = DefaultBinding.table.flatMap(\.chords)
         #expect(Set(chords).count == chords.count)
