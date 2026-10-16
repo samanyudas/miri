@@ -136,7 +136,17 @@ public struct DefaultBinding: Sendable {
     /// Adds each default newer than the recorded version whose action has no binding and whose chords are free.
     ///
     /// A user binding is never changed. A default is offered once, so a binding the user deletes stays deleted.
+    /// When the file defines `[bindings]` or `[miri]` in a form Miri does not rewrite, such as an inline table, Miri
+    /// leaves the file as it is and records no version, so it offers the defaults again if the user converts the table.
     static func adding(to document: TOMLDocument) throws -> TOMLDocument {
+        do {
+            return try addingEditable(to: document)
+        } catch TOMLEditError.notEditable {
+            return document
+        }
+    }
+
+    private static func addingEditable(to document: TOMLDocument) throws -> TOMLDocument {
         let versionPath = ["miri", "default_bindings_version"]
         let offered: Int
         switch document.value(at: versionPath) {
