@@ -282,9 +282,9 @@ class IssueLifecycleTest(unittest.TestCase):
         self.assertEqual(self.run_job("reopen-on-reply", copy.deepcopy(state), NUMBER="32"), state)
 
     def test_a_merged_reference_labels_the_open_issue(self):
-        untouched = {"42": issue(), "43": issue(state="closed")}
+        untouched = {"42": issue(), "43": issue(state="closed"), "45": issue(), "46": issue()}
         state = repo({"41": issue(labels=["bug"]), "44": issue(labels=[CONFIRM])} | copy.deepcopy(untouched),
-                     pulls={"40": pull("Refs #41\nalso see #42\nFixes #43\nRefs: #44\nRefs #98")})
+                     pulls={"40": pull("Refs #41\nalso see #42\nFixes #43\nRefs: #44\nRefs #98\nprefs #45\nprefixed #46")})
 
         after = self.run_job("fixed-on-main", state, PR_NUMBER="40", MERGE_SHA="abc123")
 
@@ -299,8 +299,8 @@ class IssueLifecycleTest(unittest.TestCase):
         self.assertEqual({n: after["issues"][n] for n in untouched}, untouched)
 
     def test_a_closing_keyword_gets_one_hint(self):
-        issues = {"51": issue(), "52": issue(state="closed")}
-        state = repo(copy.deepcopy(issues), pulls={"50": pull("Fixes #51\nCloses #52\nresolves #53")})
+        issues = {"51": issue(), "52": issue(state="closed"), "54": issue()}
+        state = repo(copy.deepcopy(issues), pulls={"50": pull("Fixes #51\nCloses #52\nresolves #53\nprefix #54")})
 
         state = self.run_job("reference-hint", state, PR_NUMBER="50")
         state = self.run_job("reference-hint", state, PR_NUMBER="50")
@@ -312,7 +312,7 @@ class IssueLifecycleTest(unittest.TestCase):
         self.assertEqual(state["issues"], issues)
 
     def test_a_plain_reference_or_a_missing_issue_gets_no_hint(self):
-        for body in ["Refs #51", "Fixes #99"]:
+        for body in ["Refs #51", "Fixes #99", "prefix #51"]:
             with self.subTest(body=body):
                 state = repo({"51": issue()}, pulls={"50": pull(body)})
                 self.assertEqual(self.run_job("reference-hint", copy.deepcopy(state), PR_NUMBER="50"), state)
