@@ -219,9 +219,12 @@ jobs:
           NUMBER: ${{ github.event.issue.number }}
         run: |
           set -euo pipefail
-          closed_by_bot=$(gh api --paginate "repos/$GH_REPO/issues/$NUMBER/comments" \
+          # closed_by names the most recent closer, so a maintainer closing a reopened issue keeps it closed.
+          closer=$(gh api "repos/$GH_REPO/issues/$NUMBER" --jq '.closed_by.login // ""')
+          [ "$closer" = "github-actions[bot]" ] || { echo "#$NUMBER was closed by ${closer:-nobody known}"; exit 0; }
+          silence=$(gh api --paginate "repos/$GH_REPO/issues/$NUMBER/comments" \
             --jq '.[] | select(.user.login == "github-actions[bot]") | .body | test("miri-fix-status closed")' | tail -1)
-          if [ "$closed_by_bot" = true ]; then
+          if [ "$silence" = true ]; then
             gh issue reopen "$NUMBER"
             gh issue edit "$NUMBER" --add-label needs-triage
             echo "#$NUMBER reopened"
