@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Check that declared platform, toolchain, and engine versions agree with each other."""
+import hashlib
 import re
 import subprocess
 import sys
@@ -14,6 +15,11 @@ SUPPORTED_MACOS = "27.0"
 RELEASE_APP_ID = "io.github.samanyudas.miri"
 DEVELOPER_APP_ID = "io.github.samanyudas.miri.dev"
 DEVELOPER_ENGINE_ID = "io.github.samanyudas.miri.dev.engine"
+# Sources/MiriCore/EngineCommand.swift mirrors the engine's command parser, so a change to it needs a review there.
+MIRRORED_PARSER = {
+    "src/types/argv.rs": "7d0d718fbc34bb8c5d07a485cc6a4767d9de85ab61ce2d4d6038f0fed07469d7",
+    "src/types/commands.rs": "e6c31dd813fe1446dc5ecefbe8148252c7e8043a6bd83c5400149cf9549436a4",
+}
 
 
 def version(text: str) -> tuple[int, ...]:
@@ -63,6 +69,12 @@ def main() -> int:
             problems.append(f"engine pin {pin} does not descend from the v0.5.2 base {ENGINE_BASE}")
         if git("merge-base", "--is-ancestor", pin, f"origin/{ENGINE_BRANCH}").returncode != 0:
             problems.append(f"engine pin {pin} is not published on the fork's {ENGINE_BRANCH} branch")
+
+    for name, digest in MIRRORED_PARSER.items():
+        source = ENGINE / name
+        if not source.exists() or hashlib.sha256(source.read_bytes()).hexdigest() != digest:
+            problems.append(f"the engine's {name} changed; check that Sources/MiriCore/EngineCommand.swift still "
+                            "mirrors it, then update MIRRORED_PARSER in scripts/check-compat.py")
 
     for problem in problems:
         print(problem)
