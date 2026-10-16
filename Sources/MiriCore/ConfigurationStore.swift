@@ -97,10 +97,14 @@ public final class ConfigurationStore {
             if let previous {
                 let before = try previous.applying(
                     to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier)
-                if let path = applied.skipped.subtracting(before.skipped).sorted().first {
+                // A key skipped both times still needs a write when the value Miri wants there changed.
+                let needed = applied.skipped.filter { path, wanted in
+                    before.skipped[path].map { $0 != wanted } ?? true
+                }
+                if let path = needed.keys.sorted().first {
                     throw TOMLEditError.notEditable(path: path)
                 }
-            } else if let path = applied.skipped.filter({ !$0.hasPrefix("miri.") }).sorted().first {
+            } else if let path = applied.skipped.keys.filter({ !$0.hasPrefix("miri.") }).sorted().first {
                 throw TOMLEditError.notEditable(path: path)
             }
             next = applied.document
