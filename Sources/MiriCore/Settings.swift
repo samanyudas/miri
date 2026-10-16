@@ -91,7 +91,7 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.string(".*"), floating, "title")
         try set(.string(appBundleIdentifier), floating, "bundle_id")
         try set(.boolean(true), floating, "floating")
-        return result
+        return try DefaultBinding.adding(to: result)
     }
 
     private static func gap(_ value: TOMLValue, key: String) throws(ConfigurationIssue) -> Int {

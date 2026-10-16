@@ -11,6 +11,8 @@ public final class ConfigurationStore {
         # Miri derives [padding] and [windows.miri-gaps] from miri.inner_gap and miri.outer_gap.
         # [windows.miri-settings] keeps Miri's own windows floating.
         # [decorations.menu] hides the engine's menu bar item, because Miri has its own.
+        # [bindings] starts with Miri's default shortcuts. Miri never changes a shortcut you set.
+        # miri.default_bindings_version records which defaults Miri has offered, so a shortcut you delete stays deleted.
 
         """
 
