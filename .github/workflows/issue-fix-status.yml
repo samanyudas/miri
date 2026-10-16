@@ -6,7 +6,7 @@ name: Issue fix status
 #   merged PR says Refs #N                 -> issue labelled "fixed (pending release)"
 #   stable release published               -> label becomes "please confirm close" and the reporter is asked
 #   14 days without any reply              -> issue closed with a note on how to reopen
-#   a later comment on that closed issue   -> issue reopened for a human
+#   a later comment on that silence close  -> issue reopened for a human
 #
 # A closing keyword closes the issue on merge, before any release carries the fix, and the jobs
 # below skip closed issues, so the reporter would never hear about it.

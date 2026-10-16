@@ -41,12 +41,13 @@ def take(flag):
     return values
 
 
-def emit(value):
+def emit(value, paged=False):
     jq = take("--jq")
-    # Real gh applies --jq to each page separately, which is what the scripts' jq -s has to undo.
+    # Real gh returns only the first page without --paginate, and applies --jq to each page separately.
     pages = [value]
-    if paginate and isinstance(value, list):
+    if paged:
         pages = [value[i:i + 2] for i in range(0, len(value), 2)] or [[]]
+        pages = pages if paginate else pages[:1]
     for page in pages:
         text = json.dumps(page)
         if jq:
@@ -92,7 +93,7 @@ elif args[:2] == ["issue", "edit"]:
 elif args[:2] == ["issue", "close"]:
     issue(args[2]).update(state="closed", state_reason=take("--reason")[0], closed_by="github-actions[bot]")
 elif args[:2] == ["issue", "reopen"]:
-    issue(args[2]).update(state="open", state_reason=None)
+    issue(args[2]).update(state="open", state_reason=None, closed_by=None)
 elif args[:2] == ["label", "create"]:
     take("--color")
     take("--description")
@@ -113,7 +114,7 @@ elif args[:1] == ["api"]:
         state["labels"] += [l for l in labels if l not in state["labels"]]
     elif tail == "/comments":
         emit([{"created_at": c["created_at"], "user": {"login": c["login"]}, "body": c["body"]}
-              for c in issue(number)["comments"]])
+              for c in issue(number)["comments"]], paged=True)
     elif kind == "issues" and not tail and number in state["pulls"]:
         emit({"number": int(number), "state": "open", "pull_request": {}})
     elif kind == "issues" and not tail:
@@ -267,6 +268,10 @@ class IssueLifecycleTest(unittest.TestCase):
         after = self.run_job("reopen-on-reply", copy.deepcopy(state), NUMBER="30")
         self.assertEqual((after["issues"]["30"]["state"], after["issues"]["30"]["labels"]), ("open", ["bug", "needs-triage"]))
 
+        after = self.run_job("reopen-on-reply", copy.deepcopy(state), NUMBER="31")
+        self.assertEqual(after, state)
+
+        state["issues"]["31"]["closed_by"] = BOT
         after = self.run_job("reopen-on-reply", copy.deepcopy(state), NUMBER="31")
         self.assertEqual(after, state)
 
