@@ -39,7 +39,9 @@ The current milestone is the first production app slice: menu bar controls, engi
 - The issue lifecycle job that labels issues a merged PR references failed with HTTP 403 on every merge until #18.
   Its token lacked `pull-requests: read`. A harness test now checks each workflow job's scopes against its API calls.
 - The release, timed-close, and reopen stages of the issue lifecycle have not run live, because no stable release exists.
-  A harness test runs their real job scripts against a fake `gh`, and a dispatched run of the close job passed on `main` on 16 October 2026.
+  A harness test runs their real job scripts against a fake `gh`.
+  A dispatched run of the close job passed on `main` on 16 October 2026.
+  No issue carried `please confirm close`, so that run proved only that the job starts with its permissions and its script parses.
 - On 16 October 2026, `make check` passed on `main`, and a live headless Claude session showed the guard block a push to `main`, a force push, a PR merge, a release, `tccutil reset`, and `defaults write`.
 - #13 shrank a window in 1 of 35 runs, across the built-in display and a 2560 x 1440 external display.
   The engine requested only height changes in every run.
