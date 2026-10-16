@@ -135,6 +135,26 @@ struct DefaultBindingsTests {
         #expect(try String(contentsOf: url, encoding: .utf8) == saved.text)
     }
 
+    @Test(arguments: ["miri = { inner_gap = 8 }\n", "miri.inner_gap = 8\n"])
+    func aMiriTableMiriCannotEditStillLoadsAndSavesOtherSettings(original: String) throws {
+        let (store, loaded) = try load(original)
+        #expect(store.issue == nil)
+        #expect(loaded.text.hasPrefix(original))
+        #expect(loaded.value(at: ["miri"]) == (try TOMLDocument(original)).value(at: ["miri"]))
+        try store.update(reduceMotion: false) { $0.widthPresets = [0.4, 0.6] }
+        let saved = try TOMLDocument(String(contentsOf: url, encoding: .utf8))
+        #expect(saved.value(at: ["options", "preset_column_widths"]) == .array([.float(0.4), .float(0.6)]))
+        #expect(saved.text.hasPrefix(original))
+        #expect(throws: ConfigurationIssue.notEditable(TOMLEditError.notEditable(path: "miri.inner_gap").description)) {
+            try store.update(reduceMotion: false) { $0.innerGap = 12 }
+        }
+        #expect(try String(contentsOf: url, encoding: .utf8) == saved.text)
+        #expect(store.settings.innerGap == 8)
+        store.load(reduceMotion: false)
+        #expect(store.issue == nil)
+        #expect(try String(contentsOf: url, encoding: .utf8) == saved.text)
+    }
+
     @Test(arguments: [
         ("window_resize", ["window_grow"]),
         ("window_resize_grow", ["window_resize", "window_grow"]),

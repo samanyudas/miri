@@ -140,6 +140,10 @@ struct ConfigurationStoreTests {
         }
         #expect(message.contains("padding"))
         #expect(try contents() == "padding = { top = 1 }\n")
+        try store.update(reduceMotion: false) { $0.widthPresets = [0.4, 0.6] }
+        let saved = try TOMLDocument(contents())
+        #expect(saved.text.hasPrefix("padding = { top = 1 }\n"))
+        #expect(saved.value(at: ["options", "preset_column_widths"]) == .array([.float(0.4), .float(0.6)]))
     }
 }
 

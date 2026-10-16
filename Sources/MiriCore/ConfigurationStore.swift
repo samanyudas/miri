@@ -57,7 +57,7 @@ public final class ConfigurationStore {
         change(&changed)
         try changed.validate()
         guard document != nil else { throw issue ?? .unreadable("Reload the file and try again.") }
-        try write(changed, reduceMotion: reduceMotion)
+        try write(changed, reduceMotion: reduceMotion, replacing: settings)
         settings = changed
     }
 
@@ -81,12 +81,29 @@ public final class ConfigurationStore {
         return text
     }
 
-    private func write(_ settings: MiriSettings, reduceMotion: Bool) throws(ConfigurationIssue) {
+    /// Writes `settings` into the file. A key the file defines in a form Miri does not rewrite is left alone, unless
+    /// writing it is what changing `previous` to `settings` needs, in which case the save fails and names the key.
+    ///
+    /// Without `previous`, as on load, a skipped engine key means a setting is not in effect, so Miri reports it and
+    /// writes nothing. The engine reads every table except `[miri]`.
+    private func write(_ settings: MiriSettings, reduceMotion: Bool, replacing previous: MiriSettings? = nil)
+        throws(ConfigurationIssue)
+    {
         guard let current = document else { return }
         let next: TOMLDocument
         do {
-            next = try settings.applied(
+            let applied = try settings.applying(
                 to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier)
+            if let previous {
+                let before = try previous.applying(
+                    to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier)
+                if let path = applied.skipped.subtracting(before.skipped).sorted().first {
+                    throw TOMLEditError.notEditable(path: path)
+                }
+            } else if let path = applied.skipped.filter({ !$0.hasPrefix("miri.") }).sorted().first {
+                throw TOMLEditError.notEditable(path: path)
+            }
+            next = applied.document
         } catch let error as TOMLEditError {
             throw .notEditable(error.description)
         } catch let error as ConfigurationIssue {
