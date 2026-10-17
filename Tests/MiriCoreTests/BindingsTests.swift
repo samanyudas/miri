@@ -542,6 +542,13 @@ struct DefaultBindingsTests {
         #expect(EngineCommand.canonical(key) == nil)
     }
 
+    @Test(arguments: ["quit_\u{301}", "window_center_\u{301}"])
+    func acceptsCommandAliasesSeparatedByScalarUnderscores(command: String) throws {
+        let (store, _) = try load("[bindings]\n\"\(command)\" = \"ctrl+alt-q\"\n")
+        #expect(store.issue == nil)
+        #expect(!store.stopShortcutIsFree)
+    }
+
     @Test func theEngineAcceptsEveryDefaultCommand() {
         for row in DefaultBinding.table { #expect(EngineCommand.canonical(row.command) != nil, "\(row.command)") }
     }
