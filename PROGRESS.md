@@ -76,39 +76,58 @@ The current milestone is the first production app slice: menu bar controls, engi
 
 ## Next
 
-PR #27 full-stop review fixed unversioned shortcut ownership, Stop ownership when another binding has an unknown key, and missing backups before default-version changes.
-The upgrade also preserves deleted version 1 resize shortcuts.
-Backups contain the exact original file under `config.toml.backups/`, and a backup failure leaves the configuration untouched.
-The real-file upgrade recorded on 16 October predates this backup implementation.
-At `0270e05`, `make check` passed with 73 Swift tests, 370 engine tests, both Accessibility selftests, and DMG packaging.
-The subsequent deleted-shortcut regression failed before the fix, and all 26 binding tests passed afterwards.
-At `be8207b`, the complete `make check` passed with 74 Swift tests, 370 engine tests, both Accessibility selftests, and DMG packaging.
-Sam is available for the remaining physical shortcut checks, and the disposable-window run has started.
-macOS currently reports only the built-in 2048 x 1332 display.
+PR #27 full-stop work is on `fix/open-issues` in `/Users/sam/.t3/projects/miri-fix-issues`.
+The branch fixes default upgrades, exact configuration backups, and Stop ownership for usable and rejected engine bindings.
+A deleted version 1 resize shortcut stays deleted.
+An unversioned file keeps its existing shortcuts.
+The real-file upgrade recorded on 16 October predates the backup implementation.
+
+The latest local source is `5b9ac13`.
+All 84 Swift tests in 14 suites pass, and strict formatting passes for the final scalar command-separator fix.
+Independent review cleared the final Stop parser changes at `5b9ac13`, and its targeted run passed all 36 binding tests.
+A signed candidate combines this Miri source with engine `5a0e74d` under `.audit/pr27-stop-final-build/`.
+It is prepared but has not replaced the running candidate.
+The complete `make check` and CI must run again after the final engine pin.
+The earlier full gate at `be8207b` passed with 74 Swift tests, 370 engine tests, both Accessibility selftests, and DMG packaging.
+The nine hosted checks at `9fc6c08` cover the earlier pushed source only.
+
+Sam's width check found a blank left margin after grow and shrink.
+The engine restored the width but moved the first column from x=4 to x=55.
+The engine fix preserves an already aligned outer column's viewport edge.
+Sam confirmed normal spacing on the signed `cb0f4ee` candidate.
+The observer recorded x=4 throughout a 508 to 610 to 508 point width roundtrip.
+
+Sam's stacked-height check found a bottom gap after growth.
+A native probe reproduced macOS accepting height 694 at the old origin before the engine moved the window upward for a requested height of 750.
+The engine fix commits native position before size and waits for settled geometry before verification.
+Sam confirmed the signed `5a0e74d` candidate grows and returns without the bottom gap.
+A controlled native probe measured heights 558, 622, and 558 with bottom y=1324 throughout.
+An initial automated after-probe lost focus and is excluded from the passing evidence.
+
+Both engine fixes are published in [samanyudas/paneru#11](https://github.com/samanyudas/paneru/pull/11) at `4de642f`.
+The PR remains open for Sam to review and merge.
+CodeRabbit skips review because the base is `miri/v0.5.2`.
+Independent source review found no production defects.
+The final test commit closes its two timing-test gaps.
+The engine's final test tree passed 40 configuration and 338 integration tests without Lua, and 51 configuration and 418 integration tests with Lua.
+Formatting and Clippy pass in both modes.
+PR #27 still pins published engine `0010611` until Sam merges the engine fix into `miri/v0.5.2`.
+
+Sam confirmed numbered and first/last-column jumps return to the lower last-focused member, Fixture 0.
+Sam confirmed ordinary Control-Option-Q stops management and subsequent resize input does nothing.
+The app relaunched with a new process and remained Stopped without an engine process.
+Sam also reproduced the rejected-reload defect: `hyper-h` leaves the engine managing while Control-Option-Q does nothing.
+The typed binding inspection fix retains the previous Stop owner when the engine rejects the bindings.
+Its final signed-app physical recheck and the mistyped-key check remain pending.
+
+The live disposable-window run currently uses `.audit/pr27-height-build/`, with Miri UI `be8207b` and engine `5a0e74d`.
 The original developer configuration is backed up in `.audit/pr27-hardware/original-config.toml` and must be restored after the run.
 The observer records fixture-only state in `.audit/pr27-hardware/observations.jsonl`.
-A later review reproduced valid multiline shortcut strings being rejected because Miri did not trim newlines as the engine does.
-The parser now trims whitespace and newlines for both validation and Stop chord ownership.
-All 75 Swift tests pass after that parser fix.
-The initial hardware build was `be8207b`, which has the same window commands and Stop implementation as `9fc6c08`.
-Sam's resize check exposed a real engine spacing defect after the test setup excluded T3 Code.
-The first column returned to its original width but shifted from x=4 to x=55, leaving a blank left margin.
-A local regression reproduces the same defect, and the candidate fix preserves the viewport edge of an already aligned outer column.
-The candidate is on local engine branch `fix/pr27-resize-edge` in `/private/tmp/miri-pr27-resize-edge`.
-The signed live candidate under `.audit/pr27-spacing-build/` contains engine `cb0f4ee`.
-Sam confirmed that spacing is fixed on 17 October 2026.
-The observer recorded Fixture 0 at x=4 throughout a 508 to 610 to 508 point width roundtrip.
-The engine fix is published as samanyudas/paneru#11 at `dc37510` and remains unmerged.
-PR #27 still pins `0010611` until the engine fix reaches `miri/v0.5.2`.
-The candidate passed 40 configuration and 331 integration tests without Lua, 51 configuration and 409 integration tests with Lua, and Clippy in both modes.
-An additional rapid-resize test passed at normal animation speed.
-At engine `dc37510`, the final suites passed with 40 configuration and 332 integration tests without Lua, and 51 configuration and 410 integration tests with Lua.
-Rust formatting and Clippy with warnings as errors also passed on that head.
-Sam's stack-height check then exposed a second native resize defect.
-The engine requested a 750-point native height, but macOS first accepted 694 points at the old lower origin.
-The subsequent upward move left a 56-point bottom gap.
-A focused real-window probe reproduces that mismatch after settling.
-The height fix and physical height signoff remain pending.
+Both displays are active with their top edges aligned.
+Quartz coordinates put the built-in display at x=-2048 and the external display at x=0.
+Sam reported that all four horizontal display actions worked.
+The observer did not cleanly track Fixture 0 through every step, so a one-transfer replay is pending.
+The vertical arrangement check remains pending.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
    To see every engine resize, log the old and new size in `WindowOS::resize` in `vendor/paneru/src/manager/windows.rs`.
@@ -116,8 +135,9 @@ The height fix and physical height signoff remain pending.
 3. Verify focused-window stacking in both directions on hardware, starting from a stack of three windows.
    The 16 October shortcut run covered stacking and pop-out in both directions with single-window columns only.
 4. Build the remaining v1 controls: the shortcut recorder and reset action, the gesture test, and pointer-targeted swipes.
-5. Test #23 East and West with the built-in display to the right of the external monitor.
-   Run the remaining shortcuts from #22, #24, #25, and #26 live.
+5. Finish the recorded #23 horizontal replay and vertical arrangement check.
+   Recheck the fixed #25 rejected reload and #26 mistyped key on the latest signed Miri candidate.
+   Restore the original configuration, quit the test app, and remove the owned fixture processes afterward.
 6. Decide Q6, the release duration, at the final check before publishing v1.
 7. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
 
@@ -127,4 +147,7 @@ The height fix and physical height signoff remain pending.
 
 ## Last verification
 
-See the verification section of the `feat/v1-app-core` PR.
+The final local Stop parser suite at `5b9ac13` passes 84 Swift tests in 14 suites.
+The final engine tree at `4de642f` passes both test modes and lint as recorded above.
+The final combined `make check`, hosted CI, and remaining physical checks are still pending.
+The append-only decision trail is `.audit/pr27-full-stop-20261017.tsv`.
