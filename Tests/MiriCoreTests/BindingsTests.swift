@@ -223,6 +223,26 @@ struct DefaultBindingsTests {
         #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(2))
     }
 
+    @Test func keepsUnversionedUserBindingsThatMatchRetiredDefaults() throws {
+        let original = """
+            [bindings]
+            window_grow = "ctrl+alt-equal"
+            window_shrink = "ctrl+alt-minus"
+            window_vertical_grow = "ctrl+alt+shift-equal"
+            window_vertical_shrink = "ctrl+alt+shift-minus"
+            """
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        #expect(document.text.hasPrefix(original + "\n"))
+        #expect(document.value(at: ["bindings", "window_grow"]) == .string("ctrl+alt-equal"))
+        #expect(document.value(at: ["bindings", "window_shrink"]) == .string("ctrl+alt-minus"))
+        #expect(document.value(at: ["bindings", "window_vertical_grow"]) == .string("ctrl+alt+shift-equal"))
+        #expect(document.value(at: ["bindings", "window_vertical_shrink"]) == .string("ctrl+alt+shift-minus"))
+        #expect(document.value(at: ["bindings", "window_step_grow"]) == nil)
+        #expect(document.value(at: ["bindings", "window_vertical_step_grow"]) == nil)
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(2))
+    }
+
     @Test(arguments: [
         ("ctrl+alt-lefarrow", "names the key \"lefarrow\""),
         ("ctrl+alt-", "names the key \"\""),
@@ -258,6 +278,18 @@ struct DefaultBindingsTests {
 
     @Test func noDefaultUsesTheStopChord() {
         #expect(!DefaultBinding.table.flatMap(\.chords).contains(DefaultBinding.stopChord))
+    }
+
+    @Test func theStopShortcutYieldsWhenAnotherBindingHasAnUnknownKey() throws {
+        let original = """
+            [bindings]
+            window_center = "ctrl+alt-q"
+            window_focus_west = "ctrl+alt-lefarrow"
+            """
+        let (store, _) = try load(original)
+        #expect(store.issue != nil)
+        #expect(!store.stopShortcutIsFree)
+        #expect(try String(contentsOf: url, encoding: .utf8) == original)
     }
 
     @Test func aRowWhoseChordsAreAllTakenStaysUnbound() throws {
