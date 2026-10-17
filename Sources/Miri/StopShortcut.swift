@@ -12,7 +12,6 @@ final class StopShortcut {
         self.action = action
     }
 
-    /// Registers the shortcut, or removes it so that a `[bindings]` entry on the same chord reaches the engine.
     func setEnabled(_ enabled: Bool) {
         if enabled, hotKey == nil {
             register()
@@ -36,7 +35,7 @@ final class StopShortcut {
                 return noErr
             }, 1, &type, context, &handler)
         guard status == noErr else { return }
-        let identifier = EventHotKeyID(signature: OSType(0x4D_69_72_69), id: 1)  // "Miri"
+        let identifier = EventHotKeyID(signature: OSType(0x4D_69_72_69), id: 1)
         let modifiers = UInt32(controlKey | optionKey)
         if RegisterEventHotKey(
             UInt32(Self.keyCode(for: DefaultBinding.stopChord.key)), modifiers, identifier,

@@ -31,7 +31,6 @@ def git(*args: str) -> subprocess.CompletedProcess:
 
 
 def key_name_problems() -> list[str]:
-    """Sources/MiriCore/EngineKey.swift lists the engine's key and modifier names, so they must match the engine."""
     engine = (ENGINE / "src/config.rs").read_text()
     swift = (ROOT / "Sources/MiriCore/EngineKey.swift").read_text()
     problems = []

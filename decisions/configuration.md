@@ -21,7 +21,10 @@ The [pinned-engine assessment](engine-v0.5.2-assessment.md) identifies standalon
 ## Configuration upgrades
 
 Configuration upgrades follow the accepted migration rule in [Release scope](release-scope.md#configuration).
-The migration schema and backup mechanism remain engineering work.
+General schema migrations remain engineering work.
+Default shortcut upgrades save the original file in `config.toml.backups/` beside `config.toml` before recording a new default version.
+Each backup has a unique filename, and a backup failure leaves the configuration file untouched.
+The initial default installation also backs up the file before adding its version marker.
 
 ## Accepted layout defaults
 

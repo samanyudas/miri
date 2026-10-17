@@ -43,6 +43,7 @@ public final class ConfigurationStore {
         do throws(ConfigurationIssue) {
             let parsed: TOMLDocument
             do { parsed = try TOMLDocument(text) } catch { throw .invalidTOML(error) }
+            stopShortcutIsFree = !DefaultBinding.binds(DefaultBinding.stopChord, in: parsed)
             let read = try MiriSettings(document: parsed)
             if let unreadable = DefaultBinding.firstUnreadableBinding(in: parsed) { throw unreadable }
             document = parsed
@@ -52,7 +53,6 @@ public final class ConfigurationStore {
         } catch {
             issue = error
         }
-        if let document { stopShortcutIsFree = !DefaultBinding.binds(DefaultBinding.stopChord, in: document) }
     }
 
     /// Validates and saves a change. On failure the file and the current settings stay unchanged.
@@ -123,6 +123,18 @@ public final class ConfigurationStore {
         // Refuse to replace a file that changed since Miri read it. The file watcher reloads it instead.
         guard (try? String(contentsOf: url, encoding: .utf8)) == current.text else {
             throw .unwritable("The file changed while Miri was saving. Miri reloaded it. Try again.")
+        }
+        let versionPath = ["miri", "default_bindings_version"]
+        if current.value(at: versionPath) != next.value(at: versionPath) {
+            do {
+                let backups = url.appendingPathExtension("backups")
+                try FileManager.default.createDirectory(at: backups, withIntermediateDirectories: true)
+                let backup = backups.appendingPathComponent(UUID().uuidString).appendingPathExtension("toml")
+                try Data(current.text.utf8).write(to: backup, options: .withoutOverwriting)
+            } catch {
+                throw .unwritable(
+                    "Miri could not back up the configuration before upgrading it. \(error.localizedDescription)")
+            }
         }
         do {
             try Data(next.text.utf8).write(to: url, options: .atomic)

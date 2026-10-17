@@ -134,7 +134,8 @@ Any action not listed here maps directly, and the live run confirmed it.
 | Toggle column between stacked and tabbed | | This action is deferred to v2. |
 
 Miri version 2 of the default set replaced the version 1 bindings `window_grow`, `window_shrink`, `window_vertical_grow`, and `window_vertical_shrink`.
-On upgrade, Miri removes each of those four only while it still has the exact value Miri wrote, and then adds the step command.
+On upgrade from a recorded version 1, Miri removes each of those four only while it still has the exact value Miri wrote, and then adds the step command.
+An unversioned file keeps its existing bindings, even when they match a retired default.
 A binding the user changed stays, and the step command gets only its free chords.
 
 ## Binding customization
