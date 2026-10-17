@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-16 by Claude on branch `fix/open-issues`
+Updated: 2026-10-17 by Claude on branch `fix/open-issues`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -54,15 +54,27 @@ The current milestone is the first production app slice: menu bar controls, engi
   A live run on 16 October 2026 sent all 43 bound chords as synthetic key events, and the engine ran each command.
   The engine's behavior differed from the accepted behavior only where the engine mapping records it, such as a numbered jump into a stacked column focusing the top window instead of the last-focused one.
   Some actions stay unbound or behave differently, as the [engine mapping](decisions/keybinding%20reference.md#engine-mapping) records.
-- `fix/open-issues` pins engine `a409c79` from samanyudas/paneru#9, which is not merged yet.
+- `fix/open-issues` pins engine `67debbc`, the squash merge of samanyudas/paneru#9 into `miri/v0.5.2`.
   The engine adds five-point resize steps (#22), directional display focus and move (#23), and column jumps that return to a stack's last-focused window (#24).
   It drops a binding whose key name it does not know, instead of binding the A key (#26).
   Vertical focus and swap no longer cross to another display at a column's edge.
+  Display focus preserves the selected virtual workspace and skips background native tabs.
+  The Lua display commands reject positional directions.
+  The merge also brought window-recovery fixes that preserve window state and geometry when an Accessibility handle is replaced.
   Miri's default set is now version 2. An upgrade replaces the four version 1 resize bindings only where they still have Miri's value.
   Miri reports a binding the engine cannot read, and owns ⌃⌥Q for Stop (#25).
   On 16 October 2026 the built app upgraded Sam's real version 1 file as designed, and the engine parsed all 51 bindings in it.
-  The screen was locked, so no shortcut was pressed live.
+- `67debbc` fails Rust 1.98.1 Clippy with `float_cmp` in `test_late_handle_keeps_width_ratio_after_active_display_changes`.
+  samanyudas/paneru#10 allows the exact comparison, as `test_scrolling_stop` already does.
+  Until it merges and `fix/open-issues` pins its merged commit, the `make engine-lint` step of PR #27 fails.
+  On 17 October 2026 at `67debbc`, `make lint`, Swift lint, 69 Swift tests, the app build, and both end-to-end checks passed.
 - A live run on 15 October 2026 on the built-in display only confirmed Start, 8-point gaps on all sides and between windows, Stop, crash recovery and restart, the three-crash limit, manual restart, and Quit.
+- A 16 October 2026 hardware run of the PR #9 engine used an external 2560 x 1440 monitor above the built-in display.
+  Sam confirmed horizontal growth and the South move, North focus, and South focus shortcuts.
+  The recorder saw Fixture 0 move between displays and grow from 500 to 756 points, which matches two 128-point steps.
+  Sam paused the run before the East and West check with the built-in display to the right of the monitor.
+  Evidence is in `.build/artifacts/pr9-hardware-evidence/`.
+  Test helpers remain in `.build/artifacts/pr9-hardware-runtime/` for that check and must be deleted afterwards.
 
 ## Next
 
@@ -72,8 +84,9 @@ The current milestone is the first production app slice: menu bar controls, engi
 3. Verify focused-window stacking in both directions on hardware, starting from a stack of three windows.
    The 16 October shortcut run covered stacking and pop-out in both directions with single-window columns only.
 4. Build the remaining v1 controls: the shortcut recorder and reset action, the gesture test, and pointer-targeted swipes.
-5. Merge samanyudas/paneru#9, then pin its merged commit in `fix/open-issues`.
-   Run the shortcuts from #22, #24, #25, and #26 live, and #23 with two displays in two arrangements.
+5. Merge samanyudas/paneru#10, then pin its merged commit in `fix/open-issues`.
+   Test #23 East and West with the built-in display to the right of the external monitor.
+   Run the remaining shortcuts from #22, #24, #25, and #26 live.
 6. Decide Q6, the release duration, at the final check before publishing v1.
 7. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
 
