@@ -329,6 +329,52 @@ struct DefaultBindingsTests {
         #expect(document.text.hasPrefix(original))
     }
 
+    @Test(arguments: ["", "ctrl+alt-c", "ctrl+alt-q"])
+    func droppedUppercaseKeyLeavesStopFree(initialChord: String) throws {
+        let (store, _) = try load("[bindings]\nwindow_center = \"\(initialChord)\"\n")
+        let replacement = "[bindings]\nwindow_center = \"ctrl+alt-Q\"\n"
+        try replacement.write(to: url, atomically: true, encoding: .utf8)
+
+        store.load(reduceMotion: false)
+
+        #expect(store.issue != nil)
+        #expect(store.stopShortcutIsFree)
+        #expect(try String(contentsOf: url, encoding: .utf8) == replacement)
+    }
+
+    @Test func droppedUppercaseKeyLeavesStopFreeOnFirstLoad() throws {
+        let (store, _) = try load("[bindings]\nwindow_center = \"ctrl+alt-Q\"\n")
+        #expect(store.issue != nil)
+        #expect(store.stopShortcutIsFree)
+    }
+
+    @Test(arguments: [
+        "\u{0009}", "\u{000A}", "\u{000B}", "\u{000C}", "\u{000D}", "\u{0020}", "\u{0085}", "\u{00A0}",
+        "\u{1680}", "\u{2000}", "\u{2001}", "\u{2002}", "\u{2003}", "\u{2004}", "\u{2005}", "\u{2006}",
+        "\u{2007}", "\u{2008}", "\u{2009}", "\u{200A}", "\u{2028}", "\u{2029}", "\u{202F}", "\u{205F}",
+        "\u{3000}",
+    ])
+    func trimsTheEnginesUnicodeWhitespace(whitespace: String) {
+        let text = "\(whitespace)ctrl\(whitespace)+\(whitespace)alt\(whitespace)-\(whitespace)q\(whitespace)"
+        #expect(EngineKey.problem(in: text) == nil)
+        #expect(Chord(engineText: text) == DefaultBinding.stopChord)
+    }
+
+    @Test func splitsASCIISeparatorsBeforeCombiningMarks() {
+        guard case .invalidModifier(_, let name) = EngineKey.problem(in: "ctrl+\u{301}alt-q") else {
+            Issue.record("expected an invalid modifier after the ASCII plus")
+            return
+        }
+        #expect(name == "\u{301}alt")
+        #expect(Chord(engineText: "ctrl+\u{301}alt-q") == nil)
+        guard case .unknownKey(_, let key) = EngineKey.problem(in: "ctrl+alt-\u{301}q") else {
+            Issue.record("expected a dropped key after the ASCII dash")
+            return
+        }
+        #expect(key == "\u{301}q")
+        #expect(Chord(engineText: "ctrl+alt-\u{301}q")?.modifiers == [.control, .option])
+    }
+
     @Test func noDefaultUsesTheStopChord() {
         #expect(!DefaultBinding.table.flatMap(\.chords).contains(DefaultBinding.stopChord))
     }
@@ -345,7 +391,11 @@ struct DefaultBindingsTests {
         #expect(try String(contentsOf: url, encoding: .utf8) == original)
     }
 
-    @Test(arguments: ["hyper-h", "Ctrl-h", "ctrl-alt-h"], [true, false])
+    @Test(
+        arguments: [
+            "hyper-h", "Ctrl-h", "ctrl-alt-h", "\u{200B}ctrl+alt-h", "\u{FEFF}ctrl+alt-h",
+            "hyper-\u{301}q", "ctrl-\u{301}alt-\u{301}q",
+        ], [true, false])
     func retainsStopShortcutOwnershipWhenTheEngineRejectsAReload(chord: String, wasFree: Bool) throws {
         let initialChord = wasFree ? "ctrl+alt-c" : "ctrl+alt-q"
         let (store, _) = try load("[bindings]\nwindow_center = \"\(initialChord)\"\n")
