@@ -129,7 +129,9 @@ The observer records fixture-only state in `.audit/pr27-hardware/observations.js
 Both displays are active with their top edges aligned.
 Quartz coordinates put the built-in display at x=-2048 and the external display at x=0.
 Sam reported that all four horizontal display actions worked.
-The observer did not cleanly track Fixture 0 through every step, so a one-transfer replay is pending.
+A controlled physical West move now confirms that only Fixture 0 transfers from external display 3 to built-in display 1, with focus following.
+The observer and native bounds match Sam's result.
+The East and West focus replay and East move are pending.
 The vertical arrangement check remains pending.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
