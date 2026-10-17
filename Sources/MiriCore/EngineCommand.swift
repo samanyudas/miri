@@ -8,7 +8,7 @@ enum EngineCommand {
     /// The engine's own spelling of the command a key names, such as `window_resize_grow` for `window_grow`.
     /// Returns `nil` for a key the engine rejects.
     static func canonical(_ key: String) -> String? {
-        let words = key.split(separator: "_", omittingEmptySubsequences: false).map(String.init)
+        let words = key.unicodeScalars.split(separator: "_", omittingEmptySubsequences: false).map { String($0) }
         return command(words)?.joined(separator: "_")
     }
 
