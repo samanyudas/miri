@@ -123,7 +123,7 @@ The native UI showed Stopped and the engine process exited.
 Sam also confirmed that Control-Option-A causes no movement for the intentional `lefarrow` typo.
 The valid fixture-only configuration is restored after both checks.
 
-The live disposable-window run now uses `.audit/pr27-stop-final-build/`, with Miri UI `5b9ac13` and engine `5a0e74d`.
+The disposable-window run used `.audit/pr27-stop-final-build/`, with Miri UI `5b9ac13` and engine `5a0e74d`.
 The original developer configuration is backed up in `.audit/pr27-hardware/original-config.toml` and must be restored after the run.
 The observer records fixture-only state in `.audit/pr27-hardware/observations.jsonl`.
 The horizontal run used top-aligned displays, with the built-in display at Quartz x=-2048 and the external display at x=0.
@@ -139,8 +139,19 @@ Native Quartz bounds confirm the external display at y=0 and the built-in displa
 Sam confirmed all four vertical compass actions, but the laptop's other fixtures moved off the left edge.
 Selecting the affected apps restored their positions.
 The vertical signoff is withheld while this strip-position defect is investigated.
-A controlled native replay is waiting for physical Fixture 0 focus, with evidence under `.audit/pr27-display-neighbours-*`.
+Two controlled native replays reproduce the defect, with zero off-screen laptop neighbours before the roundtrip and two afterward.
+Native x positions change from 8 to -495 and 516 to -725 while those windows remain on the laptop's native workspace.
+Evidence is under `.audit/pr27-display-neighbours-controlled-before{,2}.*`.
 Earlier automatic attempts had invalid focus or baseline visibility and are excluded from causal proof.
+
+Sam paused this task on 17 October and will explicitly ask to continue.
+The source diagnosis agent is interrupted, and no fix for the new strip-position defect has been written.
+The signed test app, helper, observer, and all four disposable fixtures are stopped.
+The original developer configuration is restored byte for byte.
+The valid disposable configuration is saved as `.audit/pr27-hardware/paused-fixture-config.toml`.
+The detailed restart instructions and pending source diagnosis are saved in `.audit/pr27-resume-20261017.md`.
+Both PRs are unwatched for this pause.
+Do not resume until Sam asks.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
    To see every engine resize, log the old and new size in `WindowOS::resize` in `vendor/paneru/src/manager/windows.rs`.
