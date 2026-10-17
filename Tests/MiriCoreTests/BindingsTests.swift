@@ -222,7 +222,9 @@ struct DefaultBindingsTests {
     @Test func deletedVersionOneResizeShortcutsStayDeletedAfterUpgrade() throws {
         let (store, document) = try load("[miri]\ndefault_bindings_version = 1\n")
         #expect(store.issue == nil)
-        for command in ["window_step_grow", "window_step_shrink", "window_vertical_step_grow", "window_vertical_step_shrink"] {
+        for command in [
+            "window_step_grow", "window_step_shrink", "window_vertical_step_grow", "window_vertical_step_shrink",
+        ] {
             #expect(document.value(at: ["bindings", command]) == nil)
         }
         #expect(document.value(at: ["bindings", "window_focusdisplay_west"]) == .string("ctrl+alt+cmd-a"))
