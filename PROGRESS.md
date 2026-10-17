@@ -90,7 +90,15 @@ The observer records fixture-only state in `.audit/pr27-hardware/observations.js
 A later review reproduced valid multiline shortcut strings being rejected because Miri did not trim newlines as the engine does.
 The parser now trims whitespace and newlines for both validation and Stop chord ownership.
 All 75 Swift tests pass after that parser fix.
-The running hardware build remains `be8207b`, which has the same window commands and Stop implementation.
+The initial hardware build was `be8207b`, which has the same window commands and Stop implementation as `9fc6c08`.
+Sam's resize check exposed a real engine spacing defect after the test setup excluded T3 Code.
+The first column returned to its original width but shifted from x=4 to x=55, leaving a blank left margin.
+A local regression reproduces the same defect, and the candidate fix preserves the viewport edge of an already aligned outer column.
+The candidate is on local engine branch `fix/pr27-resize-edge` in `/private/tmp/miri-pr27-resize-edge`.
+The signed live candidate under `.audit/pr27-spacing-build/` contains engine `cb0f4ee` and is awaiting Sam's spacing recheck.
+No engine fix has been published, and PR #27 still pins `0010611`.
+The candidate passed 40 configuration and 331 integration tests without Lua, 51 configuration and 409 integration tests with Lua, and Clippy in both modes.
+An additional rapid-resize test passed at normal animation speed.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
    To see every engine resize, log the old and new size in `WindowOS::resize` in `vendor/paneru/src/manager/windows.rs`.
