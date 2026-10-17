@@ -6,7 +6,7 @@ Actions this reference does not cover use Paneru's defaults, changed only where 
 These bindings define Miri's default set for new installations.
 Miri writes them to `[bindings]` from one table in `Sources/MiriCore/Bindings.swift`.
 On 16 October 2026 a live run on macOS 27 against engine `39def42` sent each bound shortcut as a synthetic key event, and each one ran its engine command.
-Engine `a409c79` adds the commands that run was missing: five-point resize steps, directional display focus and move, and column jumps that return to a stack's last-focused window.
+Engine `67debbc` adds the commands that run was missing: five-point resize steps, directional display focus and move, and column jumps that return to a stack's last-focused window.
 Stop window manager is Miri's own shortcut, not an engine binding.
 The remaining differences from the accepted behavior are in [Engine mapping](#engine-mapping).
 
@@ -117,7 +117,7 @@ Clicking a window on another display also changes focus.
 
 ## Engine mapping
 
-This table maps each accepted action to the command that the pinned engine `a409c79` runs.
+This table maps each accepted action to the command that the pinned engine `67debbc` runs.
 A blank engine command means that Miri leaves the action unbound.
 Any action not listed here maps directly, and the live run confirmed it.
 
