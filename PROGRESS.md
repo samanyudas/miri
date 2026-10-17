@@ -126,8 +126,7 @@ The valid fixture-only configuration is restored after both checks.
 The live disposable-window run now uses `.audit/pr27-stop-final-build/`, with Miri UI `5b9ac13` and engine `5a0e74d`.
 The original developer configuration is backed up in `.audit/pr27-hardware/original-config.toml` and must be restored after the run.
 The observer records fixture-only state in `.audit/pr27-hardware/observations.jsonl`.
-Both displays are active with their top edges aligned.
-Quartz coordinates put the built-in display at x=-2048 and the external display at x=0.
+The horizontal run used top-aligned displays, with the built-in display at Quartz x=-2048 and the external display at x=0.
 Sam reported that all four horizontal display actions worked.
 A controlled physical West move now confirms that only Fixture 0 transfers from external display 3 to built-in display 1, with focus following.
 The observer and native bounds match Sam's result.
@@ -135,7 +134,9 @@ Sam confirmed the controlled East focus, West focus, and East move.
 The observer recorded focus from Fixture 0 on display 1 to Fixture 3 on display 3, back to Fixture 0 on display 1, then Fixture 0 moving to display 3 with focus following.
 These horizontal checks passed on the current signed candidate.
 A window query's `display_id` describes geometric visibility, so it does not prove ownership changes for off-screen neighbouring windows.
-The vertical arrangement check remains pending.
+Sam has arranged the external display directly above the laptop with left edges aligned.
+Native Quartz bounds confirm the external display at y=0 and the built-in display at y=1440.
+The vertical focus and move check is in progress.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
    To see every engine resize, log the old and new size in `WindowOS::resize` in `vendor/paneru/src/manager/windows.rs`.
