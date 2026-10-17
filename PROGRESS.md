@@ -149,9 +149,10 @@ Sam paused this task on 17 October and asked to continue on 18 October.
 Both PRs remain open, draft, and unwatched while the new engine fix is completed.
 The current user configuration was backed up as `.audit/pr27-hardware/resume-original-config-20261018.toml` and matches the original.
 The display arrangement still has the external monitor above the laptop.
-The interim `649915f` candidate is stopped after native verification.
-The original developer configuration is restored byte for byte from the 18 October backup.
-All four disposable fixture apps remain open for the next candidate.
+A new signed candidate combines Miri UI `5b9ac13` with engine `51f0c5c` under `.audit/pr27-neighbours-r3-build/`.
+The candidate is running with the valid disposable configuration for Sam's physical recheck.
+The original developer configuration was restored between candidates and remains backed up byte for byte.
+All four disposable fixture apps are open, and the fixture-only observer is running.
 
 The effective configuration uses continuous scrolling by default, which skips the existing whole-strip edge clamp.
 Engine commit `a90bdd0` adds the exact roundtrip regression through the real display and layout systems.
@@ -173,11 +174,39 @@ This is native command evidence, not Sam's physical shortcut signoff.
 Independent Claude Opus 5.5 source review found a Medium stale-Center regression and a Low animated-focus regression in noncontinuous mode.
 A native run confirms that Center followed by removal leaves survivors at x=578 instead of the fixed left edge x=4.
 The native attempt for the second finding used an explicit focus command, which adds its own reshuffle, so it is excluded from causal proof.
-A fresh engine writer is reproducing the native-focus-event case and positive hidden-window tolerance in the real test systems.
-The first source-review round was cancelled after the generic projection candidate failed existing tests.
-The completed source verdict and exact provider/model receipt are `.audit/pr27-neighbours-review-r2.json`.
+Engine `23a2dc4` commits the configuration-mode regression tests before their fixes.
+Engine `187a916` keeps the existing noncontinuous edge-rule result as the source fitting seed.
+Engine `51f0c5c` computes tolerated visibility at the pending strip target during continuous focus animation.
+It uses the moving size and adds no persistent state, request field, system, accessor, or configuration option.
+A rejected guard that disabled the path for positive tolerance reintroduced source clipping during Stay.
+Its patch, command, hashes, and failed log are saved separately under `.audit/pr27-neighbours-r3-rejected-zero-guard.*`.
+
+The exact final tree passes 51 configuration plus 431 engine tests with Lua, and 40 plus 351 without Lua.
+Both Clippy modes and formatting pass under Rust 1.98.1.
+The exact commands, source hashes, and immutable final log hashes are in `.audit/pr27-neighbours-r3-verification.json`.
+The signed final candidate passes the fixed-edge Center-removal replay and returns the native left edge to x=8.
+It also passes the wider default roundtrip with actual transfers and focus following.
+The laptop columns return to x=4, 514, and 1406, with no native window outside the laptop display after Fixture 0 leaves.
+These are native command checks, not physical shortcut proof.
+Sam confirmed that the vertical commands work on the signed `51f0c5c` candidate.
+He reported an empty area to the right of Fixture 0 after it arrives on the laptop.
+The recorder confirms an 811-point gap between the arriving column and the usable right edge.
+The engine appends the window last but centers its old source width before the delayed target resize.
+Arrival placement is being designed so an overflowing destination finishes against the right edge with automatic centering off.
+Vertical signoff remains withheld.
+
+Independent round 3 review closed the prior findings and found one maximum-hidden-tolerance focus defect.
+Engine `e28c1c6` adds its failing regression and `84b349a` applies the projected movement condition.
+A further boundary regression at `b7ba8c8` proves exact left and right viewport contact still leaves the focused window hidden during animation.
+Engine `97d7ac9` requires positive visible width before accepting the projected tolerance.
+Both full modes pass at that head: 51 configuration plus 433 engine tests with Lua, and 40 plus 353 without Lua.
+Both Clippy modes and formatting pass.
+The current signed desktop candidate is still `51f0c5c`, so those later maximum-tolerance changes have automated proof only.
+The cross-model trail audit found stale status labels, missing checkpoint rows, and a reconstructed rejected-guard receipt.
+Append-only correction rows identify the current run, preserve the original observations, and mark interim final labels superseded.
+The earlier cancelled source review and completed round 2 findings remain recorded separately.
 No new engine commits have been pushed.
-Final source review, a new native pass, Sam's physical recheck, engine publication and merge, and the Miri final pin gate remain pending.
+Engine publication and Sam's merge, the Miri pin, and the final combined gate remain pending.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
    To see every engine resize, log the old and new size in `WindowOS::resize` in `vendor/paneru/src/manager/windows.rs`.
@@ -197,7 +226,8 @@ Final source review, a new native pass, Sam's physical recheck, engine publicati
 ## Last verification
 
 The final local Stop parser suite at `5b9ac13` passes 84 Swift tests in 14 suites.
-Engine `649915f` passes both test modes and lint as recorded above.
-Its native continuous roundtrip passes, but independent review found two configuration-mode regressions that are being fixed.
+Engine `51f0c5c` passes both test modes, lint, and the native replays recorded above.
+Engine `97d7ac9` passes both test modes and lint, but native checks still run the earlier signed candidate.
+Arrival placement, consolidated independent review, Sam's clean vertical result, and dependency publication remain pending.
 The final combined `make check`, hosted CI, and remaining physical checks are still pending.
 The append-only decision trail is `.audit/pr27-full-stop-20261017.tsv`.
