@@ -190,7 +190,6 @@ struct DefaultBindingsTests {
         #expect(bindings?["window_manage"] == .string("ctrl+alt-t"))
     }
 
-    /// Version 2 moved the resize shortcuts to five-point steps (miri#22) and added the display shortcuts (miri#23).
     @Test func aVersionOneFileMovesUnchangedResizeDefaultsAndKeepsChangedOnes() throws {
         let original = """
             [bindings]
@@ -206,17 +205,14 @@ struct DefaultBindingsTests {
         let (store, document) = try load(original)
         #expect(store.issue == nil)
         let bindings = document.value(at: ["bindings"])
-        // Unchanged since Miri wrote them, so the step commands take their chords.
         #expect(bindings?["window_grow"] == nil)
         #expect(bindings?["window_step_grow"] == .string("ctrl+alt-equal"))
         #expect(bindings?["window_vertical_shrink"] == nil)
         #expect(bindings?["window_vertical_step_shrink"] == .string("ctrl+alt+shift-minus"))
-        // Changed by the user, so they stay, and a step command gets only a free chord.
         #expect(bindings?["window_shrink"] == .string("alt-minus"))
         #expect(bindings?["window_step_shrink"] == .string("ctrl+alt-minus"))
         #expect(bindings?["window_vertical_grow"] == .array([.string("ctrl+alt+shift-equal"), .string("fn-f1")]))
         #expect(bindings?["window_vertical_step_grow"] == nil)
-        // Version 1 rows are not offered again.
         #expect(bindings?["window_focus_east"] == nil)
         #expect(bindings?["window_focusdisplay_west"] == .string("ctrl+alt+cmd-a"))
         #expect(bindings?["window_movedisplay_east"] == .string("ctrl+alt+cmd+shift-d"))
@@ -241,6 +237,44 @@ struct DefaultBindingsTests {
         #expect(document.value(at: ["bindings", "window_step_grow"]) == nil)
         #expect(document.value(at: ["bindings", "window_vertical_step_grow"]) == nil)
         #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(2))
+    }
+
+    @Test func backsUpTheOriginalFileBeforeUpgradingDefaults() throws {
+        let original = """
+            # My shortcuts.
+            [bindings]
+            window_grow = "ctrl+alt-equal"
+            [miri]
+            default_bindings_version = 1
+            """
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        #expect(document.value(at: ["bindings", "window_grow"]) == nil)
+        let backupDirectory = url.appendingPathExtension("backups")
+        let manager = FileManager.default
+        #expect(manager.fileExists(atPath: backupDirectory.path))
+        guard manager.fileExists(atPath: backupDirectory.path) else { return }
+        let backups = try manager.contentsOfDirectory(at: backupDirectory, includingPropertiesForKeys: nil)
+        #expect(backups.count == 1)
+        let backup = try #require(backups.first)
+        #expect(try String(contentsOf: backup, encoding: .utf8) == original)
+        store.load(reduceMotion: false)
+        #expect(store.issue == nil)
+        #expect(try manager.contentsOfDirectory(at: backupDirectory, includingPropertiesForKeys: nil) == backups)
+    }
+
+    @Test func leavesTheOriginalFileUntouchedWhenItsBackupCannotBeCreated() throws {
+        let original = "[miri]\ndefault_bindings_version = 1\n"
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let backupDirectory = url.appendingPathExtension("backups")
+        try "occupied".write(to: backupDirectory, atomically: true, encoding: .utf8)
+        let (store, _) = try load(original)
+        guard case .unwritable = store.issue else {
+            Issue.record("expected a backup write failure, got \(String(describing: store.issue))")
+            return
+        }
+        #expect(try String(contentsOf: url, encoding: .utf8) == original)
+        #expect(try String(contentsOf: backupDirectory, encoding: .utf8) == "occupied")
     }
 
     @Test(arguments: [
