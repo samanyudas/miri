@@ -268,9 +268,16 @@ Sam's engine merge, the Miri pin, and the final combined gate remain pending.
 The trail review's seven flags and append-only responses are recorded locally.
 The parent chose synchronous sizing after native experiments, and no completed design judge approved that final pivot.
 Source review R4 assessed the final implementation and found no production defects.
-An optional follow-up diagnosis hit the Claude API rate limit and produced no verdict.
-The earlier fixed-edge ECS x=5 versus native x=8 observation remains unexplained.
-A new speed-14 replay reports exact ECS x=4 and native x=8.
+The optional follow-up diagnosis initially hit the Claude API rate limit, then completed after T3 resumed it.
+Claude Opus 5.5 traced the fixed-edge ECS x=5 versus native x=8 observation to the existing odd-size conversion in `irect_from`.
+The parent independently verified that conversion against all 32 fixture observations in eight saved snapshots.
+The conversion is unchanged from published base `0010611` and also explains observations from the earlier `51f0c5c` run.
+Odd integer dimensions lose one point when the rectangle is rebuilt from its rounded centre and integer half-size.
+The native left edge remains correct, but the observed gap is seven points instead of eight.
+A new speed-14 replay reports exact ECS x=4 and native x=8 because its native widths are even.
+The exact origin of the odd width and the native event that refreshed the cached frame remain inferred.
+The existing precision defect is tracked separately in [#28](https://github.com/samanyudas/miri/issues/28) and does not block this engine PR.
+The source diagnosis and parent verification are `.audit/pr27-fixed-edge-one-point-diagnosis-completed.json` and `.audit/pr27-fixed-edge-rounding-parent-verification.json`.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
    To see every engine resize, log the old and new size in `WindowOS::resize` in `vendor/paneru/src/manager/windows.rs`.
