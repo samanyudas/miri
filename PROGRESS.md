@@ -226,18 +226,30 @@ The first fixed-edge assertion rejected ECS x=5 instead of x=4 while the actual 
 A separate replay passes with the same one-point ECS tolerance used by the arrival probe and the exact native x=8 requirement.
 The exclusions and correction are recorded in `.audit/pr27-arrival-native-setup-exclusions.json`.
 After the native checks, the app and helper were stopped and the original configuration was restored byte for byte.
-The same signed `6e572ea` build is now running again with the valid disposable configuration for Sam's physical recheck.
-The baseline confirms Fixture 0 above and all three laptop neighbours fully visible.
-The fixture-only observer is running.
-The exact original configuration remains backed up for restoration after the checks.
+The same signed `6e572ea` build was relaunched with the valid disposable configuration for Sam's physical recheck.
+The baseline confirmed Fixture 0 above and all three laptop neighbours fully visible.
+The fixture-only observer recorded the check.
+The exact original configuration remained backed up throughout.
 Sam physically confirmed all four vertical actions at `6e572ea`, with focus following both moves, right-edge arrival, and fully visible laptop neighbours after return.
 The observer records the matching focus and transfer sequence, and the final native bounds confirm all three laptop neighbours are visible.
 Two additional user transfer transitions occurred after the prescribed return and are retained in the evidence.
-No programmatic movement occurred after the physical question.
+No programmatic movement occurred while Sam performed the vertical check.
 The confirmation is `.audit/pr27-hardware/vertical-6e572ea-confirmation.json`.
-The earlier horizontal physical result covers engine `4de642f`, so it does not prove native sizing without the delay.
-Sam has been asked to place the laptop left of the external monitor, with their top edges aligned, for a refreshed horizontal check.
-Vertical signoff is complete at `6e572ea`, while refreshed horizontal signoff remains pending.
+Sam also physically confirmed the horizontal check at `6e572ea`, with the laptop left of the external monitor and top edges aligned.
+Both focus changes worked, both moves kept Fixture 0 focused, and the arriving window reached the laptop's usable right edge.
+All three laptop neighbours were fully visible after Fixture 0 returned right.
+The confirmation and matching observer sequence are `.audit/pr27-hardware/horizontal-6e572ea-confirmation.json`.
+Both physical arrangement checks used the disposable configuration's animation speed `1000`.
+The trail review correctly identified that this did not test the historical delayed-resize concern at Sam's normal animation speed `14`.
+Native replays now pass at speed `14` with both Fixture 0 and a disposable TextEdit document in both arrangements.
+The observer records intermediate animation frames, and all eight destination bottom edges have zero native gap.
+Those native replays also confirm right-edge arrival, focus following, and visible source neighbours after return.
+Their evidence is `.audit/pr27-arrival-speed14-verification.json` and is separate from physical keyboard proof.
+The original configuration is now restored byte for byte.
+The test app, helper, observer, and all four owned fixture processes are stopped.
+Only the disposable TextEdit document was closed, and the pre-existing TextEdit application remains running.
+The laptop-left, top-aligned display arrangement is restored and verified in Quartz coordinates.
+The cleanup receipt is `.audit/pr27-hardware/horizontal-final-restored-20261018.json`.
 
 Independent round 3 review closed the prior findings and found one maximum-hidden-tolerance focus defect.
 Engine `e28c1c6` adds its failing regression and `84b349a` applies the projected movement condition.
@@ -250,9 +262,15 @@ The cross-model trail audit found stale status labels, missing checkpoint rows, 
 Append-only correction rows identify the current run, preserve the original observations, and mark interim final labels superseded.
 The earlier cancelled source review and completed round 2 findings remain recorded separately.
 Engine `6e572ea` is now pushed to samanyudas/paneru#11.
-Its description records the source and native proof, Sam's vertical pass, and the pending horizontal check.
-The engine PR remains draft, open, and unmerged, with auto-merge disabled.
-Engine publication and Sam's merge, the Miri pin, and the final combined gate remain pending.
+Its description records both physical passes, the speed-14 native evidence, and the remaining limits.
+The engine PR is ready for review, mergeable, open, and unmerged, with auto-merge disabled.
+Sam's engine merge, the Miri pin, and the final combined gate remain pending.
+The trail review's seven flags and append-only responses are recorded locally.
+The parent chose synchronous sizing after native experiments, and no completed design judge approved that final pivot.
+Source review R4 assessed the final implementation and found no production defects.
+An optional follow-up diagnosis hit the Claude API rate limit and produced no verdict.
+The earlier fixed-edge ECS x=5 versus native x=8 observation remains unexplained.
+A new speed-14 replay reports exact ECS x=4 and native x=8.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
    To see every engine resize, log the old and new size in `WindowOS::resize` in `vendor/paneru/src/manager/windows.rs`.
@@ -260,8 +278,8 @@ Engine publication and Sam's merge, the Miri pin, and the final combined gate re
 3. Verify focused-window stacking in both directions on hardware, starting from a stack of three windows.
    The 16 October shortcut run covered stacking and pop-out in both directions with single-window columns only.
 4. Build the remaining v1 controls: the shortcut recorder and reset action, the gesture test, and pointer-targeted swipes.
-5. Finish the #23 vertical arrangement check.
-   Restore the original configuration, quit the test app, and remove the owned fixture processes afterward.
+5. After Sam merges engine PR #11, pin its published engine and rerun `make setup`, `make check`, and hosted CI.
+   Both display arrangements passed, and the original configuration and laptop-left arrangement are restored.
 6. Decide Q6, the release duration, at the final check before publishing v1.
 7. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
 
@@ -278,7 +296,10 @@ The tests-only arrival regression at `6c42b1b` fails as expected while all exist
 Engine `6e572ea` passes both full test and lint modes, the exact-head native checks, and independent source review.
 Native width constraints can still change the final edge after an app refuses a requested size.
 The maximum-width test proves reconciliation and marker cleanup, not right-edge repair after refusal.
-Sam's clean vertical result is recorded at `6e572ea`.
-Refreshed horizontal verification, the engine dependency merge, and the published Miri pin remain pending.
-The final combined `make check`, hosted CI, and remaining physical checks are still pending.
+A transfer during an existing resize derives its destination ratio from the intermediate width.
+Sam's clean vertical and horizontal results are recorded at `6e572ea` with fixture animation speed `1000`.
+Native checks with Fixture 0 and TextEdit also pass in both arrangements at speed `14`.
+All hosted checks pass at Miri `36bec2e`, which still pins engine `0010611`.
+The engine dependency merge and the published Miri pin remain pending.
+The final combined `make check` and hosted CI must run again after that pin.
 The append-only decision trail is `.audit/pr27-full-stop-20261017.tsv`.
