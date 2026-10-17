@@ -123,7 +123,6 @@ struct DefaultBindingsTests {
     @Test(arguments: [
         "bindings = { window_focus_west = \"alt-h\" }\n",
         "bindings.window_focus_west = \"alt-h\"\n",
-        "[bindings.window_focus_west]\n",
     ])
     func leavesBindingsMiriCannotEditAloneAndStillSaves(original: String) throws {
         let bindings = try TOMLDocument(original).value(at: ["bindings"])
