@@ -4,25 +4,42 @@
 /// modifiers with `parse_modifiers` (line 1736), and looks the key up with `keycode_for_key_name` (line 1718).
 /// Names are case-sensitive. `scripts/check-compat.py` checks the name lists below against the engine's tables.
 enum EngineKey {
-    static func problem(in text: String) -> String? {
+    enum Problem {
+        case extraDash(text: String)
+        case invalidModifier(text: String, name: String)
+        case unknownKey(text: String, name: String)
+
+        var message: String {
+            switch self {
+            case .extraDash(let text):
+                "\"\(text)\" has more than one dash. Write the modifiers joined by +, then one dash and the key."
+            case .invalidModifier(let text, let name):
+                "\"\(text)\" names the modifier \"\(name)\", which the engine does not know. "
+                    + "Use ctrl, alt, cmd, shift, or fn."
+            case .unknownKey(let text, let name):
+                "\"\(text)\" names the key \"\(name)\", which the engine does not know, so the shortcut does nothing. "
+                    + "Use a key name such as leftarrow, equal, or h."
+            }
+        }
+    }
+
+    static func problem(in text: String) -> Problem? {
         var parts = text.split(separator: "-", omittingEmptySubsequences: false).map {
             $0.trimmingCharacters(in: .whitespacesAndNewlines)
         }
         let key = parts.removeLast()
         guard parts.count <= 1 else {
-            return "\"\(text)\" has more than one dash. Write the modifiers joined by +, then one dash and the key."
+            return .extraDash(text: text)
         }
         if let modifiers = parts.first {
             for name in modifiers.split(separator: "+", omittingEmptySubsequences: false).map({
                 $0.trimmingCharacters(in: .whitespacesAndNewlines)
             }) where !modifierNames.contains(name) {
-                return "\"\(text)\" names the modifier \"\(name)\", which the engine does not know. "
-                    + "Use ctrl, alt, cmd, shift, or fn."
+                return .invalidModifier(text: text, name: name)
             }
         }
         guard !isPlausible(key) else { return nil }
-        return "\"\(text)\" names the key \"\(key)\", which the engine does not know, so the shortcut does nothing. "
-            + "Use a key name such as leftarrow, equal, or h."
+        return .unknownKey(text: text, name: key)
     }
 
     /// A named key, or a single character, which the engine reads from the current keyboard layout
