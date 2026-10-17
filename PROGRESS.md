@@ -136,7 +136,11 @@ These horizontal checks passed on the current signed candidate.
 A window query's `display_id` describes geometric visibility, so it does not prove ownership changes for off-screen neighbouring windows.
 Sam has arranged the external display directly above the laptop with left edges aligned.
 Native Quartz bounds confirm the external display at y=0 and the built-in display at y=1440.
-The vertical focus and move check is in progress.
+Sam confirmed all four vertical compass actions, but the laptop's other fixtures moved off the left edge.
+Selecting the affected apps restored their positions.
+The vertical signoff is withheld while this strip-position defect is investigated.
+A controlled native replay is waiting for physical Fixture 0 focus, with evidence under `.audit/pr27-display-neighbours-*`.
+Earlier automatic attempts had invalid focus or baseline visibility and are excluded from causal proof.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
    To see every engine resize, log the old and new size in `WindowOS::resize` in `vendor/paneru/src/manager/windows.rs`.
