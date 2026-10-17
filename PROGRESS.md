@@ -228,11 +228,16 @@ The exclusions and correction are recorded in `.audit/pr27-arrival-native-setup-
 After the native checks, the app and helper were stopped and the original configuration was restored byte for byte.
 The same signed `6e572ea` build is now running again with the valid disposable configuration for Sam's physical recheck.
 The baseline confirms Fixture 0 above and all three laptop neighbours fully visible.
-The fixture-only observer is running, and Sam's vertical question is pending.
+The fixture-only observer is running.
 The exact original configuration remains backed up for restoration after the checks.
-Sam has not physically tested this new implementation.
+Sam physically confirmed all four vertical actions at `6e572ea`, with focus following both moves, right-edge arrival, and fully visible laptop neighbours after return.
+The observer records the matching focus and transfer sequence, and the final native bounds confirm all three laptop neighbours are visible.
+Two additional user transfer transitions occurred after the prescribed return and are retained in the evidence.
+No programmatic movement occurred after the physical question.
+The confirmation is `.audit/pr27-hardware/vertical-6e572ea-confirmation.json`.
 The earlier horizontal physical result covers engine `4de642f`, so it does not prove native sizing without the delay.
-Vertical signoff remains withheld.
+Sam has been asked to place the laptop left of the external monitor, with their top edges aligned, for a refreshed horizontal check.
+Vertical signoff is complete at `6e572ea`, while refreshed horizontal signoff remains pending.
 
 Independent round 3 review closed the prior findings and found one maximum-hidden-tolerance focus defect.
 Engine `e28c1c6` adds its failing regression and `84b349a` applies the projected movement condition.
@@ -244,7 +249,9 @@ The maximum-tolerance changes have automated proof, while native replays use the
 The cross-model trail audit found stale status labels, missing checkpoint rows, and a reconstructed rejected-guard receipt.
 Append-only correction rows identify the current run, preserve the original observations, and mark interim final labels superseded.
 The earlier cancelled source review and completed round 2 findings remain recorded separately.
-No new engine commits have been pushed.
+Engine `6e572ea` is now pushed to samanyudas/paneru#11.
+Its description records the source and native proof, Sam's vertical pass, and the pending horizontal check.
+The engine PR remains draft, open, and unmerged, with auto-merge disabled.
 Engine publication and Sam's merge, the Miri pin, and the final combined gate remain pending.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
@@ -271,6 +278,7 @@ The tests-only arrival regression at `6c42b1b` fails as expected while all exist
 Engine `6e572ea` passes both full test and lint modes, the exact-head native checks, and independent source review.
 Native width constraints can still change the final edge after an app refuses a requested size.
 The maximum-width test proves reconciliation and marker cleanup, not right-edge repair after refusal.
-Sam's clean vertical result, refreshed horizontal verification, and dependency publication remain pending.
+Sam's clean vertical result is recorded at `6e572ea`.
+Refreshed horizontal verification, the engine dependency merge, and the published Miri pin remain pending.
 The final combined `make check`, hosted CI, and remaining physical checks are still pending.
 The append-only decision trail is `.audit/pr27-full-stop-20261017.tsv`.
