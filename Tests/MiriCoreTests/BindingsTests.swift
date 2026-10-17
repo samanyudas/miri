@@ -368,6 +368,73 @@ struct DefaultBindingsTests {
         #expect(try String(contentsOf: url, encoding: .utf8) == replacement)
     }
 
+    @Test(
+        arguments: [
+            "window_missing = \"ctrl+alt-h\"",
+            "window_missing = \"ctrl+alt-lefarrow\"",
+            "window_focus_west = 1",
+            "window_focus_west = true",
+            "window_focus_west = { key = \"ctrl+alt-h\" }",
+            "window_focus_west = [\"ctrl+alt-lefarrow\", 1]",
+            "window_focus_west = [\"ctrl+alt-lefarrow\", \"hyper-h\"]",
+        ], [true, false])
+    func rejectsBindingRowsWithoutChangingStopOwnership(row: String, wasFree: Bool) throws {
+        let initialChord = wasFree ? "ctrl+alt-c" : "ctrl+alt-q"
+        let (store, _) = try load("[bindings]\nwindow_center = \"\(initialChord)\"\n")
+        try #require(store.issue == nil)
+        let previousSettings = store.settings
+        let replacementChord = wasFree ? "ctrl+alt-q" : "ctrl+alt-c"
+        let replacement = "[bindings]\nwindow_center = \"\(replacementChord)\"\n\(row)\n"
+        try replacement.write(to: url, atomically: true, encoding: .utf8)
+
+        store.load(reduceMotion: false)
+
+        guard case .invalidValue(let key, _) = store.issue else {
+            Issue.record("expected an invalid binding, got \(String(describing: store.issue))")
+            return
+        }
+        #expect(key == "bindings.\(row.components(separatedBy: " = ")[0])")
+        #expect(store.stopShortcutIsFree == wasFree)
+        #expect(store.settings == previousSettings)
+        #expect(try String(contentsOf: url, encoding: .utf8) == replacement)
+        #expect(throws: ConfigurationIssue.self) { try store.update(reduceMotion: false) { $0.innerGap = 12 } }
+        #expect(try String(contentsOf: url, encoding: .utf8) == replacement)
+    }
+
+    @Test(arguments: ["[]", "1", "\"ctrl+alt-q\""], [true, false])
+    func rejectsANonTableBindingsSectionWithoutChangingStopOwnership(value: String, wasFree: Bool) throws {
+        let initialChord = wasFree ? "ctrl+alt-c" : "ctrl+alt-q"
+        let (store, _) = try load("[bindings]\nwindow_center = \"\(initialChord)\"\n")
+        try #require(store.issue == nil)
+        let replacement = "bindings = \(value)\n"
+        try replacement.write(to: url, atomically: true, encoding: .utf8)
+
+        store.load(reduceMotion: false)
+
+        guard case .invalidValue(let key, _) = store.issue else {
+            Issue.record("expected an invalid bindings section, got \(String(describing: store.issue))")
+            return
+        }
+        #expect(key == "bindings")
+        #expect(store.stopShortcutIsFree == wasFree)
+        #expect(try String(contentsOf: url, encoding: .utf8) == replacement)
+    }
+
+    @Test(arguments: ["", "window_missing = []\n"], [true, false])
+    func acceptedReloadChangesStopOwnership(emptyRow: String, wasFree: Bool) throws {
+        let initialChord = wasFree ? "ctrl+alt-c" : "ctrl+alt-q"
+        let (store, _) = try load("[bindings]\nwindow_center = \"\(initialChord)\"\n")
+        try #require(store.issue == nil)
+        let replacementChord = wasFree ? "ctrl+alt-q" : "ctrl+alt-c"
+        let replacement = "[bindings]\nwindow_center = \"\(replacementChord)\"\n\(emptyRow)"
+        try replacement.write(to: url, atomically: true, encoding: .utf8)
+
+        store.load(reduceMotion: false)
+
+        #expect(store.issue == nil)
+        #expect(store.stopShortcutIsFree == !wasFree)
+    }
+
     @Test func aRowWhoseChordsAreAllTakenStaysUnbound() throws {
         let (store, document) = try load("[bindings]\nquit = [\"ctrl+alt-leftarrow\", \"ctrl+alt-h\"]\n")
         #expect(store.issue == nil)
