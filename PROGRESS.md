@@ -131,7 +131,10 @@ Quartz coordinates put the built-in display at x=-2048 and the external display 
 Sam reported that all four horizontal display actions worked.
 A controlled physical West move now confirms that only Fixture 0 transfers from external display 3 to built-in display 1, with focus following.
 The observer and native bounds match Sam's result.
-The East and West focus replay and East move are pending.
+Sam confirmed the controlled East focus, West focus, and East move.
+The observer recorded focus from Fixture 0 on display 1 to Fixture 3 on display 3, back to Fixture 0 on display 1, then Fixture 0 moving to display 3 with focus following.
+These horizontal checks passed on the current signed candidate.
+A window query's `display_id` describes geometric visibility, so it does not prove ownership changes for off-screen neighbouring windows.
 The vertical arrangement check remains pending.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
@@ -140,7 +143,7 @@ The vertical arrangement check remains pending.
 3. Verify focused-window stacking in both directions on hardware, starting from a stack of three windows.
    The 16 October shortcut run covered stacking and pop-out in both directions with single-window columns only.
 4. Build the remaining v1 controls: the shortcut recorder and reset action, the gesture test, and pointer-targeted swipes.
-5. Finish the recorded #23 horizontal replay and vertical arrangement check.
+5. Finish the #23 vertical arrangement check.
    Restore the original configuration, quit the test app, and remove the owned fixture processes afterward.
 6. Decide Q6, the release duration, at the final check before publishing v1.
 7. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
