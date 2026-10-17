@@ -150,9 +150,9 @@ Both PRs remain open, draft, and unwatched while the new engine fix is completed
 The current user configuration was backed up as `.audit/pr27-hardware/resume-original-config-20261018.toml` and matches the original.
 The display arrangement still has the external monitor above the laptop.
 A new signed candidate combines Miri UI `5b9ac13` with engine `51f0c5c` under `.audit/pr27-neighbours-r3-build/`.
-The candidate is running with the valid disposable configuration for Sam's physical recheck.
-The original developer configuration was restored between candidates and remains backed up byte for byte.
-All four disposable fixture apps are open, and the fixture-only observer is running.
+The candidate and observer are now stopped after Sam's arrival-gap report.
+The original developer configuration is restored byte for byte and remains backed up.
+All four disposable fixture apps remain open for the next candidate.
 
 The effective configuration uses continuous scrolling by default, which skips the existing whole-strip edge clamp.
 Engine commit `a90bdd0` adds the exact roundtrip regression through the real display and layout systems.
@@ -192,7 +192,13 @@ Sam confirmed that the vertical commands work on the signed `51f0c5c` candidate.
 He reported an empty area to the right of Fixture 0 after it arrives on the laptop.
 The recorder confirms an 811-point gap between the arriving column and the usable right edge.
 The engine appends the window last but centers its old source width before the delayed target resize.
-Arrival placement is being designed so an overflowing destination finishes against the right edge with automatic centering off.
+The independent design judge selected a one-shot layout request for initial arrival and delayed width adaptation.
+The request uses pending layout geometry and must preserve later scrolling, Center, and Snap.
+The accepted contract is recorded in `.audit/pr27-arrival-design/synthesis.md`.
+Engine `6c42b1b` commits the arrival regression before production changes.
+Its focus, workspace, order, and adapted-width checks pass, but the arriving right edge is 1237 instead of 2044.
+All 484 existing tests pass on that tests-only tree.
+One engine writer is implementing the arrival correction and its policy controls.
 Vertical signoff remains withheld.
 
 Independent round 3 review closed the prior findings and found one maximum-hidden-tolerance focus defect.
@@ -201,7 +207,7 @@ A further boundary regression at `b7ba8c8` proves exact left and right viewport 
 Engine `97d7ac9` requires positive visible width before accepting the projected tolerance.
 Both full modes pass at that head: 51 configuration plus 433 engine tests with Lua, and 40 plus 353 without Lua.
 Both Clippy modes and formatting pass.
-The current signed desktop candidate is still `51f0c5c`, so those later maximum-tolerance changes have automated proof only.
+The latest signed candidate contains `51f0c5c` and is stopped, so those later maximum-tolerance changes have automated proof only.
 The cross-model trail audit found stale status labels, missing checkpoint rows, and a reconstructed rejected-guard receipt.
 Append-only correction rows identify the current run, preserve the original observations, and mark interim final labels superseded.
 The earlier cancelled source review and completed round 2 findings remain recorded separately.
@@ -227,7 +233,8 @@ Engine publication and Sam's merge, the Miri pin, and the final combined gate re
 
 The final local Stop parser suite at `5b9ac13` passes 84 Swift tests in 14 suites.
 Engine `51f0c5c` passes both test modes, lint, and the native replays recorded above.
-Engine `97d7ac9` passes both test modes and lint, but native checks still run the earlier signed candidate.
-Arrival placement, consolidated independent review, Sam's clean vertical result, and dependency publication remain pending.
+Engine `97d7ac9` passes both test modes and lint, but the latest native evidence is from the earlier signed candidate.
+The tests-only arrival regression at `6c42b1b` fails as expected while all existing tests pass.
+Arrival implementation, consolidated independent review, Sam's clean vertical result, and dependency publication remain pending.
 The final combined `make check`, hosted CI, and remaining physical checks are still pending.
 The append-only decision trail is `.audit/pr27-full-stop-20261017.tsv`.
