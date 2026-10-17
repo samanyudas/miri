@@ -59,7 +59,9 @@ Focus and movement within a column stay on the current display at the column's t
 Only the W, A, S, and D monitor shortcuts and ⌃⌥N cross to another display.
 [Release scope](release-scope.md#multiple-monitors) requires this split, which settles the question in miri#23.
 Stop window manager runs the same Stop as the menu bar, and Miri registers it itself.
-If `[bindings]` assigns ⌃⌥Q to an engine command, that binding wins and Miri leaves Stop without a shortcut.
+If the engine can load `[bindings]` and an accepted shortcut assigns ⌃⌥Q to an engine command, that binding wins.
+Miri then leaves Stop without a shortcut.
+If the engine rejects the binding section, Miri keeps the previous Stop shortcut ownership.
 
 ## Width, height, and centering
 
