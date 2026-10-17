@@ -4,7 +4,6 @@
 /// modifiers with `parse_modifiers` (line 1736), and looks the key up with `keycode_for_key_name` (line 1718).
 /// Names are case-sensitive. `scripts/check-compat.py` checks the name lists below against the engine's tables.
 enum EngineKey {
-    /// A sentence that names what is wrong with `text`, or `nil` when the engine reads it as a chord.
     static func problem(in text: String) -> String? {
         var parts = text.split(separator: "-", omittingEmptySubsequences: false).map {
             $0.trimmingCharacters(in: .whitespaces)
@@ -21,7 +20,7 @@ enum EngineKey {
                     + "Use ctrl, alt, cmd, shift, or fn."
             }
         }
-        guard !isKnown(key) else { return nil }
+        guard !isPlausible(key) else { return nil }
         return "\"\(text)\" names the key \"\(key)\", which the engine does not know, so the shortcut does nothing. "
             + "Use a key name such as leftarrow, equal, or h."
     }
@@ -29,7 +28,7 @@ enum EngineKey {
     /// A named key, or a single character, which the engine reads from the current keyboard layout
     /// (`generate_virtual_keymap`). The layout gives each key's unshifted character, so an uppercase letter never
     /// matches. Miri cannot see the layout, so it accepts any other single character.
-    static func isKnown(_ key: String) -> Bool {
+    static func isPlausible(_ key: String) -> Bool {
         (key.count == 1 && key == key.lowercased()) || layoutKeyNames.contains(key) || fixedKeyNames.contains(key)
     }
 

@@ -150,9 +150,6 @@ public struct DefaultBinding: Sendable {
     /// The newest version in the table. Miri records it after offering the defaults.
     public static let currentVersion = table.map(\.version).max() ?? 0
 
-    /// Defaults that a later version replaced, as Miri wrote them, with the version that replaced each one.
-    ///
-    /// Version 2 moved the four resize shortcuts from the preset-cycling commands to five-point steps (miri#22).
     static let retired: [(command: String, chord: Chord, version: Int)] = [
         ("window_grow", ctrlAlt("equal"), 2),
         ("window_shrink", ctrlAlt("minus"), 2),
@@ -194,9 +191,7 @@ public struct DefaultBinding: Sendable {
         guard offered < currentVersion else { return document }
 
         var result = document
-        // A retired default that still has exactly the value Miri wrote is Miri's, so the new default replaces it.
-        // Any other value is the user's, and stays.
-        for old in retired where old.version > offered {
+        for old in retired where offered >= 1 && old.version > offered {
             if case .string(let text) = document.value(at: ["bindings", old.command]), text == old.chord.description {
                 result = try result.removing(table: ["bindings"], key: old.command)
             }

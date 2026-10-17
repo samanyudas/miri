@@ -109,7 +109,6 @@ import ServiceManagement
         supervisor.stop()
     }
 
-    /// The Stop shortcut runs the same Stop as the menu, and does nothing once the user has stopped management.
     func stopFromShortcut() {
         guard !stoppedByUser else { return }
         stop()
