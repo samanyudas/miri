@@ -43,14 +43,15 @@ public struct Chord: Hashable, Sendable, CustomStringConvertible {
     /// (line 1718). A near miss therefore still counts as taking its chord, and Miri adds no second binding for it.
     /// Returns `nil` for text that names no single chord, such as an empty key or an unknown modifier.
     public init?(engineText: String) {
-        let parts = engineText.split(separator: "-", omittingEmptySubsequences: false).map {
-            $0.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parts = engineText.unicodeScalars.split(separator: "-", omittingEmptySubsequences: false).map {
+            String($0).trimmingCharacters(in: EngineKey.whitespace)
         }
         guard (1...2).contains(parts.count), let last = parts.last, !last.isEmpty else { return nil }
         var modifiers = Set<ChordModifier>()
         if parts.count == 2 {
-            for name in parts[0].split(separator: "+", omittingEmptySubsequences: false) {
-                guard let modifier = ChordModifier.parse(name.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+            for name in parts[0].unicodeScalars.split(separator: "+", omittingEmptySubsequences: false) {
+                guard let modifier = ChordModifier.parse(String(name).trimmingCharacters(in: EngineKey.whitespace))
+                else {
                     return nil
                 }
                 modifiers.insert(modifier)
@@ -239,7 +240,9 @@ public struct DefaultBinding: Sendable {
 
     /// Whether the file binds `chord` to an engine command, in which case that binding wins over a Miri shortcut.
     public static func binds(_ chord: Chord, in document: TOMLDocument) -> Bool {
-        boundChords(in: document.value(at: ["bindings"])).contains(chord)
+        bindingTexts(in: document.value(at: ["bindings"]))
+            .filter { EngineKey.problem(in: $0) == nil }
+            .contains { Chord(engineText: $0) == chord }
     }
 
     static func inspect(in document: TOMLDocument) -> BindingInspection {
@@ -280,12 +283,15 @@ public struct DefaultBinding: Sendable {
     }
 
     private static func boundChords(in bindings: TOMLValue?) -> [Chord] {
+        bindingTexts(in: bindings).compactMap { Chord(engineText: $0) }
+    }
+
+    private static func bindingTexts(in bindings: TOMLValue?) -> [String] {
         guard case .table(let entries) = bindings else { return [] }
-        return entries.values.flatMap { value -> [Chord] in
+        return entries.values.flatMap { value -> [String] in
             switch value {
-            case .string(let text): [Chord(engineText: text)].compactMap { $0 }
-            case .array(let items):
-                items.compactMap { if case .string(let text) = $0 { Chord(engineText: text) } else { nil } }
+            case .string(let text): [text]
+            case .array(let items): items.compactMap { if case .string(let text) = $0 { text } else { nil } }
             default: []
             }
         }
