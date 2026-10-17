@@ -150,11 +150,11 @@ public struct DefaultBinding: Sendable {
     /// The newest version in the table. Miri records it after offering the defaults.
     public static let currentVersion = table.map(\.version).max() ?? 0
 
-    static let retired: [(command: String, chord: Chord, version: Int)] = [
-        ("window_grow", ctrlAlt("equal"), 2),
-        ("window_shrink", ctrlAlt("minus"), 2),
-        ("window_vertical_grow", ctrlAlt("equal", .shift), 2),
-        ("window_vertical_shrink", ctrlAlt("minus", .shift), 2),
+    static let retired: [(command: String, replacement: String, chord: Chord, version: Int)] = [
+        ("window_grow", "window_step_grow", ctrlAlt("equal"), 2),
+        ("window_shrink", "window_step_shrink", ctrlAlt("minus"), 2),
+        ("window_vertical_grow", "window_vertical_step_grow", ctrlAlt("equal", .shift), 2),
+        ("window_vertical_shrink", "window_vertical_step_shrink", ctrlAlt("minus", .shift), 2),
     ]
 
     /// Stop window manager. Miri owns this shortcut instead of the engine, because the engine's `quit` makes Miri
@@ -191,7 +191,11 @@ public struct DefaultBinding: Sendable {
         guard offered < currentVersion else { return document }
 
         var result = document
+        var deletedReplacements = Set<String>()
         for old in retired where offered >= 1 && old.version > offered {
+            if document.value(at: ["bindings", old.command]) == nil {
+                deletedReplacements.insert(old.replacement)
+            }
             if case .string(let text) = document.value(at: ["bindings", old.command]), text == old.chord.description {
                 result = try result.removing(table: ["bindings"], key: old.command)
             }
@@ -201,6 +205,7 @@ public struct DefaultBinding: Sendable {
         // Only the file's own bindings count, so two default rows for one engine command both get written.
         let bound = Set(boundCommands(in: existing))
         for row in table where row.version > offered && !bound.contains(EngineCommand.canonical(row.command)!) {
+            guard !deletedReplacements.contains(row.command) else { continue }
             let free = row.chords.filter { !taken.contains($0) }
             guard !free.isEmpty else { continue }
             taken.formUnion(free)

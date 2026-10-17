@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-17 by Claude on branch `fix/open-issues`
+Updated: 2026-10-17 on branch `fix/open-issues`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -75,6 +75,15 @@ The current milestone is the first production app slice: menu bar controls, engi
   Test helpers remain in `.build/artifacts/pr9-hardware-runtime/` for that check and must be deleted afterwards.
 
 ## Next
+
+PR #27 full-stop review fixed unversioned shortcut ownership, Stop ownership when another binding has an unknown key, and missing backups before default-version changes.
+The upgrade also preserves deleted version 1 resize shortcuts.
+Backups contain the exact original file under `config.toml.backups/`, and a backup failure leaves the configuration untouched.
+The real-file upgrade recorded on 16 October predates this backup implementation.
+At `0270e05`, `make check` passed with 73 Swift tests, 370 engine tests, both Accessibility selftests, and DMG packaging.
+The subsequent deleted-shortcut regression failed before the fix, and all 26 binding tests passed afterwards.
+The complete gate and independent review must run on the next head before push.
+Sam is available for the remaining physical shortcut checks.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
    To see every engine resize, log the old and new size in `WindowOS::resize` in `vendor/paneru/src/manager/windows.rs`.

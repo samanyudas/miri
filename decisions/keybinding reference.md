@@ -137,6 +137,7 @@ Miri version 2 of the default set replaced the version 1 bindings `window_grow`,
 On upgrade from a recorded version 1, Miri removes each of those four only while it still has the exact value Miri wrote, and then adds the step command.
 An unversioned file keeps its existing bindings, even when they match a retired default.
 A binding the user changed stays, and the step command gets only its free chords.
+A version 1 resize binding that the user deleted stays unbound after the upgrade.
 
 ## Binding customization
 
