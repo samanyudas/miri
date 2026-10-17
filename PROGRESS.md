@@ -95,10 +95,20 @@ Sam's resize check exposed a real engine spacing defect after the test setup exc
 The first column returned to its original width but shifted from x=4 to x=55, leaving a blank left margin.
 A local regression reproduces the same defect, and the candidate fix preserves the viewport edge of an already aligned outer column.
 The candidate is on local engine branch `fix/pr27-resize-edge` in `/private/tmp/miri-pr27-resize-edge`.
-The signed live candidate under `.audit/pr27-spacing-build/` contains engine `cb0f4ee` and is awaiting Sam's spacing recheck.
-No engine fix has been published, and PR #27 still pins `0010611`.
+The signed live candidate under `.audit/pr27-spacing-build/` contains engine `cb0f4ee`.
+Sam confirmed that spacing is fixed on 17 October 2026.
+The observer recorded Fixture 0 at x=4 throughout a 508 to 610 to 508 point width roundtrip.
+The engine fix is published as samanyudas/paneru#11 at `dc37510` and remains unmerged.
+PR #27 still pins `0010611` until the engine fix reaches `miri/v0.5.2`.
 The candidate passed 40 configuration and 331 integration tests without Lua, 51 configuration and 409 integration tests with Lua, and Clippy in both modes.
 An additional rapid-resize test passed at normal animation speed.
+At engine `dc37510`, the final suites passed with 40 configuration and 332 integration tests without Lua, and 51 configuration and 410 integration tests with Lua.
+Rust formatting and Clippy with warnings as errors also passed on that head.
+Sam's stack-height check then exposed a second native resize defect.
+The engine requested a 750-point native height, but macOS first accepted 694 points at the old lower origin.
+The subsequent upward move left a 56-point bottom gap.
+A focused real-window probe reproduces that mismatch after settling.
+The height fix and physical height signoff remain pending.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
    To see every engine resize, log the old and new size in `WindowOS::resize` in `vendor/paneru/src/manager/windows.rs`.
