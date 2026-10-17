@@ -322,6 +322,14 @@ struct DefaultBindingsTests {
         #expect(!taken.stopShortcutIsFree)
     }
 
+    @Test func acceptsAMultilineBindingAndReservesItsStopChord() throws {
+        let original = "[bindings]\nwindow_center = \"\"\"\nctrl+alt-q\n\"\"\"\n"
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        #expect(!store.stopShortcutIsFree)
+        #expect(document.text.hasPrefix(original))
+    }
+
     @Test func noDefaultUsesTheStopChord() {
         #expect(!DefaultBinding.table.flatMap(\.chords).contains(DefaultBinding.stopChord))
     }
