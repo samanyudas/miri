@@ -6,7 +6,7 @@
 enum EngineKey {
     static func problem(in text: String) -> String? {
         var parts = text.split(separator: "-", omittingEmptySubsequences: false).map {
-            $0.trimmingCharacters(in: .whitespaces)
+            $0.trimmingCharacters(in: .whitespacesAndNewlines)
         }
         let key = parts.removeLast()
         guard parts.count <= 1 else {
@@ -14,7 +14,7 @@ enum EngineKey {
         }
         if let modifiers = parts.first {
             for name in modifiers.split(separator: "+", omittingEmptySubsequences: false).map({
-                $0.trimmingCharacters(in: .whitespaces)
+                $0.trimmingCharacters(in: .whitespacesAndNewlines)
             }) where !modifierNames.contains(name) {
                 return "\"\(text)\" names the modifier \"\(name)\", which the engine does not know. "
                     + "Use ctrl, alt, cmd, shift, or fn."

@@ -82,8 +82,15 @@ Backups contain the exact original file under `config.toml.backups/`, and a back
 The real-file upgrade recorded on 16 October predates this backup implementation.
 At `0270e05`, `make check` passed with 73 Swift tests, 370 engine tests, both Accessibility selftests, and DMG packaging.
 The subsequent deleted-shortcut regression failed before the fix, and all 26 binding tests passed afterwards.
-The complete gate and independent review must run on the next head before push.
-Sam is available for the remaining physical shortcut checks.
+At `be8207b`, the complete `make check` passed with 74 Swift tests, 370 engine tests, both Accessibility selftests, and DMG packaging.
+Sam is available for the remaining physical shortcut checks, and the disposable-window run has started.
+macOS currently reports only the built-in 2048 x 1332 display.
+The original developer configuration is backed up in `.audit/pr27-hardware/original-config.toml` and must be restored after the run.
+The observer records fixture-only state in `.audit/pr27-hardware/observations.jsonl`.
+A later review reproduced valid multiline shortcut strings being rejected because Miri did not trim newlines as the engine does.
+The parser now trims whitespace and newlines for both validation and Stop chord ownership.
+All 75 Swift tests pass after that parser fix.
+The running hardware build remains `be8207b`, which has the same window commands and Stop implementation.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
    To see every engine resize, log the old and new size in `WindowOS::resize` in `vendor/paneru/src/manager/windows.rs`.
