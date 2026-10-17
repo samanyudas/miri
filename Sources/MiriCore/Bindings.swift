@@ -44,13 +44,15 @@ public struct Chord: Hashable, Sendable, CustomStringConvertible {
     /// Returns `nil` for text that names no single chord, such as an empty key or an unknown modifier.
     public init?(engineText: String) {
         let parts = engineText.split(separator: "-", omittingEmptySubsequences: false).map {
-            $0.trimmingCharacters(in: .whitespaces)
+            $0.trimmingCharacters(in: .whitespacesAndNewlines)
         }
         guard (1...2).contains(parts.count), let last = parts.last, !last.isEmpty else { return nil }
         var modifiers = Set<ChordModifier>()
         if parts.count == 2 {
             for name in parts[0].split(separator: "+", omittingEmptySubsequences: false) {
-                guard let modifier = ChordModifier.parse(name.trimmingCharacters(in: .whitespaces)) else { return nil }
+                guard let modifier = ChordModifier.parse(name.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+                    return nil
+                }
                 modifiers.insert(modifier)
             }
         }
