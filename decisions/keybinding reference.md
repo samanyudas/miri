@@ -58,6 +58,9 @@ They choose the display that lies in that direction in the physical arrangement 
 Focus and movement within a column stay on the current display at the column's top or bottom edge.
 Only the W, A, S, and D monitor shortcuts and ⌃⌥N cross to another display.
 [Release scope](release-scope.md#multiple-monitors) requires this split, which settles the question in miri#23.
+A monitor move appends the focused window to the destination strip.
+When that strip overflows and automatic centering is off, the arriving column ends at the usable right edge.
+Later scrolling, centering, and snapping can move the strip from that position.
 Stop window manager runs the same Stop as the menu bar, and Miri registers it itself.
 If the engine can load `[bindings]` and an accepted shortcut assigns ⌃⌥Q to an engine command, that binding wins.
 Miri then leaves Stop without a shortcut.

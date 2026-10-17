@@ -150,8 +150,8 @@ Both PRs remain open, draft, and unwatched while the new engine fix is completed
 The current user configuration was backed up as `.audit/pr27-hardware/resume-original-config-20261018.toml` and matches the original.
 The display arrangement still has the external monitor above the laptop.
 A new signed candidate combines Miri UI `5b9ac13` with engine `51f0c5c` under `.audit/pr27-neighbours-r3-build/`.
-The candidate and observer are now stopped after Sam's arrival-gap report.
-The original developer configuration is restored byte for byte and remains backed up.
+That interim candidate and its observer were stopped after Sam's arrival-gap report.
+The original developer configuration was restored byte for byte before the next candidate and remains backed up.
 All four disposable fixture apps remain open for the next candidate.
 
 The effective configuration uses continuous scrolling by default, which skips the existing whole-strip edge clamp.
@@ -192,13 +192,46 @@ Sam confirmed that the vertical commands work on the signed `51f0c5c` candidate.
 He reported an empty area to the right of Fixture 0 after it arrives on the laptop.
 The recorder confirms an 811-point gap between the arriving column and the usable right edge.
 The engine appends the window last but centers its old source width before the delayed target resize.
-The independent design judge selected a one-shot layout request for initial arrival and delayed width adaptation.
-The request uses pending layout geometry and must preserve later scrolling, Center, and Snap.
-The accepted contract is recorded in `.audit/pr27-arrival-design/synthesis.md`.
+The independent design judge initially selected a one-shot layout request for initial arrival and delayed width adaptation.
+The selected layout arithmetic uses pending geometry and must preserve later scrolling, Center, and Snap.
 Engine `6c42b1b` commits the arrival regression before production changes.
 Its focus, workspace, order, and adapted-width checks pass, but the arriving right edge is 1237 instead of 2044.
 All 484 existing tests pass on that tests-only tree.
-One engine writer is implementing the arrival correction and its policy controls.
+The uncommitted arrival correction passes the original reproduction and preserves newer Center and Snap placement.
+A completed modifier-scroll exposes a callback race after the temporary Scrolling component disappears.
+The delayed arrival changes the user's x1336 to x1476.
+The parent reopened cancellation after that failing control and obtained two independent bounded-request proposals.
+The failing receipt is `.audit/pr27-arrival-completed-scroll-before.log`.
+Neither cancellation proposal is implemented.
+The parent instead tested the premise that native sizing requires the existing 150 ms delay.
+A synchronous-sizing prototype passes all 51 library and 446 engine tests, including completed scrolling and newer Center or Snap.
+Two signed native roundtrips at different widths confirm focus following and zero native arrival right gap.
+All three fitting laptop neighbours remain visible after Fixture 0 returns above.
+Native bottom gaps are zero on both displays.
+The prototype contains the exact saved dirty patch identified by `.audit/pr27-arrival-sync-native/candidate.json`.
+After that prototype check, it was stopped and the original configuration was restored byte for byte.
+The parent selected synchronous sizing without a delayed callback or cancellation state.
+The current contract is `.audit/pr27-arrival-design/synchronous-selection.md`.
+Engine `6e572ea` commits synchronous sizing, the one-shot arrival request, and the pending-size visibility correction.
+Both full modes pass without filtering: 51 library plus 446 engine tests with Lua, and 40 plus 366 without Lua.
+Both strict Clippy modes, formatting, and diff checks pass.
+The exact source hashes and command receipts are in `.audit/pr27-arrival-sync-final-verification.json`.
+The comment review finds no added or changed comments, six deleted comment lines, and no flags.
+Independent Claude Opus 5.5 review finds no production defects in the full `4de642f..6e572ea` range and closes the earlier findings.
+The signed exact-head bundle is saved under `.audit/pr27-arrival-final-build/`.
+Its native default roundtrip confirms focus following, zero native right and bottom gaps, and fully visible laptop neighbours after return.
+Its fixed-edge Center-removal replay restores the native left edge to x=8.
+Two invalid baseline attempts stopped before any reproduction moves and are excluded.
+The first fixed-edge assertion rejected ECS x=5 instead of x=4 while the actual native left edge was already x=8.
+A separate replay passes with the same one-point ECS tolerance used by the arrival probe and the exact native x=8 requirement.
+The exclusions and correction are recorded in `.audit/pr27-arrival-native-setup-exclusions.json`.
+After the native checks, the app and helper were stopped and the original configuration was restored byte for byte.
+The same signed `6e572ea` build is now running again with the valid disposable configuration for Sam's physical recheck.
+The baseline confirms Fixture 0 above and all three laptop neighbours fully visible.
+The fixture-only observer is running, and Sam's vertical question is pending.
+The exact original configuration remains backed up for restoration after the checks.
+Sam has not physically tested this new implementation.
+The earlier horizontal physical result covers engine `4de642f`, so it does not prove native sizing without the delay.
 Vertical signoff remains withheld.
 
 Independent round 3 review closed the prior findings and found one maximum-hidden-tolerance focus defect.
@@ -207,7 +240,7 @@ A further boundary regression at `b7ba8c8` proves exact left and right viewport 
 Engine `97d7ac9` requires positive visible width before accepting the projected tolerance.
 Both full modes pass at that head: 51 configuration plus 433 engine tests with Lua, and 40 plus 353 without Lua.
 Both Clippy modes and formatting pass.
-The latest signed candidate contains `51f0c5c` and is stopped, so those later maximum-tolerance changes have automated proof only.
+The maximum-tolerance changes have automated proof, while native replays use the default tolerance.
 The cross-model trail audit found stale status labels, missing checkpoint rows, and a reconstructed rejected-guard receipt.
 Append-only correction rows identify the current run, preserve the original observations, and mark interim final labels superseded.
 The earlier cancelled source review and completed round 2 findings remain recorded separately.
@@ -235,6 +268,9 @@ The final local Stop parser suite at `5b9ac13` passes 84 Swift tests in 14 suite
 Engine `51f0c5c` passes both test modes, lint, and the native replays recorded above.
 Engine `97d7ac9` passes both test modes and lint, but the latest native evidence is from the earlier signed candidate.
 The tests-only arrival regression at `6c42b1b` fails as expected while all existing tests pass.
-Arrival implementation, consolidated independent review, Sam's clean vertical result, and dependency publication remain pending.
+Engine `6e572ea` passes both full test and lint modes, the exact-head native checks, and independent source review.
+Native width constraints can still change the final edge after an app refuses a requested size.
+The maximum-width test proves reconciliation and marker cleanup, not right-edge repair after refusal.
+Sam's clean vertical result, refreshed horizontal verification, and dependency publication remain pending.
 The final combined `make check`, hosted CI, and remaining physical checks are still pending.
 The append-only decision trail is `.audit/pr27-full-stop-20261017.tsv`.
