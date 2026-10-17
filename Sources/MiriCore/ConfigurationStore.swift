@@ -43,9 +43,12 @@ public final class ConfigurationStore {
         do throws(ConfigurationIssue) {
             let parsed: TOMLDocument
             do { parsed = try TOMLDocument(text) } catch { throw .invalidTOML(error) }
-            stopShortcutIsFree = !DefaultBinding.binds(DefaultBinding.stopChord, in: parsed)
+            let bindings = DefaultBinding.inspect(in: parsed)
+            if case .usable = bindings {
+                stopShortcutIsFree = !DefaultBinding.binds(DefaultBinding.stopChord, in: parsed)
+            }
             let read = try MiriSettings(document: parsed)
-            if let unreadable = DefaultBinding.firstUnreadableBinding(in: parsed) { throw unreadable }
+            if let issue = bindings.issue { throw issue }
             document = parsed
             settings = read
             issue = nil

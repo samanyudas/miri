@@ -73,6 +73,18 @@ public struct Chord: Hashable, Sendable, CustomStringConvertible {
     ]
 }
 
+enum BindingInspection {
+    case usable(droppedKeyIssue: ConfigurationIssue?)
+    case rejected(ConfigurationIssue)
+
+    var issue: ConfigurationIssue? {
+        switch self {
+        case .usable(let issue): issue
+        case .rejected(let issue): issue
+        }
+    }
+}
+
 /// One action in Miri's default shortcut set and the engine command that performs it.
 public struct DefaultBinding: Sendable {
     /// The action's name in the keybinding reference.
@@ -230,26 +242,41 @@ public struct DefaultBinding: Sendable {
         boundChords(in: document.value(at: ["bindings"])).contains(chord)
     }
 
-    /// The first binding whose text the engine cannot read as a chord, as a configuration issue, or `nil`.
-    ///
-    /// The engine drops a binding whose key name it does not know, and rejects the whole file for a bad modifier or
-    /// an extra dash, so Miri reports each of these where the user can see it.
-    static func firstUnreadableBinding(in document: TOMLDocument) -> ConfigurationIssue? {
-        guard case .table(let entries) = document.value(at: ["bindings"]) else { return nil }
+    static func inspect(in document: TOMLDocument) -> BindingInspection {
+        guard let bindings = document.value(at: ["bindings"]) else { return .usable(droppedKeyIssue: nil) }
+        guard case .table(let entries) = bindings else {
+            return .rejected(.invalidValue(key: "bindings", message: "bindings must be a table of shortcuts."))
+        }
+        var droppedKeyIssue: ConfigurationIssue?
         for (command, value) in entries.sorted(by: { $0.key < $1.key }) {
-            let texts: [String] =
-                switch value {
-                case .string(let text): [text]
-                case .array(let items): items.compactMap { if case .string(let text) = $0 { text } else { nil } }
-                default: []
+            let path = "bindings.\(command)"
+            let values: [TOMLValue]
+            switch value {
+            case .array(let items): values = items
+            default: values = [value]
+            }
+            var texts: [String] = []
+            for value in values {
+                guard case .string(let text) = value else {
+                    return .rejected(
+                        .invalidValue(
+                            key: path, message: "\(path) must be a shortcut string or an array of shortcut strings."))
                 }
+                texts.append(text)
+            }
+            guard texts.isEmpty || EngineCommand.canonical(command) != nil else {
+                return .rejected(.invalidValue(key: path, message: "\(path) names a command the engine does not know."))
+            }
             for text in texts {
-                if let problem = EngineKey.problem(in: text) {
-                    return .invalidValue(key: "bindings.\(command)", message: "bindings.\(command): \(problem)")
+                guard let problem = EngineKey.problem(in: text) else { continue }
+                let issue = ConfigurationIssue.invalidValue(key: path, message: "\(path): \(problem.message)")
+                switch problem {
+                case .unknownKey: droppedKeyIssue = droppedKeyIssue ?? issue
+                case .extraDash, .invalidModifier: return .rejected(issue)
                 }
             }
         }
-        return nil
+        return .usable(droppedKeyIssue: droppedKeyIssue)
     }
 
     private static func boundChords(in bindings: TOMLValue?) -> [Chord] {
