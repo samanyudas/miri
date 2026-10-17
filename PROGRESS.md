@@ -86,7 +86,7 @@ The latest local source is `5b9ac13`.
 All 84 Swift tests in 14 suites pass, and strict formatting passes for the final scalar command-separator fix.
 Independent review cleared the final Stop parser changes at `5b9ac13`, and its targeted run passed all 36 binding tests.
 A signed candidate combines this Miri source with engine `5a0e74d` under `.audit/pr27-stop-final-build/`.
-It is prepared but has not replaced the running candidate.
+It is now running for the remaining physical checks.
 The complete `make check` and CI must run again after the final engine pin.
 The earlier full gate at `be8207b` passed with 74 Swift tests, 370 engine tests, both Accessibility selftests, and DMG packaging.
 The nine hosted checks at `9fc6c08` cover the earlier pushed source only.
@@ -118,9 +118,12 @@ Sam confirmed ordinary Control-Option-Q stops management and subsequent resize i
 The app relaunched with a new process and remained Stopped without an engine process.
 Sam also reproduced the rejected-reload defect: `hyper-h` leaves the engine managing while Control-Option-Q does nothing.
 The typed binding inspection fix retains the previous Stop owner when the engine rejects the bindings.
-Its final signed-app physical recheck and the mistyped-key check remain pending.
+Sam confirmed that physical Control-Option-Q now stops management after the rejected replacement.
+The native UI showed Stopped and the engine process exited.
+Sam also confirmed that Control-Option-A causes no movement for the intentional `lefarrow` typo.
+The valid fixture-only configuration is restored after both checks.
 
-The live disposable-window run currently uses `.audit/pr27-height-build/`, with Miri UI `be8207b` and engine `5a0e74d`.
+The live disposable-window run now uses `.audit/pr27-stop-final-build/`, with Miri UI `5b9ac13` and engine `5a0e74d`.
 The original developer configuration is backed up in `.audit/pr27-hardware/original-config.toml` and must be restored after the run.
 The observer records fixture-only state in `.audit/pr27-hardware/observations.jsonl`.
 Both displays are active with their top edges aligned.
@@ -136,7 +139,6 @@ The vertical arrangement check remains pending.
    The 16 October shortcut run covered stacking and pop-out in both directions with single-window columns only.
 4. Build the remaining v1 controls: the shortcut recorder and reset action, the gesture test, and pointer-targeted swipes.
 5. Finish the recorded #23 horizontal replay and vertical arrangement check.
-   Recheck the fixed #25 rejected reload and #26 mistyped key on the latest signed Miri candidate.
    Restore the original configuration, quit the test app, and remove the owned fixture processes afterward.
 6. Decide Q6, the release duration, at the final check before publishing v1.
 7. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
