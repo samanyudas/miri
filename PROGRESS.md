@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-17 on branch `fix/open-issues`
+Updated: 2026-10-18 on branch `fix/open-issues`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -86,10 +86,11 @@ The latest local source is `5b9ac13`.
 All 84 Swift tests in 14 suites pass, and strict formatting passes for the final scalar command-separator fix.
 Independent review cleared the final Stop parser changes at `5b9ac13`, and its targeted run passed all 36 binding tests.
 A signed candidate combines this Miri source with engine `5a0e74d` under `.audit/pr27-stop-final-build/`.
-It is now running for the remaining physical checks.
+The candidate is saved for the remaining physical checks.
+It is currently stopped.
 The complete `make check` and CI must run again after the final engine pin.
 The earlier full gate at `be8207b` passed with 74 Swift tests, 370 engine tests, both Accessibility selftests, and DMG packaging.
-The nine hosted checks at `9fc6c08` cover the earlier pushed source only.
+Hosted checks passed at pushed head `34998d6`, including the later Stop parser changes.
 
 Sam's width check found a blank left margin after grow and shrink.
 The engine restored the width but moved the first column from x=4 to x=55.
@@ -144,14 +145,39 @@ Native x positions change from 8 to -495 and 516 to -725 while those windows rem
 Evidence is under `.audit/pr27-display-neighbours-controlled-before{,2}.*`.
 Earlier automatic attempts had invalid focus or baseline visibility and are excluded from causal proof.
 
-Sam paused this task on 17 October and will explicitly ask to continue.
-The source diagnosis agent is interrupted, and no fix for the new strip-position defect has been written.
-The signed test app, helper, observer, and all four disposable fixtures are stopped.
-The original developer configuration is restored byte for byte.
-The valid disposable configuration is saved as `.audit/pr27-hardware/paused-fixture-config.toml`.
-The detailed restart instructions and pending source diagnosis are saved in `.audit/pr27-resume-20261017.md`.
-Both PRs are unwatched for this pause.
-Do not resume until Sam asks.
+Sam paused this task on 17 October and asked to continue on 18 October.
+Both PRs remain open, draft, and unwatched while the new engine fix is completed.
+The current user configuration was backed up as `.audit/pr27-hardware/resume-original-config-20261018.toml` and matches the original.
+The display arrangement still has the external monitor above the laptop.
+The interim `649915f` candidate is stopped after native verification.
+The original developer configuration is restored byte for byte from the 18 October backup.
+All four disposable fixture apps remain open for the next candidate.
+
+The effective configuration uses continuous scrolling by default, which skips the existing whole-strip edge clamp.
+Engine commit `a90bdd0` adds the exact roundtrip regression through the real display and layout systems.
+Its continuous case fails before the fix, and the noncontinuous control passes.
+All other 470 tests pass on that test-only tree.
+Engine `838cd47` separately fixes a pre-existing strict float comparison and passes its targeted test and Clippy.
+An independent Claude Opus 5.5 design judge selected minimal fitting correction inside the existing placement pass.
+The accepted design is recorded in `.audit/pr27-neighbours-design/synthesis.md`.
+Engine `de75e2f` adds compatibility tests before implementation.
+The refit-only implementation passes both exact roundtrip cases but still fails the Stay-mode animation test.
+A generic pending-target projection broke rapid resizing and automatic centering and was rejected.
+Engine `bc91de0` adds the automatic-centering control before the final focus change.
+Engine `649915f` instead uses the existing visibility request for non-centering focus during a pending strip movement.
+Both complete test modes pass at that head: 51 configuration plus 427 engine tests with Lua, and 40 plus 347 without Lua.
+Both Clippy modes and formatting pass under Rust 1.98.1.
+A signed native roundtrip at that head confirms both actual transfers, focus following, and zero off-screen laptop neighbours afterward.
+This is native command evidence, not Sam's physical shortcut signoff.
+
+Independent Claude Opus 5.5 source review found a Medium stale-Center regression and a Low animated-focus regression in noncontinuous mode.
+A native run confirms that Center followed by removal leaves survivors at x=578 instead of the fixed left edge x=4.
+The native attempt for the second finding used an explicit focus command, which adds its own reshuffle, so it is excluded from causal proof.
+A fresh engine writer is reproducing the native-focus-event case and positive hidden-window tolerance in the real test systems.
+The first source-review round was cancelled after the generic projection candidate failed existing tests.
+The completed source verdict and exact provider/model receipt are `.audit/pr27-neighbours-review-r2.json`.
+No new engine commits have been pushed.
+Final source review, a new native pass, Sam's physical recheck, engine publication and merge, and the Miri final pin gate remain pending.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
    To see every engine resize, log the old and new size in `WindowOS::resize` in `vendor/paneru/src/manager/windows.rs`.
@@ -171,6 +197,7 @@ Do not resume until Sam asks.
 ## Last verification
 
 The final local Stop parser suite at `5b9ac13` passes 84 Swift tests in 14 suites.
-The final engine tree at `4de642f` passes both test modes and lint as recorded above.
+Engine `649915f` passes both test modes and lint as recorded above.
+Its native continuous roundtrip passes, but independent review found two configuration-mode regressions that are being fixed.
 The final combined `make check`, hosted CI, and remaining physical checks are still pending.
 The append-only decision trail is `.audit/pr27-full-stop-20261017.tsv`.
