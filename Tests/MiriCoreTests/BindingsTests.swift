@@ -346,6 +346,28 @@ struct DefaultBindingsTests {
         #expect(try String(contentsOf: url, encoding: .utf8) == original)
     }
 
+    @Test(arguments: ["hyper-h", "Ctrl-h", "ctrl-alt-h"], [true, false])
+    func retainsStopShortcutOwnershipWhenTheEngineRejectsAReload(chord: String, wasFree: Bool) throws {
+        let initialChord = wasFree ? "ctrl+alt-c" : "ctrl+alt-q"
+        let (store, _) = try load("[bindings]\nwindow_center = \"\(initialChord)\"\n")
+        try #require(store.issue == nil)
+        #expect(store.stopShortcutIsFree == wasFree)
+
+        let replacementChord = wasFree ? "ctrl+alt-q" : "ctrl+alt-c"
+        let replacement = """
+            [bindings]
+            window_center = "\(replacementChord)"
+            window_focus_east = "ctrl+alt-lefarrow"
+            window_focus_west = "\(chord)"
+            """
+        try replacement.write(to: url, atomically: true, encoding: .utf8)
+        store.load(reduceMotion: false)
+
+        #expect(store.issue != nil)
+        #expect(store.stopShortcutIsFree == wasFree)
+        #expect(try String(contentsOf: url, encoding: .utf8) == replacement)
+    }
+
     @Test func aRowWhoseChordsAreAllTakenStaysUnbound() throws {
         let (store, document) = try load("[bindings]\nquit = [\"ctrl+alt-leftarrow\", \"ctrl+alt-h\"]\n")
         #expect(store.issue == nil)
