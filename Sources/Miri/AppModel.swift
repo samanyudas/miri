@@ -14,6 +14,8 @@ import ServiceManagement
     private(set) var engineState: EngineState = .stopped
     private(set) var settings = MiriSettings()
     private(set) var configurationIssue: ConfigurationIssue?
+    /// The file's shortcuts, or `nil` while the file cannot be read correctly.
+    private(set) var shortcuts: Shortcuts?
     private(set) var keyLayout: KeyLayout
     private(set) var setupChecks: [SetupCheck] = []
     /// Why management is not running when the user did not stop it, such as missing permission.
@@ -69,6 +71,7 @@ import ServiceManagement
         store.load(reduceMotion: reduceMotion)
         settings = store.settings
         configurationIssue = store.issue
+        shortcuts = store.shortcuts
         stopShortcut?.register(store.stopChordsToRegister, layout: keyLayout)
     }
 
@@ -76,6 +79,53 @@ import ServiceManagement
         keyLayout = .current
         store.layout = keyLayout
         reloadConfiguration()
+    }
+
+    enum ShortcutAddOutcome {
+        case added
+        case rejected(ShortcutRejection)
+        case systemConflict(SystemShortcut)
+        /// The file could not be saved. `configurationIssue` says why.
+        case failed
+    }
+
+    /// Adds a shortcut unless another Miri binding uses its keys. A macOS conflict needs `allowingSystemConflict`.
+    func addShortcut(_ chord: Chord, to action: ShortcutAction, allowingSystemConflict: Bool = false)
+        -> ShortcutAddOutcome
+    {
+        guard let shortcuts else { return .failed }
+        if let rejection = shortcuts.rejection(adding: chord, to: action, layout: keyLayout) {
+            return .rejected(rejection)
+        }
+        if !allowingSystemConflict,
+            let conflict = SystemShortcuts.load(layout: keyLayout).conflict(for: chord, layout: keyLayout)
+        {
+            return .systemConflict(conflict)
+        }
+        return apply(.add(chord, to: action)) ? .added : .failed
+    }
+
+    func removeShortcut(_ chord: Chord, from action: ShortcutAction) {
+        apply(.remove(chord, from: action))
+    }
+
+    func resetShortcuts() {
+        apply(.resetToDefaults)
+    }
+
+    @discardableResult private func apply(_ edit: ShortcutEdit) -> Bool {
+        do {
+            try store.apply(edit)
+            configurationIssue = nil
+            shortcuts = store.shortcuts
+            stopShortcut?.register(store.stopChordsToRegister, layout: keyLayout)
+            return true
+        } catch {
+            let issue = error as? ConfigurationIssue ?? .notEditable(String(describing: error))
+            reloadConfiguration()
+            configurationIssue = configurationIssue ?? issue
+            return false
+        }
     }
 
     func update(_ change: (inout MiriSettings) -> Void) {

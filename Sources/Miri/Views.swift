@@ -59,7 +59,7 @@ struct MenuContent: View {
 }
 
 struct SettingsView: View {
-    enum Page: String { case general, layout, setup, diagnostics }
+    enum Page: String { case general, layout, shortcuts, setup, diagnostics }
 
     let model: AppModel
     @AppStorage("settingsTab") private var page = Page.general
@@ -68,6 +68,7 @@ struct SettingsView: View {
         TabView(selection: $page) {
             Tab("General", systemImage: "gearshape", value: .general) { GeneralSettings(model: model) }
             Tab("Layout", systemImage: "rectangle.split.3x1", value: .layout) { LayoutSettings(model: model) }
+            Tab("Shortcuts", systemImage: "keyboard", value: .shortcuts) { ShortcutsSettings(model: model) }
             Tab("Setup", systemImage: "checklist", value: .setup) { SetupSettings(model: model) }
             Tab("Diagnostics", systemImage: "stethoscope", value: .diagnostics) { DiagnosticsSettings(model: model) }
         }
