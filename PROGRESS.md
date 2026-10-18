@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-18 by Claude on branch `feat/gesture-controls`
+Updated: 2026-10-19 on branch `branding/window-mark`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -14,6 +14,12 @@ The current milestone is shortcut customization in Settings.
 
 ## Done
 
+- `branding/window-mark` replaces the README's pink M logo with the blue and violet window mark.
+  `assets/` also contains running and stopped menu bar SVGs and usage notes.
+  SVG parsing and a browser preview passed for all three assets, including the menu bar marks on light and dark backgrounds.
+  `make lint` passed on current `main` plus these assets, including all 18 harness tests.
+  `make native` was skipped because this change contains only SVG assets and documentation.
+  The native app does not yet load these assets, and the Paper UI screens remain unexported because Paper Desktop was closed.
 - The v1 specification and product decisions are merged (#3).
 - The Accessibility permission prototype is merged (#4).
   Enabling only the Miri entry authorizes both the app and its engine in the development build.
