@@ -14,6 +14,9 @@ public struct MiriSettings: Equatable, Sendable {
     public var widthPresets = [0.25, 0.33, 0.5, 0.66, 0.75]
     public var animations = true
     public var launchAtLogin = true
+    public var stripGesture = StripGesture.off
+    /// Reverses the strip swipe. Off means the strip follows the fingers.
+    public var reverseSwipe = false
 
     public init() {}
 
@@ -26,6 +29,16 @@ public struct MiriSettings: Equatable, Sendable {
         }
         if let value = document.value(at: ["miri", "launch_at_login"]) {
             launchAtLogin = try Self.boolean(value, key: "miri.launch_at_login")
+        }
+        if let value = document.value(at: ["miri", "strip_gesture"]) {
+            guard case .string(let name) = value, let gesture = StripGesture(rawValue: name) else {
+                throw .invalidValue(
+                    key: "miri.strip_gesture", message: "miri.strip_gesture must be \"off\", \"three\", or \"four\".")
+            }
+            stripGesture = gesture
+        }
+        if let value = document.value(at: ["miri", "reverse_swipe"]) {
+            reverseSwipe = try Self.boolean(value, key: "miri.reverse_swipe")
         }
         if let value = document.value(at: ["options", "preset_column_widths"]) {
             guard case .array(let items) = value else { throw Self.presetIssue }
@@ -57,21 +70,25 @@ public struct MiriSettings: Equatable, Sendable {
     public var edgePadding: Int { max(0, outerGap - windowPadding) }
 
     /// Writes these settings and the engine keys derived from them, changing only values that differ.
-    /// `appBundleIdentifier` names Miri's own app, whose windows always float.
+    /// `appBundleIdentifier` names Miri's own app, whose windows always float. `gestureFingers` is the strip swipe
+    /// the engine intercepts, which is on only while it is tested or being tested. `nil` leaves macOS gestures alone.
     public func applied(
-        to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String, layout: KeyLayout = .positional
+        to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String, layout: KeyLayout = .positional,
+        gestureFingers: GestureFingers? = nil
     ) throws
         -> TOMLDocument
     {
         try applying(
-            to: document, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier, layout: layout
+            to: document, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier, layout: layout,
+            gestureFingers: gestureFingers
         ).document
     }
 
     /// Like `applied`, but leaves each key the file defines in a form Miri does not rewrite, such as an inline table,
     /// and returns each of those keys in `skipped` with the value Miri wanted there, or `nil` to remove it.
     func applying(
-        to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String, layout: KeyLayout = .positional
+        to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String, layout: KeyLayout = .positional,
+        gestureFingers: GestureFingers? = nil
     ) throws
         -> (document: TOMLDocument, skipped: [String: TOMLValue?])
     {
@@ -90,6 +107,8 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.integer(Int64(outerGap)), ["miri"], "outer_gap")
         try set(.boolean(animations), ["miri"], "animations")
         try set(.boolean(launchAtLogin), ["miri"], "launch_at_login")
+        try set(.string(stripGesture.rawValue), ["miri"], "strip_gesture")
+        try set(.boolean(reverseSwipe), ["miri"], "reverse_swipe")
         try set(.array(widthPresets.map(TOMLValue.float)), ["options"], "preset_column_widths")
         if animations && !reduceMotion {
             if result.value(at: ["options", "animation_speed"]) == nil {
@@ -111,6 +130,20 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.string(".*"), floating, "title")
         try set(.string(appBundleIdentifier), floating, "bundle_id")
         try set(.boolean(true), floating, "floating")
+        let gesture = ["swipe", "gesture"]
+        if let gestureFingers {
+            try set(.integer(Int64(gestureFingers.rawValue)), gesture, "fingers_count")
+        } else {
+            try edit(nil) { try result.removing(table: gesture, key: "fingers_count") }
+        }
+        try set(.string(reverseSwipe ? "Reversed" : "Natural"), gesture, "direction")
+        // V1 strip swipes are horizontal. The engine otherwise takes vertical swipes with the same finger count,
+        // which macOS uses for Mission Control and App Exposé.
+        try set(.boolean(false), gesture, "vertical")
+        // The engine falls back to these deprecated keys, which would keep a swipe on that Miri turned off.
+        for legacy in ["swipe_gesture_fingers", "swipe_gesture_direction"] {
+            try edit(nil) { try result.removing(table: ["options"], key: legacy) }
+        }
         return (try DefaultBinding.adding(to: result, layout: layout), skipped)
     }
 

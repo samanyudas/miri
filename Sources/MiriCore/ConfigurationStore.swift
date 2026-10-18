@@ -13,6 +13,7 @@ public final class ConfigurationStore {
         # [decorations.menu] hides the engine's menu bar item, because Miri has its own.
         # [bindings] starts with Miri's default shortcuts. Miri never changes a shortcut you set.
         # miri.default_bindings_version records which defaults Miri has offered, so a shortcut you delete stays deleted.
+        # Miri owns [swipe.gesture]. fingers_count is present only while a tested strip swipe is on or being tested.
 
         """
 
@@ -22,6 +23,11 @@ public final class ConfigurationStore {
     public private(set) var issue: ConfigurationIssue?
     /// The keyboard layout that decides which chords press the same keys.
     public var layout: KeyLayout
+    /// The strip swipe the engine should intercept for given settings, or `nil` for none. The app sets it, because
+    /// the answer depends on the gesture test result and setup checks, which live outside the file.
+    public var gestureFingers: (MiriSettings) -> GestureFingers? = { _ in nil }
+    /// The finger count of the last write, so a change to it alone still reaches the file.
+    private var writtenGestureFingers: GestureFingers?
     /// The Stop shortcuts Miri registers: `[miri].stop_shortcut` without the chords a `[bindings]` entry uses.
     /// When the engine would reject `[bindings]`, this keeps its previous value, as the engine keeps its old bindings.
     public private(set) var stopChordsToRegister = [DefaultBinding.stopChord]
@@ -76,6 +82,12 @@ public final class ConfigurationStore {
         settings = changed
     }
 
+    /// Writes `[swipe.gesture].fingers_count` when `gestureFingers` now gives a different answer.
+    public func applyGestureFingers(reduceMotion: Bool) throws(ConfigurationIssue) {
+        guard document != nil, gestureFingers(settings) != writtenGestureFingers else { return }
+        try write(settings, reduceMotion: reduceMotion, replacing: settings)
+    }
+
     /// Saves a change to the shortcuts. Throws `ShortcutRejection` when the chord is taken, or `ConfigurationIssue`.
     /// On failure the file stays unchanged. A reset backs up the file before replacing `[bindings]`.
     public func apply(_ edit: ShortcutEdit) throws {
@@ -127,13 +139,16 @@ public final class ConfigurationStore {
         throws(ConfigurationIssue)
     {
         guard let current = document else { return }
+        let fingers = gestureFingers(settings)
         let next: TOMLDocument
         do {
             let applied = try settings.applying(
-                to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier, layout: layout)
+                to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier, layout: layout,
+                gestureFingers: fingers)
             if let previous {
                 let before = try previous.applying(
-                    to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier, layout: layout)
+                    to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier, layout: layout,
+                    gestureFingers: writtenGestureFingers)
                 // A key skipped both times still needs a write when the value Miri wants there changed.
                 let needed = applied.skipped.filter { path, wanted in
                     before.skipped[path].map { $0 != wanted } ?? true
@@ -155,6 +170,7 @@ public final class ConfigurationStore {
         let versionPath = ["miri", "default_bindings_version"]
         let upgrades = current.value(at: versionPath) != next.value(at: versionPath)
         try commit(next, replacing: current, backingUpBefore: upgrades ? "upgrading it" : nil)
+        writtenGestureFingers = fingers
     }
 
     /// Replaces the file with `next`, after backing up `current` when `backupReason` names why.
