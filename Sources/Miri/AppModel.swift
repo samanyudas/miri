@@ -96,6 +96,7 @@ import ServiceManagement
         configurationIssue = store.issue
         shortcuts = store.shortcuts
         stopShortcut?.register(store.stopChordsToRegister, layout: keyLayout)
+        dropStaleGestureVerification()
     }
 
     private func keyboardLayoutChanged() {
@@ -160,6 +161,7 @@ import ServiceManagement
             try store.update(reduceMotion: reduceMotion, change)
             settings = store.settings
             configurationIssue = nil
+            dropStaleGestureVerification()
         } catch {
             configurationIssue = error
             reloadConfiguration()
@@ -180,6 +182,7 @@ import ServiceManagement
         if gestureSettings != gestureEnvironment.gestureSettings {
             gestureEnvironment.gestureSettings = gestureSettings
         }
+        dropStaleGestureVerification()
         applyGestureFingers()
     }
 
@@ -233,6 +236,17 @@ import ServiceManagement
 
     /// The user says a relevant macOS gesture changed, so the last test no longer counts.
     func reportGestureChange() {
+        saveGestureVerification(nil)
+    }
+
+    /// A change that needs a new test also ends the old result, so changing back cannot turn the swipe on untested.
+    /// A conflict is ignored here, because it blocks the swipe without saying whether the tested setup changed.
+    private func dropStaleGestureVerification() {
+        guard gestureVerification != nil,
+            case .needsTest = GestureState.evaluate(
+                preference: settings.stripGesture, reversed: settings.reverseSwipe, verification: gestureVerification,
+                environment: gestureEnvironment, conflict: .passed)
+        else { return }
         saveGestureVerification(nil)
     }
 

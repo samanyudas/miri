@@ -59,6 +59,25 @@ struct SetupCheckerTests {
         #expect(!checks.contains { $0.isBlocking })
     }
 
+    @Test func aFourFingerValueThatThreeFingersOverrideIsNoConflict() {
+        var observation = ready
+        observation.threeFingerSwipe = 2
+        observation.fourFingerSwipe = 2
+        #expect(status(.fourFingerGesture, observation) == .passed)
+        observation.threeFingerSwipe = 0
+        #expect(status(.fourFingerGesture, observation) != .passed)
+    }
+
+    @Test func aFourFingerValueIsUnverifiedWhenTheThreeFingerValueIsUnreadable() {
+        var observation = ready
+        observation.threeFingerSwipe = nil
+        observation.fourFingerSwipe = 2
+        guard case .unableToVerify = status(.fourFingerGesture, observation) else {
+            Issue.record("Expected Unable to verify")
+            return
+        }
+    }
+
     @Test func reportsGestureConflicts() {
         var observation = ready
         observation.fourFingerSwipe = 2
