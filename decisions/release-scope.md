@@ -188,12 +188,27 @@ A user-reported change to relevant macOS gestures also invalidates the result.
 The gesture preference remains saved, but the gesture stays Off until another successful test and explicit user confirmation.
 Keyboard window management continues while retesting is required.
 
+### Settling after a swipe
+
+Sam accepted this behavior on 19 October 2026.
+When the fingers lift, the strip always settles on a column.
+It lands on the column nearest the screen center at the point where the flick would naturally stop, counting momentum, and that column takes focus.
+The strip then moves only as far as needed to show that column fully, as V1 interactions describes.
+A settle never leaves empty space beside a strip that overflows the display, so a flick past either end lands with that end on the screen edge.
+Landing on a stack focuses the window in that stack that was used last.
+A strip that already fits the display slides a little with resistance, then springs back.
+Modifier-scroll with a mouse wheel settles the same way after a short pause.
+Settling is always on in v1 and has no setting.
+
 ## V1 interactions
 
 V1 includes keyboard navigation, column resizing, window stacking, floating windows, and trackpad scrolling.
 V1 uses clicking and macOS window switching to access floating windows instead of a dedicated floating-to-tiled focus shortcut.
 Fixed-size windows and Miri's settings float automatically.
-Miri automatically centers the focused column only when the strip overflows the display.
+When focus moves, the strip moves only as far as needed to show the focused column fully.
+A partly hidden column ends with its edge on the screen edge, and a fully visible column does not move.
+Keyboard focus and trackpad or modifier scrolling follow this rule, and the Centre column command still centers on demand.
+Sam replaced the earlier rule, which centered the focused column whenever the strip overflowed, on 19 October 2026.
 The layout reserves space for the visible macOS Dock without a separate v1 setting.
 Miri respects macOS Reduce Motion and provides a setting to disable animation.
 Either Reduce Motion or the disable-animation setting makes strip movement instant.

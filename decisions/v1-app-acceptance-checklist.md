@@ -111,7 +111,9 @@ Never leave windows stranded off-screen.
    Those windows float automatically.
    Clicking and macOS window switching provide access to floating windows.
 8. Focus different columns in a strip that fits, then in a strip that overflows.
-   Automatic centering occurs only in the overflowing strip.
+   The strip moves only as far as needed to show the focused column fully, and a fully visible column does not move.
+   After a trackpad swipe, the strip settles on a column and that column takes focus.
+   A width change keeps the column around its own center, and cycling back to the starting width returns it to the same place.
 9. Check the layout with a visible Dock.
    The layout reserves Dock space without a separate Miri setting.
 10. Enable macOS Reduce Motion with Miri's disable-animation setting off.
