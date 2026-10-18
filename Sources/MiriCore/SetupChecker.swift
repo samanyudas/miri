@@ -174,7 +174,7 @@ public enum SetupChecker {
 
     private static func gestureUnverified(fingers: String) -> SetupStatus {
         .unableToVerify(
-            "Miri could not read the macOS \(fingers)-finger swipe settings. A gesture test can confirm the swipe works."
+            "Miri could not read the macOS \(fingers)-finger swipe settings. Use Test Gesture in the Gestures tab to check the swipe."
         )
     }
 }

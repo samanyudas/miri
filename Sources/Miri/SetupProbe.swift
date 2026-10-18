@@ -8,6 +8,9 @@ enum SetupProbe {
     static func observe() -> SetupObservation {
         let trackpad = "com.apple.AppleMultitouchTrackpad"
         let workspace = NSWorkspace.shared
+        // Reloads the cached trackpad values, so a change made in System Settings while Miri runs is seen.
+        // It writes nothing, because Miri never sets a value in that domain.
+        CFPreferencesAppSynchronize(trackpad as CFString)
         return SetupObservation(
             accessibilityTrusted: AXIsProcessTrusted(),
             spansDisplays: preference("spans-displays", domain: "com.apple.spaces").map(\.boolValue)

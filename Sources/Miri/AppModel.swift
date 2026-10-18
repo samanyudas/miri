@@ -8,6 +8,9 @@ import ServiceManagement
 @Observable final class AppModel {
     static let stoppedKey = "managementStopped"
     static let setupPollInterval: Duration = .seconds(2)
+    static let gestureVerificationKey = "gestureVerification"
+    /// How often Miri rereads the macOS gesture settings while a strip swipe is selected.
+    static let gesturePollInterval: Duration = .seconds(5)
 
     let paths: EnginePaths
     let log: RotatingLog
@@ -23,11 +26,18 @@ import ServiceManagement
     private(set) var loginItemError: String?
     /// The user's explicit Stop. It persists across launches until the user starts management again.
     private(set) var stoppedByUser: Bool
+    /// The confirmed gesture test. It is app state, so editing the configuration file cannot mark a swipe as tested.
+    private(set) var gestureVerification: GestureVerification?
+    /// The macOS version, engine revision, and macOS gesture settings that a gesture test result depends on.
+    private(set) var gestureEnvironment: GestureEnvironment
+    /// The finger count a running gesture test turned on.
+    private(set) var gestureTestFingers: GestureFingers?
 
     @ObservationIgnored private let store: ConfigurationStore
     @ObservationIgnored private var supervisor: EngineSupervisor!
     @ObservationIgnored private var watcher: ConfigurationWatcher?
     @ObservationIgnored private var setupPoll: Task<Void, Never>?
+    @ObservationIgnored private var gesturePoll: Task<Void, Never>?
     @ObservationIgnored private var stopShortcut: StopShortcut?
     @ObservationIgnored private let defaults = UserDefaults.standard
 
@@ -43,10 +53,20 @@ import ServiceManagement
         keyLayout = layout
         store = ConfigurationStore(url: paths.configuration, appBundleIdentifier: identifier, layout: layout)
         stoppedByUser = UserDefaults.standard.bool(forKey: Self.stoppedKey)
+        gestureVerification = UserDefaults.standard.data(forKey: Self.gestureVerificationKey).flatMap {
+            try? JSONDecoder().decode(GestureVerification.self, from: $0)
+        }
+        gestureEnvironment = GestureEnvironment(
+            macOSVersion: ProcessInfo.processInfo.operatingSystemVersionString,
+            engineRevision: Self.engineRevision(bundle: bundle),
+            gestureSettings: GestureSettingsSnapshot(threeFingerSwipe: nil, fourFingerSwipe: nil, threeFingerDrag: nil))
         supervisor = EngineSupervisor(
             launcher: ProcessEngineLauncher(paths: paths, log: log),
             recoverWindows: { WindowRestorer.recover() })
         supervisor.onChange = { [weak self] state in self?.engineState = state }
+        store.gestureFingers = { [weak self] settings in
+            MainActor.assumeIsolated { self?.activeGestureFingers(for: settings) }
+        }
     }
 
     var reduceMotion: Bool { NSWorkspace.shared.accessibilityDisplayShouldReduceMotion }
@@ -54,6 +74,8 @@ import ServiceManagement
     /// Loads the configuration, watches it, and starts management unless the user stopped it.
     func launch() {
         stopShortcut = StopShortcut { [weak self] in self?.stopFromShortcut() }
+        // The first write of the file needs the gesture settings and conflicts, so the swipe stays on across launches.
+        refreshSetup()
         reloadConfiguration()
         watcher = ConfigurationWatcher(url: paths.configuration) { [weak self] in self?.reloadConfiguration() }
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -64,6 +86,7 @@ import ServiceManagement
             queue: .main
         ) { [weak self] _ in MainActor.assumeIsolated { self?.keyboardLayoutChanged() } }
         syncLoginItem()
+        watchGestureSettings()
         if !stoppedByUser { start() } else { refreshSetup() }
     }
 
@@ -150,7 +173,111 @@ import ServiceManagement
     }
 
     func refreshSetup() {
-        setupChecks = SetupChecker.evaluate(SetupProbe.observe())
+        let observation = SetupProbe.observe()
+        let checks = SetupChecker.evaluate(observation)
+        if checks != setupChecks { setupChecks = checks }
+        let gestureSettings = GestureSettingsSnapshot(observation)
+        if gestureSettings != gestureEnvironment.gestureSettings {
+            gestureEnvironment.gestureSettings = gestureSettings
+        }
+        applyGestureFingers()
+    }
+
+    // MARK: Strip gestures
+
+    var gestureState: GestureState { gestureState(for: settings) }
+
+    /// The setup check that reports macOS gestures clashing with a finger count, or `nil` before the first check.
+    func gestureCheck(for fingers: GestureFingers) -> SetupCheck? {
+        setupChecks.first { $0.id == fingers.setupCheck }
+    }
+
+    /// Why the gesture test cannot start, or `nil` when it can.
+    var gestureTestBlocker: String? {
+        guard engineState.isRunning else { return "Start window management to test the swipe." }
+        guard settings.stripGesture != .off else { return "Choose three or four fingers to test the swipe." }
+        if case .conflict = gestureState { return "Change the macOS gesture setting before testing the swipe." }
+        return nil
+    }
+
+    enum GestureTestResult {
+        /// The user confirmed the strip followed their fingers.
+        case confirmed(GestureVerification)
+        /// The test failed, was inconclusive, or the user said it did not work.
+        case failed
+        case cancelled
+    }
+
+    /// Turns on the selected swipe for a test. Returns the result to save if the user confirms it, dated now.
+    func beginGestureTest() throws(GestureTestBlocked) -> GestureVerification {
+        refreshSetup()
+        if let blocker = gestureTestBlocker { throw GestureTestBlocked(message: blocker) }
+        guard let fingers = settings.stripGesture.fingers else {
+            throw GestureTestBlocked(message: "Choose three or four fingers to test the swipe.")
+        }
+        gestureTestFingers = fingers
+        applyGestureFingers()
+        return GestureVerification(
+            fingers: fingers, reversed: settings.reverseSwipe, environment: gestureEnvironment, date: .now)
+    }
+
+    /// Ends a gesture test. The swipe stays on only when the saved result turns it on.
+    func finishGestureTest(_ result: GestureTestResult) {
+        gestureTestFingers = nil
+        switch result {
+        case .confirmed(let verification): saveGestureVerification(verification)
+        case .failed: saveGestureVerification(nil)
+        case .cancelled: applyGestureFingers()
+        }
+    }
+
+    /// The user says a relevant macOS gesture changed, so the last test no longer counts.
+    func reportGestureChange() {
+        saveGestureVerification(nil)
+    }
+
+    private func saveGestureVerification(_ verification: GestureVerification?) {
+        gestureVerification = verification
+        if let verification, let data = try? JSONEncoder().encode(verification) {
+            defaults.set(data, forKey: Self.gestureVerificationKey)
+        } else {
+            defaults.removeObject(forKey: Self.gestureVerificationKey)
+        }
+        applyGestureFingers()
+    }
+
+    private func gestureState(for settings: MiriSettings) -> GestureState {
+        let conflict =
+            settings.stripGesture.fingers.flatMap { gestureCheck(for: $0)?.status }
+            ?? .unableToVerify("Miri has not checked the macOS gesture settings yet.")
+        return GestureState.evaluate(
+            preference: settings.stripGesture, reversed: settings.reverseSwipe, verification: gestureVerification,
+            environment: gestureEnvironment, conflict: conflict)
+    }
+
+    private func activeGestureFingers(for settings: MiriSettings) -> GestureFingers? {
+        if let gestureTestFingers { return gestureTestFingers }
+        return gestureState(for: settings).isEnabled ? settings.stripGesture.fingers : nil
+    }
+
+    private func applyGestureFingers() {
+        do {
+            try store.applyGestureFingers(reduceMotion: reduceMotion)
+        } catch {
+            configurationIssue = error
+        }
+    }
+
+    /// Rereads the macOS gesture settings while a swipe is selected, so a change made in System Settings turns the
+    /// swipe off without waiting for a relaunch.
+    private func watchGestureSettings() {
+        gesturePoll = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: Self.gesturePollInterval)
+                guard let self else { return }
+                if self.settings.stripGesture != .off { self.refreshSetup() }
+            }
+        }
     }
 
     /// Starts management, or waits and rechecks while a setup problem blocks it.
@@ -197,10 +324,7 @@ import ServiceManagement
         let info = Bundle.main.infoDictionary ?? [:]
         let version =
             "\(info["CFBundleShortVersionString"] as? String ?? "?") (\(info["CFBundleVersion"] as? String ?? "?"))"
-        let revisionURL = Bundle.main.bundleURL.appending(path: "Contents/Resources/engine-revision.txt")
-        let revision =
-            (try? String(contentsOf: revisionURL, encoding: .utf8))?
-            .trimmingCharacters(in: .whitespacesAndNewlines) ?? "unknown"
+        let revision = gestureEnvironment.engineRevision
         let main = NSScreen.screens.first
         let displays = NSScreen.screens.map { screen in
             DiagnosticsReport.Display(
@@ -216,6 +340,12 @@ import ServiceManagement
             homeDirectory: NSHomeDirectory(), userNames: [NSUserName(), NSFullUserName()],
             sensitiveStrings: WindowRestorer.openWindowTitles())
         return report.rendered(with: redactor)
+    }
+
+    private static func engineRevision(bundle: Bundle) -> String {
+        let url = bundle.bundleURL.appending(path: "Contents/Resources/engine-revision.txt")
+        return (try? String(contentsOf: url, encoding: .utf8))?.trimmingCharacters(in: .whitespacesAndNewlines)
+            ?? "unknown"
     }
 
     private func pollSetupUntilReady() {
@@ -260,6 +390,10 @@ import ServiceManagement
             loginItemError = "Launch at login could not be changed. \(error.localizedDescription)"
         }
     }
+}
+
+struct GestureTestBlocked: Error {
+    let message: String
 }
 
 /// Calls `onChange` after the file is written, replaced, or deleted. It reopens the file after atomic replacement.
