@@ -240,12 +240,16 @@ import ServiceManagement
     }
 
     /// A change that needs a new test also ends the old result, so changing back cannot turn the swipe on untested.
-    /// A conflict is ignored here, because it blocks the swipe without saying whether the tested setup changed.
+    /// A conflict is ignored here, because it blocks the swipe without saying whether the tested setup changed. While
+    /// the swipe is Off, the tested finger count stands in for it, so other changes made while Off still count.
     private func dropStaleGestureVerification() {
-        guard gestureVerification != nil,
+        guard let verification = gestureVerification else { return }
+        let tested: StripGesture = verification.fingers == .three ? .three : .four
+        guard
             case .needsTest = GestureState.evaluate(
-                preference: settings.stripGesture, reversed: settings.reverseSwipe, verification: gestureVerification,
-                environment: gestureEnvironment, conflict: .passed)
+                preference: settings.stripGesture == .off ? tested : settings.stripGesture,
+                reversed: settings.reverseSwipe, verification: verification, environment: gestureEnvironment,
+                conflict: .passed)
         else { return }
         saveGestureVerification(nil)
     }
