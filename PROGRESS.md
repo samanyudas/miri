@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-18 by Claude on branch `fix/open-issues`
+Updated: 2026-10-18 by Claude on branch `fix/odd-size-frame`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -277,6 +277,12 @@ The native left edge remains correct, but the observed gap is seven points inste
 A new speed-14 replay reports exact ECS x=4 and native x=8 because its native widths are even.
 The exact origin of the odd width and the native event that refreshed the cached frame remain inferred.
 The existing precision defect is tracked separately in [#28](https://github.com/samanyudas/miri/issues/28) and does not block this engine PR.
+samanyudas/paneru#12 fixes #28 by building the rectangle from its rounded origin and size.
+On 18 October 2026 a live fixture resize to 629 points read back as width 628 on engine `3455e37` and as 629 on `a4fbf60`.
+Sam merged samanyudas/paneru#12 on 18 October 2026 as merge commit `a15682f`, whose tree matches `a4fbf60`, and `fix/odd-size-frame` pins it.
+A native gap check on 18 October 2026 used four fixture windows with 4-point window and edge padding, then resized the leftmost window to 629 points.
+Engine `3455e37` recorded width 636, and the native gap to its neighbour was 7 points.
+Engine `a15682f` recorded native X=8 and width 629 as x=4 and width 637, and every native gap stayed 8 points.
 The source diagnosis and parent verification are `.audit/pr27-fixed-edge-one-point-diagnosis-completed.json` and `.audit/pr27-fixed-edge-rounding-parent-verification.json`.
 
 1. Find out whether macOS tiling halves windows for #13, for example after a lock and unlock with an external display.
