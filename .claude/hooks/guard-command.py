@@ -96,7 +96,7 @@ def check(argv: list[str], cwd: str) -> str | None:
         return check_git(list(args), cwd)
     if program == "gh" and len(args) >= 2:
         if args[:2] == ["pr", "merge"]:
-            return "merging is Sam's decision; see the risk classes in CONTRIBUTING.md"
+            return "merging is Sam's decision; see Review and merge in CONTRIBUTING.md"
         if args[0] == "release" and args[1] in {"create", "delete", "edit", "upload"}:
             return "publishing or changing a release needs Sam"
         if args[0] == "repo" and args[1] in {"delete", "edit", "archive", "rename"}:

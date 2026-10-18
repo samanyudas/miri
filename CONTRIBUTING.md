@@ -58,14 +58,10 @@ Reference each issue on its own line:
 Refs #123
 ```
 
-## Risk classes
+## Review and merge
 
-The PR risk workflow labels every pull request from the paths it changes.
-
-| Class | Paths | Review before merge |
-| --- | --- | --- |
-| `risk: high` | `Sources/`, `Package.swift`, `vendor/`, `scripts/`, `Makefile`, `rust-toolchain.toml`, `.swift-format`, `.github/`, `.claude/`, `decisions/`, `docs/adr/`, `LICENSE`, `SECURITY.md` | Sam reads the diff and the verification evidence. Hardware-dependent behavior needs Sam's hardware result. |
-| `risk: low` | Everything else, such as README, PROGRESS.md, the glossary, and prose under `docs/` | Green CI is enough. Sam may merge after reading the bot summary. |
+Sam reads the diff and the verification evidence of every pull request.
+Hardware-dependent behavior needs Sam's hardware result.
 
 Agents never merge.
 The command guard blocks `gh pr merge`, and Sam decides every merge.
