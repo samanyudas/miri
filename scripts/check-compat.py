@@ -34,16 +34,23 @@ def key_name_problems() -> list[str]:
     engine = (ENGINE / "src/config.rs").read_text()
     swift = (ROOT / "Sources/MiriCore/EngineKey.swift").read_text()
     problems = []
-    for engine_function, swift_list in [("virtual_keycode", "layoutKeyNames"), ("literal_keycode", "fixedKeyNames"),
+    for engine_function, swift_list in [("virtual_keycode", "layoutKeys"), ("literal_keycode", "literalKeys"),
                                         ("parse_modifiers", "modifierNames")]:
         body = re.search(rf"\nfn {engine_function}\(.*?\n}}\n", engine, re.S)
-        listed = re.search(rf"static let {swift_list}: Set<String> = \[(.*?)\]", swift, re.S)
+        listed = re.search(rf"static let {swift_list}: [^=]+ = \[(.*?)\n    \]", swift, re.S)
         if not body or not listed:
             problems.append(f"cannot find {engine_function} in the engine or {swift_list} in EngineKey.swift")
             continue
-        pattern = r'^\s*"(\w+)" => Modifiers::' if engine_function == "parse_modifiers" else r'\("(\w+)", 0x'
-        names = set(re.findall(pattern, body.group(0), re.M))
-        if names != set(re.findall(r'"(\w+)"', listed.group(1))):
+        if engine_function == "parse_modifiers":
+            matches = set(re.findall(r'^\s*"(\w+)" => Modifiers::', body.group(0), re.M)) == set(
+                re.findall(r'"(\w+)"', listed.group(1)))
+        else:
+            # Order matters: the engine uses the first table entry whose layout character matches a key name.
+            pair = r'\("(\w+)", 0x([0-9a-f]+)\)'
+            engine_pairs = [(name, int(code, 16)) for name, code in re.findall(pair, body.group(0))]
+            swift_pairs = [(name, int(code, 16)) for name, code in re.findall(pair, listed.group(1))]
+            matches = bool(engine_pairs) and engine_pairs == swift_pairs
+        if not matches:
             problems.append(f"EngineKey.{swift_list} no longer matches the engine's {engine_function} in src/config.rs")
     return problems
 

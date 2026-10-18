@@ -43,6 +43,13 @@ public struct Chord: Hashable, Sendable, CustomStringConvertible {
     /// (line 1718). A near miss therefore still counts as taking its chord, and Miri adds no second binding for it.
     /// Returns `nil` for text that names no single chord, such as an empty key or an unknown modifier.
     public init?(engineText: String) {
+        guard let exact = Chord(exactEngineText: engineText) else { return nil }
+        self.init(exact.modifiers, Self.keyAliases[exact.key] ?? exact.key)
+    }
+
+    /// Like `init(engineText:)`, but keeps a printed character such as `=` as written, because only the keyboard
+    /// layout says which key it names. `KeyLayout.conflicts` compares chords read this way.
+    init?(exactEngineText engineText: String) {
         let parts = engineText.unicodeScalars.split(separator: "-", omittingEmptySubsequences: false).map {
             String($0).trimmingCharacters(in: EngineKey.whitespace)
         }
@@ -57,8 +64,7 @@ public struct Chord: Hashable, Sendable, CustomStringConvertible {
                 modifiers.insert(modifier)
             }
         }
-        let key = last.lowercased()
-        self.init(modifiers, Self.keyAliases[key] ?? key)
+        self.init(modifiers, last.lowercased())
     }
 
     /// The engine's syntax, with modifiers in a fixed order.
@@ -172,8 +178,8 @@ public struct DefaultBinding: Sendable {
         ("window_vertical_shrink", "window_vertical_step_shrink", ctrlAlt("minus", .shift), 2),
     ]
 
-    /// Stop window manager. Miri owns this shortcut instead of the engine, because the engine's `quit` makes Miri
-    /// restart the engine (miri#25).
+    /// The default Stop window manager shortcut, used when `[miri].stop_shortcut` is absent. Miri owns Stop instead of
+    /// the engine, because the engine's `quit` makes Miri restart the engine (miri#25).
     public static let stopChord = ctrlAlt("q")
 
     private static func ctrlAlt(_ key: String, _ extra: ChordModifier...) -> Chord {
