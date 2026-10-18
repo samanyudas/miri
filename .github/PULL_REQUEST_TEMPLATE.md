@@ -15,10 +15,6 @@ State what you could not test, such as hardware, a second display, or a manual p
 - [ ] Behavior that unit tests cannot show was checked end to end, and the observed output is above.
 - [ ] `PROGRESS.md` reflects the state after this PR.
 
-## Risk
-
-<!-- The PR risk workflow labels this automatically. See CONTRIBUTING.md#risk-classes. -->
-
 ## Release
 
 <!-- User-visible effect, in one sentence for the release notes. Write "none" for internal changes. -->

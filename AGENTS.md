@@ -21,7 +21,7 @@ Read this map first, then the linked document for the area you touch.
 | `vendor/paneru/` | Engine submodule, pinned to a commit on `samanyudas/paneru` branch `miri/v0.5.2`. |
 | `scripts/` | Build, packaging, selftest, and repository checks, with tests in `scripts/tests/`. |
 | `.claude/` | Project hooks: the command guard and the session-start handoff. |
-| `.github/` | CI, issue lifecycle, risk labeling, and issue and PR templates. |
+| `.github/` | CI, issue lifecycle, and issue and PR templates. |
 | `decisions/` | Accepted product direction and open questions. |
 | `docs/adr/` | Architecture decisions. |
 | `docs/specs/`, `docs/prototypes/` | The v1 specification and prototype records. |
@@ -80,7 +80,7 @@ Do not work around the guard with another command.
 
 ## Deeper docs
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) covers the workflow, risk classes, and issue lifecycle.
+- [CONTRIBUTING.md](CONTRIBUTING.md) covers the workflow, review and merge, and the issue lifecycle.
 - [docs/AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md) covers evidence standards for agent work.
 - [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md), [triage labels](docs/agents/triage-labels.md), and [domain docs](docs/agents/domain.md) cover the tracker and vocabulary.
 - [docs/prototypes/helper-permission.md](docs/prototypes/helper-permission.md) covers the permission selftest and its manual procedure.
