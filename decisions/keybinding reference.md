@@ -122,7 +122,7 @@ Clicking a window on another display also changes focus.
 
 ## Engine mapping
 
-This table maps each accepted action to the command that the pinned engine `3455e37` runs.
+This table maps each accepted action to the command that the pinned engine `a15682f` runs.
 The mapping describes commands and their expected behavior.
 [PROGRESS.md](../PROGRESS.md) records runtime and hardware checks.
 A blank engine command means that Miri leaves the action unbound.
