@@ -96,15 +96,22 @@ The current milestone is shortcut customization in Settings.
   It warns before it takes a shortcut that macOS uses.
   That list is the live System Settings shortcuts merged over built-in defaults, plus standard app shortcuts.
   Reset to Defaults backs up the file, replaces `[bindings]` with the default set, and restores ⌃⌥Q for Stop.
-  Stop is customizable in `[miri].stop_shortcut`, and Miri registers it again when the keyboard layout changes.
+  Stop is customizable in `[miri].stop_shortcut`.
+  When the keyboard layout changes, Miri registers Stop again and restarts a running engine, because the engine reads the layout only when it starts.
+  A default-binding upgrade never takes a chord that presses the same key as a Stop chord or a user binding under the active layout.
   Key names resolve through the active layout in the engine's order, so AZERTY, QWERTZ, and Dvorak record the key the engine binds.
   Unit tests pin key names and round trips on the US, French, German, and Dvorak layouts.
   On 18 October 2026 a built app ran with management stopped and a temporary home folder.
   Synthetic HID key events showed the rejection messages, the macOS conflict alert, adding a Stop chord, and the unusable-key message.
   They also showed that Escape and switching apps cancel recording, and that reset writes a backup.
-  These checks remain open: recording a chord while the engine runs, the three layouts selected for real, and pressing a custom Stop chord.
+  A second run on 18 October 2026 used the same temporary home folder with the engine running.
+  While recording, the page caught ⌃⌥T and showed "⌃⌥T is already used by Float or unfloat focused window.", and the engine did not act.
+  A recorded Stop chord, ⌃⌥⇧P, stopped management when pressed.
+  With French, German, and Dvorak each selected, the recorder wrote `ctrl+alt+shift-a`, `-q`, and `-'` for the key at the US Q position.
+  A freshly started engine ran each recorded binding.
   On AZERTY the default digit shortcuts, such as ⌃⌥1, reach the keypad digits, because the top row types symbols without Shift.
-  The page labels them as keypad keys.
+  The page labels them as keypad keys, and [#31](https://github.com/samanyudas/miri/issues/31) tracks the engine fix.
+  GPT-6.1 Sol reviewed the branch in four rounds and approved it after the layout restart and the upgrade fixes.
 
 ## Next
 
@@ -125,6 +132,6 @@ Each phase lands as its own PR.
 
 ## Last verification
 
-On 18 October 2026 `make check` passed on `feat/shortcut-settings` with engine `a15682f`: 111 Swift tests, 40 and 368 engine tests, both Accessibility selftests, window recovery, and DMG packaging.
+On 18 October 2026 `make check` passed on `feat/shortcut-settings` with engine `a15682f`: 113 Swift tests, 40 and 368 engine tests, both Accessibility selftests, window recovery, and DMG packaging.
 Native width constraints can still change the final edge after an app refuses a requested size.
 A transfer during an existing resize derives its destination ratio from the intermediate width.
