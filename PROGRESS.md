@@ -122,7 +122,12 @@ The current milestone is shortcut customization in Settings.
   The gesture test polls `miri-engine query state --json`, needs the strip to slide both ways, fails on a Space or app switch, and saves a result only after the user confirms it.
   The result lives in user defaults, and Report a macOS Gesture Change deletes it.
   Unit tests cover the state table, the file keys, the result's JSON, and the movement detector.
-  No live trackpad check has run, and the Gestures tab has not been seen on screen.
+  Changing the finger count, direction, macOS version, engine revision, or a readable macOS gesture setting deletes the saved result, even while the swipe is Off, so changing back needs a new test.
+  The four-finger setup check no longer reports a conflict when macOS keeps the four-finger value at 2 while full-screen swiping uses three fingers, as on Sam's Mac on 18 October 2026.
+  On 18 October 2026 the built app showed the Gestures tab on screen with the swipe Off by default and both test buttons disabled, and its config had `direction = "Natural"`, `vertical = false`, and no `fingers_count`.
+  No live trackpad check has run.
+  GPT-6.1 Sol reviewed the branch in three rounds and approved it.
+  [#33](https://github.com/samanyudas/miri/issues/33) tracks the engine helper outliving a dead app, which would keep a test swipe active until the next launch.
 
 ## Next
 
@@ -130,7 +135,7 @@ Sam's status audit of 18 October 2026 proposes these remaining v1 phases.
 Each phase lands as its own PR.
 
 1. Build pointer-versus-focus targeting (engine patch), then run the live trackpad verification.
-   The live run checks the Gestures tab on screen, the gesture test on real hardware, and app checklist items 1 to 16 under Strip gestures.
+   The live run checks the gesture test on real hardware and app checklist items 1 to 16 under Strip gestures.
 2. Integrate Sparkle updates, then production signing, notarization, the release DMG, and the Homebrew cask.
 3. Run the complete app and hardware acceptance checklists on the bundled app with Accessibility granted.
    This includes focused-window stacking from a three-window stack and the external-display live app run.
@@ -145,5 +150,6 @@ Each phase lands as its own PR.
 
 On 18 October 2026 `make check` passed on `feat/gesture-controls` at `5a354d1` with engine `a15682f`: 134 Swift tests, 40 and 368 engine tests, both Accessibility selftests, window recovery, and DMG packaging.
 That run is unit-level for gestures. No trackpad was used.
+At `c85b47a` lint, 136 Swift tests, both engine test modes, the app build, the Accessibility selftest, and packaging passed, while window recovery waited for the locked screen.
 Native width constraints can still change the final edge after an app refuses a requested size.
 A transfer during an existing resize derives its destination ratio from the intermediate width.
