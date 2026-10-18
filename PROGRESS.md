@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-18 on branch `fix/open-issues`
+Updated: 2026-10-18 by Claude on branch `fix/open-issues`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -54,7 +54,7 @@ The current milestone is the first production app slice: menu bar controls, engi
   A live run on 16 October 2026 sent all 43 bound chords as synthetic key events, and the engine ran each command.
   The engine's behavior differed from the accepted behavior only where the engine mapping records it, such as a numbered jump into a stacked column focusing the top window instead of the last-focused one.
   Some actions stay unbound or behave differently, as the [engine mapping](decisions/keybinding%20reference.md#engine-mapping) records.
-- `fix/open-issues` pins engine `0010611` on `miri/v0.5.2`, which includes the squash merge of samanyudas/paneru#9.
+- `fix/open-issues` pins engine `3455e37` on `miri/v0.5.2`, the squash merge of samanyudas/paneru#11, which follows samanyudas/paneru#9 and #10.
   The engine adds five-point resize steps (#22), directional display focus and move (#23), and column jumps that return to a stack's last-focused window (#24).
   It drops a binding whose key name it does not know, instead of binding the A key (#26).
   Vertical focus and swap no longer cross to another display at a column's edge.
@@ -112,7 +112,7 @@ Independent source review found no production defects.
 The final test commit closes its two timing-test gaps.
 The engine's final test tree passed 40 configuration and 338 integration tests without Lua, and 51 configuration and 418 integration tests with Lua.
 Formatting and Clippy pass in both modes.
-PR #27 still pins published engine `0010611` until Sam merges the engine fix into `miri/v0.5.2`.
+Sam merged samanyudas/paneru#11 on 18 October 2026 as `3455e37`, whose tree matches `6e572ea`, and PR #27 now pins it.
 
 Sam confirmed numbered and first/last-column jumps return to the lower last-focused member, Fixture 0.
 Sam confirmed ordinary Control-Option-Q stops management and subsequent resize input does nothing.
@@ -285,10 +285,8 @@ The source diagnosis and parent verification are `.audit/pr27-fixed-edge-one-poi
 3. Verify focused-window stacking in both directions on hardware, starting from a stack of three windows.
    The 16 October shortcut run covered stacking and pop-out in both directions with single-window columns only.
 4. Build the remaining v1 controls: the shortcut recorder and reset action, the gesture test, and pointer-targeted swipes.
-5. After Sam merges engine PR #11, pin its published engine and rerun `make setup`, `make check`, and hosted CI.
-   Both display arrangements passed, and the original configuration and laptop-left arrangement are restored.
-6. Decide Q6, the release duration, at the final check before publishing v1.
-7. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
+5. Decide Q6, the release duration, at the final check before publishing v1.
+6. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
 
 ## Blockers
 
@@ -306,7 +304,5 @@ The maximum-width test proves reconciliation and marker cleanup, not right-edge 
 A transfer during an existing resize derives its destination ratio from the intermediate width.
 Sam's clean vertical and horizontal results are recorded at `6e572ea` with fixture animation speed `1000`.
 Native checks with Fixture 0 and TextEdit also pass in both arrangements at speed `14`.
-All hosted checks pass at Miri `36bec2e`, which still pins engine `0010611`.
-The engine dependency merge and the published Miri pin remain pending.
-The final combined `make check` and hosted CI must run again after that pin.
+On 18 October 2026 the final combined `make check` passed with engine `3455e37`: 84 Swift tests, 40 and 366 engine tests, both Accessibility selftests, window recovery, and DMG packaging.
 The append-only decision trail is `.audit/pr27-full-stop-20261017.tsv`.
