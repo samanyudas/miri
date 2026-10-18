@@ -109,6 +109,7 @@ The current milestone is shortcut customization in Settings.
   A recorded Stop chord, ⌃⌥⇧P, stopped management when pressed.
   With French, German, and Dvorak each selected, the recorder wrote `ctrl+alt+shift-a`, `-q`, and `-'` for the key at the US Q position.
   A freshly started engine ran each recorded binding.
+  With the engine running, switching to French and back to Australian restarted the engine each time, with process IDs 5840, 6259, and 6268.
   On AZERTY the default digit shortcuts, such as ⌃⌥1, reach the keypad digits, because the top row types symbols without Shift.
   The page labels them as keypad keys, and [#31](https://github.com/samanyudas/miri/issues/31) tracks the engine fix.
   GPT-6.1 Sol reviewed the branch in four rounds and approved it after the layout restart and the upgrade fixes.
