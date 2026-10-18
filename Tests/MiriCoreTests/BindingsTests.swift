@@ -496,6 +496,22 @@ struct DefaultBindingsTests {
         #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(2))
     }
 
+    @Test func anUpgradeLeavesAStopChordToStop() throws {
+        let original = """
+            [bindings]
+            window_grow = "ctrl+alt-g"
+
+            [miri]
+            default_bindings_version = 1
+            stop_shortcut = "ctrl+alt-equal"
+            """
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        #expect(document.value(at: ["bindings", "window_step_grow"]) == nil)
+        #expect(document.value(at: ["miri", "stop_shortcut"]) == .string("ctrl+alt-equal"))
+        #expect(store.stopChordsToRegister == [Chord([.control, .option], "equal")])
+    }
+
     @Test func aVersionAboveTheCurrentOneAddsNothing() throws {
         let (store, document) = try load("[miri]\ndefault_bindings_version = 7\n")
         #expect(store.issue == nil)

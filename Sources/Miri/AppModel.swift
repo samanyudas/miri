@@ -76,9 +76,13 @@ import ServiceManagement
     }
 
     private func keyboardLayoutChanged() {
-        keyLayout = .current
-        store.layout = keyLayout
+        let layout = KeyLayout.current
+        guard layout != keyLayout else { return }
+        keyLayout = layout
+        store.layout = layout
         reloadConfiguration()
+        // The engine reads the layout only when it starts, so it restarts to bind the same keys as Stop and the recorder.
+        if engineState.isRunning { supervisor.restartManually() }
     }
 
     enum ShortcutAddOutcome {
