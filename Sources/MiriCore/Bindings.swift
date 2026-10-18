@@ -222,10 +222,10 @@ public struct DefaultBinding: Sendable {
             }
         }
         let existing = result.value(at: ["bindings"])
-        var taken = boundChords(in: existing)
+        var taken = boundChords(in: existing, layout: layout)
         // An engine binding wins over Stop on the same chord, so a default must never take a Stop chord.
         if let stop = result.value(at: ["miri", "stop_shortcut"]) {
-            taken += boundChords(in: .table(["stop_shortcut": stop]))
+            taken += boundChords(in: .table(["stop_shortcut": stop]), layout: layout)
         } else {
             taken.append(stopChord)
         }
@@ -287,8 +287,13 @@ public struct DefaultBinding: Sendable {
         return .usable(droppedKeyIssue: droppedKeyIssue)
     }
 
-    private static func boundChords(in bindings: TOMLValue?) -> [Chord] {
-        bindingTexts(in: bindings).compactMap { Chord(engineText: $0) }
+    /// A printed character such as `]` names whichever key types it in `layout`, so it keeps its spelling there.
+    /// Only a character the layout cannot resolve falls back to its US key name.
+    private static func boundChords(in bindings: TOMLValue?, layout: KeyLayout) -> [Chord] {
+        bindingTexts(in: bindings).compactMap { text in
+            guard let exact = Chord(exactEngineText: text) else { return nil }
+            return layout.keyCode(for: exact.key) == nil ? Chord(engineText: text) : exact
+        }
     }
 
     private static func bindingTexts(in bindings: TOMLValue?) -> [String] {
