@@ -76,6 +76,7 @@ Validate each supported finger count and macOS gesture combination on real hardw
 ### Test and retest a strip gesture
 
 When automatic conflict detection is unavailable, Miri offers a gesture test during setup.
+The test is in **Settings > Gestures**, next to the strip swipe choice and its status.
 The pass criteria, the **Verified by user test** result, and the conditions that require a retest follow [Strip gestures](release-scope.md#strip-gestures).
 
 ### Proposed four-finger setup

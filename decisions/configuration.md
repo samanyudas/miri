@@ -100,12 +100,18 @@ They do not by themselves encode Miri's verification status or conflict policy.
 | --- | --- | --- |
 | `[swipe.gesture].direction` | Follow finger movement by default, with a persistent reversal setting. | Source values are `"Natural"` and `"Reversed"`. |
 | `[swipe.gesture].fingers_count` | Three fingers, four fingers, or Off, subject to the accepted enablement policy. | Exact-count interception starts at three fingers. Omission or zero disables it. |
+| `[swipe.gesture].vertical` | Strip swipes are horizontal only. | Vertical interception defaults to enabled. |
 
 `swipe_natural` is absent from this release.
 Legacy `[options].swipe_gesture_fingers` and `[options].swipe_gesture_direction` are deprecated.
 Source acceptance of a five-finger count does not add five-finger support to Miri v1.
-Vertical gesture interception defaults to enabled in the engine.
-Its interaction with Miri's horizontal-only v1 strip behavior and macOS gestures needs explicit configuration and hardware verification.
+
+Miri stores the choice in `[miri].strip_gesture` as `"off"`, `"three"`, or `"four"`, and the reversal in `[miri].reverse_swipe`.
+It always writes `[swipe.gesture].direction` from the reversal and sets `[swipe.gesture].vertical` to `false`.
+It writes `[swipe.gesture].fingers_count` only while the selected swipe is enabled or a gesture test is running, and removes it otherwise.
+It removes the legacy `[options]` swipe keys, because the engine falls back to them and would keep a swipe on that Miri turned off.
+The gesture test result is app state outside the file, so a file edit cannot mark a swipe as tested.
+The effect of `vertical = false` on Mission Control and App Exposé swipes still needs hardware verification.
 
 The accepted strip target for trackpad scrolling and keyboard commands is in [Multiple monitors](release-scope.md#multiple-monitors).
 Paneru's trackpad behavior needs verification and may require an engine patch.
