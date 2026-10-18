@@ -58,15 +58,21 @@ public struct MiriSettings: Equatable, Sendable {
 
     /// Writes these settings and the engine keys derived from them, changing only values that differ.
     /// `appBundleIdentifier` names Miri's own app, whose windows always float.
-    public func applied(to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String) throws
+    public func applied(
+        to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String, layout: KeyLayout = .positional
+    ) throws
         -> TOMLDocument
     {
-        try applying(to: document, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier).document
+        try applying(
+            to: document, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier, layout: layout
+        ).document
     }
 
     /// Like `applied`, but leaves each key the file defines in a form Miri does not rewrite, such as an inline table,
     /// and returns each of those keys in `skipped` with the value Miri wanted there, or `nil` to remove it.
-    func applying(to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String) throws
+    func applying(
+        to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String, layout: KeyLayout = .positional
+    ) throws
         -> (document: TOMLDocument, skipped: [String: TOMLValue?])
     {
         try validate()
@@ -105,7 +111,7 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.string(".*"), floating, "title")
         try set(.string(appBundleIdentifier), floating, "bundle_id")
         try set(.boolean(true), floating, "floating")
-        return (try DefaultBinding.adding(to: result), skipped)
+        return (try DefaultBinding.adding(to: result, layout: layout), skipped)
     }
 
     private static func gap(_ value: TOMLValue, key: String) throws(ConfigurationIssue) -> Int {

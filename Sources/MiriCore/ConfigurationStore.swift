@@ -130,10 +130,10 @@ public final class ConfigurationStore {
         let next: TOMLDocument
         do {
             let applied = try settings.applying(
-                to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier)
+                to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier, layout: layout)
             if let previous {
                 let before = try previous.applying(
-                    to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier)
+                    to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier, layout: layout)
                 // A key skipped both times still needs a write when the value Miri wants there changed.
                 let needed = applied.skipped.filter { path, wanted in
                     before.skipped[path].map { $0 != wanted } ?? true

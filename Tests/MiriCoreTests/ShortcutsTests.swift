@@ -256,10 +256,11 @@ import Testing
     private var url: URL { directory.appending(path: "config.toml") }
     private let us = KeyLayout(inputSourceID: "com.apple.keylayout.US")!
 
-    private func store(_ original: String) throws -> ConfigurationStore {
+    private func store(_ original: String, layout: KeyLayout? = nil) throws -> ConfigurationStore {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try original.write(to: url, atomically: true, encoding: .utf8)
-        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri", layout: us)
+        let store = ConfigurationStore(
+            url: url, appBundleIdentifier: "io.github.samanyudas.miri", layout: layout ?? us)
         store.load(reduceMotion: false)
         return store
     }
@@ -277,6 +278,23 @@ import Testing
             after.value(at: ["bindings", "window_focus_west"])
                 == .array([.string("ctrl+alt-leftarrow"), .string("ctrl+alt-h")]))
         #expect(store.shortcuts?.document.text == after.text)
+    }
+
+    @Test func anUpgradeLeavesStopTheKeyItsOtherSpellingNames() throws {
+        let french = try #require(KeyLayout(inputSourceID: "com.apple.keylayout.French"))
+        let store = try store(
+            """
+            [bindings]
+            window_shrink = "ctrl+alt-g"
+
+            [miri]
+            default_bindings_version = 1
+            stop_shortcut = "ctrl+alt-)"
+            """, layout: french)
+        let document = try TOMLDocument(String(contentsOf: url, encoding: .utf8))
+        #expect(store.issue == nil)
+        #expect(document.value(at: ["bindings", "window_step_shrink"]) == nil)
+        #expect(store.stopChordsToRegister == [Chord([.control, .option], ")")])
     }
 
     @Test func aRejectedAddLeavesTheFileUnchanged() throws {
