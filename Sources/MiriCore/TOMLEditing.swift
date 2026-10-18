@@ -33,6 +33,8 @@ extension TOMLDocument {
             var suffix = text.isEmpty || text.hasSuffix("\n") ? "" : "\n"
             if !text.isEmpty { suffix += "\n" }
             edited = text + suffix + "[\(header)]\n\(TOMLValue.encodeKey(key)) = \(value.encoded)\n"
+            // A parent defined inline, such as `swipe = { sensitivity = 0.5 }`, cannot gain a `[swipe.gesture]` header.
+            guard (try? TOMLDocument(edited)) != nil else { throw TOMLEditError.notEditable(path: path) }
         }
         let result = try TOMLDocument(edited)
         guard result.value(at: table + [key]) == value else { throw TOMLEditError.verificationFailed(path: path) }
