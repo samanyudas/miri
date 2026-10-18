@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-18 by Claude on branch `feat/shortcut-settings`
+Updated: 2026-10-18 by Claude on branch `feat/gesture-controls`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -113,14 +113,24 @@ The current milestone is shortcut customization in Settings.
   On AZERTY the default digit shortcuts, such as ⌃⌥1, reach the keypad digits, because the top row types symbols without Shift.
   The page labels them as keypad keys, and [#31](https://github.com/samanyudas/miri/issues/31) tracks the engine fix.
   GPT-6.1 Sol reviewed the branch in four rounds and approved it after the layout restart and the upgrade fixes.
+- `feat/gesture-controls` is phase 3a, the strip gesture controls without pointer-versus-focus targeting.
+  Settings has a Gestures tab with Off, Three fingers, and Four fingers (recommended), and Reverse swipe direction.
+  `[miri].strip_gesture` defaults to Off, and `[miri].reverse_swipe` sets `[swipe.gesture].direction`.
+  `GestureState.evaluate` turns the swipe on only for a confirmed user test that matches the finger count, direction, macOS version, engine revision, and readable macOS gesture settings.
+  A confirmed macOS conflict always keeps it off, and automatic detection never turns it on.
+  Miri writes `[swipe.gesture].fingers_count` only while the swipe is on or a test runs, sets `vertical = false`, and removes the legacy `[options]` swipe keys.
+  The gesture test polls `miri-engine query state --json`, needs the strip to slide both ways, fails on a Space or app switch, and saves a result only after the user confirms it.
+  The result lives in user defaults, and Report a macOS Gesture Change deletes it.
+  Unit tests cover the state table, the file keys, the result's JSON, and the movement detector.
+  No live trackpad check has run, and the Gestures tab has not been seen on screen.
 
 ## Next
 
 Sam's status audit of 18 October 2026 proposes these remaining v1 phases.
 Each phase lands as its own PR.
 
-1. Build the gesture controls: three-finger, four-finger, and Off, persistent reversal, and pointer-versus-focus targeting.
-   Add the real gesture test with explicit confirmation, and persist and invalidate its result as the app checklist requires.
+1. Build pointer-versus-focus targeting (engine patch), then run the live trackpad verification.
+   The live run checks the Gestures tab on screen, the gesture test on real hardware, and app checklist items 1 to 16 under Strip gestures.
 2. Integrate Sparkle updates, then production signing, notarization, the release DMG, and the Homebrew cask.
 3. Run the complete app and hardware acceptance checklists on the bundled app with Accessibility granted.
    This includes focused-window stacking from a three-window stack and the external-display live app run.
