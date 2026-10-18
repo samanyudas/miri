@@ -1,4 +1,5 @@
 import AppKit
+import Carbon.HIToolbox
 import MiriCore
 import Observation
 import ServiceManagement
@@ -13,6 +14,7 @@ import ServiceManagement
     private(set) var engineState: EngineState = .stopped
     private(set) var settings = MiriSettings()
     private(set) var configurationIssue: ConfigurationIssue?
+    private(set) var keyLayout: KeyLayout
     private(set) var setupChecks: [SetupCheck] = []
     /// Why management is not running when the user did not stop it, such as missing permission.
     private(set) var startBlockers: [SetupCheck] = []
@@ -35,7 +37,9 @@ import ServiceManagement
             executable: bundle.bundleURL.appending(path: "Contents/Helpers/miri-engine"), support: support,
             serviceName: identifier + ".engine")
         log = RotatingLog(url: paths.logs.appending(path: "engine.log"))
-        store = ConfigurationStore(url: paths.configuration, appBundleIdentifier: identifier)
+        let layout = KeyLayout.current
+        keyLayout = layout
+        store = ConfigurationStore(url: paths.configuration, appBundleIdentifier: identifier, layout: layout)
         stoppedByUser = UserDefaults.standard.bool(forKey: Self.stoppedKey)
         supervisor = EngineSupervisor(
             launcher: ProcessEngineLauncher(paths: paths, log: log),
@@ -53,6 +57,10 @@ import ServiceManagement
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification, object: nil, queue: .main
         ) { [weak self] _ in MainActor.assumeIsolated { self?.reloadConfiguration() } }
+        DistributedNotificationCenter.default().addObserver(
+            forName: Notification.Name(kTISNotifySelectedKeyboardInputSourceChanged as String), object: nil,
+            queue: .main
+        ) { [weak self] _ in MainActor.assumeIsolated { self?.keyboardLayoutChanged() } }
         syncLoginItem()
         if !stoppedByUser { start() } else { refreshSetup() }
     }
@@ -61,7 +69,13 @@ import ServiceManagement
         store.load(reduceMotion: reduceMotion)
         settings = store.settings
         configurationIssue = store.issue
-        stopShortcut?.setEnabled(store.stopShortcutIsFree)
+        stopShortcut?.register(store.stopChordsToRegister, layout: keyLayout)
+    }
+
+    private func keyboardLayoutChanged() {
+        keyLayout = .current
+        store.layout = keyLayout
+        reloadConfiguration()
     }
 
     func update(_ change: (inout MiriSettings) -> Void) {

@@ -1,29 +1,38 @@
 import Carbon.HIToolbox
 import MiriCore
 
-/// Miri's global ⌃⌥Q shortcut for Stop window manager. A Carbon hot key needs no Accessibility permission, so it works
-/// whether or not the engine is running. The app keeps one for its whole life.
+/// Miri's global shortcuts for Stop window manager. A Carbon hot key needs no Accessibility permission, so they work
+/// whether or not the engine is running. The app keeps one instance for its whole life.
 final class StopShortcut {
     private let action: () -> Void
-    private var hotKey: EventHotKeyRef?
+    private var hotKeys: [EventHotKeyRef] = []
     private var handler: EventHandlerRef?
 
     init(action: @escaping () -> Void) {
         self.action = action
     }
 
-    func setEnabled(_ enabled: Bool) {
-        if enabled, hotKey == nil {
-            register()
-        } else if !enabled, let hotKey {
-            UnregisterEventHotKey(hotKey)
-            self.hotKey = nil
-            if let handler { RemoveEventHandler(handler) }
-            handler = nil
+    /// Replaces the registered shortcuts. A chord with fn, or with a key the layout cannot place, is skipped, because
+    /// Carbon hot keys have no fn modifier.
+    func register(_ chords: [Chord], layout: KeyLayout) {
+        for hotKey in hotKeys { UnregisterEventHotKey(hotKey) }
+        hotKeys = []
+        guard !chords.isEmpty, installHandler() else { return }
+        for (index, chord) in chords.enumerated() {
+            guard !chord.modifiers.contains(.function), let keyCode = layout.keyCode(for: chord.key) else { continue }
+            let identifier = EventHotKeyID(signature: OSType(0x4D_69_72_69), id: UInt32(index + 1))
+            var hotKey: EventHotKeyRef?
+            if RegisterEventHotKey(
+                UInt32(keyCode), Self.carbonModifiers(chord.modifiers), identifier, GetEventDispatcherTarget(), 0,
+                &hotKey) == noErr, let hotKey
+            {
+                hotKeys.append(hotKey)
+            }
         }
     }
 
-    private func register() {
+    private func installHandler() -> Bool {
+        guard handler == nil else { return true }
         var type = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
         let context = Unmanaged.passUnretained(self).toOpaque()
         let status = InstallEventHandler(
@@ -34,39 +43,14 @@ final class StopShortcut {
                 MainActor.assumeIsolated { Unmanaged<StopShortcut>.fromOpaque(context).takeUnretainedValue().action() }
                 return noErr
             }, 1, &type, context, &handler)
-        guard status == noErr else { return }
-        let identifier = EventHotKeyID(signature: OSType(0x4D_69_72_69), id: 1)
-        let modifiers = UInt32(controlKey | optionKey)
-        if RegisterEventHotKey(
-            UInt32(Self.keyCode(for: DefaultBinding.stopChord.key)), modifiers, identifier,
-            GetEventDispatcherTarget(), 0, &hotKey) != noErr
-        {
-            hotKey = nil
-            if let handler { RemoveEventHandler(handler) }
-            handler = nil
-        }
+        if status != noErr { handler = nil }
+        return status == noErr
     }
 
-    /// The key that types `character` in the current keyboard layout, as the engine reads a one-letter key name,
-    /// so the shortcut follows AZERTY and other layouts. Falls back to the US position.
-    static func keyCode(for character: String) -> Int {
-        let fallback = kVK_ANSI_Q
-        guard let source = TISCopyCurrentASCIICapableKeyboardLayoutInputSource()?.takeRetainedValue(),
-            let pointer = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData)
-        else { return fallback }
-        let data = Unmanaged<CFData>.fromOpaque(pointer).takeUnretainedValue() as Data
-        return data.withUnsafeBytes { bytes -> Int in
-            guard let layout = bytes.bindMemory(to: UCKeyboardLayout.self).baseAddress else { return fallback }
-            for code in 0..<128 {
-                var deadKeys: UInt32 = 0
-                var length = 0
-                var characters = [UniChar](repeating: 0, count: 4)
-                let status = UCKeyTranslate(
-                    layout, UInt16(code), UInt16(kUCKeyActionDown), 0, UInt32(LMGetKbdType()),
-                    OptionBits(kUCKeyTranslateNoDeadKeysBit), &deadKeys, characters.count, &length, &characters)
-                if status == noErr, String(utf16CodeUnits: characters, count: length) == character { return code }
-            }
-            return fallback
-        }
+    private static func carbonModifiers(_ modifiers: Set<ChordModifier>) -> UInt32 {
+        let masks: [(ChordModifier, Int)] = [
+            (.control, controlKey), (.option, optionKey), (.command, cmdKey), (.shift, shiftKey),
+        ]
+        return UInt32(masks.filter { modifiers.contains($0.0) }.reduce(0) { $0 | $1.1 })
     }
 }
