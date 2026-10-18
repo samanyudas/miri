@@ -10,7 +10,7 @@ These SVG files contain Miri's blue and violet window mark.
 
 The menu bar SVGs use black shapes on a transparent background.
 The native app must load the menu bar images as template images so macOS can apply the correct appearance.
-The repository does not yet contain app code that loads these assets.
+The app does not yet load these SVG assets as its app or menu bar icons.
 
 The updated Paper UI uses `#4F6BF5` for the primary accent and `#3048C8` for darker links and labels.
 Warning and error colors retain their existing meanings.
