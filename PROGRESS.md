@@ -143,6 +143,7 @@ Each phase lands as its own PR.
 
 ## Last verification
 
-On 18 October 2026 `make check` passed on `feat/shortcut-settings` with engine `a15682f`: 113 Swift tests, 40 and 368 engine tests, both Accessibility selftests, window recovery, and DMG packaging.
+On 18 October 2026 `make check` passed on `feat/gesture-controls` at `5a354d1` with engine `a15682f`: 134 Swift tests, 40 and 368 engine tests, both Accessibility selftests, window recovery, and DMG packaging.
+That run is unit-level for gestures. No trackpad was used.
 Native width constraints can still change the final edge after an app refuses a requested size.
 A transfer during an existing resize derives its destination ratio from the intermediate width.
