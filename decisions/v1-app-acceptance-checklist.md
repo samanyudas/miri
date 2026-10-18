@@ -1,7 +1,8 @@
 # V1 app acceptance checklist
 
 Status: checks derived from Sam's accepted design decisions on 14 October 2026.
-The repository has no app implementation, and these checks have not run.
+A check passes only with a recorded result for the build under test.
+Implementation and test status lives in [PROGRESS.md](../PROGRESS.md), not in this document.
 This checklist adds no new product choices and does not alter the [multi-monitor release checklist](v1-acceptance-checklist.md).
 
 ## Prerequisites and evidence

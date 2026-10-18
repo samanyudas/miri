@@ -2,7 +2,7 @@
 
 Status: Miri settings decisions and proposals.
 The [release scope](release-scope.md) and [ADR 0007](../docs/adr/0007-isolate-miri-configuration.md) define the accepted configuration contract.
-The repository has no app implementation.
+Implementation and test status lives in [PROGRESS.md](../PROGRESS.md), not in this document.
 
 Expose settings through controls in a native window.
 Apply valid changes immediately, without a Save button or restart.

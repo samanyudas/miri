@@ -1,8 +1,8 @@
 # Setup
 
 Status: planned Miri setup behavior, aligned with the accepted [release scope](release-scope.md).
-The repository has no app implementation.
-The steps below describe the intended Miri setup experience and require validation against a working build.
+Implementation and test status lives in [PROGRESS.md](../PROGRESS.md), not in this document.
+The steps below describe the intended Miri setup experience.
 
 ## Check the requirements
 
