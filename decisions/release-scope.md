@@ -194,6 +194,7 @@ Sam accepted this behavior on 19 October 2026.
 When the fingers lift, the strip always settles on a column.
 It lands on the column nearest the screen center at the point where the flick would naturally stop, counting momentum, and that column takes focus.
 The strip then moves only as far as needed to show that column fully, as V1 interactions describes.
+A settle never leaves empty space beside a strip that overflows the display, so a flick past either end lands with that end on the screen edge.
 Landing on a stack focuses the window in that stack that was used last.
 A strip that already fits the display slides a little with resistance, then springs back.
 Modifier-scroll with a mouse wheel settles the same way after a short pause.
