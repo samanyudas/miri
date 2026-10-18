@@ -81,6 +81,12 @@ If the engine rejects the binding section, or `[miri].stop_shortcut` is invalid,
 | Make window shorter | ⌃⌥⇧- |
 | Equalize window heights within column | ⌃⌥0 |
 
+A width change grows or shrinks the column around its own center.
+The column shifts inward only when it would leave the display.
+Within one run of width changes, Miri remembers where the column started, so returning to the original width returns it to the same place.
+That memory ends when focus or the strip moves.
+Sam accepted this behavior on 19 October 2026.
+
 Full column width is separate from native macOS fullscreen.
 The width and height adjustment increment follows [Default shortcuts and layout](release-scope.md#default-shortcuts-and-layout).
 
