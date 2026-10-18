@@ -125,7 +125,7 @@ The current milestone is shortcut customization in Settings.
   `GestureState.evaluate` turns the swipe on only for a confirmed user test that matches the finger count, direction, macOS version, engine revision, and readable macOS gesture settings.
   A confirmed macOS conflict always keeps it off, and automatic detection never turns it on.
   Miri writes `[swipe.gesture].fingers_count` only while the swipe is on or a test runs, sets `vertical = false`, and removes the legacy `[options]` swipe keys.
-  The gesture test polls `miri-engine query state --json`, needs the strip to slide both ways, fails on a Space or app switch, and saves a result only after the user confirms it.
+  The gesture test polls `miri-engine query state --json`, needs the strip to slide both ways, fails on a Space switch, and saves a result only after the user confirms it.
   The result lives in user defaults, and Report a macOS Gesture Change deletes it.
   Unit tests cover the state table, the file keys, the result's JSON, and the movement detector.
   Changing the finger count, direction, macOS version, engine revision, or a readable macOS gesture setting deletes the saved result, even while the swipe is Off, so changing back needs a new test.
