@@ -142,9 +142,11 @@ public enum SetupChecker {
     }
 
     private static func fourFingerStatus(_ observation: SetupObservation) -> SetupStatus {
-        switch observation.fourFingerSwipe {
-        case 0?: .passed
-        case 2?:
+        // macOS keeps the four-finger value at 2 while full-screen swiping uses three fingers, so 2 is a conflict
+        // only when the three-finger swipe is not the one switching full-screen apps.
+        switch (observation.fourFingerSwipe, observation.threeFingerSwipe) {
+        case (0?, _), (2?, 2?): .passed
+        case (2?, _?):
             .problem(
                 "Four-finger swipes switch full-screen apps. Turn off Swipe between full-screen applications in System Settings > Trackpad > More Gestures, or set it to three fingers."
             )
