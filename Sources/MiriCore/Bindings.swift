@@ -223,6 +223,12 @@ public struct DefaultBinding: Sendable {
         }
         let existing = result.value(at: ["bindings"])
         var taken = Set(boundChords(in: existing))
+        // An engine binding wins over Stop on the same chord, so a default must never take a Stop chord.
+        if let stop = result.value(at: ["miri", "stop_shortcut"]) {
+            taken.formUnion(boundChords(in: .table(["stop_shortcut": stop])))
+        } else {
+            taken.insert(stopChord)
+        }
         // Only the file's own bindings count, so two default rows for one engine command both get written.
         let bound = Set(boundCommands(in: existing))
         for row in table where row.version > offered && !bound.contains(EngineCommand.canonical(row.command)!) {
