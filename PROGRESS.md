@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-18 by Claude on branch `docs/reconcile-status`
+Updated: 2026-10-18 by Claude on branch `feat/shortcut-settings`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -89,20 +89,35 @@ The current milestone is shortcut customization in Settings.
   Engine `3455e37` recorded width 636, and the native gap to its neighbour was 7 points.
   Engine `a15682f` recorded native X=8 and width 629 as x=4 and width 637, and every native gap stayed 8 points.
 
+- `feat/shortcut-settings` adds the Shortcuts settings page.
+  It records a chord through an event tap at the head of the HID event stream, so it also sees chords the engine binds.
+  Each action lists several chords, and each chord has its own remove button.
+  The page rejects a chord that another Miri action, Stop, or an unlisted engine command already uses, and the file stays unchanged.
+  It warns before it takes a shortcut that macOS uses.
+  That list is the live System Settings shortcuts merged over built-in defaults, plus standard app shortcuts.
+  Reset to Defaults backs up the file, replaces `[bindings]` with the default set, and restores ⌃⌥Q for Stop.
+  Stop is customizable in `[miri].stop_shortcut`, and Miri registers it again when the keyboard layout changes.
+  Key names resolve through the active layout in the engine's order, so AZERTY, QWERTZ, and Dvorak record the key the engine binds.
+  Unit tests pin key names and round trips on the US, French, German, and Dvorak layouts.
+  On 18 October 2026 a built app ran with management stopped and a temporary home folder.
+  Synthetic HID key events showed the rejection messages, the macOS conflict alert, adding a Stop chord, and the unusable-key message.
+  They also showed that Escape and switching apps cancel recording, and that reset writes a backup.
+  These checks remain open: recording a chord while the engine runs, the three layouts selected for real, and pressing a custom Stop chord.
+  On AZERTY the default digit shortcuts, such as ⌃⌥1, reach the keypad digits, because the top row types symbols without Shift.
+  The page labels them as keypad keys.
+
 ## Next
 
 Sam's status audit of 18 October 2026 proposes these remaining v1 phases.
 Each phase lands as its own PR.
 
-1. Build shortcut customization in Settings: recording, multiple bindings per action, explicit reset, duplicate-assignment rejection, and known macOS conflict warnings.
-   Check AZERTY, QWERTZ, and Dvorak layouts, and keep custom and deleted bindings intact during upgrades.
-2. Build the gesture controls: three-finger, four-finger, and Off, persistent reversal, and pointer-versus-focus targeting.
+1. Build the gesture controls: three-finger, four-finger, and Off, persistent reversal, and pointer-versus-focus targeting.
    Add the real gesture test with explicit confirmation, and persist and invalidate its result as the app checklist requires.
-3. Integrate Sparkle updates, then production signing, notarization, the release DMG, and the Homebrew cask.
-4. Run the complete app and hardware acceptance checklists on the bundled app with Accessibility granted.
+2. Integrate Sparkle updates, then production signing, notarization, the release DMG, and the Homebrew cask.
+3. Run the complete app and hardware acceptance checklists on the bundled app with Accessibility granted.
    This includes focused-window stacking from a three-window stack and the external-display live app run.
-5. Complete the endurance period and decide Q6, the release duration, at the final check before publishing v1.
-6. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
+4. Complete the endurance period and decide Q6, the release duration, at the final check before publishing v1.
+5. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
 
 ## Blockers
 
@@ -110,6 +125,6 @@ Each phase lands as its own PR.
 
 ## Last verification
 
-On 18 October 2026 `make check` passed with engine `a15682f`: 84 Swift tests, 40 and 368 engine tests, both Accessibility selftests, window recovery, and DMG packaging.
+On 18 October 2026 `make check` passed on `feat/shortcut-settings` with engine `a15682f`: 111 Swift tests, 40 and 368 engine tests, both Accessibility selftests, window recovery, and DMG packaging.
 Native width constraints can still change the final edge after an app refuses a requested size.
 A transfer during an existing resize derives its destination ratio from the intermediate width.

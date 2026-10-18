@@ -62,9 +62,11 @@ A monitor move appends the focused window to the destination strip.
 When that strip overflows and automatic centering is off, the arriving column ends at the usable right edge.
 Later scrolling, centering, and snapping can move the strip from that position.
 Stop window manager runs the same Stop as the menu bar, and Miri registers it itself.
-If the engine can load `[bindings]` and an accepted shortcut assigns ⌃⌥Q to an engine command, that binding wins.
-Miri then leaves Stop without a shortcut.
-If the engine rejects the binding section, Miri keeps the previous Stop shortcut ownership.
+Its shortcuts are customizable and live in `[miri].stop_shortcut`, as one chord string or an array of chord strings in the engine's syntax.
+An absent key means ⌃⌥Q, and an empty array means Stop has no shortcut.
+If the engine can load `[bindings]` and an accepted shortcut assigns a Stop chord to an engine command, that binding wins.
+Miri then leaves that chord out of Stop.
+If the engine rejects the binding section, or `[miri].stop_shortcut` is invalid, Miri keeps the previous Stop shortcuts.
 
 ## Width, height, and centering
 
