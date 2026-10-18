@@ -147,6 +147,109 @@ struct ConfigurationStoreTests {
     }
 }
 
+struct GestureConfigurationTests {
+    private let directory = FileManager.default.temporaryDirectory.appending(path: "miri-gesture-\(UUID().uuidString)")
+    private var url: URL { directory.appending(path: "config.toml") }
+
+    private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
+
+    private func store(_ text: String? = nil) throws -> ConfigurationStore {
+        if let text {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            try text.write(to: url, atomically: true, encoding: .utf8)
+        }
+        return ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
+    }
+
+    @Test func aNewFileHasTheSwipeOffAndFollowingTheFingers() throws {
+        let store = try store()
+        store.load(reduceMotion: false)
+        let document = try TOMLDocument(contents())
+        #expect(document.value(at: ["miri", "strip_gesture"]) == .string("off"))
+        #expect(document.value(at: ["miri", "reverse_swipe"]) == .boolean(false))
+        #expect(
+            document.value(at: ["swipe", "gesture"])
+                == .table(["direction": .string("Natural"), "vertical": .boolean(false)]))
+    }
+
+    @Test func writesTheFingerCountOnlyWhileASwipeIsActive() throws {
+        let store = try store("[miri]\nstrip_gesture = \"four\"\n")
+        var active: GestureFingers?
+        store.gestureFingers = { settings in active == nil ? nil : settings.stripGesture.fingers }
+        store.load(reduceMotion: false)
+        #expect(store.settings.stripGesture == .four)
+        #expect(try TOMLDocument(contents()).value(at: ["swipe", "gesture", "fingers_count"]) == nil)
+        active = .four
+        try store.applyGestureFingers(reduceMotion: false)
+        #expect(try TOMLDocument(contents()).value(at: ["swipe", "gesture", "fingers_count"]) == .integer(4))
+        try store.update(reduceMotion: false) { $0.stripGesture = .three }
+        #expect(try TOMLDocument(contents()).value(at: ["swipe", "gesture", "fingers_count"]) == .integer(3))
+        active = nil
+        try store.applyGestureFingers(reduceMotion: false)
+        let document = try TOMLDocument(contents())
+        #expect(document.value(at: ["swipe", "gesture", "fingers_count"]) == nil)
+        #expect(document.value(at: ["miri", "strip_gesture"]) == .string("three"))
+    }
+
+    @Test func writesTheDirectionFromReverseSwipe() throws {
+        let store = try store("[miri]\nreverse_swipe = true\n")
+        store.load(reduceMotion: false)
+        #expect(try TOMLDocument(contents()).value(at: ["swipe", "gesture", "direction"]) == .string("Reversed"))
+        try store.update(reduceMotion: false) { $0.reverseSwipe = false }
+        #expect(try TOMLDocument(contents()).value(at: ["swipe", "gesture", "direction"]) == .string("Natural"))
+    }
+
+    @Test func removesLegacyAndHandEditedSwipeKeysButKeepsTheRest() throws {
+        let store = try store(
+            """
+            # keep me
+            [options]
+            swipe_gesture_fingers = 3
+            swipe_gesture_direction = "Reversed"
+            focus_follows_mouse = true
+
+            [swipe]
+            sensitivity = 0.5 # mine
+
+            [swipe.gesture]
+            fingers_count = 3
+            """)
+        store.load(reduceMotion: false)
+        #expect(store.issue == nil)
+        let text = try contents()
+        #expect(text.hasPrefix("# keep me\n[options]\nfocus_follows_mouse = true\n"))
+        #expect(text.contains("[swipe]\nsensitivity = 0.5 # mine\n"))
+        let document = try TOMLDocument(text)
+        #expect(document.value(at: ["options", "swipe_gesture_fingers"]) == nil)
+        #expect(document.value(at: ["options", "swipe_gesture_direction"]) == nil)
+        #expect(
+            document.value(at: ["swipe", "gesture"])
+                == .table(["direction": .string("Natural"), "vertical": .boolean(false)]))
+    }
+
+    @Test func reportsAnUnknownStripGestureByKey() throws {
+        let store = try store("[miri]\nstrip_gesture = \"five\"\n")
+        store.load(reduceMotion: false)
+        #expect(
+            store.issue
+                == .invalidValue(
+                    key: "miri.strip_gesture", message: "miri.strip_gesture must be \"off\", \"three\", or \"four\"."))
+        #expect(try contents() == "[miri]\nstrip_gesture = \"five\"\n")
+    }
+
+    @Test func leavesAnInlineSwipeTableAlone() throws {
+        let original = "swipe = { sensitivity = 0.5 }\n"
+        let store = try store(original)
+        store.load(reduceMotion: false)
+        guard case .notEditable(let message) = store.issue else {
+            Issue.record("Expected notEditable, got \(String(describing: store.issue))")
+            return
+        }
+        #expect(message.contains("swipe.gesture"))
+        #expect(try contents() == original)
+    }
+}
+
 struct GapMappingTests {
     @Test(arguments: [(8, 8, 4, 4), (0, 8, 0, 8), (8, 0, 4, 0), (9, 10, 4, 6), (32, 32, 16, 16)])
     func mapsGapsToEnginePadding(inner: Int, outer: Int, window: Int, edge: Int) {
