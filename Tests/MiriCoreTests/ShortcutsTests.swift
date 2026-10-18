@@ -280,21 +280,27 @@ import Testing
         #expect(store.shortcuts?.document.text == after.text)
     }
 
-    @Test func anUpgradeLeavesStopTheKeyItsOtherSpellingNames() throws {
-        let french = try #require(KeyLayout(inputSourceID: "com.apple.keylayout.French"))
+    @Test(arguments: [
+        ("French", "window_shrink", "window_step_shrink", ")"),
+        ("Dvorak", "window_grow", "window_step_grow", "]"),
+    ])
+    func anUpgradeLeavesStopTheKeyItsOtherSpellingNames(
+        layoutName: String, oldCommand: String, newCommand: String, stopKey: String
+    ) throws {
+        let layout = try #require(KeyLayout(inputSourceID: "com.apple.keylayout.\(layoutName)"))
         let store = try store(
             """
             [bindings]
-            window_shrink = "ctrl+alt-g"
+            \(oldCommand) = "ctrl+alt-g"
 
             [miri]
             default_bindings_version = 1
-            stop_shortcut = "ctrl+alt-)"
-            """, layout: french)
+            stop_shortcut = "ctrl+alt-\(stopKey)"
+            """, layout: layout)
         let document = try TOMLDocument(String(contentsOf: url, encoding: .utf8))
         #expect(store.issue == nil)
-        #expect(document.value(at: ["bindings", "window_step_shrink"]) == nil)
-        #expect(store.stopChordsToRegister == [Chord([.control, .option], ")")])
+        #expect(document.value(at: ["bindings", newCommand]) == nil)
+        #expect(store.stopChordsToRegister == [Chord([.control, .option], stopKey)])
     }
 
     @Test func aRejectedAddLeavesTheFileUnchanged() throws {
