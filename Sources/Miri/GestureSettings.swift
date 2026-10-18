@@ -127,6 +127,8 @@ struct GestureTestSheet: View {
         .frame(width: 420, alignment: .leading)
         .onAppear { test.start() }
         .onDisappear { test.cancel() }
+        // Closing Settings hides its window without removing this view, so onDisappear alone can miss it.
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { _ in test.cancel() }
     }
 
     @ViewBuilder private var content: some View {
