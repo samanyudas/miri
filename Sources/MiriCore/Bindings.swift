@@ -191,15 +191,15 @@ public struct DefaultBinding: Sendable {
     /// A user binding is never changed. A default is offered once, so a binding the user deletes stays deleted.
     /// When the file defines `[bindings]` or `[miri]` in a form Miri does not rewrite, such as an inline table, Miri
     /// leaves the file as it is and records no version, so it offers the defaults again if the user converts the table.
-    static func adding(to document: TOMLDocument) throws -> TOMLDocument {
+    static func adding(to document: TOMLDocument, layout: KeyLayout = .positional) throws -> TOMLDocument {
         do {
-            return try addingEditable(to: document)
+            return try addingEditable(to: document, layout: layout)
         } catch TOMLEditError.notEditable {
             return document
         }
     }
 
-    private static func addingEditable(to document: TOMLDocument) throws -> TOMLDocument {
+    private static func addingEditable(to document: TOMLDocument, layout: KeyLayout) throws -> TOMLDocument {
         let versionPath = ["miri", "default_bindings_version"]
         let offered: Int
         switch document.value(at: versionPath) {
@@ -222,20 +222,20 @@ public struct DefaultBinding: Sendable {
             }
         }
         let existing = result.value(at: ["bindings"])
-        var taken = Set(boundChords(in: existing))
+        var taken = boundChords(in: existing)
         // An engine binding wins over Stop on the same chord, so a default must never take a Stop chord.
         if let stop = result.value(at: ["miri", "stop_shortcut"]) {
-            taken.formUnion(boundChords(in: .table(["stop_shortcut": stop])))
+            taken += boundChords(in: .table(["stop_shortcut": stop]))
         } else {
-            taken.insert(stopChord)
+            taken.append(stopChord)
         }
         // Only the file's own bindings count, so two default rows for one engine command both get written.
         let bound = Set(boundCommands(in: existing))
         for row in table where row.version > offered && !bound.contains(EngineCommand.canonical(row.command)!) {
             guard !deletedReplacements.contains(row.command) else { continue }
-            let free = row.chords.filter { !taken.contains($0) }
+            let free = row.chords.filter { chord in !taken.contains { layout.conflicts($0, chord) } }
             guard !free.isEmpty else { continue }
-            taken.formUnion(free)
+            taken += free
             let value: TOMLValue =
                 free.count == 1 ? .string(free[0].description) : .array(free.map { .string($0.description) })
             result = try result.setting(value, table: ["bindings"], key: row.command)
