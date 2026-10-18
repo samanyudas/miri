@@ -316,16 +316,16 @@ struct DefaultBindingsTests {
 
     @Test func theStopShortcutYieldsToABindingOnItsChord() throws {
         let (free, _) = try load()
-        #expect(free.stopShortcutIsFree)
+        #expect(free.stopChordsToRegister == [DefaultBinding.stopChord])
         let (taken, _) = try load("[bindings]\nquit = \"ctrl + alt - q\"\n")
-        #expect(!taken.stopShortcutIsFree)
+        #expect(taken.stopChordsToRegister.isEmpty)
     }
 
     @Test func acceptsAMultilineBindingAndReservesItsStopChord() throws {
         let original = "[bindings]\nwindow_center = \"\"\"\nctrl+alt-q\n\"\"\"\n"
         let (store, document) = try load(original)
         #expect(store.issue == nil)
-        #expect(!store.stopShortcutIsFree)
+        #expect(store.stopChordsToRegister.isEmpty)
         #expect(document.text.hasPrefix(original))
     }
 
@@ -338,14 +338,14 @@ struct DefaultBindingsTests {
         store.load(reduceMotion: false)
 
         #expect(store.issue != nil)
-        #expect(store.stopShortcutIsFree)
+        #expect(store.stopChordsToRegister == [DefaultBinding.stopChord])
         #expect(try String(contentsOf: url, encoding: .utf8) == replacement)
     }
 
     @Test func droppedUppercaseKeyLeavesStopFreeOnFirstLoad() throws {
         let (store, _) = try load("[bindings]\nwindow_center = \"ctrl+alt-Q\"\n")
         #expect(store.issue != nil)
-        #expect(store.stopShortcutIsFree)
+        #expect(store.stopChordsToRegister == [DefaultBinding.stopChord])
     }
 
     @Test(arguments: [
@@ -387,7 +387,7 @@ struct DefaultBindingsTests {
             """
         let (store, _) = try load(original)
         #expect(store.issue != nil)
-        #expect(!store.stopShortcutIsFree)
+        #expect(store.stopChordsToRegister.isEmpty)
         #expect(try String(contentsOf: url, encoding: .utf8) == original)
     }
 
@@ -400,7 +400,7 @@ struct DefaultBindingsTests {
         let initialChord = wasFree ? "ctrl+alt-c" : "ctrl+alt-q"
         let (store, _) = try load("[bindings]\nwindow_center = \"\(initialChord)\"\n")
         try #require(store.issue == nil)
-        #expect(store.stopShortcutIsFree == wasFree)
+        #expect((store.stopChordsToRegister == [DefaultBinding.stopChord]) == wasFree)
 
         let replacementChord = wasFree ? "ctrl+alt-q" : "ctrl+alt-c"
         let replacement = """
@@ -413,7 +413,7 @@ struct DefaultBindingsTests {
         store.load(reduceMotion: false)
 
         #expect(store.issue != nil)
-        #expect(store.stopShortcutIsFree == wasFree)
+        #expect((store.stopChordsToRegister == [DefaultBinding.stopChord]) == wasFree)
         #expect(try String(contentsOf: url, encoding: .utf8) == replacement)
     }
 
@@ -443,7 +443,7 @@ struct DefaultBindingsTests {
             return
         }
         #expect(key == "bindings.\(row.components(separatedBy: " = ")[0])")
-        #expect(store.stopShortcutIsFree == wasFree)
+        #expect((store.stopChordsToRegister == [DefaultBinding.stopChord]) == wasFree)
         #expect(store.settings == previousSettings)
         #expect(try String(contentsOf: url, encoding: .utf8) == replacement)
         #expect(throws: ConfigurationIssue.self) { try store.update(reduceMotion: false) { $0.innerGap = 12 } }
@@ -465,7 +465,7 @@ struct DefaultBindingsTests {
             return
         }
         #expect(key == "bindings")
-        #expect(store.stopShortcutIsFree == wasFree)
+        #expect((store.stopChordsToRegister == [DefaultBinding.stopChord]) == wasFree)
         #expect(try String(contentsOf: url, encoding: .utf8) == replacement)
     }
 
@@ -481,7 +481,7 @@ struct DefaultBindingsTests {
         store.load(reduceMotion: false)
 
         #expect(store.issue == nil)
-        #expect(store.stopShortcutIsFree == !wasFree)
+        #expect((store.stopChordsToRegister == [DefaultBinding.stopChord]) == !wasFree)
     }
 
     @Test func aRowWhoseChordsAreAllTakenStaysUnbound() throws {
@@ -546,7 +546,7 @@ struct DefaultBindingsTests {
     func acceptsCommandAliasesSeparatedByScalarUnderscores(command: String) throws {
         let (store, _) = try load("[bindings]\n\"\(command)\" = \"ctrl+alt-q\"\n")
         #expect(store.issue == nil)
-        #expect(!store.stopShortcutIsFree)
+        #expect(store.stopChordsToRegister.isEmpty)
     }
 
     @Test func theEngineAcceptsEveryDefaultCommand() {

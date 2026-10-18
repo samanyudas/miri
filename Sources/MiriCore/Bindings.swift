@@ -244,13 +244,6 @@ public struct DefaultBinding: Sendable {
         return entries.keys.map { EngineCommand.canonical($0) ?? $0 }
     }
 
-    /// Whether the file binds `chord` to an engine command, in which case that binding wins over a Miri shortcut.
-    public static func binds(_ chord: Chord, in document: TOMLDocument) -> Bool {
-        bindingTexts(in: document.value(at: ["bindings"]))
-            .filter { EngineKey.problem(in: $0) == nil }
-            .contains { Chord(engineText: $0) == chord }
-    }
-
     static func inspect(in document: TOMLDocument) -> BindingInspection {
         guard let bindings = document.value(at: ["bindings"]) else { return .usable(droppedKeyIssue: nil) }
         guard case .table(let entries) = bindings else {

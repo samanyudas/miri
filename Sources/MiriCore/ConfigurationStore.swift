@@ -20,15 +20,22 @@ public final class ConfigurationStore {
     public let appBundleIdentifier: String
     public private(set) var settings = MiriSettings()
     public private(set) var issue: ConfigurationIssue?
-    /// Whether Miri's own Stop shortcut is free, because no `[bindings]` entry uses its chord.
-    public private(set) var stopShortcutIsFree = true
+    /// The keyboard layout that decides which chords press the same keys.
+    public var layout: KeyLayout
+    /// The Stop shortcuts Miri registers: `[miri].stop_shortcut` without the chords a `[bindings]` entry uses.
+    /// When the engine would reject `[bindings]`, this keeps its previous value, as the engine keeps its old bindings.
+    public private(set) var stopChordsToRegister = [DefaultBinding.stopChord]
     /// The current file, when it was read correctly. Writes require it.
     private var document: TOMLDocument?
 
-    public init(url: URL, appBundleIdentifier: String) {
+    public init(url: URL, appBundleIdentifier: String, layout: KeyLayout = .positional) {
         self.url = url
         self.appBundleIdentifier = appBundleIdentifier
+        self.layout = layout
     }
+
+    /// The shortcuts in the file, when it was read correctly.
+    public var shortcuts: Shortcuts? { document.map(Shortcuts.init) }
 
     /// Reads the file, creating it with defaults when it is missing, then writes any derived engine keys it lacks.
     public func load(reduceMotion: Bool) {
@@ -44,11 +51,12 @@ public final class ConfigurationStore {
             let parsed: TOMLDocument
             do { parsed = try TOMLDocument(text) } catch { throw .invalidTOML(error) }
             let bindings = DefaultBinding.inspect(in: parsed)
-            if case .usable = bindings {
-                stopShortcutIsFree = !DefaultBinding.binds(DefaultBinding.stopChord, in: parsed)
+            let stopIssue = Shortcuts.stopShortcutIssue(in: parsed)
+            if case .usable = bindings, stopIssue == nil {
+                stopChordsToRegister = Shortcuts(document: parsed).stopChordsToRegister(layout: layout)
             }
             let read = try MiriSettings(document: parsed)
-            if let issue = bindings.issue { throw issue }
+            if let issue = bindings.issue ?? stopIssue { throw issue }
             document = parsed
             settings = read
             issue = nil
@@ -66,6 +74,28 @@ public final class ConfigurationStore {
         guard document != nil else { throw issue ?? .unreadable("Reload the file and try again.") }
         try write(changed, reduceMotion: reduceMotion, replacing: settings)
         settings = changed
+    }
+
+    /// Saves a change to the shortcuts. Throws `ShortcutRejection` when the chord is taken, or `ConfigurationIssue`.
+    /// On failure the file stays unchanged. A reset backs up the file before replacing `[bindings]`.
+    public func apply(_ edit: ShortcutEdit) throws {
+        guard let current = document else {
+            throw issue ?? ConfigurationIssue.unreadable("Reload the file and try again.")
+        }
+        let shortcuts = Shortcuts(document: current)
+        let next: TOMLDocument
+        do {
+            switch edit {
+            case .add(let chord, let action): next = try shortcuts.adding(chord, to: action, layout: layout)
+            case .remove(let chord, let action): next = try shortcuts.removing(chord, from: action)
+            case .resetToDefaults: next = try shortcuts.resettingToDefaults()
+            }
+        } catch let error as TOMLEditError {
+            throw ConfigurationIssue.notEditable(error.description)
+        }
+        try commit(next, replacing: current, backingUpBefore: edit == .resetToDefaults ? "resetting shortcuts" : nil)
+        issue = nil
+        stopChordsToRegister = Shortcuts(document: next).stopChordsToRegister(layout: layout)
     }
 
     private func read() throws(ConfigurationIssue) -> String {
@@ -122,28 +152,38 @@ public final class ConfigurationStore {
         } catch {
             throw .notEditable(String(describing: error))
         }
+        let versionPath = ["miri", "default_bindings_version"]
+        let upgrades = current.value(at: versionPath) != next.value(at: versionPath)
+        try commit(next, replacing: current, backingUpBefore: upgrades ? "upgrading it" : nil)
+    }
+
+    /// Replaces the file with `next`, after backing up `current` when `backupReason` names why.
+    private func commit(_ next: TOMLDocument, replacing current: TOMLDocument, backingUpBefore backupReason: String?)
+        throws(ConfigurationIssue)
+    {
         guard next.text != current.text else { return }
         // Refuse to replace a file that changed since Miri read it. The file watcher reloads it instead.
         guard (try? String(contentsOf: url, encoding: .utf8)) == current.text else {
             throw .unwritable("The file changed while Miri was saving. Miri reloaded it. Try again.")
         }
-        let versionPath = ["miri", "default_bindings_version"]
-        if current.value(at: versionPath) != next.value(at: versionPath) {
-            do {
-                let backups = url.appendingPathExtension("backups")
-                try FileManager.default.createDirectory(at: backups, withIntermediateDirectories: true)
-                let backup = backups.appendingPathComponent(UUID().uuidString).appendingPathExtension("toml")
-                try Data(current.text.utf8).write(to: backup, options: .withoutOverwriting)
-            } catch {
-                throw .unwritable(
-                    "Miri could not back up the configuration before upgrading it. \(error.localizedDescription)")
-            }
-        }
+        if let backupReason { try backUp(current, before: backupReason) }
         do {
             try Data(next.text.utf8).write(to: url, options: .atomic)
         } catch {
             throw .unwritable(error.localizedDescription)
         }
         document = next
+    }
+
+    private func backUp(_ document: TOMLDocument, before reason: String) throws(ConfigurationIssue) {
+        do {
+            let backups = url.appendingPathExtension("backups")
+            try FileManager.default.createDirectory(at: backups, withIntermediateDirectories: true)
+            let backup = backups.appendingPathComponent(UUID().uuidString).appendingPathExtension("toml")
+            try Data(document.text.utf8).write(to: backup, options: .withoutOverwriting)
+        } catch {
+            throw .unwritable(
+                "Miri could not back up the configuration before \(reason). \(error.localizedDescription)")
+        }
     }
 }
