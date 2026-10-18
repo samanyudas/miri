@@ -4,9 +4,9 @@ Status: Miri product proposals, with accepted release boundaries recorded separa
 
 The [release scope](release-scope.md) records accepted v1 and v2 boundaries.
 Features described below do not establish a complete v1 commitment.
-Miri's native app interface is designed and will be built from the ground up for this project.
+Miri's native app interface is designed and built from the ground up for this project.
 The app bundles a pinned Paneru-based engine.
-The repository has decision documents but no app implementation.
+Implementation and test status lives in [PROGRESS.md](../PROGRESS.md), not in this document.
 
 ## Use a horizontal strip of columns
 

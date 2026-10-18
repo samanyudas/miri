@@ -3,7 +3,7 @@
 Draft synthesized from the saved repository documents on 14 October 2026.
 The deleted design conversations are not a source for this draft.
 Accepted requirements describe intended behavior, not implemented or verified behavior.
-This checkout has no app implementation, automated test suite, or completed hardware validation.
+Implementation and test status lives in [PROGRESS.md](../../PROGRESS.md), not in this document.
 Sam confirmed both testing seam proposals below.
 This draft does not publish a GitHub issue or authorize implementation before the recorded prerequisites and shared-understanding confirmation.
 

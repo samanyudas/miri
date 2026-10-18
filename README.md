@@ -14,7 +14,8 @@ Further quality-of-life candidates are recorded in the [V2 roadmap](decisions/v2
 Miri has no release.
 The app runs from the menu bar, starts and stops the bundled engine, and owns its configuration file.
 It checks macOS setup, recovers stranded windows when the engine stops, and previews redacted diagnostics.
-Starting the engine through the app has not yet been tested on real hardware.
+Development builds have run on Sam's Mac with the built-in display and an external display.
+The full v1 acceptance checklists have not run.
 [PROGRESS.md](PROGRESS.md) records the current work and next steps.
 
 ## Requirements
