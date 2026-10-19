@@ -41,10 +41,16 @@ def jobs(text: str) -> tuple[dict[str, str], dict[str, list[str]]]:
     return workflow, found
 
 
+# A job that authenticates with a stored token does not use the GITHUB_TOKEN scopes.
+STORED_TOKEN = re.compile(r"^\s+GH_TOKEN: \$\{\{ secrets\.(?!GITHUB_TOKEN\b)[A-Z0-9_]+ \}\}$")
+
+
 def missing_scopes(text: str) -> list[str]:
     workflow, found = jobs(text)
     problems = []
     for name, block in found.items():
+        if any(STORED_TOKEN.match(line) for line in block):
+            continue
         granted = scopes(block, 4)
         granted = workflow if granted is None else granted
         for line in block:
@@ -78,6 +84,23 @@ jobs:
       - run: gh issue comment 1 --body hi
 """
         self.assertEqual(missing_scopes(text), ["inherits: needs pull-requests read", "overrides: needs issues write"])
+
+    def test_a_job_with_a_stored_token_needs_no_workflow_scopes(self):
+        text = """permissions: {}
+
+jobs:
+  stored:
+    steps:
+      - env:
+          GH_TOKEN: ${{ secrets.CODERABBIT_TRIGGER_TOKEN }}
+        run: gh pr comment 1 --body hi
+  builtin:
+    steps:
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr comment 1 --body hi
+"""
+        self.assertEqual(missing_scopes(text), ["builtin: needs pull-requests write"])
 
     def test_a_read_scope_does_not_allow_a_write(self):
         text = """jobs:
