@@ -116,7 +116,7 @@ Verify the relevant settings paths on each supported macOS version.
 
 ## Check competing macOS tiling
 
-macOS tiling controls can conflict with Miri's planned drag-to-reorder behavior in v2.
+macOS tiling controls can conflict with dragging a window into a stack, which is in v1, and with dragging to reorder columns, which is planned for v2.
 Verify conflicts before requiring changes to these settings in **System Settings > Desktop & Dock > Windows**:
 
 - **Drag windows to screen edges to tile**.

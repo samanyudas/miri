@@ -197,7 +197,7 @@ Miri checks for updates daily and asks before installing.
 If users enable automatic updates, Miri installs updates silently in the background at startup.
 
 The engine restores its layout after a start or crash restart.
-The minimap, tabbed columns, dimming, advanced rules, and drag-to-reorder remain v2 work.
+The minimap, tabbed columns, dimming, advanced rules, and dragging to reorder columns remain v2 work.
 
 ## Open configuration decisions
 
