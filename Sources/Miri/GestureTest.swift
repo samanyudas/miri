@@ -3,7 +3,7 @@ import MiriCore
 import Observation
 
 /// One run of the gesture test. It turns on the selected swipe, watches the engine's strip move while the user
-/// swipes, fails on a macOS Space or app switch, and saves a result only after the user confirms it.
+/// swipes, fails on a macOS Space switch, and saves a result only after the user confirms it.
 @Observable final class GestureTest {
     enum Phase: Equatable {
         case idle
@@ -110,22 +110,15 @@ import Observation
         }
     }
 
+    /// The horizontal macOS swipes that clash with the strip swipe all switch Spaces. An app switch is not one:
+    /// the strip focuses the window it lands on, which activates that window's app.
     private func watchForMacOSActions() {
         let center = NSWorkspace.shared.notificationCenter
         observers = [
             center.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) {
                 [weak self] _ in
                 MainActor.assumeIsolated { self?.macOSActed("macOS switched Spaces.") }
-            },
-            center.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) {
-                [weak self] notification in
-                let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
-                let pid = app?.processIdentifier
-                MainActor.assumeIsolated {
-                    guard pid != ProcessInfo.processInfo.processIdentifier else { return }
-                    self?.macOSActed("macOS switched apps.")
-                }
-            },
+            }
         ]
     }
 
