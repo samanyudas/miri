@@ -224,8 +224,10 @@ When the stacked windows cannot shrink further, the stack extends past the botto
 How the top bars stay visible is still open in [#42](https://github.com/samanyudas/miri/issues/42).
 Dragging a window onto a stack moves it into that stack, between the two windows it is dropped between.
 A drop above the top window makes it the top window, and a drop at the bottom of the screen makes it the bottom window.
-A stack holds at most a number of windows the user sets in Settings, and a Stack command that would exceed it starts a new column instead.
-The default limit is still open in [#44](https://github.com/samanyudas/miri/issues/44).
+A stack holds a limited number of windows, and a Stack command that would exceed the limit starts a new column instead.
+Settings chooses the limit: fit the display, which allows as many windows as fit in a column at the minimum window height, or a set number from 1 up to that.
+The default is a set number of 5, and the limit in use never exceeds what fits on the display the stack is on.
+There is no unlimited option, because a column cannot show more windows than fit at the minimum height ([#44](https://github.com/samanyudas/miri/issues/44)).
 
 Directional monitor focus uses Control-Option-Command with W, A, S, and D for up, left, down, and right.
 Adding Shift moves the focused window in the corresponding monitor direction.
