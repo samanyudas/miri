@@ -166,7 +166,7 @@ The endurance requirement that engine memory stays stable has no measurable pass
 
 ## Deferred branches
 
-Tabbed columns, the minimap, inactive-window dimming, advanced rules, drag-to-reorder, virtual workspaces, and portable display layouts remain outside v1.
+Tabbed columns, the minimap, inactive-window dimming, advanced rules, dragging to reorder columns, virtual workspaces, and portable display layouts remain outside v1.
 Focus borders, pointer-following controls, display exclusions, cross-display dragging, fixed-pixel presets, animation tuning, and Hyper-key recording are also excluded from v1.
 Five-finger strip gestures are also deferred.
 Alternative automatic centering modes, `never` and `always`, remain unselected proposals outside the accepted v1 controls.

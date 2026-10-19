@@ -213,11 +213,27 @@ The layout reserves space for the visible macOS Dock without a separate v1 setti
 Miri respects macOS Reduce Motion and provides a setting to disable animation.
 Either Reduce Motion or the disable-animation setting makes strip movement instant.
 Numbered jumps select columns and focus the last-focused window within the selected column.
+
+### Stacks
+
+Sam accepted these stack rules on 19 October 2026.
+When a window joins or leaves a stack, every window in that column gets an equal share of its height.
+Heights set with the vertical resize shortcuts are kept until the stack's members change.
+A window that refuses its share keeps the height it accepts, the other windows share the rest, and stacked windows never overlap.
+When the stacked windows cannot shrink further, the stack extends past the bottom of the screen, and every window's top bar stays visible.
+How the top bars stay visible is still open in [#42](https://github.com/samanyudas/miri/issues/42).
+Dragging a window onto a stack moves it into that stack, between the two windows it is dropped between.
+A drop above the top window makes it the top window, and a drop at the bottom of the screen makes it the bottom window.
+A stack holds a limited number of windows, and a Stack command that would exceed the limit starts a new column instead.
+Settings chooses the limit: fit the display, which allows as many windows as fit in a column at the minimum window height, or a set number from 1 up to that.
+The default is a set number of 5, and the limit in use never exceeds what fits on the display the stack is on.
+There is no unlimited option, because a column cannot show more windows than fit at the minimum height ([#44](https://github.com/samanyudas/miri/issues/44)).
+
 Directional monitor focus uses Control-Option-Command with W, A, S, and D for up, left, down, and right.
 Adding Shift moves the focused window in the corresponding monitor direction.
 These bindings preserve the previously selected shortcuts and require verification against the engine and macOS.
 Shortcut recording follows [Binding customization](keybinding%20reference.md#binding-customization).
-Tabbed columns, the minimap, inactive-window dimming, advanced window rules, and drag-to-reorder are deferred to v2.
+Tabbed columns, the minimap, inactive-window dimming, advanced window rules, and dragging to reorder columns are deferred to v2.
 Focus borders, pointer-following controls, display exclusions, cross-display dragging, fixed-pixel presets, animation tuning, and Hyper-key recording are also deferred to v2.
 Deferral excludes these proposals from v1 without committing to their inclusion in v2.
 
