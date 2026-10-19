@@ -59,8 +59,13 @@ def observe(bundle, name, target):
             pid = int(sidecar.read_text())
             owned_apps[pid] = bundle / 'Contents/Helpers/miri-engine'
             launch.wait(timeout=12)
-            assert launch.returncode == 0, (f'LaunchServices failed for {name} with exit code {launch.returncode}: '
-                                            f'{(evidence / f"{name}-launch.log").read_text().strip()}')
+            launch_log = (evidence / f'{name}-launch.log').read_text().strip()
+            # `open -W` fails this way when the app exits before LaunchServices
+            # starts waiting for it. The app has finished, so the checks below
+            # on its report and its exit decide the result.
+            exited_early = 'kevent() failed: No such process' in launch_log
+            assert launch.returncode == 0 or exited_early, (
+                f'LaunchServices failed for {name} with exit code {launch.returncode}: {launch_log}')
             assert report.exists(), 'The app exited without an observation report'
             result = json.loads(report.read_text())
             assert result['schemaVersion'] == 1

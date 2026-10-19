@@ -25,8 +25,16 @@ try:
         assert fixture_process.poll() is None and time.monotonic() < end, 'The fixture did not start'
         time.sleep(.02)
     target = int(ready.read_text())
-    subprocess.run(['open', '-n', '-W', str(app), '--args', '--recovery-selftest', str(report),
-                    '--target-pid', str(target)], check=True, timeout=30)
+    launch = subprocess.run(['open', '-n', '-W', str(app), '--args', '--recovery-selftest', str(report),
+                             '--target-pid', str(target)], capture_output=True, text=True, timeout=30)
+    # `open -W` fails this way when the app exits before LaunchServices starts
+    # waiting for it. The app has finished, so its report decides the result.
+    exited_early = 'kevent() failed: No such process' in launch.stderr
+    assert launch.returncode == 0 or exited_early, (
+        f'LaunchServices failed with exit code {launch.returncode}: {launch.stderr.strip()}')
+    end = time.monotonic() + 10
+    while not report.exists() and time.monotonic() < end:
+        time.sleep(.05)
     result = json.loads(report.read_text())
     assert result['schemaVersion'] == 1
     if not result['trusted']:
