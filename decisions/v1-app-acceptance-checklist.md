@@ -2,7 +2,7 @@
 
 Status: checks derived from Sam's accepted design decisions on 14 October 2026.
 A check passes only with a recorded result for the build under test.
-Implementation and test status lives in [PROGRESS.md](../PROGRESS.md), not in this document.
+Implementation status lives in [PROGRESS.md](../PROGRESS.md), and results live in the [acceptance ledger](../docs/acceptance-ledger.md).
 This checklist adds no new product choices and does not alter the [multi-monitor release checklist](v1-acceptance-checklist.md).
 
 ## Prerequisites and evidence

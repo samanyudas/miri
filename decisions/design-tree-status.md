@@ -1,12 +1,12 @@
 # Design tree status
 
-Status: updated after Sam's answers on 15 October 2026.
-This report records observed documentation state and the accepted answers to Q1 through Q5 and Q7 through Q21.
-Sam answered the stacking scope question on 15 October 2026.
+Status: reconciled with `main` at `e516edd` on 20 October 2026.
+This report records the accepted answers to Q1 through Q5 and Q7 through Q21, and the stack and settling rules Sam accepted on 19 October 2026.
 Sam deferred Q6 to the final check before publishing v1.
 No product question blocks implementation.
-No production app implementation or hardware validation exists yet.
-The only implementation is the [permission prototype](../docs/prototypes/helper-permission.md).
+This document owns product decision state only.
+[PROGRESS.md](../PROGRESS.md) owns implementation state, and the [acceptance ledger](../docs/acceptance-ledger.md) owns acceptance results.
+The native app is implemented, but no complete acceptance run has passed.
 
 ## Settled branches
 
@@ -29,7 +29,15 @@ The only implementation is the [permission prototype](../docs/prototypes/helper-
   Adding Shift moves the focused window in that monitor direction.
 - V1 uses clicking and macOS window switching to access floating windows without a dedicated floating-to-tiled focus shortcut.
 - Fixed-size windows and Miri's settings float automatically.
-- Automatic centering occurs only when the strip overflows the display.
+- When focus moves, the strip moves only as far as needed to show the focused column fully.
+  Sam replaced the earlier rule, which centered the focused column whenever the strip overflowed, on 19 October 2026.
+- After a swipe or modifier scroll, the strip settles on a column, as [Release scope](release-scope.md) describes.
+- Trackpad scrolling moves the strip under the pointer by default, and a setting chooses the focused strip instead.
+- [Stacks](release-scope.md#stacks) keep equal heights after membership changes and never overlap.
+  An overflowing stack keeps every window's top bar visible.
+- Dragging a window onto a stack inserts it at the drop position.
+  Dragging to reorder columns stays in v2.
+- A stack limit defaults to 5, never exceeds what fits on the display, and a Stack command past it starts a new column.
 - The layout reserves space for the visible Dock without a separate v1 setting.
 - V2 includes an optional custom Miri dock that can be enabled or disabled.
   The Miri dock is enabled by default.
@@ -136,37 +144,31 @@ Those windows could leave the layout, which would conflict with the rule that wi
 
 ## Remaining engineering work
 
-- Recheck app and helper Accessibility attribution with Developer ID signing and notarized distribution before release.
+This list holds only work that has no implementation on `main` at `e516edd`.
+[PROGRESS.md](../PROGRESS.md) records what is implemented and what is verified.
+
+- Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
+- Implement drag insertion into a stack ([#43](https://github.com/samanyudas/miri/issues/43)) and the stack limit ([#44](https://github.com/samanyudas/miri/issues/44)).
+- Decide how an overflowing stack keeps every top bar visible, then implement it ([#42](https://github.com/samanyudas/miri/issues/42)).
+- Integrate Sparkle updates with the accepted update policy.
+- Configure Developer ID signing, notarization, signed update feeds, the release disk image, and the Homebrew cask.
+- Recheck app and helper Accessibility attribution on the Developer ID signed, notarized bundle.
+- Define a measurable engine memory-stability rule.
 - Complete the release source audit beyond the reviewed configuration, gesture, sizing, isolation, and clean-exit paths.
   Establish a reproducible app and helper build.
-- Verify configuration keys, accepted types and ranges, binding syntax, gesture support, and private API fallbacks.
-- Implement gesture verification and conflict handling without treating unavailable detection as a passed check or a confirmed conflict.
-- Map the accepted eight-point gaps to the source-backed padding fields and select Miri's validation range after coordinate checks.
-- Define command reconciliation, external configuration edit handling, and upgrade migrations under the selected product policies.
-- Establish window recovery that satisfies Q12 even when the engine cannot run a clean-shutdown handler.
-- Verify focused-window stacking in both directions on hardware.
-  The engine fork change samanyudas/paneru#6 implements it and adds the missing stack-right and pop-left commands.
-  Its unit tests reproduce and fix the fullscreen column loss in `LayoutStrip::stack`.
-- Build the native settings window, menu bar controls, helper lifecycle, setup checker, and diagnostics.
-- Verify directional display focus and move on hardware with two displays in at least two arrangements (miri#23).
-- Define bounded log storage and a measurable engine memory-stability check.
-- Configure release signing, notarization, signed update feeds, disk image packaging, and Homebrew cask delivery.
-- Verify clean installation, upgrades, app behavior, and the real-hardware multi-monitor checklist.
-
-These tasks implement or verify the accepted direction in [Release scope](release-scope.md).
-The targeted source inspection is complete.
-App implementation, integration fixes, native validation, and release delivery remain uncompleted.
+- Review configuration keys, accepted types and ranges, and private API fallbacks against the pinned engine.
 
 ## Acceptance gaps
 
-The [multi-monitor checklist](v1-acceptance-checklist.md) retains its existing release requirements.
-The new [app acceptance checklist](v1-app-acceptance-checklist.md) derives checks from accepted permission, shortcut, configuration, update, diagnostic, lifecycle, and layout behavior.
-Neither checklist has been run against an app implementation.
+The [acceptance ledger](../docs/acceptance-ledger.md) records every required check, and all of them are pending.
+Selected checks ran on earlier builds, as PROGRESS.md records, but no release candidate is frozen.
+No real trackpad result is recorded.
 The endurance requirement that engine memory stays stable has no measurable pass rule.
 
 ## Deferred branches
 
 Tabbed columns, the minimap, inactive-window dimming, advanced rules, dragging to reorder columns, virtual workspaces, and portable display layouts remain outside v1.
+Dragging a window into a stack is v1 work and is separate from dragging to reorder columns.
 Focus borders, pointer-following controls, display exclusions, cross-display dragging, fixed-pixel presets, animation tuning, and Hyper-key recording are also excluded from v1.
 Five-finger strip gestures are also deferred.
 Alternative automatic centering modes, `never` and `always`, remain unselected proposals outside the accepted v1 controls.

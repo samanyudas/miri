@@ -6,6 +6,7 @@ This checklist has two levels.
 The quick check runs during everyday development, so builds and iteration stay fast.
 The release check is the v1 multi-monitor release blocker.
 It runs as v1 approaches, and whenever Sam asks for it.
+Record each result in the [acceptance ledger](../docs/acceptance-ledger.md).
 
 ## Quick check
 
