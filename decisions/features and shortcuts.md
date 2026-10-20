@@ -56,9 +56,7 @@ Horizontal strip gestures follow [Strip gestures](release-scope.md#strip-gesture
 The strip follows the fingers and settles at the nearest column on release.
 
 Clicking a window changes focus.
-Dragging a window into a stack follows [Stacks](release-scope.md#stacks).
-Dragging to reorder columns is deferred to v2.
-Dragging a window between displays is deferred to v2.
+Dragging a window follows [Dragging windows](release-scope.md#dragging-windows).
 
 Focus follows mouse and mouse follows keyboard focus are deferred to v2.
 Their proposed defaults are both off.

@@ -52,7 +52,9 @@ Miri must implement the accepted incremental behavior through its integration.
 
 ## Layout behavior and remaining controls
 
-Automatic centering and Dock reservation follow [V1 interactions](release-scope.md#v1-interactions).
+Focus reveal and Dock reservation follow [V1 interactions](release-scope.md#v1-interactions).
+The stack limit is an engine option, `[options].stack_limit`, which holds a number from 1 or `"fit"` and defaults to `5`.
+Settings writes it, and the engine caps it at what fits on each display.
 Alternative centering modes, `never` and `always`, remain proposals rather than accepted v1 controls.
 The allowed gap range remains unresolved.
 Fixed-pixel width presets are deferred to v2.
@@ -197,7 +199,7 @@ Miri checks for updates daily and asks before installing.
 If users enable automatic updates, Miri installs updates silently in the background at startup.
 
 The engine restores its layout after a start or crash restart.
-The minimap, tabbed columns, dimming, advanced rules, and dragging to reorder columns remain v2 work.
+The minimap, tabbed columns, dimming, and advanced rules remain v2 work.
 
 ## Open configuration decisions
 

@@ -219,22 +219,52 @@ Numbered jumps select columns and focus the last-focused window within the selec
 Sam accepted these stack rules on 19 October 2026.
 When a window joins or leaves a stack, every window in that column gets an equal share of its height.
 Heights set with the vertical resize shortcuts are kept until the stack's members change.
-A window that refuses its share keeps the height it accepts, the other windows share the rest, and stacked windows never overlap.
-When the stacked windows cannot shrink further, the stack extends past the bottom of the screen, and every window's top bar stays visible.
-How the top bars stay visible is still open in [#42](https://github.com/samanyudas/miri/issues/42).
-Dragging a window onto a stack moves it into that stack, between the two windows it is dropped between.
-A drop above the top window makes it the top window, and a drop at the bottom of the screen makes it the bottom window.
+A window that refuses its share keeps the height it accepts, and the other windows share the rest.
+While the windows fit, stacked windows never overlap.
+
+Sam accepted the overflow rule on 20 October 2026 ([#42](https://github.com/samanyudas/miri/issues/42)).
+When the stacked windows cannot shrink further, each lower window overlaps the window above it, but only below that window's top bar.
+A top bar is the window's title bar, toolbar, or navigation bar, and every top bar stays visible.
+Miri measures each top bar through Accessibility and uses 52 points when it cannot.
+The stack extends past the bottom of the screen only when even the top bars do not fit.
+The focused window comes to the front and shows its full content.
+When focus leaves it, it returns to its overlapped place in the stack.
+Miri draws no extra cue for an overlapped stack.
+
 A stack holds a limited number of windows, and a Stack command that would exceed the limit starts a new column instead.
 Settings chooses the limit: fit the display, which allows as many windows as fit in a column at the minimum window height, or a set number from 1 up to that.
 The default is a set number of 5, and the limit in use never exceeds what fits on the display the stack is on.
 There is no unlimited option, because a column cannot show more windows than fit at the minimum height ([#44](https://github.com/samanyudas/miri/issues/44)).
+Lowering the limit leaves existing stacks unchanged, and the new limit applies to the next Stack command or drop.
+
+### Dragging windows
+
+Sam accepted these drag rules on 19 and 20 October 2026 ([#43](https://github.com/samanyudas/miri/issues/43)).
+Dragging a tiled window by its title bar moves it in the layout, on the same display or on another display.
+A drag moves only the window it grabs, and moving a whole stack stays a keyboard action.
+Floating windows never join the layout by drag, and dragging only moves them.
+
+- A drop over the middle half of a column moves the window into that column, between the two windows it is dropped between.
+  A drop above the top window makes it the top window, and a drop at the bottom of the screen makes it the bottom window.
+  A drop on a single-window column forms a stack, and a drop within the window's own stack reorders it.
+  The window takes that column's width, and the stack shares its height equally.
+- A drop over the outer quarter of a column moves the window to a new column on that side.
+- A drop in empty space moves the window to a new column at the nearest end of that strip.
+- A window that becomes a new column keeps its width relative to its display.
+
+While dragging, a horizontal insertion line shows a drop into a column, and a vertical line shows a new column.
+A drop into a stack at its limit, or past what the destination display fits, is refused.
+Miri shows a not-allowed indicator, and the window returns to its place.
+Holding the pointer near a display edge with no neighboring display for about half a second scrolls the strip.
+After a drop, the dropped window keeps focus, and the strip moves only as far as needed to show it.
+If macOS tiles the window instead, the engine returns it to its place in the layout.
 
 Directional monitor focus uses Control-Option-Command with W, A, S, and D for up, left, down, and right.
 Adding Shift moves the focused window in the corresponding monitor direction.
 These bindings preserve the previously selected shortcuts and require verification against the engine and macOS.
 Shortcut recording follows [Binding customization](keybinding%20reference.md#binding-customization).
-Tabbed columns, the minimap, inactive-window dimming, advanced window rules, and dragging to reorder columns are deferred to v2.
-Focus borders, pointer-following controls, display exclusions, cross-display dragging, fixed-pixel presets, animation tuning, and Hyper-key recording are also deferred to v2.
+Tabbed columns, the minimap, inactive-window dimming, and advanced window rules are deferred to v2.
+Focus borders, pointer-following controls, display exclusions, fixed-pixel presets, animation tuning, and Hyper-key recording are also deferred to v2.
 Deferral excludes these proposals from v1 without committing to their inclusion in v2.
 
 Miri uses the GNU General Public License version 3 or any later version at the recipient's option.

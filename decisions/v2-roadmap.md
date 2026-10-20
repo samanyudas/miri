@@ -25,8 +25,9 @@ Sam accepted the Miri dock for v2 and deferred the other work below during the i
   A separate setting would control whether layouts transfer to different physical monitors.
   This work depends on a Paneru interface that moves a strip to a chosen display.
   Display changes require one rule for any monitor count, not separate rules for each transition.
-- Tabbed columns, the minimap, inactive-window dimming, advanced window rules, and dragging to reorder columns are deferred from v1.
+- Tabbed columns, the minimap, inactive-window dimming, and advanced window rules are deferred from v1.
   Dragging a window into a stack moved into v1 on 19 October 2026.
+  Dragging to reorder columns and dragging between displays moved into v1 on 20 October 2026.
 - A guided tutorial could teach the strip and essential shortcuts on first run.
 - Grid monitor arrangements and the maximum supported display count move from v1.
   The target is eight displays, the most that Apple documents for any current Mac.
@@ -34,7 +35,7 @@ Sam accepted the Miri dock for v2 and deferred the other work below during the i
 - Paneru's virtual workspaces, which add extra strips within one native Space, are turned off in v1 and planned for v2.
 - Five-finger strip gestures are deferred from v1.
   The pinned engine's acceptance of the finger count does not establish usable hardware behavior.
-- Focus borders, pointer-following controls, display exclusions, cross-display dragging, fixed-pixel presets, animation tuning, and Hyper-key recording are excluded from v1.
+- Focus borders, pointer-following controls, display exclusions, fixed-pixel presets, animation tuning, and Hyper-key recording are excluded from v1.
   Sam accepted these deferrals in the subsequent design-tree interview on 14 October 2026.
   Their deferral does not commit to implementing every proposal in v2.
 
@@ -74,7 +75,6 @@ The following candidates come from Miri's design documents and are not accepted 
 - A minimap could show the current position in the strip.
 - A focus border and inactive-window dimming could identify the focused window.
 - Gesture controls beyond v1's three fingers, four fingers, Off, and persistent direction reversal remain candidates.
-- Dragging could reorder columns.
 - Per-app rules could control floating windows and strip placement.
 - Automation could expose commands through a CLI, a URL scheme, or Raycast.
 
