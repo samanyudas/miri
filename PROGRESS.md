@@ -153,7 +153,7 @@ The public release path and the complete acceptance runs follow.
   The labels were removed on 20 October 2026, and one wrong bot comment remains on each issue.
   `fix/refs-vs-part-of` adds `Part of #N` for decisions, docs, and partial work, which never labels an issue, and stops `Related to #N` from labelling one.
   A harness test reproduced the `Related to` labelling before the change and passes after it.
-- `feat/stack-overflow` pins engine `b4dddf7` from samanyudas/paneru#21, which implements stack overflow (#42).
+- `feat/stack-overflow` pins engine `2f2aedf` from samanyudas/paneru#21, which implements stack overflow (#42).
   When a stack's minimum heights exceed its column, each lower window overlaps the window above it only below that window's top bar.
   The engine measures each top bar through Accessibility once and uses 52 points when it cannot.
   The focused window comes to the front, and it returns to its place when focus leaves it.
