@@ -205,6 +205,14 @@ struct StackLimitConfigurationTests {
         #expect(StackLimit.fitCount(columnHeight: 1400) == 7)
         #expect(StackLimit.fitCount(columnHeight: 150) == 1)
     }
+
+    @Test func offeredCountsKeepALargerHandSetNumberWithoutListingEveryCount() {
+        #expect(StackLimit.offeredCounts(fit: 3, configured: .fit) == [1, 2, 3])
+        #expect(StackLimit.offeredCounts(fit: 3, configured: .count(2)) == [1, 2, 3])
+        #expect(StackLimit.offeredCounts(fit: 3, configured: .count(9)) == [1, 2, 3, 9])
+        #expect(StackLimit.offeredCounts(fit: 6, configured: .count(Int.max)) == [1, 2, 3, 4, 5, 6, Int.max])
+        #expect(StackLimit.offeredCounts(fit: 0, configured: .fit) == [1])
+    }
 }
 
 struct GestureConfigurationTests {

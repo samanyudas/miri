@@ -202,6 +202,13 @@ public enum StackLimit: Hashable, Sendable {
         max(1, Int(columnHeight) / minimumWindowHeight)
     }
 
+    /// The counts Settings offers: 1 up to `fit`, plus `configured` when it is larger, so a number set by hand stays selectable.
+    public static func offeredCounts(fit: Int, configured: StackLimit) -> [Int] {
+        var counts = Array(1...max(1, fit))
+        if case .count(let count) = configured, count > counts.count { counts.append(count) }
+        return counts
+    }
+
     var tomlValue: TOMLValue {
         switch self {
         case .fit: .string("fit")
