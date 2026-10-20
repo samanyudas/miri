@@ -171,10 +171,39 @@ struct LayoutSettings: View {
                 )
                 .foregroundStyle(.secondary)
             }
+            Section {
+                Picker("Windows per stack", selection: stackLimit) {
+                    Text("Fit the display").tag(StackLimit.fit)
+                    ForEach(Array(1...stackCountMax), id: \.self) { count in
+                        Text("\(count)").tag(StackLimit.count(count))
+                    }
+                }
+            } footer: {
+                Text(
+                    "Stacking a window onto a full stack starts a new column instead. Up to \(mainDisplayFit) windows fit on the main display at the minimum height of \(StackLimit.minimumWindowHeight) points, and a stack never holds more than fit on its display."
+                )
+                .foregroundStyle(.secondary)
+            }
         }
         .formStyle(.grouped)
         .onAppear(perform: showPresets)
         .onChange(of: model.settings.widthPresets) { showPresets() }
+    }
+
+    private var stackLimit: Binding<StackLimit> {
+        Binding(get: { model.settings.stackLimit }, set: { value in model.update { $0.stackLimit = value } })
+    }
+
+    /// How many windows fit in a column on the display with the menu bar, as the engine counts them.
+    private var mainDisplayFit: Int {
+        let height = NSScreen.screens.first?.visibleFrame.height ?? 0
+        return StackLimit.fitCount(columnHeight: height - Double(2 * model.settings.edgePadding))
+    }
+
+    /// The largest number offered, which still includes a larger number set by hand.
+    private var stackCountMax: Int {
+        guard case .count(let count) = model.settings.stackLimit else { return mainDisplayFit }
+        return max(mainDisplayFit, count)
     }
 
     private func gapRow(_ title: String, _ key: WritableKeyPath<MiriSettings, Int>) -> some View {

@@ -20,6 +20,7 @@ struct ConfigurationStoreTests {
             document.value(at: ["options", "preset_column_widths"])
                 == .array([0.25, 0.33, 0.5, 0.66, 0.75].map(TOMLValue.float)))
         #expect(document.value(at: ["options", "animation_speed"]) == .float(14))
+        #expect(document.value(at: ["options", "stack_limit"]) == .integer(5))
         for side in ["top", "right", "bottom", "left"] {
             #expect(document.value(at: ["padding", side]) == .integer(4))
         }
@@ -144,6 +145,65 @@ struct ConfigurationStoreTests {
         let saved = try TOMLDocument(contents())
         #expect(saved.text.hasPrefix("padding = { top = 1 }\n"))
         #expect(saved.value(at: ["options", "preset_column_widths"]) == .array([.float(0.4), .float(0.6)]))
+    }
+}
+
+struct StackLimitConfigurationTests {
+    private let directory = FileManager.default.temporaryDirectory.appending(
+        path: "miri-stack-limit-\(UUID().uuidString)")
+    private var url: URL { directory.appending(path: "config.toml") }
+
+    private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
+
+    private func store(_ text: String) throws -> ConfigurationStore {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try text.write(to: url, atomically: true, encoding: .utf8)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
+        store.load(reduceMotion: false)
+        return store
+    }
+
+    @Test func readsANumberOrFit() throws {
+        #expect(try store("[options]\nstack_limit = 3\n").settings.stackLimit == .count(3))
+        #expect(try store("[options]\nstack_limit = \"fit\"\n").settings.stackLimit == .fit)
+    }
+
+    @Test func writesTheChoiceAsTheEngineReadsIt() throws {
+        let store = try store("")
+        try store.update(reduceMotion: false) { $0.stackLimit = .fit }
+        #expect(try TOMLDocument(contents()).value(at: ["options", "stack_limit"]) == .string("fit"))
+        try store.update(reduceMotion: false) { $0.stackLimit = .count(2) }
+        #expect(try TOMLDocument(contents()).value(at: ["options", "stack_limit"]) == .integer(2))
+        #expect(store.settings.stackLimit == .count(2))
+    }
+
+    @Test func rejectsValuesTheEngineRejects() throws {
+        for bad in ["0", "-1", "\"bogus\"", "2.5", "true"] {
+            let text = "[options]\nstack_limit = \(bad)\n"
+            let store = try store(text)
+            #expect(
+                store.issue
+                    == .invalidValue(
+                        key: "options.stack_limit",
+                        message: "options.stack_limit must be a whole number from 1 or \"fit\"."), "\(bad)")
+            #expect(try contents() == text)
+        }
+    }
+
+    @Test func refusesAZeroLimitWithoutWriting() throws {
+        let store = try store("[options]\nstack_limit = 4\n")
+        let before = try contents()
+        #expect(throws: ConfigurationIssue.self) { try store.update(reduceMotion: false) { $0.stackLimit = .count(0) } }
+        #expect(try contents() == before)
+        #expect(store.settings.stackLimit == .count(4))
+    }
+
+    @Test func countsWhatFitsAsTheEngineDoes() {
+        #expect(StackLimit.fitCount(columnHeight: 1270) == 6)
+        #expect(StackLimit.fitCount(columnHeight: 748) == 3)
+        #expect(StackLimit.fitCount(columnHeight: 1399.5) == 6)
+        #expect(StackLimit.fitCount(columnHeight: 1400) == 7)
+        #expect(StackLimit.fitCount(columnHeight: 150) == 1)
     }
 }
 

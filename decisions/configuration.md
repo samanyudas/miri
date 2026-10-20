@@ -33,6 +33,7 @@ The initial default installation also backs up the file before adding its versio
 | Width presets | `[0.25, 0.33, 0.5, 0.66, 0.75]` | `[options].preset_column_widths`, cycled by Control-Option-R. |
 | Inner gap | `8` points | `[miri].inner_gap`. Miri writes half of it as per-window padding in `[windows.miri-gaps]`. |
 | Outer gap | `8` points | `[miri].outer_gap`. Miri writes it minus the per-window padding to each `[padding]` side. |
+| Stack limit | `5` windows | `[options].stack_limit`, a number from 1 or `"fit"`. The engine caps it at what fits on each display. |
 
 Paneru v0.5.2 has no `gap_inner` or `gap_outer` configuration keys.
 Its outer padding has separate top, right, bottom, and left fields.
