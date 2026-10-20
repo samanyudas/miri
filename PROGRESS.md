@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-20 on branch `fix/refs-vs-part-of`
+Updated: 2026-10-20 on branch `feat/stack-overflow`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -10,7 +10,7 @@ Update it at the end of every session and in any PR that changes what is done or
 
 Reach a working v1 app that manages windows through the bundled engine, as defined in [release scope](decisions/release-scope.md).
 The app foundation, engine integration, configuration, default shortcuts, shortcut customization, and gesture controls are merged.
-The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting, drag insertion into a stack, the stack limit, and stack overflow.
+The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting, drag insertion into a stack, and the stack limit.
 The public release path and the complete acceptance runs follow.
 
 ## Done
@@ -153,6 +153,14 @@ The public release path and the complete acceptance runs follow.
   The labels were removed on 20 October 2026, and one wrong bot comment remains on each issue.
   `fix/refs-vs-part-of` adds `Part of #N` for decisions, docs, and partial work, which never labels an issue, and stops `Related to #N` from labelling one.
   A harness test reproduced the `Related to` labelling before the change and passes after it.
+- `feat/stack-overflow` pins engine `b4dddf7` from samanyudas/paneru#21, which implements stack overflow (#42).
+  When a stack's minimum heights exceed its column, each lower window overlaps the window above it only below that window's top bar.
+  The engine measures each top bar through Accessibility once and uses 52 points when it cannot.
+  The focused window comes to the front, and it returns to its place when focus leaves it.
+  The engine also lays out a stack with more windows than fit at the 200-point minimum, which it used to leave out of the layout.
+  Engine unit and harness tests cover the overlap, the fallback, the spill past the bottom, the window order, and the dropped column.
+  A read-only Accessibility probe measured a 96-point top bar on Helium, the only app with a standard window open.
+  No real desktop or hardware check has run, so acceptance check S-5 stays pending.
 
 ## Next
 
@@ -162,7 +170,7 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 1. Finish the remaining v1 features.
    - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
    - Implement dragging windows into columns and to new columns, on one display and across displays (#43).
-   - Implement the stack limit as an engine option (#44) and overlapping stack overflow (#42).
+   - Implement the stack limit as an engine option (#44).
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
    Integrate Sparkle updates, then production signing, notarization, the release DMG, and the Homebrew cask.
