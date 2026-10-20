@@ -117,7 +117,7 @@ Source: [App acceptance](../decisions/v1-app-acceptance-checklist.md).
 | AS-1 | Record several shortcuts for one action. | | | | | Pending | |
 | AS-2 | Test supported non-US keyboard layouts, including AZERTY, QWERTZ, and Dvorak. | | | | | Pending | |
 | AS-3 | Upgrade an installation with custom bindings. | | | | | Pending | |
-| AS-4 | Exercise the v1 bindings in [Keybinding reference](keybinding%20reference.md). | | | | | Pending | |
+| AS-4 | Exercise the v1 bindings in [Keybinding reference](../decisions/keybinding%20reference.md). | | | | | Pending | |
 | AS-5 | Open a new resizable window. | | | | | Pending | |
 | AS-6 | Adjust column width and window height. | | | | | Pending | |
 | AS-7 | Open fixed-size windows and Miri's settings. | | | | | Pending | |
