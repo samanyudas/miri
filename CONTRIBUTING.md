@@ -52,11 +52,20 @@ Name the title `type(scope): imperative summary`, for example `fix(engine): keep
 Open unfinished work as a draft and name what is missing.
 Leave version bumps and release notes to the maintainer.
 
-Reference each issue on its own line:
+Reference each issue on its own line.
+Use `Refs` only when the pull request delivers what the issue asks for:
 
 ```text
 Refs #123
 ```
+
+Use `Part of` when the pull request only records decisions, changes documentation, or delivers part of the issue:
+
+```text
+Part of #124
+```
+
+A merged `Refs` labels the issue `fixed (pending release)`, and a merged `Part of` changes nothing.
 
 ## Review and merge
 
@@ -74,6 +83,7 @@ The [issue fix status workflow](.github/workflows/issue-fix-status.yml) keeps ea
 
 1. A pull request that uses `Closes #N` or `Fixes #N` gets one comment that asks for `Refs #N` instead.
 2. When a pull request with `Refs #N` merges, the issue gets the `fixed (pending release)` label and a comment.
+   `Part of #N` and `Related to #N` never label an issue.
 3. When Sam publishes a stable release, each waiting issue gets `please confirm close`, and its reporter is asked to test that version.
 4. If nobody replies in 14 days, the workflow closes the issue as completed.
 5. A later comment on that issue reopens it with `needs-triage`.

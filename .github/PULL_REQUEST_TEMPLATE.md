@@ -4,7 +4,8 @@ Describe what changes and why. For a fix, describe the behavior before and after
 
 ## Related issues
 
-<!-- One `Refs #123` per line. Do not use Closes or Fixes: they close the issue before a release carries the fix. -->
+<!-- One reference per line. Use `Refs #123` when this PR delivers the issue: merging labels it fixed (pending release).
+Use `Part of #123` for decisions, docs, or partial work. Do not use Closes or Fixes: they close the issue before a release carries the fix. -->
 
 ## Verification
 

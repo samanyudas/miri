@@ -303,6 +303,16 @@ class IssueLifecycleTest(unittest.TestCase):
                     "<!-- miri-fix-status sha=abc123 pr=40 -->"))
         self.assertEqual({n: after["issues"][n] for n in untouched}, untouched)
 
+    def test_a_part_of_or_related_reference_labels_nothing(self):
+        issues = {"42": issue(), "43": issue(), "44": issue()}
+        state = repo(copy.deepcopy(issues) | {"45": issue()},
+                     pulls={"52": pull("Part of #42\nPart of: #43\nRelated to #44\nRefs #45")})
+
+        after = self.run_job("fixed-on-main", state, PR_NUMBER="52", MERGE_SHA="abc123")
+
+        self.assertEqual({n: after["issues"][n] for n in issues}, issues)
+        self.assertEqual(after["issues"]["45"]["labels"], [PENDING])
+
     def test_a_closing_keyword_gets_one_hint(self):
         issues = {"51": issue(), "52": issue(state="closed"), "54": issue()}
         state = repo(copy.deepcopy(issues), pulls={"50": pull("Fixes #51\nCloses #52\nresolves #53\nprefix #54")})
