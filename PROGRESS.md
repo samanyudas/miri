@@ -153,12 +153,14 @@ The public release path and the complete acceptance runs follow.
   The labels were removed on 20 October 2026, and one wrong bot comment remains on each issue.
   `fix/refs-vs-part-of` adds `Part of #N` for decisions, docs, and partial work, which never labels an issue, and stops `Related to #N` from labelling one.
   A harness test reproduced the `Related to` labelling before the change and passes after it.
-- `feat/stack-overflow` pins engine `2f2aedf` from samanyudas/paneru#21, which implements stack overflow (#42).
+- `feat/stack-overflow` pins engine `dad61d0` from samanyudas/paneru#21, which implements stack overflow (#42).
   When a stack's minimum heights exceed its column, each lower window overlaps the window above it only below that window's top bar.
-  The engine measures each top bar through Accessibility once and uses 52 points when it cannot.
+  The engine measures each top bar through Accessibility when a stack first overlaps, and again when the window loses focus or resizes.
+  A window with no measurable top bar gets 52 points.
+  When any Accessibility read fails, the engine keeps the last measured height, or 52 points if it has none, and tries again after a growing wait.
   The focused window comes to the front, and it returns to its place when focus leaves it.
   The engine also lays out a stack with more windows than fit at the 200-point minimum, which it used to leave out of the layout.
-  Engine unit and harness tests cover the overlap, the fallback, the spill past the bottom, the window order, and the dropped column.
+  Engine unit and harness tests cover the overlap, the fallback, the refresh and retry, the spill past the bottom, the window order, and the dropped column.
   A read-only Accessibility probe measured a 96-point top bar on Helium, the only app with a standard window open.
   No real desktop or hardware check has run, so acceptance check S-5 stays pending.
 
