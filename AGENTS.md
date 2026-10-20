@@ -25,6 +25,7 @@ Read this map first, then the linked document for the area you touch.
 | `decisions/` | Accepted product direction and open questions. |
 | `docs/adr/` | Architecture decisions. |
 | `docs/specs/`, `docs/prototypes/` | The v1 specification and prototype records. |
+| `docs/acceptance-ledger.md` | The recorded result of every v1 acceptance check. |
 | `GLOSSARY.md` | Domain vocabulary. Use its terms. |
 
 Each fact has one owner.

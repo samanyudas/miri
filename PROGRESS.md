@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-19 on branch `branding/window-mark`
+Updated: 2026-10-20 on branch `docs/reconcile-audit-20261020`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -9,8 +9,9 @@ Update it at the end of every session and in any PR that changes what is done or
 ## Objective
 
 Reach a working v1 app that manages windows through the bundled engine, as defined in [release scope](decisions/release-scope.md).
-The app foundation, engine integration, configuration, and default shortcuts are merged.
-The current milestone is shortcut customization in Settings.
+The app foundation, engine integration, configuration, default shortcuts, shortcut customization, and gesture controls are merged.
+The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting, drag insertion into a stack, the stack limit, and stack overflow.
+The public release path and the complete acceptance runs follow.
 
 ## Done
 
@@ -135,17 +136,33 @@ The current milestone is shortcut customization in Settings.
   GPT-6.1 Sol reviewed the branch in three rounds and approved it.
   [#33](https://github.com/samanyudas/miri/issues/33) tracks the engine helper outliving a dead app, which would keep a test swipe active until the next launch.
 
+- PR #37 records the strip settling design, and PR #41 pins engine `491508e`, which implements it.
+  A swipe settles on the column nearest the center where the flick would stop, and focus reveals only the hidden part of a column.
+  The engine also keeps a column's anchor during preset width cycling (#39), and Quit and Stop return windows to their frames from before Miri started.
+  A live check on Sam's Mac started and quit the engine with nine windows open, and all nine returned to their starting frames.
+  No real trackpad check of settling has run.
+- PR #45 records the stack rules Sam accepted on 19 October 2026 in [release scope](decisions/release-scope.md#stacks).
+  PR #46 pins engine `579bc0b`, which gives stacked windows equal heights and stops a window with a minimum height from overlapping the next one (#40).
+- PR #47 makes CI tolerate the `open -W` race in both selftests and retries `hdiutil` in DMG packaging.
+- PR #50 pins engine `4b4705a`, which asks a slow app for focus again before it floats the window (#48).
+- On 20 October 2026 a status audit compared `main` at `e516edd` with the v1 documentation.
+  The branch `docs/reconcile-audit-20261020` corrects the stale status claims, adds the [acceptance ledger](docs/acceptance-ledger.md), and updates #42, #43, and #44.
+
 ## Next
 
-Sam's status audit of 18 October 2026 proposes these remaining v1 phases.
-Each phase lands as its own PR.
+Each phase lands as its own PR or PRs.
+Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
 
-1. Build pointer-versus-focus targeting (engine patch), then run the live trackpad verification.
-   The live run checks the gesture test on real hardware and app checklist items 1 to 16 under Strip gestures.
-2. Integrate Sparkle updates, then production signing, notarization, the release DMG, and the Homebrew cask.
-3. Run the complete app and hardware acceptance checklists on the bundled app with Accessibility granted.
-   This includes focused-window stacking from a three-window stack and the external-display live app run.
-4. Complete the endurance period and decide Q6, the release duration, at the final check before publishing v1.
+1. Finish the remaining v1 features.
+   - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
+   - Implement drag insertion into a stack (#43) and the stack limit (#44).
+   - Decide with Sam how an overflowing stack keeps every top bar visible, then implement it (#42).
+   - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
+2. Build the public release path, in parallel with phase 1.
+   Integrate Sparkle updates, then production signing, notarization, the release DMG, and the Homebrew cask.
+   Verify install, upgrade, and Accessibility attribution on the released bundle.
+3. Freeze one release candidate, then run the complete app and multi-monitor acceptance checklists on that bundle with Accessibility granted.
+4. Define the engine memory-stability rule, complete the endurance period, and have Sam decide Q6 at the final check before publishing v1.
 5. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
 
 ## Blockers
@@ -154,8 +171,10 @@ Each phase lands as its own PR.
 
 ## Last verification
 
-On 18 October 2026 `make check` passed on `feat/gesture-controls` at `5a354d1` with engine `a15682f`: 134 Swift tests, 40 and 368 engine tests, both Accessibility selftests, window recovery, and DMG packaging.
-That run is unit-level for gestures. No trackpad was used.
-At `c85b47a` lint, 136 Swift tests, both engine test modes, the app build, the Accessibility selftest, and packaging passed, while window recovery waited for the locked screen.
-Native width constraints can still change the final edge after an app refuses a requested size.
-A transfer during an existing resize derives its destination ratio from the intermediate width.
+CI run [39222055411](https://github.com/samanyudas/miri/actions/runs/39222055411) passed on `main` at `e516edd` with engine `4b4705a` on 19 October 2026.
+It ran documentation checks, lint, the build, 136 Swift tests, 40 engine library tests, 417 engine binary tests, and DMG packaging.
+The permission selftest reported `observed-ungranted. Attribution unresolved.`, and its missing-helper and aliased-path checks passed.
+The recovery selftest reported `skipped-ungranted`, because Miri Developer lacked the Accessibility grant.
+That run therefore does not prove granted window recovery on the current pin.
+The last granted recovery check is the 18 October 2026 `make check` on `feat/gesture-controls` at `5a354d1` with engine `a15682f`.
+No trackpad has been used for any check.
