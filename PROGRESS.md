@@ -162,7 +162,7 @@ The public release path and the complete acceptance runs follow.
   The engine rejects `0`, negative numbers, and other values with a parse error, and so does Miri, which reports `options.stack_limit`.
   `effective_stack_limit(config, column_height)` in the engine's `src/ecs/layout.rs` holds the cap, for reuse by drag insertion (#43).
   Settings has a Windows per stack picker on the Layout page, with Fit the display and the numbers from 1 to what fits on the main display.
-  The branch pins engine `0cd2368`, the head of `miri/stack-limit`, so `make compat` fails until samanyudas/paneru#20 merges and the pin moves to that merge.
+  The branch pins engine `c07c913`, the head of `miri/stack-limit` after merging samanyudas/paneru#19,, so `make compat` fails until samanyudas/paneru#20 merges and the pin moves to that merge.
   On 20 October 2026, `make native` passed on this branch with 141 Swift tests, 40 engine library tests, and 427 engine binary tests.
   Its permission selftest reported `observed-granted. Attribution unresolved.`, and its recovery selftest recovered the fixture window.
   `make lint` passed except `make compat`, for the unmerged pin above.
