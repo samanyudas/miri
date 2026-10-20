@@ -33,7 +33,7 @@ The native app is implemented, but no complete acceptance run has passed.
   Sam replaced the earlier rule, which centered the focused column whenever the strip overflowed, on 19 October 2026.
 - After a swipe or modifier scroll, the strip settles on a column, as [Release scope](release-scope.md) describes.
 - Trackpad scrolling moves the strip under the pointer by default, and a setting chooses the focused strip instead.
-- [Stacks](release-scope.md#stacks) keep equal heights after membership changes and never overlap.
+- [Stacks](release-scope.md#stacks) keep equal heights after membership changes and never overlap while they fit.
   An overflowing stack overlaps each window below the top bar of the window above, and the focused window comes to the front.
 - Dragging a tiled window moves it into a column or to a new column at the drop position, on any display.
 - The stack limit is an engine option that defaults to 5, never exceeds what fits on the display, and a Stack command past it starts a new column.

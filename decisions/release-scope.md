@@ -214,6 +214,20 @@ Miri respects macOS Reduce Motion and provides a setting to disable animation.
 Either Reduce Motion or the disable-animation setting makes strip movement instant.
 Numbered jumps select columns and focus the last-focused window within the selected column.
 
+Directional monitor focus uses Control-Option-Command with W, A, S, and D for up, left, down, and right.
+Adding Shift moves the focused window in the corresponding monitor direction.
+These bindings preserve the previously selected shortcuts and require verification against the engine and macOS.
+Shortcut recording follows [Binding customization](keybinding%20reference.md#binding-customization).
+Tabbed columns, the minimap, inactive-window dimming, and advanced window rules are deferred to v2.
+Focus borders, pointer-following controls, display exclusions, fixed-pixel presets, animation tuning, and Hyper-key recording are also deferred to v2.
+Deferral excludes these proposals from v1 without committing to their inclusion in v2.
+
+Miri uses the GNU General Public License version 3 or any later version at the recipient's option.
+The SPDX license identifier is `GPL-3.0-or-later`.
+
+The feature, configuration, shortcut, and setup documents describe Miri's design decisions and proposals.
+They do not establish that every listed feature is required for v1.
+
 ### Stacks
 
 Sam accepted these stack rules on 19 October 2026.
@@ -258,20 +272,6 @@ Miri shows a not-allowed indicator, and the window returns to its place.
 Holding the pointer near a display edge with no neighboring display for about half a second scrolls the strip.
 After a drop, the dropped window keeps focus, and the strip moves only as far as needed to show it.
 If macOS tiles the window instead, the engine returns it to its place in the layout.
-
-Directional monitor focus uses Control-Option-Command with W, A, S, and D for up, left, down, and right.
-Adding Shift moves the focused window in the corresponding monitor direction.
-These bindings preserve the previously selected shortcuts and require verification against the engine and macOS.
-Shortcut recording follows [Binding customization](keybinding%20reference.md#binding-customization).
-Tabbed columns, the minimap, inactive-window dimming, and advanced window rules are deferred to v2.
-Focus borders, pointer-following controls, display exclusions, fixed-pixel presets, animation tuning, and Hyper-key recording are also deferred to v2.
-Deferral excludes these proposals from v1 without committing to their inclusion in v2.
-
-Miri uses the GNU General Public License version 3 or any later version at the recipient's option.
-The SPDX license identifier is `GPL-3.0-or-later`.
-
-The feature, configuration, shortcut, and setup documents describe Miri's design decisions and proposals.
-They do not establish that every listed feature is required for v1.
 
 ## V2
 
