@@ -76,7 +76,8 @@ Do not work around the guard with another command.
 
 - Never use the em dash character. `make docs` rejects it.
 - In Markdown, put each sentence on its own line.
-- In PRs, reference issues with `Refs #N`, never `Closes` or `Fixes`. The [issue lifecycle](CONTRIBUTING.md#issue-lifecycle) explains why.
+- In PRs, reference an issue the PR delivers with `Refs #N`, never `Closes` or `Fixes`. The [issue lifecycle](CONTRIBUTING.md#issue-lifecycle) explains why.
+- Use `Part of #N` for a PR that only records decisions, changes docs, or delivers part of the issue. A merged `Refs` marks the issue fixed.
 - Never edit `CHANGELOG.md` or generated files by hand.
 
 ## Deeper docs

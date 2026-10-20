@@ -11,6 +11,7 @@ name: Issue fix status
 # A closing keyword closes the issue on merge, before any release carries the fix, and the jobs
 # below skip closed issues, so the reporter would never hear about it.
 # A bare "#N" mention is never treated as a reference.
+# "Part of #N" and "Related to #N" mention an issue without claiming to fix it, so they never label it.
 # The release trigger works when Sam publishes a release. A release created by GITHUB_TOKEN does not
 # start workflows, so a future release workflow must trigger reporter-check through workflow_run.
 # No job checks out or executes pull request code. Bodies are read through the API and only grepped.
@@ -109,7 +110,7 @@ jobs:
         run: |
           set -euo pipefail
           gh api "repos/$GH_REPO/pulls/$PR_NUMBER" --jq '.body // ""' > pr-body.txt
-          refs=$(grep -oiE '(^|[^[:alnum:]_])(refs?|references?|related to|fixes|fixed|closes?|resolves?)[[:space:]]*:?[[:space:]]*#[0-9]+' pr-body.txt \
+          refs=$(grep -oiE '(^|[^[:alnum:]_])(refs?|references?|fixes|fixed|closes?|resolves?)[[:space:]]*:?[[:space:]]*#[0-9]+' pr-body.txt \
                    | grep -oE '[0-9]+$' | sort -un) || true
           [ -n "$refs" ] || { echo "#$PR_NUMBER references no issue"; exit 0; }
           for number in $refs; do

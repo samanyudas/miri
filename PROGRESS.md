@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-20 on branch `docs/drag-and-overflow-decisions`
+Updated: 2026-10-20 on branch `fix/refs-vs-part-of`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -149,6 +149,10 @@ The public release path and the complete acceptance runs follow.
   Sam settled the open #42, #43, and #44 questions on 20 October 2026, and the branch `docs/drag-and-overflow-decisions` records them in [release scope](decisions/release-scope.md#dragging-windows).
   Dragging to reorder columns and dragging between displays moved into v1.
   The branch `docs/reconcile-audit-20261020` corrects the stale status claims, adds the [acceptance ledger](docs/acceptance-ledger.md), and updates #42, #43, and #44.
+- PRs #51 and #52 changed only documents, but each listed `Refs #42`, `Refs #43`, and `Refs #44`, so the issue lifecycle labelled all three `fixed (pending release)`.
+  The labels were removed on 20 October 2026, and one wrong bot comment remains on each issue.
+  `fix/refs-vs-part-of` adds `Part of #N` for decisions, docs, and partial work, which never labels an issue, and stops `Related to #N` from labelling one.
+  A harness test reproduced the `Related to` labelling before the change and passes after it.
 
 ## Next
 
