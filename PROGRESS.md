@@ -180,3 +180,7 @@ The recovery selftest reported `skipped-ungranted`, because Miri Developer lacke
 That run therefore does not prove granted window recovery on the current pin.
 The last granted recovery check is the 18 October 2026 `make check` on `feat/gesture-controls` at `5a354d1` with engine `a15682f`.
 No trackpad has been used for any check.
+
+Known limits from that 18 October 2026 work remain.
+Native width constraints can still change the final edge after an app refuses a requested size.
+A transfer during an existing resize derives its destination ratio from the intermediate width.

@@ -154,6 +154,9 @@ This list holds only work that has no implementation on `main` at `e516edd`.
 - Configure Developer ID signing, notarization, signed update feeds, the release disk image, and the Homebrew cask.
 - Recheck app and helper Accessibility attribution on the Developer ID signed, notarized bundle.
 - Define a measurable engine memory-stability rule.
+- Complete the release source audit beyond the reviewed configuration, gesture, sizing, isolation, and clean-exit paths.
+  Establish a reproducible app and helper build.
+- Review configuration keys, accepted types and ranges, and private API fallbacks against the pinned engine.
 
 ## Acceptance gaps
 
