@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-20 on branch `docs/reconcile-audit-20261020`
+Updated: 2026-10-20 on branch `docs/drag-and-overflow-decisions`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -146,6 +146,8 @@ The public release path and the complete acceptance runs follow.
 - PR #47 makes CI tolerate the `open -W` race in both selftests and retries `hdiutil` in DMG packaging.
 - PR #50 pins engine `4b4705a`, which asks a slow app for focus again before it floats the window (#48).
 - On 20 October 2026 a status audit compared `main` at `e516edd` with the v1 documentation.
+  Sam settled the open #42, #43, and #44 questions on 20 October 2026, and the branch `docs/drag-and-overflow-decisions` records them in [release scope](decisions/release-scope.md#dragging-windows).
+  Dragging to reorder columns and dragging between displays moved into v1.
   The branch `docs/reconcile-audit-20261020` corrects the stale status claims, adds the [acceptance ledger](docs/acceptance-ledger.md), and updates #42, #43, and #44.
 
 ## Next
@@ -155,8 +157,8 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 1. Finish the remaining v1 features.
    - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
-   - Implement drag insertion into a stack (#43) and the stack limit (#44).
-   - Decide with Sam how an overflowing stack keeps every top bar visible, then implement it (#42).
+   - Implement dragging windows into columns and to new columns, on one display and across displays (#43).
+   - Implement the stack limit as an engine option (#44) and overlapping stack overflow (#42).
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
    Integrate Sparkle updates, then production signing, notarization, the release DMG, and the Homebrew cask.

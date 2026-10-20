@@ -33,11 +33,10 @@ The native app is implemented, but no complete acceptance run has passed.
   Sam replaced the earlier rule, which centered the focused column whenever the strip overflowed, on 19 October 2026.
 - After a swipe or modifier scroll, the strip settles on a column, as [Release scope](release-scope.md) describes.
 - Trackpad scrolling moves the strip under the pointer by default, and a setting chooses the focused strip instead.
-- [Stacks](release-scope.md#stacks) keep equal heights after membership changes and never overlap.
-  An overflowing stack keeps every window's top bar visible.
-- Dragging a window onto a stack inserts it at the drop position.
-  Dragging to reorder columns stays in v2.
-- A stack limit defaults to 5, never exceeds what fits on the display, and a Stack command past it starts a new column.
+- [Stacks](release-scope.md#stacks) keep equal heights after membership changes and never overlap while they fit.
+  An overflowing stack overlaps each window below the top bar of the window above, and the focused window comes to the front.
+- Dragging a tiled window moves it into a column or to a new column at the drop position, on any display.
+- The stack limit is an engine option that defaults to 5, never exceeds what fits on the display, and a Stack command past it starts a new column.
 - The layout reserves space for the visible Dock without a separate v1 setting.
 - V2 includes an optional custom Miri dock that can be enabled or disabled.
   The Miri dock is enabled by default.
@@ -148,8 +147,9 @@ This list holds only work that has no implementation on `main` at `e516edd`.
 [PROGRESS.md](../PROGRESS.md) records what is implemented and what is verified.
 
 - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
-- Implement drag insertion into a stack ([#43](https://github.com/samanyudas/miri/issues/43)) and the stack limit ([#44](https://github.com/samanyudas/miri/issues/44)).
-- Decide how an overflowing stack keeps every top bar visible, then implement it ([#42](https://github.com/samanyudas/miri/issues/42)).
+- Implement dragging windows into columns and to new columns, on one display and across displays ([#43](https://github.com/samanyudas/miri/issues/43)).
+- Implement the stack limit as an engine option ([#44](https://github.com/samanyudas/miri/issues/44)).
+- Implement overlapping overflow that keeps every top bar visible ([#42](https://github.com/samanyudas/miri/issues/42)).
 - Integrate Sparkle updates with the accepted update policy.
 - Configure Developer ID signing, notarization, signed update feeds, the release disk image, and the Homebrew cask.
 - Recheck app and helper Accessibility attribution on the Developer ID signed, notarized bundle.
@@ -167,9 +167,9 @@ The endurance requirement that engine memory stays stable has no measurable pass
 
 ## Deferred branches
 
-Tabbed columns, the minimap, inactive-window dimming, advanced rules, dragging to reorder columns, virtual workspaces, and portable display layouts remain outside v1.
-Dragging a window into a stack is v1 work and is separate from dragging to reorder columns.
-Focus borders, pointer-following controls, display exclusions, cross-display dragging, fixed-pixel presets, animation tuning, and Hyper-key recording are also excluded from v1.
+Tabbed columns, the minimap, inactive-window dimming, advanced rules, virtual workspaces, and portable display layouts remain outside v1.
+Dragging windows into columns, to new columns, and between displays is v1 work.
+Focus borders, pointer-following controls, display exclusions, fixed-pixel presets, animation tuning, and Hyper-key recording are also excluded from v1.
 Five-finger strip gestures are also deferred.
 Alternative automatic centering modes, `never` and `always`, remain unselected proposals outside the accepted v1 controls.
 Their detailed design can remain unresolved without blocking the v1 interview.
