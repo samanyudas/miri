@@ -174,7 +174,9 @@ struct LayoutSettings: View {
             Section {
                 Picker("Windows per stack", selection: stackLimit) {
                     Text("Fit the display").tag(StackLimit.fit)
-                    ForEach(StackLimit.offeredCounts(fit: mainDisplayFit, configured: model.settings.stackLimit), id: \.self) { count in
+                    ForEach(
+                        StackLimit.offeredCounts(fit: mainDisplayFit, configured: model.settings.stackLimit), id: \.self
+                    ) { count in
                         Text("\(count)").tag(StackLimit.count(count))
                     }
                 }
@@ -199,7 +201,6 @@ struct LayoutSettings: View {
         let height = NSScreen.screens.first?.visibleFrame.height ?? 0
         return StackLimit.fitCount(columnHeight: height - Double(2 * model.settings.edgePadding))
     }
-
 
     private func gapRow(_ title: String, _ key: WritableKeyPath<MiriSettings, Int>) -> some View {
         LabeledContent(title) {
