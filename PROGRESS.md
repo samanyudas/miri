@@ -186,10 +186,12 @@ The public release path and the complete acceptance runs follow.
   This branch merges that result and keeps engine `db5bba3`, which contains both stack limit and stack overflow.
 
 
-- `feat/drag-insert-integration` starts from `main` at `49661a5` and pins engine `c6ae07a` from [samanyudas/paneru#29](https://github.com/samanyudas/paneru/pull/29), which remains unmerged.
+- `feat/drag-insert-integration` starts from `main` at `49661a5` and pins engine `48df35a` from [samanyudas/paneru#29](https://github.com/samanyudas/paneru/pull/29), which remains unmerged.
   This brings in the landed drag insertion and feedback changes from engine PRs #22, #23, and #28, together with part C from #29.
   Part C adds cross-display drops, outer-edge hold scrolling, and restoration after macOS tiles a managed window (#43).
   Native membership uses fresh window frames and preserves held drags, pending engine placement, and native tab groups.
+  The engine also replays a held tab group's skipped layout when a press ends without a drop.
+  The regression failed before the fix for lost release, pointer movement, and resize cancellation, and passes after the fix.
   The app also recognizes the engine's `showmenu` and `hidemenu` binding keys and rejects extra words, matching the updated engine parser.
   The compatibility guard still requires the engine pin to be published on `miri/v0.5.2`, so this integration cannot pass `make check` until #29 lands and its final merge is pinned.
   Mock engine tests cover the drag behavior, including a neighboring display with a native fullscreen Space.
@@ -221,16 +223,23 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 ## Last verification
 
-On 22 October 2026, this integration working tree based on `49661a5` passed `make native` with engine `c6ae07a`.
-It passed 142 Swift tests, 41 engine library tests, 706 engine binary tests, strict Swift and engine lint, app/helper signature checks, and DMG packaging.
-The permission selftest reported `observed-granted. Attribution unresolved.`, and the recovery selftest recovered its stranded fixture.
-A separate default-feature engine run passed 52 library and 793 binary tests.
-All 145 drag tests passed in both feature configurations.
-Sol approved the engine behavior at `e3575f2`, and the final engine commit changes private names and comments only.
-A native AppKit fill check at `c6ae07a` restored width 512 after macOS filled the fixture to 2048.
-All eight unrelated window frames stayed unchanged, and the fixture and engine exited.
-The remaining native drag and physical display checks are listed above.
+On 22 October 2026, the integration working tree with engine `48df35a` passed strict Swift and engine lint, the signed app/helper build, 142 Swift tests, 41 engine library tests, and 707 binary tests.
+A separate default-feature engine run passed 52 library and 794 binary tests.
+The permission selftest reported `observed-granted. Attribution unresolved.` and passed its missing-helper and aliased-path checks.
+The full `make native` target then failed in window recovery with `The fixture has no standard window.`
+At the same time, `loginwindow` was foreground and a separate isolated engine could see no macOS Spaces.
+Final-pin native verification is blocked until the desktop is available.
+The isolated attempt exited both owned processes and left its one observable unrelated window frame unchanged.
+
+Earlier in this session, engine `c6ae07a` passed the complete native target, including fixture recovery and DMG packaging.
+An AppKit fill check at that earlier pin observed width 512 to 2048 and restoration to 512.
+All eight unrelated window frames stayed unchanged, and both owned processes exited.
+Those earlier results do not establish native behavior at the latest pin.
+
+Sol approved the engine behavior at `e3575f2`, and then approved the reproduced press-reflow repair now committed as `48df35a`.
+The regression failed before the repair for lost release, pointer movement, and resize cancellation.
+It now checks both native tabs against an unpressed control across five endings, including confirmation expiry.
 
 The docs, 19 harness tests, shell scripts, and workflows passed lint.
-Compatibility now reports only that `c6ae07a` is not on the fork's required `miri/v0.5.2` branch.
+Compatibility rejects the feature-branch engine pin because it is not on the fork's required `miri/v0.5.2` branch.
 The integration remains draft until engine PR #29 lands, its final merge commit is pinned, and the native checks complete.
