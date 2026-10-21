@@ -150,7 +150,6 @@ This list holds only work that has no implementation on `main` at `e516edd`.
 - Implement dragging windows into columns and to new columns, on one display and across displays ([#43](https://github.com/samanyudas/miri/issues/43)).
 - Run the stack limit hardware check, S-7 in the [acceptance ledger](../docs/acceptance-ledger.md).
   The engine option and its Settings control are built, pending that check ([#44](https://github.com/samanyudas/miri/issues/44)).
-- Implement overlapping overflow that keeps every top bar visible ([#42](https://github.com/samanyudas/miri/issues/42)).
 - Integrate Sparkle updates with the accepted update policy.
 - Configure Developer ID signing, notarization, signed update feeds, the release disk image, and the Homebrew cask.
 - Recheck app and helper Accessibility attribution on the Developer ID signed, notarized bundle.

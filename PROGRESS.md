@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-20 on branch `feat/stack-limit`
+Updated: 2026-10-21 on branch `feat/stack-overflow`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -10,8 +10,8 @@ Update it at the end of every session and in any PR that changes what is done or
 
 Reach a working v1 app that manages windows through the bundled engine, as defined in [release scope](decisions/release-scope.md).
 The app foundation, engine integration, configuration, default shortcuts, shortcut customization, and gesture controls are merged.
-The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting, drag insertion into a stack, and stack overflow.
-The stack limit is built and waits for its hardware check.
+The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
+The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
 
 ## Done
@@ -154,6 +154,16 @@ The public release path and the complete acceptance runs follow.
   The labels were removed on 20 October 2026, and one wrong bot comment remains on each issue.
   `fix/refs-vs-part-of` adds `Part of #N` for decisions, docs, and partial work, which never labels an issue, and stops `Related to #N` from labelling one.
   A harness test reproduced the `Related to` labelling before the change and passes after it.
+- `feat/stack-overflow` pins engine `db5bba3`, the merge of samanyudas/paneru#21, which implements stack overflow (#42).
+  When a stack's minimum heights exceed its column, each lower window overlaps the window above it only below that window's top bar.
+  The engine measures each top bar through Accessibility when a stack first overlaps, and again when the window loses focus or resizes.
+  A window with no measurable top bar gets 52 points.
+  When any Accessibility read fails, the engine keeps the last measured height, or 52 points if it has none, and tries again after a growing wait.
+  The focused window comes to the front, and it returns to its place when focus leaves it.
+  The engine also lays out a stack with more windows than fit at the 200-point minimum, which it used to leave out of the layout.
+  Engine unit and harness tests cover the overlap, the fallback, the refresh and retry, the spill past the bottom, the window order, and the dropped column.
+  A read-only Accessibility probe measured a 96-point top bar on Helium, the only app with a standard window open.
+  No real desktop or hardware check has run, so acceptance check S-5 stays pending.
 - `feat/stack-limit` delivers the stack limit (#44) with samanyudas/paneru#20, which adds the engine option `[options].stack_limit`.
   It holds a whole number from 1 or `"fit"`, defaults to `5`, and is capped at what fits in the column at 200 points on the active display.
   A Stack command into a full column moves the window out of its own stack into a new column between the two.
@@ -162,12 +172,18 @@ The public release path and the complete acceptance runs follow.
   The engine rejects `0`, negative numbers, and other values with a parse error, and so does Miri, which reports `options.stack_limit`.
   `effective_stack_limit(config, column_height)` in the engine's `src/ecs/layout.rs` holds the cap, for reuse by drag insertion (#43).
   Settings has a Windows per stack picker on the Layout page, with Fit the display and the numbers from 1 to what fits on the main display.
-  The branch pins engine `9065569`, the merge of samanyudas/paneru#20 into `miri/v0.5.2`.
-  On 20 October 2026, `make native` passed on this branch with 141 Swift tests, 40 engine library tests, and 427 engine binary tests.
+  PR #54 pinned engine `9065569`, the merge of samanyudas/paneru#20 into `miri/v0.5.2`.
+  On 20 October 2026, `make native` passed on `feat/stack-limit` with 141 Swift tests, 40 engine library tests, and 427 engine binary tests.
   Its permission selftest reported `observed-granted. Attribution unresolved.`, and its recovery selftest recovered the fixture window.
-  `make lint` passed except `make compat`, for the unmerged pin above.
-  Settings was not opened, so the picker has not been seen on screen.
+  Before the engine merge, `make lint` passed except `make compat`, which rejected the unpublished pin.
+  Settings was not opened during that run.
   No hardware check has run, and the acceptance check is S-7 in the [acceptance ledger](docs/acceptance-ledger.md).
+- PR #54 merged into `main` as `6a85fcf` on 21 October 2026 after Greptile scored its final head `87178e9` at 5/5 and CI passed.
+  Independent verification passed 142 Swift tests, strict Swift lint, and `make lint`, including 19 harness tests and compatibility.
+  A native fixture rendered the production Layout settings view with an isolated model and configuration file.
+  The previous commit kept a stale capacity of 6 after a simulated display notification, while the merged view immediately showed 3 and preserved the configured count of 5.
+  This did not change physical displays or run the engine.
+  This branch merges that result and keeps engine `db5bba3`, which contains both stack limit and stack overflow.
 
 ## Next
 
@@ -177,8 +193,7 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 1. Finish the remaining v1 features.
    - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
    - Implement dragging windows into columns and to new columns, on one display and across displays (#43).
-   - Implement overlapping stack overflow (#42).
-   - After samanyudas/paneru#20 merges, repin the engine to its merge commit on `miri/v0.5.2`, then run the stack limit hardware check (S-7, #44).
+   - Run the stack overflow and stack limit hardware checks (S-5 and S-7).
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
    Integrate Sparkle updates, then production signing, notarization, the release DMG, and the Homebrew cask.
@@ -192,6 +207,13 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 - Developer ID enrollment is pending and blocks signed, notarized releases.
 
 ## Last verification
+
+On 21 October 2026, merging `main` at `6a85fcf` into `feat/stack-overflow` passed `make lint swift-lint` and all 142 Swift tests.
+Compatibility reported engine `db5bba3` with zero problems.
+The engine pin is unchanged from the previously green #55 head, and it contains the stack-limit engine pin from #54.
+The complete `make native` target was not repeated locally for this merge resolution because no engine source changed.
+CI will run the full native build, test, selftest, and package targets on the pushed merge commit.
+No hardware acceptance result changed.
 
 CI run [39222055411](https://github.com/samanyudas/miri/actions/runs/39222055411) passed on `main` at `e516edd` with engine `4b4705a` on 19 October 2026.
 It ran documentation checks, lint, the build, 136 Swift tests, 40 engine library tests, 417 engine binary tests, and DMG packaging.
