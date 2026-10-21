@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-20 on branch `fix/refs-vs-part-of`
+Updated: 2026-10-20 on branch `feat/stack-limit`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -10,7 +10,8 @@ Update it at the end of every session and in any PR that changes what is done or
 
 Reach a working v1 app that manages windows through the bundled engine, as defined in [release scope](decisions/release-scope.md).
 The app foundation, engine integration, configuration, default shortcuts, shortcut customization, and gesture controls are merged.
-The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting, drag insertion into a stack, the stack limit, and stack overflow.
+The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting, drag insertion into a stack, and stack overflow.
+The stack limit is built and waits for its hardware check.
 The public release path and the complete acceptance runs follow.
 
 ## Done
@@ -153,6 +154,20 @@ The public release path and the complete acceptance runs follow.
   The labels were removed on 20 October 2026, and one wrong bot comment remains on each issue.
   `fix/refs-vs-part-of` adds `Part of #N` for decisions, docs, and partial work, which never labels an issue, and stops `Related to #N` from labelling one.
   A harness test reproduced the `Related to` labelling before the change and passes after it.
+- `feat/stack-limit` delivers the stack limit (#44) with samanyudas/paneru#20, which adds the engine option `[options].stack_limit`.
+  It holds a whole number from 1 or `"fit"`, defaults to `5`, and is capped at what fits in the column at 200 points on the active display.
+  A Stack command into a full column moves the window out of its own stack into a new column between the two.
+  A window that is already its own column stays put.
+  Lowering the limit leaves existing stacks unchanged, and the engine reads the limit on every Stack command, so a hot reload applies to the next one.
+  The engine rejects `0`, negative numbers, and other values with a parse error, and so does Miri, which reports `options.stack_limit`.
+  `effective_stack_limit(config, column_height)` in the engine's `src/ecs/layout.rs` holds the cap, for reuse by drag insertion (#43).
+  Settings has a Windows per stack picker on the Layout page, with Fit the display and the numbers from 1 to what fits on the main display.
+  The branch pins engine `9065569`, the merge of samanyudas/paneru#20 into `miri/v0.5.2`.
+  On 20 October 2026, `make native` passed on this branch with 141 Swift tests, 40 engine library tests, and 427 engine binary tests.
+  Its permission selftest reported `observed-granted. Attribution unresolved.`, and its recovery selftest recovered the fixture window.
+  `make lint` passed except `make compat`, for the unmerged pin above.
+  Settings was not opened, so the picker has not been seen on screen.
+  No hardware check has run, and the acceptance check is S-7 in the [acceptance ledger](docs/acceptance-ledger.md).
 
 ## Next
 
@@ -162,7 +177,8 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 1. Finish the remaining v1 features.
    - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
    - Implement dragging windows into columns and to new columns, on one display and across displays (#43).
-   - Implement the stack limit as an engine option (#44) and overlapping stack overflow (#42).
+   - Implement overlapping stack overflow (#42).
+   - After samanyudas/paneru#20 merges, repin the engine to its merge commit on `miri/v0.5.2`, then run the stack limit hardware check (S-7, #44).
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
    Integrate Sparkle updates, then production signing, notarization, the release DMG, and the Homebrew cask.

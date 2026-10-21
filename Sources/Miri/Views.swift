@@ -146,6 +146,7 @@ struct LayoutSettings: View {
     let model: AppModel
     @State private var presetsText = ""
     @State private var presetsError: String?
+    @State private var mainDisplayHeight = LayoutSettings.currentMainDisplayHeight()
 
     var body: some View {
         Form {
@@ -171,10 +172,43 @@ struct LayoutSettings: View {
                 )
                 .foregroundStyle(.secondary)
             }
+            Section {
+                Picker("Windows per stack", selection: stackLimit) {
+                    Text("Fit the display").tag(StackLimit.fit)
+                    ForEach(
+                        StackLimit.offeredCounts(fit: mainDisplayFit, configured: model.settings.stackLimit), id: \.self
+                    ) { count in
+                        Text("\(count)").tag(StackLimit.count(count))
+                    }
+                }
+            } footer: {
+                Text(
+                    "Stacking a window onto a full stack starts a new column instead. Up to \(mainDisplayFit) windows fit on the main display at the minimum height of \(StackLimit.minimumWindowHeight) points. A Stack command never fills a stack past what fits on its display, and lowering the limit leaves existing stacks unchanged."
+                )
+                .foregroundStyle(.secondary)
+            }
         }
         .formStyle(.grouped)
         .onAppear(perform: showPresets)
         .onChange(of: model.settings.widthPresets) { showPresets() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didChangeScreenParametersNotification)) {
+            _ in
+            mainDisplayHeight = Self.currentMainDisplayHeight()
+        }
+    }
+
+    private var stackLimit: Binding<StackLimit> {
+        Binding(get: { model.settings.stackLimit }, set: { value in model.update { $0.stackLimit = value } })
+    }
+
+    /// How many windows fit in a column on the display with the menu bar, as the engine counts them.
+    private var mainDisplayFit: Int {
+        StackLimit.fitCount(columnHeight: mainDisplayHeight - Double(2 * model.settings.edgePadding))
+    }
+
+    /// The visible height of the display with the menu bar, which macOS lists first.
+    private static func currentMainDisplayHeight() -> Double {
+        Double(NSScreen.screens.first?.visibleFrame.height ?? 0)
     }
 
     private func gapRow(_ title: String, _ key: WritableKeyPath<MiriSettings, Int>) -> some View {

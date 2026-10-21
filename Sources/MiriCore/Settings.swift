@@ -12,6 +12,7 @@ public struct MiriSettings: Equatable, Sendable {
     public var innerGap = 8
     public var outerGap = 8
     public var widthPresets = [0.25, 0.33, 0.5, 0.66, 0.75]
+    public var stackLimit = StackLimit.count(5)
     public var animations = true
     public var launchAtLogin = true
     public var stripGesture = StripGesture.off
@@ -50,6 +51,13 @@ public struct MiriSettings: Equatable, Sendable {
                 }
             }
         }
+        if let value = document.value(at: ["options", "stack_limit"]) {
+            switch value {
+            case .integer(let count) where count >= 1: stackLimit = .count(Int(clamping: count))
+            case .string("fit"): stackLimit = .fit
+            default: throw Self.stackLimitIssue
+            }
+        }
         try validate()
     }
 
@@ -61,6 +69,7 @@ public struct MiriSettings: Equatable, Sendable {
             widthPresets.allSatisfy(Self.presetRange.contains),
             zip(widthPresets, widthPresets.dropFirst()).allSatisfy({ $0 < $1 })
         else { throw Self.presetIssue }
+        if case .count(let count) = stackLimit, count < 1 { throw Self.stackLimitIssue }
     }
 
     /// Per-window padding. Adjacent windows each contribute it, so two of them make the inner gap.
@@ -110,6 +119,7 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.string(stripGesture.rawValue), ["miri"], "strip_gesture")
         try set(.boolean(reverseSwipe), ["miri"], "reverse_swipe")
         try set(.array(widthPresets.map(TOMLValue.float)), ["options"], "preset_column_widths")
+        try set(stackLimit.tomlValue, ["options"], "stack_limit")
         if animations && !reduceMotion {
             if result.value(at: ["options", "animation_speed"]) == nil {
                 try set(.float(Self.animationSpeed), ["options"], "animation_speed")
@@ -171,6 +181,40 @@ public struct MiriSettings: Equatable, Sendable {
         message:
             "options.preset_column_widths must list 1 to 10 increasing ratios from 0.05 to 1, such as [0.33, 0.5, 0.66]."
     )
+
+    private static let stackLimitIssue = ConfigurationIssue.invalidValue(
+        key: "options.stack_limit",
+        message: "options.stack_limit must be a whole number from 1 or \"fit\"."
+    )
+}
+
+/// How many windows one stack holds. The engine caps a count at what fits on the display the stack is on.
+public enum StackLimit: Hashable, Sendable {
+    /// As many windows as fit in a column at the engine's minimum window height.
+    case fit
+    case count(Int)
+
+    /// The engine's `MIN_WINDOW_HEIGHT` in points.
+    public static let minimumWindowHeight = 200
+
+    /// How many windows fit in a column `columnHeight` points tall, counted as the engine counts them.
+    public static func fitCount(columnHeight: Double) -> Int {
+        max(1, Int(columnHeight) / minimumWindowHeight)
+    }
+
+    /// The counts Settings offers: 1 up to `fit`, plus `configured` when it is larger, so a number set by hand stays selectable.
+    public static func offeredCounts(fit: Int, configured: StackLimit) -> [Int] {
+        var counts = Array(1...max(1, fit))
+        if case .count(let count) = configured, count > counts.count { counts.append(count) }
+        return counts
+    }
+
+    var tomlValue: TOMLValue {
+        switch self {
+        case .fit: .string("fit")
+        case .count(let count): .integer(Int64(count))
+        }
+    }
 }
 
 /// A problem that stops Miri from using or changing its configuration file. Miri keeps the last valid settings.
