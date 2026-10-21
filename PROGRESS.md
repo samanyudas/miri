@@ -185,6 +185,19 @@ The public release path and the complete acceptance runs follow.
   This did not change physical displays or run the engine.
   This branch merges that result and keeps engine `db5bba3`, which contains both stack limit and stack overflow.
 
+
+- `feat/drag-insert-integration` starts from `main` at `49661a5` and pins engine `c6ae07a` from [samanyudas/paneru#29](https://github.com/samanyudas/paneru/pull/29), which remains unmerged.
+  This brings in the landed drag insertion and feedback changes from engine PRs #22, #23, and #28, together with part C from #29.
+  Part C adds cross-display drops, outer-edge hold scrolling, and restoration after macOS tiles a managed window (#43).
+  Native membership uses fresh window frames and preserves held drags, pending engine placement, and native tab groups.
+  The app also recognizes the engine's `showmenu` and `hidemenu` binding keys and rejects extra words, matching the updated engine parser.
+  The compatibility guard still requires the engine pin to be published on `miri/v0.5.2`, so this integration cannot pass `make check` until #29 lands and its final merge is pinned.
+  Mock engine tests cover the drag behavior, including a neighboring display with a native fullscreen Space.
+  An isolated AppKit fixture on the final engine `c6ae07a` measured native fill from width 512 to 2048 and restoration to 512.
+  All eight unrelated window frames stayed unchanged, both owned processes exited, and the original frontmost app returned.
+  Native titlebar drops, edge holds, half and quarter tiling, and cross-display hardware behavior remain unverified.
+  Acceptance check S-6 stays pending.
+
 ## Next
 
 Each phase lands as its own PR or PRs.
@@ -192,7 +205,7 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 1. Finish the remaining v1 features.
    - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
-   - Implement dragging windows into columns and to new columns, on one display and across displays (#43).
+   - Finish native verification of drag insertion (#43), then land engine #29 and update the integration pin to its merge commit.
    - Run the stack overflow and stack limit hardware checks (S-5 and S-7).
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
@@ -208,21 +221,16 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 ## Last verification
 
-On 21 October 2026, merging `main` at `6a85fcf` into `feat/stack-overflow` passed `make lint swift-lint` and all 142 Swift tests.
-Compatibility reported engine `db5bba3` with zero problems.
-The engine pin is unchanged from the previously green #55 head, and it contains the stack-limit engine pin from #54.
-The complete `make native` target was not repeated locally for this merge resolution because no engine source changed.
-CI will run the full native build, test, selftest, and package targets on the pushed merge commit.
-No hardware acceptance result changed.
+On 22 October 2026, this integration working tree based on `49661a5` passed `make native` with engine `c6ae07a`.
+It passed 142 Swift tests, 41 engine library tests, 706 engine binary tests, strict Swift and engine lint, app/helper signature checks, and DMG packaging.
+The permission selftest reported `observed-granted. Attribution unresolved.`, and the recovery selftest recovered its stranded fixture.
+A separate default-feature engine run passed 52 library and 793 binary tests.
+All 145 drag tests passed in both feature configurations.
+Sol approved the engine behavior at `e3575f2`, and the final engine commit changes private names and comments only.
+A native AppKit fill check at `c6ae07a` restored width 512 after macOS filled the fixture to 2048.
+All eight unrelated window frames stayed unchanged, and the fixture and engine exited.
+The remaining native drag and physical display checks are listed above.
 
-CI run [39222055411](https://github.com/samanyudas/miri/actions/runs/39222055411) passed on `main` at `e516edd` with engine `4b4705a` on 19 October 2026.
-It ran documentation checks, lint, the build, 136 Swift tests, 40 engine library tests, 417 engine binary tests, and DMG packaging.
-The permission selftest reported `observed-ungranted. Attribution unresolved.`, and its missing-helper and aliased-path checks passed.
-The recovery selftest reported `skipped-ungranted`, because Miri Developer lacked the Accessibility grant.
-That run therefore does not prove granted window recovery on the current pin.
-The last granted recovery check is the 18 October 2026 `make check` on `feat/gesture-controls` at `5a354d1` with engine `a15682f`.
-No trackpad has been used for any check.
-
-Known limits from that 18 October 2026 work remain.
-Native width constraints can still change the final edge after an app refuses a requested size.
-A transfer during an existing resize derives its destination ratio from the intermediate width.
+The docs, 19 harness tests, shell scripts, and workflows passed lint.
+Compatibility now reports only that `c6ae07a` is not on the fork's required `miri/v0.5.2` branch.
+The integration remains draft until engine PR #29 lands, its final merge commit is pinned, and the native checks complete.

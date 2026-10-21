@@ -42,6 +42,11 @@ Its permission selftest reported `observed-ungranted. Attribution unresolved.`
 Its recovery selftest reported `skipped-ungranted`, because Miri Developer lacked the Accessibility grant.
 A green selftest step therefore does not prove granted window recovery.
 
+The drag integration branch pins unmerged engine `c6ae07a` from [samanyudas/paneru#29](https://github.com/samanyudas/paneru/pull/29).
+A native AppKit fixture at that pin measured fill restoration from width 512 to 2048 and back to 512, with all eight unrelated window frames unchanged.
+Its automated mock tests and this fill check do not establish native dragging, edge holds, or cross-display behavior.
+S-6 remains pending on a frozen candidate.
+
 ## Scope accepted after the checklists
 
 [Release scope](../decisions/release-scope.md) added these behaviors on 19 October 2026.
