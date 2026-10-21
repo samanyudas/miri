@@ -146,6 +146,7 @@ struct LayoutSettings: View {
     let model: AppModel
     @State private var presetsText = ""
     @State private var presetsError: String?
+    @State private var mainDisplayHeight = LayoutSettings.currentMainDisplayHeight()
 
     var body: some View {
         Form {
@@ -190,6 +191,10 @@ struct LayoutSettings: View {
         .formStyle(.grouped)
         .onAppear(perform: showPresets)
         .onChange(of: model.settings.widthPresets) { showPresets() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didChangeScreenParametersNotification)) {
+            _ in
+            mainDisplayHeight = Self.currentMainDisplayHeight()
+        }
     }
 
     private var stackLimit: Binding<StackLimit> {
@@ -198,8 +203,12 @@ struct LayoutSettings: View {
 
     /// How many windows fit in a column on the display with the menu bar, as the engine counts them.
     private var mainDisplayFit: Int {
-        let height = NSScreen.screens.first?.visibleFrame.height ?? 0
-        return StackLimit.fitCount(columnHeight: height - Double(2 * model.settings.edgePadding))
+        StackLimit.fitCount(columnHeight: mainDisplayHeight - Double(2 * model.settings.edgePadding))
+    }
+
+    /// The visible height of the display with the menu bar, which macOS lists first.
+    private static func currentMainDisplayHeight() -> Double {
+        Double(NSScreen.screens.first?.visibleFrame.height ?? 0)
     }
 
     private func gapRow(_ title: String, _ key: WritableKeyPath<MiriSettings, Int>) -> some View {
