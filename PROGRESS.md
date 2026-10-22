@@ -186,14 +186,15 @@ The public release path and the complete acceptance runs follow.
   This branch merges that result and keeps engine `db5bba3`, which contains both stack limit and stack overflow.
 
 
-- `feat/drag-insert-integration` starts from `main` at `49661a5` and pins engine `48df35a` from [samanyudas/paneru#29](https://github.com/samanyudas/paneru/pull/29), which remains unmerged.
+- `feat/drag-insert-integration` starts from `main` at `49661a5` and pins engine merge `ffff464` from [samanyudas/paneru#29](https://github.com/samanyudas/paneru/pull/29), merged into `miri/v0.5.2` on 23 October 2026.
   This brings in the landed drag insertion and feedback changes from engine PRs #22, #23, and #28, together with part C from #29.
   Part C adds cross-display drops, outer-edge hold scrolling, and restoration after macOS tiles a managed window (#43).
   Native membership uses fresh window frames and preserves held drags, pending engine placement, and native tab groups.
   The engine also replays a held tab group's skipped layout when a press ends without a drop.
   The regression failed before the fix for lost release, pointer movement, and resize cancellation, and passes after the fix.
   The app also recognizes the engine's `showmenu` and `hidemenu` binding keys and rejects extra words, matching the updated engine parser.
-  The compatibility guard still requires the engine pin to be published on `miri/v0.5.2`, so this integration cannot pass `make check` until #29 lands and its final merge is pinned.
+  The compatibility guard still requires the engine pin to be published on `miri/v0.5.2`.
+  The verified merge satisfies that ancestry requirement.
   Mock engine tests cover the drag behavior, including a neighboring display with a native fullscreen Space.
   Standalone engine `ee94515` passes all thirteen final native fixture lanes on two physical displays on 23 October 2026.
   These include both keyboard-resize lanes, Window menu Half, Quarter, and Fill, same-display gestures, and nine consecutive cross-display runs.
@@ -209,7 +210,7 @@ The public release path and the complete acceptance runs follow.
   Its frame stays at (0,30), 1280 by 705, instead of returning to the earlier slot.
   Sol approved the full engine change after two rounds, with the stale snapshot finding resolved.
   Physical diagonal-edge behavior has source and mock coverage only.
-  The integration still pins `48df35a` until engine #29 lands and its verified merge commit is integrated.
+  The integration pins verified merge `ffff464`, whose tree exactly matches the reviewed and natively tested `ee94515`.
   Acceptance check S-6 stays pending.
 
 ## Next
@@ -219,7 +220,7 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 1. Finish the remaining v1 features.
    - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
-   - Review engine #29, then land it and update the integration pin to its verified merge commit (#43).
+   - Finish CI and review for the verified engine #29 merge pin (#43).
    - Run the stack overflow and stack limit hardware checks (S-5 and S-7).
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
@@ -247,10 +248,13 @@ The no-default run passes 41 library and 751 binary tests.
 Formatting and strict Clippy pass in both feature configurations.
 Sol approves the full engine change in round two, with source and mock evidence kept separate from native results.
 All thirteen final native fixture lanes pass under the environment conditions above.
-Greptile scored the preceding engine `90e84ae` and integration `17e8d14` heads at 5/5.
-Fresh Greptile review will be requested after the final branch updates.
-Neither PR is ready to merge.
+Greptile scored engine `ee94515` and integration `d4102fe` at 5/5.
+Engine #29 merged after Sol approved, both bot checks passed, and all review threads were resolved.
+Sol approved the merge-commit repin in integration round two, with no findings.
 
-The docs, 19 harness tests, shell scripts, and workflows passed the earlier lint run.
-Compatibility still rejects the feature-branch engine pin because it is not on the fork's required `miri/v0.5.2` branch.
-The integration remains draft until engine PR #29 lands, its final merge commit is pinned, and the native checks complete.
+The integration repin to published merge `ffff464` passes `make check` on 23 October 2026.
+This includes docs, 19 harness tests, ShellCheck, actionlint, compatibility, strict Swift and engine lint, the signed build, 142 Swift tests, and 41 library plus 751 binary engine tests.
+Its native selftests report `observed-granted. Attribution unresolved.` and successful fixture recovery.
+DMG creation, verification, mounting, signatures, and the embedded engine revision check also pass.
+The parser hashes and publication guard remain unchanged.
+The integration remains draft until fresh CI and bot review finish for the repin.
