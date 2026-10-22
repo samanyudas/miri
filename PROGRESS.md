@@ -195,16 +195,19 @@ The public release path and the complete acceptance runs follow.
   The app also recognizes the engine's `showmenu` and `hidemenu` binding keys and rejects extra words, matching the updated engine parser.
   The compatibility guard still requires the engine pin to be published on `miri/v0.5.2`, so this integration cannot pass `make check` until #29 lands and its final merge is pinned.
   Mock engine tests cover the drag behavior, including a neighboring display with a native fullscreen Space.
-  Standalone engine `90e84ae` passes all thirteen final native fixture lanes on two physical displays on 23 October 2026.
+  Standalone engine `ee94515` passes all thirteen final native fixture lanes on two physical displays on 23 October 2026.
   These include both keyboard-resize lanes, Window menu Half, Quarter, and Fill, same-display gestures, and nine consecutive cross-display runs.
   Immediate Grow produces width 1920 after an app resize to 1600, replacing the previous wrong 1280.
   Cross-display runs preserve width ratios, equal 643-point stack shares, insertion feedback, refusal, and complete return geometry.
   All fourteen unrelated window frames stay unchanged in every lane, and strict foreground checks pass.
   Every owned process exits and the original frontmost app returns.
   Sam disabled Vorssaint's Focus Follows Mouse setting before these final runs.
-  The unchanged approved engine then passes, so the unsuccessful redundant-focus prototype is not included.
+  The final runs use the existing engine focus behavior.
   These checks use three owned AppKit windows and Sam-authorized synthetic CGEvent input, with Helium hidden and its session preserved.
-  Sol approved the lifecycle correction after three rounds, with all five findings resolved in source.
+  Successful drops now retire earlier native resize snapshots for every native-tab member.
+  A fixture-driven native Half-sized resize followed by a drag now keeps its accepted destination.
+  Its frame stays at (0,30), 1280 by 705, instead of returning to the earlier slot.
+  Sol approved the full engine change after two rounds, with the stale snapshot finding resolved.
   Physical diagonal-edge behavior has source and mock coverage only.
   The integration still pins `48df35a` until engine #29 lands and its verified merge commit is integrated.
   Acceptance check S-6 stays pending.
@@ -239,12 +242,12 @@ After Sam unlocked the desktop, `make e2e` passed both permission observations a
 Permission attribution remains unresolved.
 Those app checks do not verify the newer standalone engine repairs.
 
-On 23 October 2026, standalone engine `90e84ae` passes 52 library and 835 binary tests with defaults.
-The no-default run passes 41 library and 745 binary tests.
+On 23 October 2026, standalone engine `ee94515` passes 52 library and 841 binary tests with defaults.
+The no-default run passes 41 library and 751 binary tests.
 Formatting and strict Clippy pass in both feature configurations.
-Sol approves the lifecycle correction in round three, with source and mock evidence kept separate from native results.
+Sol approves the full engine change in round two, with source and mock evidence kept separate from native results.
 All thirteen final native fixture lanes pass under the environment conditions above.
-Greptile's earlier scores are 4/5 for engine `bb1693d` and 5/5 for integration `540cc57`.
+Greptile scored the preceding engine `90e84ae` and integration `17e8d14` heads at 5/5.
 Fresh Greptile review will be requested after the final branch updates.
 Neither PR is ready to merge.
 
