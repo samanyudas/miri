@@ -195,18 +195,18 @@ The public release path and the complete acceptance runs follow.
   The app also recognizes the engine's `showmenu` and `hidemenu` binding keys and rejects extra words, matching the updated engine parser.
   The compatibility guard still requires the engine pin to be published on `miri/v0.5.2`, so this integration cannot pass `make check` until #29 lands and its final merge is pinned.
   Mock engine tests cover the drag behavior, including a neighboring display with a native fullscreen Space.
-  Standalone engine `bb1693d` passed nine consecutive cross-display fixture runs on two physical displays on 22 October 2026.
-  Each run checked insertion feedback, width ratios, equal 643-point stack shares, refusal, and growth when returning to the larger display.
-  A same-display run also passed joining, refusal, new columns, cancellation, lost release, fast release, reordering, and growth from the lower slot.
-  Its stack members measured 705 points each.
-  These runs used three owned AppKit windows and Sam-authorized synthetic CGEvent input, with Helium hidden.
-  All eight unrelated window frames stayed unchanged, no transient popup was excluded, and all owned processes exited.
-  The earlier mid-screen feedback failure did not recur in those nine runs.
-  Native Left Half and Top Left Quarter restoration still fail at that head.
-  Left Half retained width 1280 instead of 640, and the quarter check also ended with different native and engine heights.
-  A separate Fill action restored its window, but that does not clear the failed tiling run.
-  Greptile reported a keyboard-resize regression that an isolated mock test reproduces, plus findings about diagonal display edges and idle scheduling.
-  The integration still pins `48df35a` while these dependency findings remain open.
+  Standalone engine `90e84ae` passes all thirteen final native fixture lanes on two physical displays on 23 October 2026.
+  These include both keyboard-resize lanes, Window menu Half, Quarter, and Fill, same-display gestures, and nine consecutive cross-display runs.
+  Immediate Grow produces width 1920 after an app resize to 1600, replacing the previous wrong 1280.
+  Cross-display runs preserve width ratios, equal 643-point stack shares, insertion feedback, refusal, and complete return geometry.
+  All fourteen unrelated window frames stay unchanged in every lane, and strict foreground checks pass.
+  Every owned process exits and the original frontmost app returns.
+  Sam disabled Vorssaint's Focus Follows Mouse setting before these final runs.
+  The unchanged approved engine then passes, so the unsuccessful redundant-focus prototype is not included.
+  These checks use three owned AppKit windows and Sam-authorized synthetic CGEvent input, with Helium hidden and its session preserved.
+  Sol approved the lifecycle correction after three rounds, with all five findings resolved in source.
+  Physical diagonal-edge behavior has source and mock coverage only.
+  The integration still pins `48df35a` until engine #29 lands and its verified merge commit is integrated.
   Acceptance check S-6 stays pending.
 
 ## Next
@@ -216,7 +216,7 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 1. Finish the remaining v1 features.
    - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
-   - Finish native verification of drag insertion (#43), then land engine #29 and update the integration pin to its merge commit.
+   - Review engine #29, then land it and update the integration pin to its verified merge commit (#43).
    - Run the stack overflow and stack limit hardware checks (S-5 and S-7).
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
@@ -239,12 +239,14 @@ After Sam unlocked the desktop, `make e2e` passed both permission observations a
 Permission attribution remains unresolved.
 Those app checks do not verify the newer standalone engine repairs.
 
-On 22 October 2026, standalone engine `bb1693d` passed 52 library and 809 binary tests with defaults.
-The no-default run passed 41 library and 722 binary tests.
-Formatting and strict Clippy passed in both feature configurations.
-The native drag results and remaining native tiling failures appear above.
-Greptile scored engine PR #29 at 4/5 and integration PR #56 at 5/5 for its earlier head `540cc57`.
-The engine findings remain open, and neither PR is ready to merge.
+On 23 October 2026, standalone engine `90e84ae` passes 52 library and 835 binary tests with defaults.
+The no-default run passes 41 library and 745 binary tests.
+Formatting and strict Clippy pass in both feature configurations.
+Sol approves the lifecycle correction in round three, with source and mock evidence kept separate from native results.
+All thirteen final native fixture lanes pass under the environment conditions above.
+Greptile's earlier scores are 4/5 for engine `bb1693d` and 5/5 for integration `540cc57`.
+Fresh Greptile review will be requested after the final branch updates.
+Neither PR is ready to merge.
 
 The docs, 19 harness tests, shell scripts, and workflows passed the earlier lint run.
 Compatibility still rejects the feature-branch engine pin because it is not on the fork's required `miri/v0.5.2` branch.
