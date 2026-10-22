@@ -15,6 +15,7 @@ enum EngineCommand {
     private static func command(_ words: [String]) -> [String]? {
         switch words[0] {
         case "printstate", "quit", "restart": [words[0]]
+        case "showmenu", "hidemenu": words.count == 1 ? [words[0]] : nil
         case "window": operation(Array(words.dropFirst())).map { ["window"] + $0 }
         case "mouse": words.count > 1 && words[1] == "nextdisplay" ? ["mouse", "nextdisplay"] : nil
         default: nil

@@ -543,6 +543,8 @@ struct DefaultBindingsTests {
         ("window_focusdisplay_north", "window_focusdisplay_north"),
         ("window_movedisplay_east", "window_movedisplay_east"),
         ("quit_now", "quit"),
+        ("showmenu", "showmenu"),
+        ("hidemenu", "hidemenu"),
     ])
     func readsABindingsKeyAsTheEngineDoes(key: String, canonical: String) {
         #expect(EngineCommand.canonical(key) == canonical)
@@ -553,6 +555,7 @@ struct DefaultBindingsTests {
         "window_stack_north", "window_virtual_0", "window", "Window_center", "window__center", "mouse", "",
         "window_step_up", "window_vertical_step_up", "window_focusdisplay_first", "window_focusdisplay",
         "window_movedisplay_2",
+        "showmenu_extra", "hidemenu_extra", "showmenu_", "hidemenu_",
     ])
     func rejectsBindingsKeysTheEngineRejects(key: String) {
         #expect(EngineCommand.canonical(key) == nil)

@@ -185,6 +185,34 @@ The public release path and the complete acceptance runs follow.
   This did not change physical displays or run the engine.
   This branch merges that result and keeps engine `db5bba3`, which contains both stack limit and stack overflow.
 
+
+- `feat/drag-insert-integration` starts from `main` at `49661a5` and pins engine merge `ffff464` from [samanyudas/paneru#29](https://github.com/samanyudas/paneru/pull/29), merged into `miri/v0.5.2` on 23 October 2026.
+  This brings in the landed drag insertion and feedback changes from engine PRs #22, #23, and #28, together with part C from #29.
+  Part C adds cross-display drops, outer-edge hold scrolling, and restoration after macOS tiles a managed window (#43).
+  Native membership uses fresh window frames and preserves held drags, pending engine placement, and native tab groups.
+  The engine also replays a held tab group's skipped layout when a press ends without a drop.
+  The regression failed before the fix for lost release, pointer movement, and resize cancellation, and passes after the fix.
+  The app also recognizes the engine's `showmenu` and `hidemenu` binding keys and rejects extra words, matching the updated engine parser.
+  The compatibility guard still requires the engine pin to be published on `miri/v0.5.2`.
+  The verified merge satisfies that ancestry requirement.
+  Mock engine tests cover the drag behavior, including a neighboring display with a native fullscreen Space.
+  Standalone engine `ee94515` passes all thirteen final native fixture lanes on two physical displays on 23 October 2026.
+  These include both keyboard-resize lanes, Window menu Half, Quarter, and Fill, same-display gestures, and nine consecutive cross-display runs.
+  Immediate Grow produces width 1920 after an app resize to 1600, replacing the previous wrong 1280.
+  Cross-display runs preserve width ratios, equal 643-point stack shares, insertion feedback, refusal, and complete return geometry.
+  All fourteen unrelated window frames stay unchanged in every lane, and strict foreground checks pass.
+  Every owned process exits and the original frontmost app returns.
+  Sam disabled Vorssaint's Focus Follows Mouse setting before these final runs.
+  The final runs use the existing engine focus behavior.
+  These checks use three owned AppKit windows and Sam-authorized synthetic CGEvent input, with Helium hidden and its session preserved.
+  Successful drops now retire earlier native resize snapshots for every native-tab member.
+  A fixture-driven native Half-sized resize followed by a drag now keeps its accepted destination.
+  Its frame stays at (0,30), 1280 by 705, instead of returning to the earlier slot.
+  Sol approved the full engine change after two rounds, with the stale snapshot finding resolved.
+  Physical diagonal-edge behavior has source and mock coverage only.
+  The integration pins verified merge `ffff464`, whose tree exactly matches the reviewed and natively tested `ee94515`.
+  Acceptance check S-6 stays pending.
+
 ## Next
 
 Each phase lands as its own PR or PRs.
@@ -192,7 +220,7 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 1. Finish the remaining v1 features.
    - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
-   - Implement dragging windows into columns and to new columns, on one display and across displays (#43).
+   - Finish CI and review for the verified engine #29 merge pin (#43).
    - Run the stack overflow and stack limit hardware checks (S-5 and S-7).
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
@@ -208,21 +236,25 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 ## Last verification
 
-On 21 October 2026, merging `main` at `6a85fcf` into `feat/stack-overflow` passed `make lint swift-lint` and all 142 Swift tests.
-Compatibility reported engine `db5bba3` with zero problems.
-The engine pin is unchanged from the previously green #55 head, and it contains the stack-limit engine pin from #54.
-The complete `make native` target was not repeated locally for this merge resolution because no engine source changed.
-CI will run the full native build, test, selftest, and package targets on the pushed merge commit.
-No hardware acceptance result changed.
+The app implementation at `540cc57`, with engine `48df35a`, passed strict Swift and engine lint, the signed app and helper build, and 142 Swift tests.
+Its engine passed 41 library and 707 binary tests without default features, and 52 library and 794 binary tests with defaults.
+The first native target failed recovery while the desktop was locked.
+After Sam unlocked the desktop, `make e2e` passed both permission observations and fixture recovery.
+Permission attribution remains unresolved.
+Those app checks do not verify the newer standalone engine repairs.
 
-CI run [39222055411](https://github.com/samanyudas/miri/actions/runs/39222055411) passed on `main` at `e516edd` with engine `4b4705a` on 19 October 2026.
-It ran documentation checks, lint, the build, 136 Swift tests, 40 engine library tests, 417 engine binary tests, and DMG packaging.
-The permission selftest reported `observed-ungranted. Attribution unresolved.`, and its missing-helper and aliased-path checks passed.
-The recovery selftest reported `skipped-ungranted`, because Miri Developer lacked the Accessibility grant.
-That run therefore does not prove granted window recovery on the current pin.
-The last granted recovery check is the 18 October 2026 `make check` on `feat/gesture-controls` at `5a354d1` with engine `a15682f`.
-No trackpad has been used for any check.
+On 23 October 2026, standalone engine `ee94515` passes 52 library and 841 binary tests with defaults.
+The no-default run passes 41 library and 751 binary tests.
+Formatting and strict Clippy pass in both feature configurations.
+Sol approves the full engine change in round two, with source and mock evidence kept separate from native results.
+All thirteen final native fixture lanes pass under the environment conditions above.
+Greptile scored engine `ee94515` and integration `d4102fe` at 5/5.
+Engine #29 merged after Sol approved, both bot checks passed, and all review threads were resolved.
+Sol approved the merge-commit repin in integration round two, with no findings.
 
-Known limits from that 18 October 2026 work remain.
-Native width constraints can still change the final edge after an app refuses a requested size.
-A transfer during an existing resize derives its destination ratio from the intermediate width.
+The integration repin to published merge `ffff464` passes `make check` on 23 October 2026.
+This includes docs, 19 harness tests, ShellCheck, actionlint, compatibility, strict Swift and engine lint, the signed build, 142 Swift tests, and 41 library plus 751 binary engine tests.
+Its native selftests report `observed-granted. Attribution unresolved.` and successful fixture recovery.
+DMG creation, verification, mounting, signatures, and the embedded engine revision check also pass.
+The parser hashes and publication guard remain unchanged.
+The integration remains draft until fresh CI and bot review finish for the repin.
