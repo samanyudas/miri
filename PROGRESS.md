@@ -195,9 +195,18 @@ The public release path and the complete acceptance runs follow.
   The app also recognizes the engine's `showmenu` and `hidemenu` binding keys and rejects extra words, matching the updated engine parser.
   The compatibility guard still requires the engine pin to be published on `miri/v0.5.2`, so this integration cannot pass `make check` until #29 lands and its final merge is pinned.
   Mock engine tests cover the drag behavior, including a neighboring display with a native fullscreen Space.
-  An isolated AppKit fixture on the final engine `c6ae07a` measured native fill from width 512 to 2048 and restoration to 512.
-  All eight unrelated window frames stayed unchanged, both owned processes exited, and the original frontmost app returned.
-  Native titlebar drops, edge holds, half and quarter tiling, and cross-display hardware behavior remain unverified.
+  Standalone engine `bb1693d` passed nine consecutive cross-display fixture runs on two physical displays on 22 October 2026.
+  Each run checked insertion feedback, width ratios, equal 643-point stack shares, refusal, and growth when returning to the larger display.
+  A same-display run also passed joining, refusal, new columns, cancellation, lost release, fast release, reordering, and growth from the lower slot.
+  Its stack members measured 705 points each.
+  These runs used three owned AppKit windows and Sam-authorized synthetic CGEvent input, with Helium hidden.
+  All eight unrelated window frames stayed unchanged, no transient popup was excluded, and all owned processes exited.
+  The earlier mid-screen feedback failure did not recur in those nine runs.
+  Native Left Half and Top Left Quarter restoration still fail at that head.
+  Left Half retained width 1280 instead of 640, and the quarter check also ended with different native and engine heights.
+  A separate Fill action restored its window, but that does not clear the failed tiling run.
+  Greptile reported a keyboard-resize regression that an isolated mock test reproduces, plus findings about diagonal display edges and idle scheduling.
+  The integration still pins `48df35a` while these dependency findings remain open.
   Acceptance check S-6 stays pending.
 
 ## Next
@@ -223,23 +232,20 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 ## Last verification
 
-On 22 October 2026, the integration working tree with engine `48df35a` passed strict Swift and engine lint, the signed app/helper build, 142 Swift tests, 41 engine library tests, and 707 binary tests.
-A separate default-feature engine run passed 52 library and 794 binary tests.
-The permission selftest reported `observed-granted. Attribution unresolved.` and passed its missing-helper and aliased-path checks.
-The full `make native` target then failed in window recovery with `The fixture has no standard window.`
-At the same time, `loginwindow` was foreground and a separate isolated engine could see no macOS Spaces.
-Final-pin native verification is blocked until the desktop is available.
-The isolated attempt exited both owned processes and left its one observable unrelated window frame unchanged.
+The app implementation at `540cc57`, with engine `48df35a`, passed strict Swift and engine lint, the signed app and helper build, and 142 Swift tests.
+Its engine passed 41 library and 707 binary tests without default features, and 52 library and 794 binary tests with defaults.
+The first native target failed recovery while the desktop was locked.
+After Sam unlocked the desktop, `make e2e` passed both permission observations and fixture recovery.
+Permission attribution remains unresolved.
+Those app checks do not verify the newer standalone engine repairs.
 
-Earlier in this session, engine `c6ae07a` passed the complete native target, including fixture recovery and DMG packaging.
-An AppKit fill check at that earlier pin observed width 512 to 2048 and restoration to 512.
-All eight unrelated window frames stayed unchanged, and both owned processes exited.
-Those earlier results do not establish native behavior at the latest pin.
+On 22 October 2026, standalone engine `bb1693d` passed 52 library and 809 binary tests with defaults.
+The no-default run passed 41 library and 722 binary tests.
+Formatting and strict Clippy passed in both feature configurations.
+The native drag results and remaining native tiling failures appear above.
+Greptile scored engine PR #29 at 4/5 and integration PR #56 at 5/5 for its earlier head `540cc57`.
+The engine findings remain open, and neither PR is ready to merge.
 
-Sol approved the engine behavior at `e3575f2`, and then approved the reproduced press-reflow repair now committed as `48df35a`.
-The regression failed before the repair for lost release, pointer movement, and resize cancellation.
-It now checks both native tabs against an unpressed control across five endings, including confirmation expiry.
-
-The docs, 19 harness tests, shell scripts, and workflows passed lint.
-Compatibility rejects the feature-branch engine pin because it is not on the fork's required `miri/v0.5.2` branch.
+The docs, 19 harness tests, shell scripts, and workflows passed the earlier lint run.
+Compatibility still rejects the feature-branch engine pin because it is not on the fork's required `miri/v0.5.2` branch.
 The integration remains draft until engine PR #29 lands, its final merge commit is pinned, and the native checks complete.
