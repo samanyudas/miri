@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-21 on branch `feat/stack-overflow`
+Updated: 2026-10-24 on branch `fix/acceptance-defects`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,39 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Acceptance repairs in progress
+
+[Engine PR #31](https://github.com/samanyudas/paneru/pull/31) merged into `miri/v0.5.2` as `9ac7ec7ef6bd4ecd60bca4019e40a22730b25cf5`.
+The local Miri integration pins this published revision.
+It keeps size-refusing stack windows on the display where the engine placed them.
+It also exposes the eligible focused survivor after removal and preserves focus when a background window is destroyed.
+The visibility request waits for scrolling or drag placement to finish and then checks the current focus.
+Keyboard focus placement and workspace restoration retain control.
+[Issue #60](https://github.com/samanyudas/miri/issues/60) tracks the close and visibility failure.
+
+Sol approved the source and tests after five bounded review rounds.
+Greptile reviewed the final engine revision at 5/5, and both PR checks passed.
+Independent native verification returned PASS+NOTES on engine `1cbb987` before its tree-identical squash merge.
+The verifier reproduced BASE moving a constrained window to the built-in display, stealing focus after background close, and leaving a focused survivor at x=-32.
+The candidate retained the external display and focus, and corrected the survivor to x=8.
+Native AX close, SIGTERM, graceful quit, and synthetic modifier-scroll checks passed within their recorded scope.
+Physical touchpad behavior and exact native swipe timing remain unverified.
+The engine passes 41 library and 759 binary tests without defaults, and 52 library and 849 binary tests with defaults.
+Formatting and strict Clippy pass in both configurations.
+Miri's full `make check` passes with the published pin.
+This includes compatibility, 144 Swift tests, 41 library and 759 engine tests, strict lint, the signed build, permission observation, window recovery, and DMG packaging.
+Sol approved the three-file Miri integration and verified parser compatibility and the minimum-height wording.
+Independent verification of the final Miri artifact and integration PR checks remain pending.
+
+The macOS tiling setup check already merged in [PR #57](https://github.com/samanyudas/miri/pull/57) as `601b056`.
+The keybinding reference now distinguishes a 200-point layout slot from its 192-point native window with default gaps.
+The overlap-order retry prototype failed 6 of 12 native focus steps and was removed from the shipping diff.
+Overlap ordering and the documented stack-focus switch remain unresolved under #42.
+[Issue #59](https://github.com/samanyudas/miri/issues/59) tracks intermittent window discovery and remains unfixed.
+[Issue #58](https://github.com/samanyudas/miri/issues/58) separately tracks macOS tile height.
+These changes do not complete frozen-release acceptance.
+The evidence and decision trail remain in `.audit/acceptance-pickup/` in the repair worktree.
 
 ## Done
 
