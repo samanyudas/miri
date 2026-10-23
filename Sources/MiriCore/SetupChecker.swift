@@ -12,13 +12,19 @@ public struct SetupObservation: Equatable, Sendable {
     /// `TrackpadFourFingerHorizSwipeGesture`: 0 off, 2 swipe between full-screen apps.
     public var fourFingerSwipe: Int?
     public var threeFingerDrag: Bool?
+    /// `com.apple.WindowManager` `EnableTilingByEdgeDrag`: **Drag windows to screen edges to tile**.
+    public var edgeTiling: Bool?
+    /// `com.apple.WindowManager` `EnableTopTilingByEdgeDrag`: **Drag windows to menu bar to fill screen**.
+    public var menuBarTiling: Bool?
+    /// `com.apple.WindowManager` `EnableTilingOptionAccelerator`: **Hold ⌥ key while dragging windows to tile**.
+    public var optionDragTiling: Bool?
     public var runningBundleIdentifiers: Set<String>
     public var runningProcessNames: Set<String>
 
     public init(
         accessibilityTrusted: Bool, spansDisplays: Bool?, stageManager: Bool?, threeFingerSwipe: Int?,
-        fourFingerSwipe: Int?, threeFingerDrag: Bool?, runningBundleIdentifiers: Set<String>,
-        runningProcessNames: Set<String>
+        fourFingerSwipe: Int?, threeFingerDrag: Bool?, edgeTiling: Bool?, menuBarTiling: Bool?,
+        optionDragTiling: Bool?, runningBundleIdentifiers: Set<String>, runningProcessNames: Set<String>
     ) {
         self.accessibilityTrusted = accessibilityTrusted
         self.spansDisplays = spansDisplays
@@ -26,6 +32,9 @@ public struct SetupObservation: Equatable, Sendable {
         self.threeFingerSwipe = threeFingerSwipe
         self.fourFingerSwipe = fourFingerSwipe
         self.threeFingerDrag = threeFingerDrag
+        self.edgeTiling = edgeTiling
+        self.menuBarTiling = menuBarTiling
+        self.optionDragTiling = optionDragTiling
         self.runningBundleIdentifiers = runningBundleIdentifiers
         self.runningProcessNames = runningProcessNames
     }
@@ -43,7 +52,8 @@ public enum SetupStatus: Equatable, Sendable {
 
 public struct SetupCheck: Equatable, Sendable, Identifiable {
     public enum Kind: String, Sendable, CaseIterable {
-        case accessibility, separateSpaces, competingManagers, stageManager, fourFingerGesture, threeFingerGesture
+        case accessibility, separateSpaces, competingManagers, stageManager, macOSTiling, fourFingerGesture
+        case threeFingerGesture
     }
 
     public let id: Kind
@@ -94,6 +104,10 @@ public enum SetupChecker {
                 status: stageManagerStatus(observation),
                 blocksStart: false, settingsURL: desktopURL),
             SetupCheck(
+                id: .macOSTiling, title: "macOS window tiling",
+                status: tilingStatus(observation),
+                blocksStart: false, settingsURL: desktopURL),
+            SetupCheck(
                 id: .fourFingerGesture, title: "Four-finger strip swipe",
                 status: fourFingerStatus(observation),
                 blocksStart: false, settingsURL: trackpadURL),
@@ -139,6 +153,27 @@ public enum SetupChecker {
             .problem("Turn off Stage Manager in System Settings > Desktop & Dock. It rearranges windows.")
         case nil: .notChecked("Open System Settings > Desktop & Dock and make sure Stage Manager is off.")
         }
+    }
+
+    private static func tilingStatus(_ observation: SetupObservation) -> SetupStatus {
+        let options = [
+            (observation.edgeTiling, "Drag windows to screen edges to tile"),
+            (observation.menuBarTiling, "Drag windows to menu bar to fill screen"),
+            (observation.optionDragTiling, "Hold ⌥ key while dragging windows to tile"),
+        ]
+        let on = options.filter { $0.0 == true }.map(\.1)
+        let unread = options.filter { $0.0 == nil }.map(\.1)
+        if !on.isEmpty {
+            return .problem(
+                "Turn off \(ListFormatter.localizedString(byJoining: on)) in System Settings > Desktop & Dock > Windows. macOS tiling moves windows that Miri arranges, including windows you drag."
+            )
+        }
+        if !unread.isEmpty {
+            return .notChecked(
+                "Open System Settings > Desktop & Dock > Windows and make sure \(ListFormatter.localizedString(byJoining: unread)) is off."
+            )
+        }
+        return .passed
     }
 
     private static func fourFingerStatus(_ observation: SetupObservation) -> SetupStatus {

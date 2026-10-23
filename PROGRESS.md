@@ -212,6 +212,12 @@ The public release path and the complete acceptance runs follow.
   Physical diagonal-edge behavior has source and mock coverage only.
   The integration pins verified merge `ffff464`, whose tree exactly matches the reviewed and natively tested `ee94515`.
   Acceptance check S-6 stays pending.
+- `feat/setup-tiling-conflicts` adds the macOS tiling check that Sam decided for drag insertion (#43).
+  The setup checker now reports **Drag windows to screen edges to tile**, **Drag windows to menu bar to fill screen**, and **Hold Option key while dragging windows to tile** when they are on.
+  macOS stores these values only after a change, so an absent value counts as on, the macOS default.
+  The check never blocks window management.
+  On 23 October 2026 the built app showed Passed with all three off, and named the two options turned on with `defaults` after Check Again.
+  With macOS tiling on, a dragged window that macOS filled or tiled returned to its column origin and width within 0.4 seconds, but kept the macOS height of 1410 points instead of 1394.
 
 ## Next
 

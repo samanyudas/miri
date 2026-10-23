@@ -27,7 +27,7 @@ An unavailable or unverified check remains pending rather than passing.
    The other tool's configuration stays unchanged.
 5. Turn off **Displays have separate Spaces**.
    Miri refuses to start management and explains the logout requirement.
-6. Exercise the setup checker for Stage Manager and supported macOS gesture conflicts.
+6. Exercise the setup checker for Stage Manager, macOS tiling, and supported macOS gesture conflicts.
    The checker reports the condition, links to System Settings, and never changes macOS settings itself.
    Automatic detection remains pending where the engineering investigation has not established a reliable check.
 7. Exercise a non-gesture setup check whose setting cannot be inspected.
