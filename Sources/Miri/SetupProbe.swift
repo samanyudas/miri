@@ -19,12 +19,21 @@ enum SetupProbe {
             threeFingerSwipe: preference("TrackpadThreeFingerHorizSwipeGesture", domain: trackpad)?.intValue,
             fourFingerSwipe: preference("TrackpadFourFingerHorizSwipeGesture", domain: trackpad)?.intValue,
             threeFingerDrag: preference("TrackpadThreeFingerDrag", domain: trackpad).map(\.boolValue),
+            edgeTiling: tilingPreference("EnableTilingByEdgeDrag"),
+            menuBarTiling: tilingPreference("EnableTopTilingByEdgeDrag"),
+            optionDragTiling: tilingPreference("EnableTilingOptionAccelerator"),
             runningBundleIdentifiers: Set(workspace.runningApplications.compactMap(\.bundleIdentifier)),
             runningProcessNames: processNames())
     }
 
     private static func preference(_ key: String, domain: String) -> NSNumber? {
         CFPreferencesCopyAppValue(key as CFString, domain as CFString) as? NSNumber
+    }
+
+    /// macOS turns each tiling option on by default and stores a value only after the user changes it,
+    /// so an absent value means on.
+    private static func tilingPreference(_ key: String) -> Bool {
+        preference(key, domain: "com.apple.WindowManager")?.boolValue ?? true
     }
 
     /// `spans-displays` is absent until the user changes the setting, and absent means separate Spaces are on.

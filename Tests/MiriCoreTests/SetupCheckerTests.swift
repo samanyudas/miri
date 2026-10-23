@@ -5,7 +5,8 @@ import Testing
 struct SetupCheckerTests {
     private let ready = SetupObservation(
         accessibilityTrusted: true, spansDisplays: false, stageManager: false, threeFingerSwipe: 0,
-        fourFingerSwipe: 0, threeFingerDrag: false, runningBundleIdentifiers: ["com.apple.finder"],
+        fourFingerSwipe: 0, threeFingerDrag: false, edgeTiling: false, menuBarTiling: false,
+        optionDragTiling: false, runningBundleIdentifiers: ["com.apple.finder"],
         runningProcessNames: ["Finder"])
 
     private func status(_ kind: SetupCheck.Kind, _ observation: SetupObservation) -> SetupStatus? {
@@ -42,9 +43,10 @@ struct SetupCheckerTests {
     @Test func neverReportsAnUnreadableSettingAsPassed() {
         let unknown = SetupObservation(
             accessibilityTrusted: true, spansDisplays: nil, stageManager: nil, threeFingerSwipe: nil,
-            fourFingerSwipe: nil, threeFingerDrag: nil, runningBundleIdentifiers: [], runningProcessNames: [])
+            fourFingerSwipe: nil, threeFingerDrag: nil, edgeTiling: nil, menuBarTiling: nil, optionDragTiling: nil,
+            runningBundleIdentifiers: [], runningProcessNames: [])
         let checks = SetupChecker.evaluate(unknown)
-        for kind in [SetupCheck.Kind.separateSpaces, .stageManager] {
+        for kind in [SetupCheck.Kind.separateSpaces, .stageManager, .macOSTiling] {
             guard case .notChecked = checks.first(where: { $0.id == kind })?.status else {
                 Issue.record("\(kind) should be Not checked")
                 continue
@@ -97,5 +99,42 @@ struct SetupCheckerTests {
         }
         #expect(drag.contains("Three Finger Drag"))
         #expect(SetupChecker.evaluate(observation).filter(\.isBlocking).isEmpty)
+    }
+
+    @Test func reportsEachMacOSTilingOptionThatIsOn() {
+        var observation = ready
+        observation.edgeTiling = true
+        observation.optionDragTiling = true
+        guard case .problem(let message) = status(.macOSTiling, observation) else {
+            Issue.record("Expected a tiling conflict")
+            return
+        }
+        #expect(message.contains("Drag windows to screen edges to tile"))
+        #expect(message.contains("Hold ⌥ key while dragging windows to tile"))
+        #expect(!message.contains("menu bar"))
+        #expect(SetupChecker.evaluate(observation).filter(\.isBlocking).isEmpty)
+        observation = ready
+        observation.menuBarTiling = true
+        guard case .problem(let menuBar) = status(.macOSTiling, observation) else {
+            Issue.record("Expected a menu bar tiling conflict")
+            return
+        }
+        #expect(menuBar.contains("Drag windows to menu bar to fill screen"))
+    }
+
+    @Test func aTilingOptionThatIsOnOutranksOneThatCannotBeRead() {
+        var observation = ready
+        observation.edgeTiling = nil
+        observation.menuBarTiling = true
+        guard case .problem = status(.macOSTiling, observation) else {
+            Issue.record("Expected a tiling conflict")
+            return
+        }
+        observation.menuBarTiling = false
+        guard case .notChecked(let manual) = status(.macOSTiling, observation) else {
+            Issue.record("Expected Not checked")
+            return
+        }
+        #expect(manual.contains("Drag windows to screen edges to tile"))
     }
 }

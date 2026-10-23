@@ -77,7 +77,7 @@ Source: [App acceptance](../decisions/v1-app-acceptance-checklist.md).
 | AP-3 | Test the documented recovery procedure after replacing or moving the installed bundle. | | | | | Pending | |
 | AP-4 | Run a competing window manager, including standalone Paneru. | | | | | Pending | |
 | AP-5 | Turn off **Displays have separate Spaces**. | | | | | Pending | |
-| AP-6 | Exercise the setup checker for Stage Manager and supported macOS gesture conflicts. | | | | | Pending | |
+| AP-6 | Exercise the setup checker for Stage Manager, macOS tiling, and supported macOS gesture conflicts. | | | | | Pending | |
 | AP-7 | Exercise a non-gesture setup check whose setting cannot be inspected. | | | | | Pending | |
 
 ### App lifecycle and recovery

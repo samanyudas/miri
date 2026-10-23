@@ -110,7 +110,7 @@ Miri also refuses to start while another window manager runs, including standalo
 Quit the tool that Miri identifies before starting management.
 Miri leaves the other tool's configuration untouched.
 
-The setup checker reports Stage Manager and macOS gesture conflicts.
+The setup checker reports Stage Manager, macOS tiling, and macOS gesture conflicts.
 Turning off **Automatically rearrange Spaces based on most recent use** remains proposed setup guidance.
 Verify the relevant settings paths on each supported macOS version.
 
@@ -155,7 +155,7 @@ Miri keeps standalone Paneru's configuration files untouched.
 
 ## Setup checks to implement
 
-Report missing Accessibility permission, **Displays have separate Spaces** turned off, Stage Manager turned on, competing window managers, and conflicting macOS gestures.
+Report missing Accessibility permission, **Displays have separate Spaces** turned off, Stage Manager turned on, competing window managers, macOS tiling options turned on, and conflicting macOS gestures.
 Explain the relevant System Settings path for each failure.
 Update the check status as users resolve each problem.
 
