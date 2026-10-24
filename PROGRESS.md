@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-24 on branch `docs/finder-stack-limitation`, based on `main` at `f9d76ea`
+Updated: 2026-10-24 on branch `chore/agent-owned-issue-closure`, based on `main` at `b2e6d12`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -82,6 +82,11 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 
 ## Done
 
+- `chore/agent-owned-issue-closure` removes the GitHub Actions issue lifecycle and its dedicated harness tests and fixtures.
+  Agents verify every acceptance criterion on landed code, post evidence, and close completed issues under the [issue lifecycle](CONTRIBUTING.md#issue-lifecycle).
+  Partial or unverified issues remain open, and release distribution acceptance stays separate.
+  The lifecycle notes below are historical evidence for the retired automation.
+  No live issue or label was changed.
 - `branding/window-mark` replaces the README's pink M logo with the blue and violet window mark.
   `assets/` also contains running and stopped menu bar SVGs and usage notes.
   SVG parsing and a browser preview passed for all three assets, including the menu bar marks on light and dark backgrounds.
@@ -287,6 +292,8 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 
 ## Next
 
+Sam reviews and merges the issue-closure policy pull request.
+
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
 
@@ -330,3 +337,14 @@ Its native selftests report `observed-granted. Attribution unresolved.` and succ
 DMG creation, verification, mounting, signatures, and the embedded engine revision check also pass.
 The parser hashes and publication guard remain unchanged.
 The integration remains draft until fresh CI and bot review finish for the repin.
+
+On 24 October 2026, the issue-closure implementation passes `make docs harness-tests actions shell` and `make lint` with engine pin `f831216` unchanged.
+The baseline harness passes all 19 tests, and the remaining nine tests pass after removing the retired automation's ten tests.
+The tracked-instruction search leaves legacy lifecycle guidance only in historical evidence and the new policy's legacy-label explanation.
+`make native` was intentionally skipped for this workflow and documentation change.
+Its skipped targets are `make doctor`, `make swift-lint`, `make engine-lint`, `make build`, `make test`, `make e2e`, and `make package`.
+`make check` was not run because it includes those native targets.
+No native app or desktop operation ran, and no live issue or label changed.
+The integrated branch also passes `make lint` and `git diff --check`.
+Independent source review approved `743802f` against `b2e6d12` with no findings.
+The comment pass found no deletion candidates or refactor flags.
