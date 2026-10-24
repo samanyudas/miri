@@ -248,6 +248,10 @@ The focused window comes to the front and shows its full content.
 When focus leaves it, it returns to its overlapped place in the stack.
 Miri draws no extra cue for an overlapped stack.
 
+Known limitation: when Finder is frontmost with no window, the previously focused stack window can remain above its overlapped place.
+The stack returns to its normal order when focus reaches another managed window.
+Miri does not temporarily activate stack apps to restore the order while Finder has focus.
+
 A stack holds a limited number of windows, and a Stack command that would exceed the limit starts a new column instead.
 Settings chooses the limit: fit the display, which allows as many windows as fit in a column at the minimum window height, or a set number from 1 up to that.
 The default is a set number of 5, and the limit in use never exceeds what fits on the display the stack is on.

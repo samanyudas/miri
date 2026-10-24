@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-24 on branch `fix/stack-order-discovery`, based on `main` at `3898f6f`
+Updated: 2026-10-24 on branch `docs/finder-stack-limitation`, based on `main` at `f9d76ea`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -21,7 +21,15 @@ It keeps an overlapping stack of windows from different apps in order after focu
 `AXRaise` returns before a background app reorders its window, and it places that window just below the frontmost app's windows.
 The engine now raises only windows that need to move, waits up to 50 ms for each raise to show, and waits up to 500 ms for the focused window to show in front.
 Native focus walks with four fixture apps failed 7 of 12 steps on `9ac7ec7` and passed 96 of 96 on the fix.
-While a windowless app such as Finder is frontmost, macOS places every raise below the previous app's window, so the stack keeps its order.
+While Finder is frontmost with no window, the previously focused stack window can remain in front instead of returning to its overlapped place.
+The bounded focus-first experiment on 24 October used four native fixture apps and returned focus to Finder after activating each app in stack order.
+The captured run left the wrong order without pauses and restored D1, C1, B1, A1 with 50 ms and 150 ms pauses.
+The helper at `/tmp/miri-42/ff.swift` sets `AXFrontmost` for each app and then Finder.
+It does not issue a separate `AXRaise`, so this records activation with the running engine rather than an isolated focus-and-raise implementation.
+The workaround would take focus from Finder while cycling through the apps.
+No engine change is included, and the Finder limitation is recorded in [release scope](decisions/release-scope.md#stacks).
+Sam limited this investigation to one workaround attempt, so it ends here.
+These results come from the prior session's captured output, not a fresh native run.
 Two windows of one app with another app's window between them still cannot be fully ordered.
 
 [Engine PR #33](https://github.com/samanyudas/paneru/pull/33) merged as `f831216` for #59.
