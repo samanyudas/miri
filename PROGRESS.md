@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-24 on branch `fix/acceptance-defects`
+Updated: 2026-10-24 on branch `fix/stack-order-discovery`, based on `main` at `3898f6f`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -14,10 +14,30 @@ The current milestone is the remaining v1 features: pointer-versus-focus gesture
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
 
-## Acceptance repairs in progress
+## Stack ordering and window admission repairs
+
+[Engine PR #32](https://github.com/samanyudas/paneru/pull/32) merged into `miri/v0.5.2` as `50f49fc` for #42.
+It keeps an overlapping stack of windows from different apps in order after focus changes.
+`AXRaise` returns before a background app reorders its window, and it places that window just below the frontmost app's windows.
+The engine now raises only windows that need to move, waits up to 50 ms for each raise to show, and waits up to 500 ms for the focused window to show in front.
+Native focus walks with four fixture apps failed 7 of 12 steps on `9ac7ec7` and passed 96 of 96 on the fix.
+While a windowless app such as Finder is frontmost, macOS places every raise below the previous app's window, so the stack keeps its order.
+Two windows of one app with another app's window between them still cannot be fully ordered.
+
+[Engine PR #33](https://github.com/samanyudas/paneru/pull/33) merged as `f831216` for #59.
+macOS can announce a launch before `NSRunningApplication` knows the process, and the engine now looks it up again instead of dropping the process after 5 s.
+An app that shows no window within 10 s now stays managed, so a later window enters the layout.
+The float command now toggles a window only when macOS reports it focused in the frontmost app.
+Native launch probes missed none of 320 ordinary windows, a window shown 12 s after launch was managed after 13 s, and the float key ignored an unmanaged focused window.
+An app whose observers cannot register for 5 s is still dropped, and an app that keeps its main thread blocked can wait for a later event.
+
+Both engine PRs passed two Sol rounds and scored 5/5 in Greptile.
+This branch pins `f831216`.
+
+## Previous acceptance repairs
 
 [Engine PR #31](https://github.com/samanyudas/paneru/pull/31) merged into `miri/v0.5.2` as `9ac7ec7ef6bd4ecd60bca4019e40a22730b25cf5`.
-The local Miri integration pins this published revision.
+[Miri PR #61](https://github.com/samanyudas/miri/pull/61) merged as `3898f6fd8e3f27bc6b4f7eab0a3e43d43c2797a9` and pins this published revision.
 It keeps size-refusing stack windows on the display where the engine placed them.
 It also exposes the eligible focused survivor after removal and preserves focus when a background window is destroyed.
 The visibility request waits for scrolling or drag placement to finish and then checks the current focus.
@@ -36,7 +56,12 @@ Formatting and strict Clippy pass in both configurations.
 Miri's full `make check` passes with the published pin.
 This includes compatibility, 144 Swift tests, 41 library and 759 engine tests, strict lint, the signed build, permission observation, window recovery, and DMG packaging.
 Sol approved the three-file Miri integration and verified parser compatibility and the minimum-height wording.
-Independent verification of the final Miri artifact and integration PR checks remain pending.
+Independent verification of the final Miri artifact returned PASS+NOTES on `1fcfa57`, whose tree matches the merged revision.
+The signed app and read-only DMG match completely, and fresh native closes preserve focus and final visibility.
+All integration PR checks passed before merging.
+Both PR watchers are stopped, and the verified app remains running with one engine child.
+The DMG inspection left a nonblocking installation prompt that computer use could not inspect because it timed out.
+No installation occurred.
 
 The macOS tiling setup check already merged in [PR #57](https://github.com/samanyudas/miri/pull/57) as `601b056`.
 The keybinding reference now distinguishes a 200-point layout slot from its 192-point native window with default gaps.
