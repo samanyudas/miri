@@ -21,7 +21,7 @@ Read this map first, then the linked document for the area you touch.
 | `vendor/paneru/` | Engine submodule, pinned to a commit on `samanyudas/paneru` branch `miri/v0.5.2`. |
 | `scripts/` | Build, packaging, selftest, and repository checks, with tests in `scripts/tests/`. |
 | `.claude/` | Project hooks: the command guard and the session-start handoff. |
-| `.github/` | CI, issue lifecycle, and issue and PR templates. |
+| `.github/` | CI and issue and PR templates. |
 | `decisions/` | Accepted product direction and open questions. |
 | `docs/adr/` | Architecture decisions. |
 | `docs/specs/`, `docs/prototypes/` | The v1 specification and prototype records. |
@@ -52,6 +52,7 @@ CI in `.github/workflows/ci.yml` runs the same make targets.
 ## Definition of done
 
 - The issue's acceptance criteria hold, and you observed them on the real artifact.
+- Verify and close completed issues under the [issue lifecycle](CONTRIBUTING.md#issue-lifecycle).
 - `make check` passes, or the PR names each skipped target and why.
 - A bug fix includes the failing output from before the fix and the passing output after it.
 - The PR description lists commands and results and names what remains untested, such as hardware or a manual permission grant.
@@ -76,8 +77,9 @@ Do not work around the guard with another command.
 
 - Never use the em dash character. `make docs` rejects it.
 - In Markdown, put each sentence on its own line.
-- In PRs, reference an issue the PR delivers with `Refs #N`, never `Closes` or `Fixes`. The [issue lifecycle](CONTRIBUTING.md#issue-lifecycle) explains why.
-- Use `Part of #N` for a PR that only records decisions, changes docs, or delivers part of the issue. A merged `Refs` marks the issue fixed.
+- In PRs, reference an issue the PR delivers with `Refs #N`, rather than closing keywords such as `Closes`, `Fixes`, or `Resolves`.
+  The [issue lifecycle](CONTRIBUTING.md#issue-lifecycle) explains why.
+- Use `Part of #N` for a PR that only records decisions, changes docs, or delivers part of the issue.
 - Never edit `CHANGELOG.md` or generated files by hand.
 
 ## Deeper docs

@@ -65,7 +65,9 @@ Use `Part of` when the pull request only records decisions, changes documentatio
 Part of #124
 ```
 
-A merged `Refs` labels the issue `fixed (pending release)`, and a merged `Part of` changes nothing.
+These references link the pull request to the issue without changing its status.
+Use issue references rather than GitHub closing keywords such as `Closes`, `Fixes`, or `Resolves`.
+Closing keywords close the issue on merge before an agent verifies the landed change.
 
 ## Review and merge
 
@@ -79,14 +81,30 @@ Treat its findings as input, not as a review verdict.
 
 ## Issue lifecycle
 
-The [issue fix status workflow](.github/workflows/issue-fix-status.yml) keeps each report open until its fix reaches the reporter.
+Agents own issue verification and closure.
+Implementation issues stay open until their changes have merged and an agent verifies every acceptance criterion on the landed code.
+Investigation or decision issues can close once their required answer and evidence are recorded.
+Neither a merged pull request nor a cross-reference proves completion.
+GitHub Actions does not manage issue completion, and silence is never evidence of completion.
 
-1. A pull request that uses `Closes #N` or `Fixes #N` gets one comment that asks for `Refs #N` instead.
-2. When a pull request with `Refs #N` merges, the issue gets the `fixed (pending release)` label and a comment.
-   `Part of #N` and `Related to #N` never label an issue.
-3. When Sam publishes a stable release, each waiting issue gets `please confirm close`, and its reporter is asked to test that version.
-4. If nobody replies in 14 days, the workflow closes the issue as completed.
-5. A later comment on that issue reopens it with `needs-triage`.
+1. Read the issue's full acceptance criteria and the changes or answer that address them.
+2. Record the verified artifact and, for code changes, the exact merged revision and applicable bundled engine pin.
+3. Verify every criterion on that artifact.
+   Follow the [evidence standards](docs/AI-CONTRIBUTIONS.md#evidence-standards) and the issue's required verification level.
+   Window behavior needs the relevant native checks and any required [hardware checks](decisions/v1-acceptance-checklist.md).
+   Record Sam's hardware results where required, and distinguish them from automated observations.
+4. Post a concise issue comment with the verified artifact, applicable revisions, commands, observed results, evidence links, and remaining limits.
+   If any criterion is incomplete, partial, or unverified, record the gaps and leave the issue open.
+5. When evidence proves every criterion, close the issue with `gh issue close <number> --reason completed`.
+
+Close a verified issue without waiting for a release or reporter silence.
+Release distribution acceptance, including installation and updates, remains separate from individual issue completion.
+If an issue explicitly requires release distribution evidence, that criterion still needs verification before closure.
+Sam continues to own merges and releases.
+
+The legacy labels `fixed (pending release)` and `please confirm close` record historical automation state, not completion proof.
+During agent re-evaluation, remove either obsolete label if present, whether the issue stays open or closes.
+Use `gh issue edit <number> --remove-label "<label>"` for each obsolete label present.
 
 New issues start with `needs-triage`.
 The [triage labels](docs/agents/triage-labels.md) describe the next states.
