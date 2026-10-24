@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-24 on branch `chore/agent-owned-issue-closure`, based on `main` at `b2e6d12`
+Updated: 2026-10-25 on branch `fix/stack-sizing-and-order`, based on `main` at `a78274f`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,76 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Stack sizing and order fixes in review
+
+[Engine PR #34](https://github.com/samanyudas/paneru/pull/34) fixes the #42 mixed-app ordering.
+`AXRaise` puts a background app's window just below the frontmost app's focused window, so `raise_in_order` now checks each raise against earlier entries only and puts the focused window back in front after a raise of another frontmost-app window.
+[Engine PR #35](https://github.com/samanyudas/paneru/pull/35) fixes the #40 fresh-window overlap.
+The size check read a Chromium-style late resize as the old full height and stored it as a minimum, so a window still taller than requested is now read again after 500 ms first.
+An app that applies a size more than 500 ms late can still have its old height learned.
+Each PR has a regression test that fails without its fix.
+Both pass 52 library and 878 binary tests with defaults, 41 and 788 without, strict Clippy, and rustfmt.
+Greptile scored both 5/5, and one Sonnet sol-loop round approved both with nits only.
+
+A signed Miri Developer build with candidate engine `07b55ae`, both fixes on `896d887`, ran native fixture checks on 25 October.
+The #42 mixed column `A1, B1, A2` passed 13 of 13 order checks, against 9 of 13 on base `896d887`.
+The #40 gate fixture showed no stale minimum with a 300 ms delay, a 1000 ms delay, or dropped writes, and the fresh-window repro passed 3 of 3 runs.
+Evidence is in `.audit/fullsend-stacks-20261025/`.
+Sam's trial build was restored afterwards.
+Two of Sam's windows, Spotify and a wide Helium window, ended in a virtual workspace that the restored trial engine does not show, so it parks them at the corner.
+
+The Miri repin waits for both engine PRs to merge into `miri/v0.5.2`.
+The repin also brings in engine PR #30, `896d887`, which no Miri PR pins yet.
+
+## Native issue verification
+
+PR #65 is merged, and agents now verify and close issues without a release wait.
+The 24 October native audit used a fresh signed build from the tree-identical `34f2f6d` head and the published engine pin `f831216`.
+It confirmed [#39](https://github.com/samanyudas/miri/issues/39), [#44](https://github.com/samanyudas/miri/issues/44), and the bounded retry in [#48](https://github.com/samanyudas/miri/issues/48).
+Their issue comments record the native observations, passing regression tests, and limits.
+[#26](https://github.com/samanyudas/miri/issues/26) was reopened because a native check confirmed the missing Settings error for an unresolved single-character binding.
+The earlier named-typo repair still works.
+
+The mature-window lane for [#40](https://github.com/samanyudas/miri/issues/40) passed equal splitting, minimum-height redistribution, retained manual sizing, and membership removal.
+The fresh-window lane failed, so #40 stays open for triage.
+[#33](https://github.com/samanyudas/miri/issues/33) and [#58](https://github.com/samanyudas/miri/issues/58) reproduced their app-death and height-restoration failures.
+One busy-launch cohort admitted all 18 windows, which does not clear the intermittent discovery defects in [#59](https://github.com/samanyudas/miri/issues/59) and [#63](https://github.com/samanyudas/miri/issues/63).
+The remaining keyboard, gesture, overflow-ordering, and drag criteria still belong to their open issues.
+No release-candidate acceptance row was passed by this audit.
+
+All test apps and engines exited, the original Miri support folder was restored byte-for-byte, and existing user-window frames were unchanged.
+The private local evidence is in `.audit/native-issue-verification-20261024/`.
+It includes unrelated window titles in baseline captures and must not be published wholesale.
+Only sanitized observations were posted to GitHub.
+No product source or engine pin changed.
+A manual checklist is prepared in `.audit/native-issue-verification-20261024/manual-checklist.md` for Sam's combined hardware results.
+It covers seven open-issue scenarios and four optional physical checks for closed issues.
+The confirmed code gaps in #26, #31, and #33 need no repeated manual reproduction.
+
+Sam's follow-up reports a pass for #35, correcting an initial reference to #33.
+His #40 observations match adjacent-pair height resizing, equalization after removal, and horizontal row selection with the destination's last row as a fallback.
+Those observations do not resolve the earlier fresh-window failure, so #40 remains open.
+Overlap is expected only when the windows' minimum heights cannot fit, under #42's top-bar and focus-ordering rules.
+The supplied #42 recording shows wallpaper and a cursor without application windows, so it cannot verify those rules.
+No issue was closed from this follow-up.
+
+The autonomous follow-up used the same signed merged-build artifact and engine `f831216` in `.audit/stack-repro-20261024/`.
+Fresh flexible and constrained #40 cases passed with animations enabled and disabled.
+Five flexible native fixture windows also split without overlap, and removing a constrained sixth member restored their equal shares.
+The earlier fresh-window failure remains unexplained, so #40 stays open.
+
+The #42 mixed-app column `A1, B1, A2` reproduced the wrong native order on every return to A2 in three focus walks.
+Five paired trials then changed the wrong order `A2, A1, B1` to `A2, B1, A1` with a direct native raise of B1.
+A2 remained the focused/frontmost window at both endpoints.
+The source-derived explanation is the overly broad exclusion of frontmost-app windows in `raise_in_order`, which skips B1's raise.
+The native counterexample disproves an unavoidable platform limit for this fixture case, but it does not directly trace that engine branch.
+Independent review excluded the distinct-app comparison because its third window was on another display.
+No product fix was applied, and #42 stays open.
+The previous trial build at engine `5daaa0f` and its original configuration were restored after testing.
+On reload, the trial app removes the derived `swipe.gesture.fingers_count` entry, while the original user-facing settings remain unchanged.
+Final verification found no changed existing window frames.
+The independently reviewed observations are posted on [#40](https://github.com/samanyudas/miri/issues/40#issuecomment-6384818919) and [#42](https://github.com/samanyudas/miri/issues/42#issuecomment-6384816787).
 
 ## Stack ordering and window admission repairs
 
@@ -292,15 +362,17 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 
 ## Next
 
-Sam reviews and merges the issue-closure policy pull request.
+Sam merges engine PRs #34 and #35.
+Then repin Miri to the merged `miri/v0.5.2` head, run `make check` and a native recheck, open the Miri PR, and close #40 and #42 if their remaining criteria hold.
+Triage the unresolved character-binding warning in #26.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
 
 1. Finish the remaining v1 features.
    - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
-   - Finish CI and review for the verified engine #29 merge pin (#43).
-   - Run the stack overflow and stack limit hardware checks (S-5 and S-7).
+   - Complete drag and restoration acceptance for #43, including the height defect in #58.
+   - Complete stack overflow acceptance (S-5) and repeat the verified stack-limit behavior on the frozen release candidate (S-7).
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
    Integrate Sparkle updates, then production signing, notarization, the release DMG, and the Homebrew cask.
