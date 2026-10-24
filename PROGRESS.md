@@ -14,11 +14,11 @@ The current milestone is the remaining v1 features: pointer-versus-focus gesture
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
 
-## Stack sizing and order fixes in review
+## Stack sizing and order fixes
 
-[Engine PR #34](https://github.com/samanyudas/paneru/pull/34) fixes the #42 mixed-app ordering.
+[Engine PR #34](https://github.com/samanyudas/paneru/pull/34) merged as `e4137a4` and fixes the #42 mixed-app ordering.
 `AXRaise` puts a background app's window just below the frontmost app's focused window, so `raise_in_order` now checks each raise against earlier entries only and puts the focused window back in front after a raise of another frontmost-app window.
-[Engine PR #35](https://github.com/samanyudas/paneru/pull/35) fixes the #40 fresh-window overlap.
+[Engine PR #35](https://github.com/samanyudas/paneru/pull/35) merged as `4890749` and fixes the #40 fresh-window overlap.
 The size check read a Chromium-style late resize as the old full height and stored it as a minimum, so a window still taller than requested is now read again after 500 ms first.
 An app that applies a size more than 500 ms late can still have its old height learned.
 Each PR has a regression test that fails without its fix.
@@ -32,8 +32,11 @@ Evidence is in `.audit/fullsend-stacks-20261025/`.
 Sam's trial build was restored afterwards.
 Two of Sam's windows, Spotify and a wide Helium window, ended in a virtual workspace that the restored trial engine does not show, so it parks them at the corner.
 
-The Miri repin waits for both engine PRs to merge into `miri/v0.5.2`.
-The repin also brings in engine PR #30, `896d887`, which no Miri PR pins yet.
+This branch pins `4890749`, which also brings in engine PR #30, `896d887`, the per-app background window writes.
+The merged engine's non-test source is identical to the natively tested candidate `07b55ae`.
+Only the test mock differs.
+The sol-loop nit commit for #34, a variable rename and two comment changes, missed the merge and is still pending.
+On 25 October, `make check` passed with the pin: 144 Swift tests, 41 library and 789 engine tests, strict lint, the signed build, `observed-granted` permission observation, fixture recovery, and DMG packaging.
 
 ## Native issue verification
 
@@ -362,8 +365,8 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 
 ## Next
 
-Sam merges engine PRs #34 and #35.
-Then repin Miri to the merged `miri/v0.5.2` head, run `make check` and a native recheck, open the Miri PR, and close #40 and #42 if their remaining criteria hold.
+Sam merges the `4890749` repin PR.
+Then verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Triage the unresolved character-binding warning in #26.
 
 Each phase lands as its own PR or PRs.
