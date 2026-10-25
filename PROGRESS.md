@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `feat/reserve-constrained-width`, based on `main` at `bf4529e`
+Updated: 2026-10-26 on branch `feat/title-bar-maximize`, based on `main` at `7d7301e`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,24 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Title-bar maximize
+
+This branch builds [#88](https://github.com/samanyudas/miri/issues/88) in the engine and records the rules in the [release scope](decisions/release-scope.md#maximizing-a-window).
+A double-click on a window's top bar fills the usable area of its display, and the next one restores it.
+The window keeps its place in the layout while maximized, so its neighbors never move.
+
+On 26 October, current `main` with engine `6325638` reproduced the defect on the primary display.
+A double-click on a Finder title bar let macOS zoom Finder to 868 points wide, and the engine took that as the column's width, which moved T3 Code 156 points left.
+With the candidate, Finder, a stacked Finder window, a Finder window on the built-in display, a Helium window, and a floating Helium window each filled the usable area and returned to their exact frames.
+The other windows kept their frames throughout.
+A double-click on Finder's back button left the window alone.
+These are automated observations on the real windows, driven by synthetic mouse events, not physical input.
+
+macOS ignores a small shrink that leaves a window's bottom edge near the bottom of the screen, but it lets a window grow into that zone.
+A restore therefore first ends 100 points above the slot and then grows into it.
+The same rule can also stop the layout from shrinking a newly opened window that touches the screen bottom into its slot.
+That layout case exists without this branch and may explain [#58](https://github.com/samanyudas/miri/issues/58).
 
 ## Constrained window width and tile override
 

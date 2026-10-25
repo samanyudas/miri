@@ -295,6 +295,33 @@ Holding the pointer near a display edge with no neighboring display for about ha
 After a drop, the dropped window keeps focus, and the strip moves only as far as needed to show it.
 If macOS tiles the window instead, the engine returns it to its place in the layout.
 
+### Maximizing a window
+
+Sam accepted these rules on 25 October 2026 ([#88](https://github.com/samanyudas/miri/issues/88)).
+A double-click on a window's title bar, toolbar, or navigation bar fills the usable area of the display the pointer is on.
+The usable area excludes the menu bar and the visible Dock.
+The next double-click on that window's top bar restores it.
+There is no timer, and no toggle creates a native full-screen Space.
+A double-click on a control in the top bar, such as a button, text field, or tab, stays the control's own.
+Make column full width, Control-Option-F, stays a separate column-width action.
+
+A maximized window may cover the windows around it, and they keep their sizes and places.
+The maximized window keeps its place in the layout while it is maximized.
+A tiled window returns to that place, so a stacked window returns to its stack, at the position the stack gives it at that time.
+A floating window returns to its earlier size, at the same offset from the top-left corner of the usable area, moved and shrunk as needed to stay on the display.
+Because the window never leaves its place, the stack-capacity and missing-stack fallbacks in #88 do not occur.
+A display move does not cancel maximization, and [#87](https://github.com/samanyudas/miri/issues/87) covers fitting a maximized window to another display.
+
+macOS also runs its own double-click action, such as Zoom.
+For one second after each toggle, Miri puts the window back at the frame the toggle gave it, so that action does not change the result.
+Dragging a maximized window moves only that window, and the next double-click returns it to its place.
+
+Known limitations:
+
+- A window with a maximum size grows only to that size, at the top-left corner of the usable area.
+- Chromium-based browsers can hide their tabs from Accessibility.
+  In such a browser, a double-click on a tab also maximizes the window.
+
 ## V2
 
 V2 contains further quality-of-life improvements.
