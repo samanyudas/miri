@@ -387,8 +387,8 @@ The following table records the selected v1 defaults without claiming tested act
 | Make window taller | Control-Option-Shift-Equals | |
 | Make window shorter | Control-Option-Shift-Minus | |
 | Equalize window heights within column | Control-Option-0 | |
-| Stack focused window into left column | Control-Option-] | |
-| Stack focused window into right column | Control-Option-[ | |
+| Stack focused window into left column | Control-Option-[ | |
+| Stack focused window into right column | Control-Option-] | |
 | Pop focused window out to right | Control-Option-Shift-] | |
 | Pop focused window out to left | Control-Option-Shift-[ | |
 | Float or unfloat focused window | Control-Option-T | |
@@ -397,7 +397,7 @@ The following table records the selected v1 defaults without claiming tested act
   They do not number individual windows.
 - Full column width is distinct from native macOS fullscreen.
   macOS Space switching, fullscreen, app switching, closing, and ordinary app commands remain macOS or application interactions.
-- Stack-left uses `]`, and stack-right uses `[`, as selected in the reference.
+- `[` means left and `]` means right for both stacking and popping out, as selected in the reference.
   Stacking moves only the focused window, so Miri must change Paneru's whole-column behavior.
 - Supply stack-right and pop-left through Miri's integration because the selected engine source lacks those commands.
   Final action contracts, repeated-command behavior, and safe fullscreen interaction still need reconciliation.

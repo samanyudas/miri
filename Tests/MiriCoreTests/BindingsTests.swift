@@ -22,7 +22,7 @@ struct DefaultBindingsTests {
     @Test func aNewInstallGetsTheAcceptedDefaultSet() throws {
         let (store, document) = try load()
         #expect(store.issue == nil)
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(2))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
         let expected: [String: TOMLValue] = [
             "window_focus_west": .array([.string("ctrl+alt-leftarrow"), .string("ctrl+alt-h")]),
             "window_focus_east": .array([.string("ctrl+alt-rightarrow"), .string("ctrl+alt-l")]),
@@ -62,8 +62,8 @@ struct DefaultBindingsTests {
             "window_vertical_step_grow": .string("ctrl+alt+shift-equal"),
             "window_vertical_step_shrink": .string("ctrl+alt+shift-minus"),
             "window_equalize": .string("ctrl+alt-0"),
-            "window_stack_west": .string("ctrl+alt-rightbracket"),
-            "window_stack_east": .string("ctrl+alt-leftbracket"),
+            "window_stack_west": .string("ctrl+alt-leftbracket"),
+            "window_stack_east": .string("ctrl+alt-rightbracket"),
             "window_unstack_east": .string("ctrl+alt+shift-rightbracket"),
             "window_unstack_west": .string("ctrl+alt+shift-leftbracket"),
             "window_manage": .string("ctrl+alt-t"),
@@ -112,7 +112,7 @@ struct DefaultBindingsTests {
         let (_, document) = try load(original)
         #expect(document.text.hasPrefix("[miri]\ninner_gap = 8\n"))
         #expect(document.value(at: ["bindings", "window_manage"]) == .string("ctrl+alt-t"))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(2))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
     }
 
     @Test func rejectsAnInvalidVersionWithoutWriting() throws {
@@ -217,7 +217,7 @@ struct DefaultBindingsTests {
         #expect(bindings?["window_focus_east"] == nil)
         #expect(bindings?["window_focusdisplay_west"] == .string("ctrl+alt+cmd-a"))
         #expect(bindings?["window_movedisplay_east"] == .string("ctrl+alt+cmd+shift-d"))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(2))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
     }
 
     @Test func deletedVersionOneResizeShortcutsStayDeletedAfterUpgrade() throws {
@@ -229,7 +229,7 @@ struct DefaultBindingsTests {
             #expect(document.value(at: ["bindings", command]) == nil)
         }
         #expect(document.value(at: ["bindings", "window_focusdisplay_west"]) == .string("ctrl+alt+cmd-a"))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(2))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
     }
 
     @Test func keepsUnversionedUserBindingsThatMatchRetiredDefaults() throws {
@@ -249,6 +249,133 @@ struct DefaultBindingsTests {
         #expect(document.value(at: ["bindings", "window_vertical_shrink"]) == .string("ctrl+alt+shift-minus"))
         #expect(document.value(at: ["bindings", "window_step_grow"]) == nil)
         #expect(document.value(at: ["bindings", "window_vertical_step_grow"]) == nil)
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
+    }
+
+    @Test(arguments: [1, 2])
+    func anUpgradeMovesUnchangedJoinDefaultsSoOpeningBracketMeansLeft(version: Int) throws {
+        let original = """
+            [bindings]
+            window_stack_west = "ctrl+alt-rightbracket"
+            window_stack_east = "ctrl+alt-leftbracket"
+            window_unstack_east = "ctrl+alt+shift-rightbracket"
+            window_unstack_west = "ctrl+alt+shift-leftbracket"
+
+            [miri]
+            default_bindings_version = \(version)
+            """
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        let bindings = document.value(at: ["bindings"])
+        #expect(bindings?["window_stack_west"] == .string("ctrl+alt-leftbracket"))
+        #expect(bindings?["window_stack_east"] == .string("ctrl+alt-rightbracket"))
+        #expect(bindings?["window_unstack_east"] == .string("ctrl+alt+shift-rightbracket"))
+        #expect(bindings?["window_unstack_west"] == .string("ctrl+alt+shift-leftbracket"))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
+        #expect(store.keptDefaults.isEmpty)
+    }
+
+    @Test func aCustomizedJoinStaysAndItsUnchangedCounterpartMovesToAFreeChord() throws {
+        let original = """
+            [bindings]
+            window_stack_west = "ctrl+alt-rightbracket"
+            window_stack_east = "ctrl+alt-p"
+
+            [miri]
+            default_bindings_version = 2
+            """
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        #expect(document.value(at: ["bindings", "window_stack_west"]) == .string("ctrl+alt-leftbracket"))
+        #expect(document.value(at: ["bindings", "window_stack_east"]) == .string("ctrl+alt-p"))
+        #expect(store.keptDefaults.isEmpty)
+    }
+
+    @Test func aCustomizedJoinOnTheNewChordKeepsItsCounterpartOnTheOldOneAndReportsIt() throws {
+        let original = """
+            [bindings]
+            window_stack_west = "ctrl+alt-rightbracket"
+            window_stack_east = ["ctrl+alt-leftbracket", "fn-f1"]
+
+            [miri]
+            default_bindings_version = 2
+            """
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        #expect(document.text.hasPrefix(original.replacingOccurrences(of: "= 2", with: "= 3")))
+        #expect(
+            store.keptDefaults == [
+                KeptDefault(
+                    action: .engine(command: "window_stack_west"), kept: Chord([.control, .option], "rightbracket"),
+                    wanted: Chord([.control, .option], "leftbracket"), owner: "Stack focused window into right column")
+            ])
+        store.load(reduceMotion: false)
+        #expect(store.keptDefaults.count == 1)
+        try store.apply(.resetToDefaults)
+        #expect(store.keptDefaults.isEmpty)
+        #expect(
+            store.shortcuts?.chords(for: .engine(command: "window_stack_west")) == [
+                Chord([.control, .option], "leftbracket")
+            ])
+    }
+
+    @Test func aBlockedJoinMoveCanBlockItsCounterpartSoNoChordIsShared() throws {
+        let original = """
+            [bindings]
+            window_stack_west = "ctrl+alt-rightbracket"
+            window_stack_east = "ctrl+alt-leftbracket"
+            quit = "ctrl+alt-leftbracket"
+
+            [miri]
+            default_bindings_version = 2
+            """
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        #expect(document.value(at: ["bindings", "window_stack_west"]) == .string("ctrl+alt-rightbracket"))
+        #expect(document.value(at: ["bindings", "window_stack_east"]) == .string("ctrl+alt-leftbracket"))
+        #expect(
+            store.keptDefaults.map(\.owner) == [
+                "Stack focused window into right column", "Stack focused window into left column",
+            ])
+    }
+
+    @Test func aDeletedJoinStaysDeletedAndItsCounterpartMoves() throws {
+        let original = """
+            [bindings]
+            window_stack_east = "ctrl+alt-leftbracket"
+
+            [miri]
+            default_bindings_version = 2
+            """
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        #expect(document.value(at: ["bindings", "window_stack_west"]) == nil)
+        #expect(document.value(at: ["bindings", "window_stack_east"]) == .string("ctrl+alt-rightbracket"))
+    }
+
+    @Test func keepsUnversionedJoinBindingsThatMatchTheOldDefaults() throws {
+        let original = """
+            [bindings]
+            window_stack_west = "ctrl+alt-rightbracket"
+            window_stack_east = "ctrl+alt-leftbracket"
+            """
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        #expect(document.text.hasPrefix(original + "\n"))
+        #expect(document.value(at: ["bindings", "window_stack_west"]) == .string("ctrl+alt-rightbracket"))
+        #expect(document.value(at: ["bindings", "window_stack_east"]) == .string("ctrl+alt-leftbracket"))
+        #expect(store.keptDefaults.isEmpty)
+    }
+
+    @Test func leavesOldJoinDefaultsInABindingsTableMiriCannotEdit() throws {
+        let original = """
+            bindings = { window_stack_west = "ctrl+alt-rightbracket", window_stack_east = "ctrl+alt-leftbracket" }
+            [miri]
+            default_bindings_version = 2
+            """
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        #expect(document.text.hasPrefix(original))
         #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(2))
     }
 
@@ -532,7 +659,7 @@ struct DefaultBindingsTests {
                 == .array([
                     .string("ctrl+alt-rightarrow"), .string("ctrl+alt-l"),
                 ]))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(2))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
     }
 
     @Test func anUpgradeLeavesAStopChordToStop() throws {

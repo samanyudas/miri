@@ -94,14 +94,15 @@ The width and height adjustment increment follows [Default shortcuts and layout]
 
 | Action | Default shortcut |
 | --- | --- |
-| Stack focused window into left column | ⌃⌥] |
-| Stack focused window into right column | ⌃⌥[ |
+| Stack focused window into left column | ⌃⌥[ |
+| Stack focused window into right column | ⌃⌥] |
 | Pop focused window out to right | ⌃⌥⇧] |
 | Pop focused window out to left | ⌃⌥⇧[ |
 | Toggle column between stacked and tabbed, v2 only | ⌃⌥⇧T |
 | Float or unfloat focused window | ⌃⌥T |
 
-Miri assigns `]` to stacking left and `[` to stacking right.
+An opening bracket `[` means left and a closing bracket `]` means right, for both stacking and popping out.
+Sam chose this rule in [issue #92](https://github.com/samanyudas/miri/issues/92), which reversed the earlier join defaults.
 Stacking moves only the focused window into the neighboring column, and the rest of its old stack stays in place.
 In the first or last column, stacking toward the edge does nothing.
 
@@ -153,6 +154,14 @@ On upgrade from a recorded version 1, Miri removes each of those four only while
 An unversioned file keeps its existing bindings, even when they match a retired default.
 A binding the user changed stays, and the step command gets only its free chords.
 A version 1 resize binding that the user deleted stays unbound after the upgrade.
+
+Version 3 of the default set moves Stack focused window into left column from ⌃⌥] to ⌃⌥[, and Stack focused window into right column from ⌃⌥[ to ⌃⌥].
+On upgrade from a recorded version 1 or 2, Miri moves each of the two only while it still has the exact value Miri wrote and its new chord is free.
+When another binding holds the new chord, the action keeps its old chord, so no chord gets two actions.
+The Shortcuts settings page then reports which action kept its old chord and which action holds the new one.
+A join binding that the user changed or deleted stays as it is.
+An unversioned file and a `[bindings]` table in a form Miri does not rewrite keep their join bindings until the user resets the shortcuts.
+The engine adds no bracket bindings of its own, because its default configuration has an empty `[bindings]` table.
 
 ## Binding customization
 

@@ -26,6 +26,23 @@ struct ShortcutsSettings: View {
     var body: some View {
         Form {
             ConfigurationIssueBanner(model: model)
+            if !model.keptDefaults.isEmpty {
+                Section {
+                    ForEach(model.keptDefaults, id: \.self) { kept in
+                        Label {
+                            Text(
+                                "\(kept.action.title) kept \(model.keyLayout.label(for: kept.kept)). Its new default, "
+                                    + "\(model.keyLayout.label(for: kept.wanted)), is used by \(kept.owner)."
+                            )
+                            .fixedSize(horizontal: false, vertical: true)
+                        } icon: {
+                            Image(systemName: "info.circle.fill").foregroundStyle(.blue)
+                        }
+                    }
+                } header: {
+                    Text("Updated Default Shortcuts")
+                }
+            }
             if let shortcuts = model.shortcuts {
                 Section {
                     TextField("Filter", text: $filter, prompt: Text("Filter shortcuts"))

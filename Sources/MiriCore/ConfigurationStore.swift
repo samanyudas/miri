@@ -31,6 +31,8 @@ public final class ConfigurationStore {
     /// The Stop shortcuts Miri registers: `[miri].stop_shortcut` without the chords a `[bindings]` entry uses.
     /// When the engine would reject `[bindings]`, this keeps its previous value, as the engine keeps its old bindings.
     public private(set) var stopChordsToRegister = [DefaultBinding.stopChord]
+    /// The defaults whose new chord the last upgrade could not assign, because another binding holds it.
+    public private(set) var keptDefaults: [KeptDefault] = []
     /// The current file, when it was read correctly. Writes require it.
     private var document: TOMLDocument?
 
@@ -107,6 +109,7 @@ public final class ConfigurationStore {
         }
         try commit(next, replacing: current, backingUpBefore: edit == .resetToDefaults ? "resetting shortcuts" : nil)
         issue = nil
+        if edit == .resetToDefaults { keptDefaults = [] }
         stopChordsToRegister = Shortcuts(document: next, layout: layout).stopChordsToRegister(layout: layout)
     }
 
@@ -171,6 +174,17 @@ public final class ConfigurationStore {
         let upgrades = current.value(at: versionPath) != next.value(at: versionPath)
         try commit(next, replacing: current, backingUpBefore: upgrades ? "upgrading it" : nil)
         writtenGestureFingers = fingers
+        if upgrades {
+            let shortcuts = Shortcuts(document: next, layout: layout)
+            keptDefaults = DefaultBinding.keptMoves(upgrading: current, to: next).map { move in
+                let action = ShortcutAction.engine(command: EngineCommand.canonical(move.command)!)
+                let owner =
+                    if case .usedBy(let owner) = shortcuts.rejection(adding: move.to, to: action, layout: layout) {
+                        owner
+                    } else { "another shortcut" }
+                return KeptDefault(action: action, kept: move.from, wanted: move.to, owner: owner)
+            }
+        }
     }
 
     /// Replaces the file with `next`, after backing up `current` when `backupReason` names why.

@@ -19,6 +19,8 @@ import ServiceManagement
     private(set) var configurationIssue: ConfigurationIssue?
     /// The file's shortcuts, or `nil` while the file cannot be read correctly.
     private(set) var shortcuts: Shortcuts?
+    /// The defaults the last upgrade could not move to their new shortcut.
+    private(set) var keptDefaults: [KeptDefault] = []
     private(set) var keyLayout: KeyLayout
     private(set) var setupChecks: [SetupCheck] = []
     /// Why management is not running when the user did not stop it, such as missing permission.
@@ -95,6 +97,7 @@ import ServiceManagement
         settings = store.settings
         configurationIssue = store.issue
         shortcuts = store.shortcuts
+        keptDefaults = store.keptDefaults
         stopShortcut?.register(store.stopChordsToRegister, layout: keyLayout)
         dropStaleGestureVerification()
     }
@@ -146,6 +149,7 @@ import ServiceManagement
             try store.apply(edit)
             configurationIssue = nil
             shortcuts = store.shortcuts
+            keptDefaults = store.keptDefaults
             stopShortcut?.register(store.stopChordsToRegister, layout: keyLayout)
             return true
         } catch {
