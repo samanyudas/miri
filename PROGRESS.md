@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `fix/drag-centre-and-empty-display`, based on `main` at `41bbae9`
+Updated: 2026-10-26 on branch `fix/bracket-directions`, based on `main` at `c4833ce`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,26 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Bracket directions for stack shortcuts
+
+[#92](https://github.com/samanyudas/miri/issues/92) is implemented on this branch.
+An opening bracket now means left and a closing bracket means right for joining and popping out.
+⌃⌥[ joins the column on the left, and ⌃⌥] joins the column on the right.
+The pop-out shortcuts already followed this rule and did not change.
+Default-set version 3 moves an upgraded file's join bindings only while they keep the exact value Miri wrote and the new chord is free.
+A blocked move keeps the old chord, and the Shortcuts settings page reports it.
+The engine's default configuration has an empty `[bindings]` table, so it adds no bracket bindings of its own.
+
+On 26 October, the running pre-change build from the PR #76 worktree reproduced the old direction: ⌃⌥[ joined the middle test window into the column on its right.
+The branch build then upgraded Sam's real version 2 configuration: only the version and the two join lines changed, after a byte-identical backup.
+On three throwaway Helium windows, synthetic key events showed each join and pop-out direction, a join from inside a stack, a repeated join, and no-ops at both strip edges and for a pop-out outside a stack.
+Focus stayed on the moved window, and all three windows stayed visible.
+A fresh install wrote the new defaults at version 3.
+A customized version 2 file kept both join bindings, and Settings showed the kept-chord notice and the actual chords.
+These are synthetic key events in the real app, not physical key presses.
+Sam's configuration and the previously running build were restored byte-for-byte afterward.
+Private local evidence is in `/tmp/miri92/`.
 
 ## Drag target and empty display fixes
 
@@ -431,6 +451,7 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 The `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70), is merged.
 Verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
+Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
 Sam runs the real-mouse drag check in #72 on the merged build, then #72 can close.
 
 Each phase lands as its own PR or PRs.

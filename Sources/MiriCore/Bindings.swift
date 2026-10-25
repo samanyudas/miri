@@ -161,21 +161,27 @@ public struct DefaultBinding: Sendable {
             DefaultBinding("Make window taller", "window_vertical_step_grow", ctrlAlt("equal", .shift), version: 2),
             DefaultBinding("Make window shorter", "window_vertical_step_shrink", ctrlAlt("minus", .shift), version: 2),
             DefaultBinding("Equalize window heights within column", "window_equalize", ctrlAlt("0")),
-            DefaultBinding("Stack focused window into left column", "window_stack_west", ctrlAlt("rightbracket")),
-            DefaultBinding("Stack focused window into right column", "window_stack_east", ctrlAlt("leftbracket")),
+            DefaultBinding("Stack focused window into left column", "window_stack_west", ctrlAlt("leftbracket")),
+            DefaultBinding("Stack focused window into right column", "window_stack_east", ctrlAlt("rightbracket")),
             DefaultBinding("Pop focused window out to right", "window_unstack_east", ctrlAlt("rightbracket", .shift)),
             DefaultBinding("Pop focused window out to left", "window_unstack_west", ctrlAlt("leftbracket", .shift)),
             DefaultBinding("Float or unfloat focused window", "window_manage", ctrlAlt("t")),
         ]
 
-    /// The newest version in the table. Miri records it after offering the defaults.
-    public static let currentVersion = table.map(\.version).max() ?? 0
+    /// The newest version in the table or in `moved`. Miri records it after offering the defaults.
+    public static let currentVersion = (table.map(\.version) + moved.map(\.version)).max() ?? 0
 
     static let retired: [(command: String, replacement: String, chord: Chord, version: Int)] = [
         ("window_grow", "window_step_grow", ctrlAlt("equal"), 2),
         ("window_shrink", "window_step_shrink", ctrlAlt("minus"), 2),
         ("window_vertical_grow", "window_vertical_step_grow", ctrlAlt("equal", .shift), 2),
         ("window_vertical_shrink", "window_vertical_step_shrink", ctrlAlt("minus", .shift), 2),
+    ]
+
+    /// Defaults whose chord changed in `version`. Version 3 makes `[` mean left and `]` mean right (miri#92).
+    static let moved: [(command: String, from: Chord, to: Chord, version: Int)] = [
+        ("window_stack_west", ctrlAlt("rightbracket"), ctrlAlt("leftbracket"), 3),
+        ("window_stack_east", ctrlAlt("leftbracket"), ctrlAlt("rightbracket"), 3),
     ]
 
     /// The default Stop window manager shortcut, used when `[miri].stop_shortcut` is absent. Miri owns Stop instead of
@@ -188,7 +194,8 @@ public struct DefaultBinding: Sendable {
 
     /// Adds each default newer than the recorded version whose engine command has no binding, with its free chords.
     ///
-    /// A user binding is never changed. A default is offered once, so a binding the user deletes stays deleted.
+    /// A user binding is never changed. Miri changes only a retired or moved default that still has the exact value
+    /// Miri wrote. A default is offered once, so a binding the user deletes stays deleted.
     /// When the file defines `[bindings]` or `[miri]` in a form Miri does not rewrite, such as an inline table, Miri
     /// leaves the file as it is and records no version, so it offers the defaults again if the user converts the table.
     static func adding(to document: TOMLDocument, layout: KeyLayout = .positional) throws -> TOMLDocument {
@@ -221,14 +228,9 @@ public struct DefaultBinding: Sendable {
                 result = try result.removing(table: ["bindings"], key: old.command)
             }
         }
+        result = try moving(in: result, offered: offered, layout: layout)
         let existing = result.value(at: ["bindings"])
-        var taken = boundChords(in: existing, layout: layout)
-        // An engine binding wins over Stop on the same chord, so a default must never take a Stop chord.
-        if let stop = result.value(at: ["miri", "stop_shortcut"]) {
-            taken += boundChords(in: .table(["stop_shortcut": stop]), layout: layout)
-        } else {
-            taken.append(stopChord)
-        }
+        var taken = takenChords(in: result, layout: layout)
         // Only the file's own bindings count, so two default rows for one engine command both get written.
         let bound = Set(boundCommands(in: existing))
         for row in table where row.version > offered && !bound.contains(EngineCommand.canonical(row.command)!) {
@@ -241,6 +243,50 @@ public struct DefaultBinding: Sendable {
             result = try result.setting(value, table: ["bindings"], key: row.command)
         }
         return try result.setting(.integer(Int64(currentVersion)), table: ["miri"], key: "default_bindings_version")
+    }
+
+    /// Gives each `moved` default newer than `offered` its new chord, but only while the binding still has the exact
+    /// value Miri wrote and the new chord is free. Otherwise the binding keeps its value, and `keptMoves` finds it.
+    private static func moving(in document: TOMLDocument, offered: Int, layout: KeyLayout) throws -> TOMLDocument {
+        var moves = moved.filter { move in
+            offered >= 1 && move.version > offered
+                && document.value(at: ["bindings", move.command]) == .string(move.from.description)
+        }
+        // A move whose new chord another binding holds keeps its old chord, which can block another move in turn.
+        while true {
+            var others = document
+            for move in moves { others = try others.removing(table: ["bindings"], key: move.command) }
+            let taken = takenChords(in: others, layout: layout)
+            let blocked = Set(moves.filter { move in taken.contains { layout.conflicts($0, move.to) } }.map(\.command))
+            guard !blocked.isEmpty else { break }
+            moves.removeAll { blocked.contains($0.command) }
+        }
+        var result = document
+        for move in moves {
+            result = try result.setting(.string(move.to.description), table: ["bindings"], key: move.command)
+        }
+        return result
+    }
+
+    /// The `moved` defaults that `document` records as offered but that still have the exact value Miri wrote before
+    /// the move.
+    static func keptMoves(in document: TOMLDocument) -> [(command: String, from: Chord, to: Chord)] {
+        guard case .integer(let offered) = document.value(at: ["miri", "default_bindings_version"]) else { return [] }
+        return moved.filter { move in
+            move.version <= offered && document.value(at: ["bindings", move.command]) == .string(move.from.description)
+        }.map { ($0.command, $0.from, $0.to) }
+    }
+
+    /// The chords a new default must not take: every binding's, and Stop's, because an engine binding wins over Stop
+    /// on the same chord.
+    private static func takenChords(in document: TOMLDocument, layout: KeyLayout) -> [Chord] {
+        var taken = boundChords(in: document.value(at: ["bindings"]), layout: layout)
+        if let stop = document.value(at: ["miri", "stop_shortcut"]) {
+            taken += boundChords(in: .table(["stop_shortcut": stop]), layout: layout)
+        } else {
+            taken.append(stopChord)
+        }
+        return taken
     }
 
     /// Each bound command in the engine's own spelling, so that an alias such as `window_resize` counts as
