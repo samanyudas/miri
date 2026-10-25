@@ -41,7 +41,7 @@ public final class ConfigurationStore {
     }
 
     /// The shortcuts in the file, when it was read correctly.
-    public var shortcuts: Shortcuts? { document.map(Shortcuts.init) }
+    public var shortcuts: Shortcuts? { document.map { Shortcuts(document: $0, layout: layout) } }
 
     /// Reads the file, creating it with defaults when it is missing, then writes any derived engine keys it lacks.
     public func load(reduceMotion: Bool) {
@@ -56,10 +56,10 @@ public final class ConfigurationStore {
         do throws(ConfigurationIssue) {
             let parsed: TOMLDocument
             do { parsed = try TOMLDocument(text) } catch { throw .invalidTOML(error) }
-            let bindings = DefaultBinding.inspect(in: parsed)
-            let stopIssue = Shortcuts.stopShortcutIssue(in: parsed)
+            let bindings = DefaultBinding.inspect(in: parsed, layout: layout)
+            let stopIssue = Shortcuts.stopShortcutIssue(in: parsed, layout: layout)
             if case .usable = bindings, stopIssue == nil {
-                stopChordsToRegister = Shortcuts(document: parsed).stopChordsToRegister(layout: layout)
+                stopChordsToRegister = Shortcuts(document: parsed, layout: layout).stopChordsToRegister(layout: layout)
             }
             let read = try MiriSettings(document: parsed)
             if let issue = bindings.issue ?? stopIssue { throw issue }
@@ -94,7 +94,7 @@ public final class ConfigurationStore {
         guard let current = document else {
             throw issue ?? ConfigurationIssue.unreadable("Reload the file and try again.")
         }
-        let shortcuts = Shortcuts(document: current)
+        let shortcuts = Shortcuts(document: current, layout: layout)
         let next: TOMLDocument
         do {
             switch edit {
@@ -107,7 +107,7 @@ public final class ConfigurationStore {
         }
         try commit(next, replacing: current, backingUpBefore: edit == .resetToDefaults ? "resetting shortcuts" : nil)
         issue = nil
-        stopChordsToRegister = Shortcuts(document: next).stopChordsToRegister(layout: layout)
+        stopChordsToRegister = Shortcuts(document: next, layout: layout).stopChordsToRegister(layout: layout)
     }
 
     private func read() throws(ConfigurationIssue) -> String {

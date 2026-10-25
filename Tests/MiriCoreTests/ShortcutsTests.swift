@@ -76,7 +76,9 @@ import Testing
     private let focusWest = ShortcutAction.engine(command: "window_focus_west")
     private let resize = ShortcutAction.engine(command: "window_resize_grow")
 
-    private func shortcuts(_ text: String) throws -> Shortcuts { Shortcuts(document: try TOMLDocument(text)) }
+    private func shortcuts(_ text: String) throws -> Shortcuts {
+        Shortcuts(document: try TOMLDocument(text), layout: us)
+    }
 
     @Test func theEditableListIsTheDefaultTableThenStop() {
         #expect(ShortcutAction.editable.count == DefaultBinding.table.count + 1)
@@ -222,6 +224,7 @@ import Testing
             "stop_shortcut = \"ctrl+alt-lefarrow\"",
             "miri.stop_shortcut: \"ctrl+alt-lefarrow\" names the key \"lefarrow\""
         ),
+        ("stop_shortcut = \"ctrl+alt-?\"", "miri.stop_shortcut: \"ctrl+alt-?\" names the key \"?\""),
         ("stop_shortcut = [\"hyper-q\"]", "miri.stop_shortcut: \"hyper-q\" names the modifier \"hyper\""),
     ])
     func reportsAStopShortcutMiriCannotRead(line: String, message: String) throws {
