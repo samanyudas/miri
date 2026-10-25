@@ -109,7 +109,7 @@ public final class ConfigurationStore {
         }
         try commit(next, replacing: current, backingUpBefore: edit == .resetToDefaults ? "resetting shortcuts" : nil)
         issue = nil
-        if edit == .resetToDefaults { keptDefaults = [] }
+        refreshKeptDefaults(keptDefaults.map { ($0.action, $0.kept, $0.wanted) }, in: next)
         stopChordsToRegister = Shortcuts(document: next, layout: layout).stopChordsToRegister(layout: layout)
     }
 
@@ -174,16 +174,23 @@ public final class ConfigurationStore {
         let upgrades = current.value(at: versionPath) != next.value(at: versionPath)
         try commit(next, replacing: current, backingUpBefore: upgrades ? "upgrading it" : nil)
         writtenGestureFingers = fingers
-        if upgrades {
-            let shortcuts = Shortcuts(document: next, layout: layout)
-            keptDefaults = DefaultBinding.keptMoves(upgrading: current, to: next).map { move in
-                let action = ShortcutAction.engine(command: EngineCommand.canonical(move.command)!)
-                let owner =
-                    if case .usedBy(let owner) = shortcuts.rejection(adding: move.to, to: action, layout: layout) {
-                        owner
-                    } else { "another shortcut" }
-                return KeptDefault(action: action, kept: move.from, wanted: move.to, owner: owner)
-            }
+        let kept =
+            upgrades
+            ? DefaultBinding.keptMoves(upgrading: current, to: next).map {
+                (ShortcutAction.engine(command: EngineCommand.canonical($0.command)!), $0.from, $0.to)
+            } : keptDefaults.map { ($0.action, $0.kept, $0.wanted) }
+        refreshKeptDefaults(kept, in: next)
+    }
+
+    /// Keeps each kept default that `document` still shows: the action still has its old chord, and another binding
+    /// still holds the new one.
+    private func refreshKeptDefaults(_ kept: [(ShortcutAction, Chord, Chord)], in document: TOMLDocument) {
+        let shortcuts = Shortcuts(document: document, layout: layout)
+        keptDefaults = kept.compactMap { action, old, new in
+            guard shortcuts.chords(for: action).contains(old),
+                case .usedBy(let owner) = shortcuts.rejection(adding: new, to: action, layout: layout)
+            else { return nil }
+            return KeptDefault(action: action, kept: old, wanted: new, owner: owner)
         }
     }
 

@@ -319,6 +319,31 @@ struct DefaultBindingsTests {
             ])
     }
 
+    @Test func aKeptJoinNoticeEndsWhenTheShortcutsNoLongerMatchIt() throws {
+        let original = """
+            [bindings]
+            window_stack_west = "ctrl+alt-rightbracket"
+            window_stack_east = ["ctrl+alt-leftbracket", "fn-f1"]
+
+            [miri]
+            default_bindings_version = 2
+            """
+        let (store, document) = try load(original)
+        #expect(store.keptDefaults.count == 1)
+        let freed = document.text.replacingOccurrences(of: "[\"ctrl+alt-leftbracket\", \"fn-f1\"]", with: "\"fn-f1\"")
+        try freed.write(to: url, atomically: true, encoding: .utf8)
+        store.load(reduceMotion: false)
+        #expect(store.issue == nil)
+        #expect(store.keptDefaults.isEmpty)
+
+        try original.write(to: url, atomically: true, encoding: .utf8)
+        store.load(reduceMotion: false)
+        #expect(store.keptDefaults.count == 1)
+        try store.apply(
+            .remove(Chord([.control, .option], "rightbracket"), from: .engine(command: "window_stack_west")))
+        #expect(store.keptDefaults.isEmpty)
+    }
+
     @Test func aBlockedJoinMoveCanBlockItsCounterpartSoNoChordIsShared() throws {
         let original = """
             [bindings]
