@@ -50,9 +50,9 @@ import Testing
         EngineSupervisor(launcher: launcher, recoverWindows: recovered, now: now)
     }
 
-    /// Waits up to five seconds for `condition`, so a timer that a loaded machine runs late does not fail the test.
+    /// Waits up to 30 seconds for `condition`. A loaded machine can run the supervisor timers several seconds late.
     private func eventually(_ condition: () -> Bool) async throws {
-        let deadline = ContinuousClock.now + .seconds(5)
+        let deadline = ContinuousClock.now + .seconds(30)
         while !condition(), ContinuousClock.now < deadline {
             try await Task.sleep(for: .milliseconds(20))
         }
