@@ -17,7 +17,7 @@ The public release path and the complete acceptance runs follow.
 ## macOS tile restoration fixes
 
 This branch pins engine `03a7420`, which merges [engine PR #38](https://github.com/samanyudas/paneru/pull/38) for [#58](https://github.com/samanyudas/miri/issues/58) on top of engine PRs #36 and #37.
-A window dragged onto the menu bar or a screen edge that macOS fills or tiles now returns to its column from before the drag, with its own size and focus.
+When the engine detects a same-display fill or tile, a window dragged onto the menu bar or a screen edge returns to its column from before the drag, with its own size and focus.
 The engine undoes its own drop when macOS tiles the dropped window within one second.
 It also restores a fill that macOS finishes after the restore or puts back after the hold, and it matches move and resize notifications that name no window ID, which Helium sends often.
 Each change has a regression test that fails without it.
@@ -390,7 +390,7 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 
 ## Next
 
-Sam merges the `4890749` repin PR.
+Sam merges the `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70).
 Then verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Triage the unresolved character-binding warning in #26.
 
