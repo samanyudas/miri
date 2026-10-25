@@ -50,6 +50,14 @@ import Testing
         EngineSupervisor(launcher: launcher, recoverWindows: recovered, now: now)
     }
 
+    /// Waits up to five seconds for `condition`, so a timer that a loaded machine runs late does not fail the test.
+    private func eventually(_ condition: () -> Bool) async throws {
+        let deadline = ContinuousClock.now + .seconds(5)
+        while !condition(), ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+    }
+
     @Test func startsAndStopsCleanlyAndRecoversWindows() async {
         var recovered = 0
         let engine = supervisor(recovered: { recovered += 1 })
@@ -72,7 +80,7 @@ import Testing
         var stopped = false
         engine.stop { stopped = true }
         #expect(!stopped)
-        try await Task.sleep(for: EngineSupervisor.stopTimeout + .milliseconds(300))
+        try await eventually { stopped }
         #expect(launcher.engines[0].kills == 1)
         #expect(stopped)
         #expect(engine.state == .stopped)
@@ -85,7 +93,7 @@ import Testing
         launcher.engines[0].crash()
         #expect(engine.state == .restarting(crashes: 1))
         #expect(recovered == 1)
-        try await Task.sleep(for: EngineSupervisor.restartDelay + .milliseconds(300))
+        try await eventually { engine.state == .running(pid: 101) }
         #expect(engine.state == .running(pid: 101))
     }
 
