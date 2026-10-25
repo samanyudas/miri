@@ -17,8 +17,8 @@ The public release path and the complete acceptance runs follow.
 ## Drag target and empty display fixes
 
 This branch pins engine `4ba2bf0`, which merges [engine PR #39](https://github.com/samanyudas/paneru/pull/39) for [#72](https://github.com/samanyudas/miri/issues/72) and [engine PR #40](https://github.com/samanyudas/paneru/pull/40) for [#73](https://github.com/samanyudas/miri/issues/73).
-Engine PR #39 picks a drag's drop column and zone from the dragged window's centre, while the pointer still picks the display, the drop height, and the edge-hold scroll.
-Engine PR #40 scrolls the nearest column into view when closes leave the strip that a display shows with only slivers, without moving focus.
+Engine PR #39 implements the drag rule in [release scope](decisions/release-scope.md#dragging-windows).
+Engine PR #40 implements the expected result in #73, which keeps focus where it is.
 Each change has tests that fail without it, and Sol approved both.
 Live on Miri Developer on 26 October, a stacked Finder window grabbed at the right end of its top bar and dragged straight down showed the bottom insertion line and reordered the stack.
 Closing three Finder windows that filled the primary display, with focus on the built-in display, left Grok Bot and Ghostty in view and focus unchanged.
