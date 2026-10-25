@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-25 on branch `fix/stack-sizing-and-order`, based on `main` at `a78274f`
+Updated: 2026-10-25 on branch `fix/pin-engine-tile-restore`, based on `main` at `8833a37`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,31 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## macOS tile restoration fixes
+
+This branch pins engine `03a7420`, which merges [engine PR #38](https://github.com/samanyudas/paneru/pull/38) for [#58](https://github.com/samanyudas/miri/issues/58) on top of engine PRs #36 and #37.
+When the engine detects a same-display fill or tile, a window dragged onto the menu bar or a screen edge returns to its column from before the drag, with its own size and focus.
+The engine undoes its own drop when macOS tiles the dropped window within one second.
+It also restores a fill that macOS finishes after the restore or puts back after the hold, and it matches move and resize notifications that name no window ID, which Helium sends often.
+Each change has a regression test that fails without it.
+Live on Miri Developer with Helium, the old engine moved the window to a new column after an edge tile 3 of 3 times and kept the fill size in 3 of 3 fills; the fix passed 32 of 32 mixed tries.
+A drag that macOS does not fill can still leave the window 8 points up against the menu bar, which is a separate, older defect.
+A drop onto another display that macOS then tiles is not undone.
+
+## Stack resize and engine restart fixes
+
+This pin also brings engine `c2d7d38`, which merges [engine PR #36](https://github.com/samanyudas/paneru/pull/36) and [engine PR #37](https://github.com/samanyudas/paneru/pull/37).
+They fix five #40 defects that a live rerun on 25 October reproduced on `4890749`.
+Engine PR #36 keeps a height step off windows outside the step, keeps an even split beside a learned minimum, and lets a grow step pass a neighbour at its minimum.
+Engine PR #37 keeps windows on a hidden native Space managed after a restart, keeps each window on its strip's display at exit, and shows every display's restored strip inside the display padding.
+Each defect has a regression test that fails without its fix.
+The live rerun on Miri Developer passed every case on the built-in display with Helium, T3 Code and Ghostty, and three Restart Engine runs restored all windows that the scan reached.
+Evidence is in `/tmp/miri-e2e-20261025/` on Sam's Mac and is not published.
+
+Two gaps remain open.
+[#68](https://github.com/samanyudas/miri/issues/68): the startup brute-force scan has a 250 ms budget per app, so a Helium window with many tabs on a hidden Space can still go unmanaged until its Space is shown.
+[#69](https://github.com/samanyudas/miri/issues/69): restore does not keep a strip's scroll offset, so a strip whose focus moved starts at its first column after a restart.
 
 ## Stack sizing and order fixes
 
@@ -365,7 +390,7 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 
 ## Next
 
-Sam merges the `4890749` repin PR.
+Sam merges the `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70).
 Then verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Triage the unresolved character-binding warning in #26.
 
