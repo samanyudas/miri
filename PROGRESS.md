@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `fix/bracket-directions`, based on `main` at `c4833ce`
+Updated: 2026-10-26 on branch `feat/reserve-constrained-width`, based on `main` at `bf4529e`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,27 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Constrained window width and tile override
+
+This branch pins engine `6325638` for [#93](https://github.com/samanyudas/miri/issues/93), which merges [engine PR #42](https://github.com/samanyudas/paneru/pull/42).
+The [release scope](decisions/release-scope.md#stacks) records both accepted rules.
+A stacked window records the widest and narrowest widths it refused.
+A member at its widest no longer sets the column width, so it keeps its own size at the left edge and the rest of the column stays empty.
+A column also reserves a member's refused minimum width.
+Tiling a window with the float toggle while a floating rule matches it records an override in the engine's `tile-overrides.json`.
+The override survives an engine or Miri restart while that window stays open, and floating the window again or closing it ends the override.
+A window is known by its window number, process ID, and process start time.
+
+On 26 October, current `main` reproduced the defect on the primary display.
+System Settings, which accepts no more than 740 points of width, sat above Spotify, which accepts no less than 800.
+The column took 748 points, so T3 Code covered the right 52 points of Spotify.
+With the candidate, the column reserves 808 points, Spotify stays fully visible, and the desktop shows to the right of System Settings.
+Unstacking, restacking, reordering, a width step, a second stacked column of two Helium windows, and a move to the built-in display and back all kept that spacing.
+Miri Settings stayed tiled after an engine-only restart, and floating it again or closing it removed its override entry.
+These are automated observations on the real windows, driven through the engine's command socket, not physical keyboard input.
+A Miri restart with a non-Miri window under a floating rule was not observed, because Sam's configuration floats only Miri Settings, which closes when Miri quits.
+Automatic floating of fixed-size windows is still not built, so the override currently applies to rule-based floating only.
 
 ## Bracket directions for stack shortcuts
 
