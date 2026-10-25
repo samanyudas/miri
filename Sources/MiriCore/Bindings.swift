@@ -246,7 +246,7 @@ public struct DefaultBinding: Sendable {
     }
 
     /// Gives each `moved` default newer than `offered` its new chord, but only while the binding still has the exact
-    /// value Miri wrote and the new chord is free. Otherwise the binding keeps its value, and `keptMoves` reports it.
+    /// value Miri wrote and the new chord is free. Otherwise the binding keeps its value, and `keptMoves` finds it.
     private static func moving(in document: TOMLDocument, offered: Int, layout: KeyLayout) throws -> TOMLDocument {
         var moves = moved.filter { move in
             offered >= 1 && move.version > offered
@@ -268,17 +268,12 @@ public struct DefaultBinding: Sendable {
         return result
     }
 
-    /// The `moved` defaults that upgrading `before` into `after` left on their old chord, because another binding
-    /// holds the new one.
-    static func keptMoves(upgrading before: TOMLDocument, to after: TOMLDocument) -> [(
-        command: String, from: Chord, to: Chord
-    )] {
-        guard case .integer(let offered) = before.value(at: ["miri", "default_bindings_version"]),
-            case .integer(let reached) = after.value(at: ["miri", "default_bindings_version"])
-        else { return [] }
+    /// The `moved` defaults that `document` records as offered but that still have the exact value Miri wrote before
+    /// the move.
+    static func keptMoves(in document: TOMLDocument) -> [(command: String, from: Chord, to: Chord)] {
+        guard case .integer(let offered) = document.value(at: ["miri", "default_bindings_version"]) else { return [] }
         return moved.filter { move in
-            offered >= 1 && move.version > offered && move.version <= reached
-                && after.value(at: ["bindings", move.command]) == .string(move.from.description)
+            move.version <= offered && document.value(at: ["bindings", move.command]) == .string(move.from.description)
         }.map { ($0.command, $0.from, $0.to) }
     }
 

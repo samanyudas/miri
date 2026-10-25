@@ -344,6 +344,22 @@ struct DefaultBindingsTests {
         #expect(store.keptDefaults.isEmpty)
     }
 
+    @Test func aKeptJoinNoticeSurvivesARestart() throws {
+        let (first, _) = try load(
+            """
+            [bindings]
+            window_stack_west = "ctrl+alt-rightbracket"
+            window_stack_east = ["ctrl+alt-leftbracket", "fn-f1"]
+
+            [miri]
+            default_bindings_version = 2
+            """)
+        let (restarted, document) = try load()
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
+        #expect(restarted.keptDefaults.count == 1)
+        #expect(restarted.keptDefaults == first.keptDefaults)
+    }
+
     @Test func aBlockedJoinMoveCanBlockItsCounterpartSoNoChordIsShared() throws {
         let original = """
             [bindings]
@@ -389,7 +405,8 @@ struct DefaultBindingsTests {
         #expect(document.text.hasPrefix(original + "\n"))
         #expect(document.value(at: ["bindings", "window_stack_west"]) == .string("ctrl+alt-rightbracket"))
         #expect(document.value(at: ["bindings", "window_stack_east"]) == .string("ctrl+alt-leftbracket"))
-        #expect(store.keptDefaults.isEmpty)
+        // Each join still has its old default, and the other join holds its new one.
+        #expect(store.keptDefaults.map(\.wanted.key) == ["leftbracket", "rightbracket"])
     }
 
     @Test func leavesOldJoinDefaultsInABindingsTableMiriCannotEdit() throws {
