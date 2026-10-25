@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `fix/unknown-key-validation`, based on `main` at `014b50e`
+Updated: 2026-10-26 on branch `fix/drag-centre-and-empty-display`, based on `main` at `41bbae9`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,17 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Drag target and empty display fixes
+
+This branch pins engine `4ba2bf0`, which merges [engine PR #39](https://github.com/samanyudas/paneru/pull/39) for [#72](https://github.com/samanyudas/miri/issues/72) and [engine PR #40](https://github.com/samanyudas/paneru/pull/40) for [#73](https://github.com/samanyudas/miri/issues/73).
+Engine PR #39 implements the drag rule in [release scope](decisions/release-scope.md#dragging-windows).
+Engine PR #40 implements the expected result in #73, which keeps focus where it is.
+Each change has tests that fail without it, and Sol approved both.
+Live on Miri Developer on 26 October, a stacked Finder window grabbed at the right end of its top bar and dragged straight down showed the bottom insertion line and reordered the stack.
+Closing three Finder windows that filled the primary display, with focus on the built-in display, left Grok Bot and Ghostty in view and focus unchanged.
+Sam's real-mouse check for #72 is still open.
+[#74](https://github.com/samanyudas/miri/issues/74) tracks engine `window_writes` tests that fail under heavy machine load.
 
 ## Unknown-key configuration warnings
 
@@ -43,7 +54,7 @@ The issue stays open until the landed revision passes its acceptance checks.
 
 ## macOS tile restoration fixes
 
-This branch pins engine `03a7420`, which merges [engine PR #38](https://github.com/samanyudas/paneru/pull/38) for [#58](https://github.com/samanyudas/miri/issues/58) on top of engine PRs #36 and #37.
+Engine `03a7420` merges [engine PR #38](https://github.com/samanyudas/paneru/pull/38) for [#58](https://github.com/samanyudas/miri/issues/58) on top of engine PRs #36 and #37.
 When the engine detects a same-display fill or tile, a window dragged onto the menu bar or a screen edge returns to its column from before the drag, with its own size and focus.
 The engine undoes its own drop when macOS tiles the dropped window within one second.
 It also restores a fill that macOS finishes after the restore or puts back after the hold, and it matches move and resize notifications that name no window ID, which Helium sends often.
@@ -420,6 +431,7 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 The `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70), is merged.
 Verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
+Sam runs the real-mouse drag check in #72 on the merged build, then #72 can close.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
