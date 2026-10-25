@@ -265,12 +265,17 @@ Dragging a tiled window by its title bar moves it in the layout, on the same dis
 A drag moves only the window it grabs, and moving a whole stack stays a keyboard action.
 Floating windows never join the layout by drag, and dragging only moves them.
 
-- A drop over the middle half of a column moves the window into that column, between the two windows it is dropped between.
+The pointer picks the display and the drop height.
+On that display, the dragged window's centre picks the column and its zone, so where the title bar was grabbed does not matter.
+A centre outside the pointer's display counts as the nearest point inside that display.
+Sam accepted this rule on 25 October 2026 ([#72](https://github.com/samanyudas/miri/issues/72)).
+
+- A drop with the window's centre over the middle half of a column moves the window into that column, between the two windows it is dropped between.
   A drop above the top window makes it the top window, and a drop at the bottom of the screen makes it the bottom window.
   A drop on a single-window column forms a stack, and a drop within the window's own stack reorders it.
   The window takes that column's width, and the stack shares its height equally.
-- A drop over the outer quarter of a column moves the window to a new column on that side.
-- A drop in empty space moves the window to a new column at the nearest end of that strip.
+- A drop with the window's centre over the outer quarter of a column moves the window to a new column on that side.
+- A drop with the window's centre over empty space moves the window to a new column at the nearest end of that strip.
 - A window that becomes a new column keeps its width relative to its display.
 
 While dragging, a horizontal insertion line shows a drop into a column, and a vertical line shows a new column.
