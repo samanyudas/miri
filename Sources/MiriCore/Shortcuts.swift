@@ -45,11 +45,13 @@ public struct Shortcuts: Sendable {
     }
 
     public let document: TOMLDocument
+    private let layout: KeyLayout
     /// The file's `[bindings]` keys for each listed command, sorted, so edits go to the spelling the user wrote.
     private let keysByCommand: [String: [String]]
     public let others: [OtherBinding]
 
-    public init(document: TOMLDocument) {
+    public init(document: TOMLDocument, layout: KeyLayout = .positional) {
+        self.layout = layout
         self.document = document
         var keysByCommand: [String: [String]] = [:]
         var others: [OtherBinding] = []
@@ -59,7 +61,7 @@ public struct Shortcuts: Sendable {
             let command = EngineCommand.canonical(key) ?? key
             if DefaultBinding.row(for: command) != nil {
                 keysByCommand[command, default: []].append(key)
-            } else if let chords = Self.chords(in: entries[key]), !chords.isEmpty {
+            } else if let chords = Self.chords(in: entries[key], layout: layout), !chords.isEmpty {
                 others.append(OtherBinding(key: key, chords: chords))
             }
         }
@@ -70,9 +72,11 @@ public struct Shortcuts: Sendable {
     public func chords(for action: ShortcutAction) -> [Chord] {
         switch action {
         case .engine(let command):
-            (keysByCommand[command] ?? []).flatMap { Self.chords(in: document.value(at: ["bindings", $0])) ?? [] }
+            (keysByCommand[command] ?? []).flatMap {
+                Self.chords(in: document.value(at: ["bindings", $0]), layout: layout) ?? []
+            }
         case .stop:
-            document.value(at: ["miri", "stop_shortcut"]).map { Self.chords(in: $0) ?? [] } ?? [
+            document.value(at: ["miri", "stop_shortcut"]).map { Self.chords(in: $0, layout: layout) ?? [] } ?? [
                 DefaultBinding.stopChord
             ]
         }
@@ -153,13 +157,15 @@ public struct Shortcuts: Sendable {
     /// press first.
     public func stopChordsToRegister(layout: KeyLayout) -> [Chord] {
         let engineChords =
-            keysByCommand.values.joined().flatMap { Self.chords(in: document.value(at: ["bindings", $0])) ?? [] }
+            keysByCommand.values.joined().flatMap {
+                Self.chords(in: document.value(at: ["bindings", $0]), layout: layout) ?? []
+            }
             + others.flatMap(\.chords)
         return chords(for: .stop).filter { stop in !engineChords.contains { layout.conflicts($0, stop) } }
     }
 
     /// The problem with `[miri].stop_shortcut`, if any. Miri reads it itself, so the engine never reports it.
-    static func stopShortcutIssue(in document: TOMLDocument) -> ConfigurationIssue? {
+    static func stopShortcutIssue(in document: TOMLDocument, layout: KeyLayout = .positional) -> ConfigurationIssue? {
         let key = "miri.stop_shortcut"
         guard let value = document.value(at: ["miri", "stop_shortcut"]) else { return nil }
         let items: [TOMLValue] = if case .array(let items) = value { items } else { [value] }
@@ -172,7 +178,7 @@ public struct Shortcuts: Sendable {
             texts.append(text)
         }
         for text in texts {
-            if let problem = EngineKey.problem(in: text) {
+            if let problem = EngineKey.problem(in: text, layout: layout) {
                 return .invalidValue(key: key, message: "\(key): \(problem.message)")
             }
         }
@@ -181,10 +187,11 @@ public struct Shortcuts: Sendable {
 
     /// The chords a binding value names, skipping text the engine drops. Returns `nil` for a value that is not a
     /// string or an array of strings.
-    private static func chords(in value: TOMLValue?) -> [Chord]? {
+    private static func chords(in value: TOMLValue?, layout: KeyLayout) -> [Chord]? {
         switch value {
         case .string, .array:
-            texts(in: value).filter { EngineKey.problem(in: $0) == nil }.compactMap(Chord.init(exactEngineText:))
+            texts(in: value).filter { EngineKey.problem(in: $0, layout: layout) == nil }.compactMap(
+                Chord.init(exactEngineText:))
         default: nil
         }
     }

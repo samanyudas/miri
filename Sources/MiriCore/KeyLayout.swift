@@ -62,7 +62,8 @@ public struct KeyLayout: Equatable, Sendable {
 
     /// The key the engine binds for `name`: the layout's character first, then the US position, then a fixed key.
     public func keyCode(for name: String) -> UInt16? {
-        keys.first { $0.character == name }?.code
+        // Rust compares UTF-8 bytes, whereas Swift String equality also accepts canonical Unicode equivalents.
+        keys.first { $0.character.utf8.elementsEqual(name.utf8) }?.code
             ?? EngineKey.layoutKeys.first { $0.name == name }?.code
             ?? EngineKey.literalKeys.first { $0.name == name }?.code
     }

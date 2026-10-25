@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-25 on branch `fix/pin-engine-tile-restore`, based on `main` at `8833a37`
+Updated: 2026-10-26 on branch `fix/unknown-key-validation`, based on `main` at `014b50e`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,33 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Unknown-key configuration warnings
+
+The remaining [#26](https://github.com/samanyudas/miri/issues/26) warning gap is implemented on this branch.
+Miri validates binding names with the same keyboard-layout resolver it uses for recorded shortcuts.
+Unknown characters now produce the existing configuration error in Settings and the menu bar, and Miri leaves the invalid file unchanged.
+Valid US, German, and French layout characters remain accepted.
+The resolver compares UTF-8 bytes to match Rust, so a decomposed Unicode spelling does not match a composed character by mistake.
+This extends Sam's original engine and app repair in [PR #27](https://github.com/samanyudas/miri/pull/27), without changing its engine pin or commits.
+
+On 26 October, the signed current-source baseline reproduced the missing Settings warning for `ctrl+alt-?`, while engine `03a7420` logged `invalid key '?'`.
+The candidate showed the warning and preserved the invalid file byte-for-byte.
+Replacing it with the supported `ctrl+alt-=` cleared the warning.
+Sam manually confirmed the candidate's menu-bar configuration-error message.
+The original configuration was restored byte-for-byte after testing.
+These are automated native Settings observations and a manual menu-bar observation, not a fresh physical keyboard test.
+The issue retains Sam's earlier physical named-typo confirmation.
+Private local evidence is in `/tmp/miri26-evidence/` and the check logs in `/tmp/miri26-*.log`.
+Sol approved the final behavior in two GPT-6.1 Sol rounds on high effort.
+Its one Unicode finding is fixed, with a failing regression before its repair.
+All 148 final Swift tests pass.
+The full `make check` passed, including strict lint, 41 library and 803 engine tests, granted permission observation, native fixture recovery, and DMG packaging.
+After the one-line Unicode repair, the final Swift lint, signed build, granted permission observation, native fixture recovery, and DMG packaging passed again.
+The final signed app also showed the `?` warning and preserved the invalid configuration byte-for-byte, then the original configuration was restored.
+A fresh synthetic keyboard probe was inconclusive because Computer Use and the engine reported different focused windows.
+It is not additional physical-key evidence.
+The issue stays open until the landed revision passes its acceptance checks.
 
 ## macOS tile restoration fixes
 
@@ -390,9 +417,9 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 
 ## Next
 
-Sam merges the `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70).
-Then verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
-Triage the unresolved character-binding warning in #26.
+The `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70), is merged.
+Verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
+Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).

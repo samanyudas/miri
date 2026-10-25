@@ -250,7 +250,7 @@ public struct DefaultBinding: Sendable {
         return entries.keys.map { EngineCommand.canonical($0) ?? $0 }
     }
 
-    static func inspect(in document: TOMLDocument) -> BindingInspection {
+    static func inspect(in document: TOMLDocument, layout: KeyLayout = .positional) -> BindingInspection {
         guard let bindings = document.value(at: ["bindings"]) else { return .usable(droppedKeyIssue: nil) }
         guard case .table(let entries) = bindings else {
             return .rejected(.invalidValue(key: "bindings", message: "bindings must be a table of shortcuts."))
@@ -276,7 +276,7 @@ public struct DefaultBinding: Sendable {
                 return .rejected(.invalidValue(key: path, message: "\(path) names a command the engine does not know."))
             }
             for text in texts {
-                guard let problem = EngineKey.problem(in: text) else { continue }
+                guard let problem = EngineKey.problem(in: text, layout: layout) else { continue }
                 let issue = ConfigurationIssue.invalidValue(key: path, message: "\(path): \(problem.message)")
                 switch problem {
                 case .unknownKey: droppedKeyIssue = droppedKeyIssue ?? issue

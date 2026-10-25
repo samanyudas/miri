@@ -31,7 +31,7 @@ enum EngineKey {
             + "\u{2000}\u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{200A}"
             + "\u{2028}\u{2029}\u{202F}\u{205F}\u{3000}")
 
-    static func problem(in text: String) -> Problem? {
+    static func problem(in text: String, layout: KeyLayout = .positional) -> Problem? {
         var parts = text.unicodeScalars.split(separator: "-", omittingEmptySubsequences: false).map {
             String($0).trimmingCharacters(in: whitespace)
         }
@@ -46,16 +46,8 @@ enum EngineKey {
                 return .invalidModifier(text: text, name: name)
             }
         }
-        guard !isPlausible(key) else { return nil }
+        guard layout.keyCode(for: key) == nil else { return nil }
         return .unknownKey(text: text, name: key)
-    }
-
-    /// A named key, or a single character, which the engine reads from the current keyboard layout
-    /// (`generate_virtual_keymap`). The layout gives each key's unshifted character, so an uppercase letter never
-    /// matches. This check accepts any other single character, so a file reads the same under every layout.
-    static func isPlausible(_ key: String) -> Bool {
-        (key.count == 1 && key == key.lowercased()) || layoutKeys.contains { $0.name == key }
-            || literalKeys.contains { $0.name == key }
     }
 
     static let modifierNames: Set<String> = [

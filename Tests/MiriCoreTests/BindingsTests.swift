@@ -7,12 +7,14 @@ struct DefaultBindingsTests {
     private let directory = FileManager.default.temporaryDirectory.appending(path: "miri-bindings-\(UUID().uuidString)")
     private var url: URL { directory.appending(path: "config.toml") }
 
-    private func load(_ original: String? = nil) throws -> (ConfigurationStore, TOMLDocument) {
+    private func load(
+        _ original: String? = nil, layout: KeyLayout = KeyLayout(keys: [.init(code: 0x18, character: "=")])
+    ) throws -> (ConfigurationStore, TOMLDocument) {
         if let original {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             try original.write(to: url, atomically: true, encoding: .utf8)
         }
-        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri", layout: layout)
         store.load(reduceMotion: false)
         return (store, try TOMLDocument(String(contentsOf: url, encoding: .utf8)))
     }
@@ -308,7 +310,7 @@ struct DefaultBindingsTests {
         #expect(try String(contentsOf: url, encoding: .utf8) == original)
     }
 
-    @Test(arguments: ["ctrl+alt-=", "ctrl + lalt - leftarrow", "f5", "cmd+fn-keypad7", "shift-ü"])
+    @Test(arguments: ["ctrl+alt-=", "ctrl + lalt - leftarrow", "f5", "cmd+fn-keypad7"])
     func acceptsBindingsTheEngineReads(chord: String) throws {
         let (store, _) = try load("[bindings]\nquit = \"\(chord)\"\n")
         #expect(store.issue == nil)
@@ -377,6 +379,43 @@ struct DefaultBindingsTests {
 
     @Test func noDefaultUsesTheStopChord() {
         #expect(!DefaultBinding.table.flatMap(\.chords).contains(DefaultBinding.stopChord))
+    }
+
+    @Test(arguments: ["?", "ü", "🙂"])
+    func reportsACharacterTheLayoutCannotResolve(key: String) throws {
+        let original = "[bindings]\nwindow_focus_west = \"ctrl+alt-\(key)\"\n"
+        let (store, _) = try load(original)
+        #expect(store.issue != nil)
+        #expect(try String(contentsOf: url, encoding: .utf8) == original)
+    }
+
+    @MainActor @Test(arguments: [("US", "="), ("German", "ü"), ("French", "&")])
+    func acceptsCharactersFromTheSelectedLayout(name: String, key: String) throws {
+        let layout = try #require(KeyLayout(inputSourceID: "com.apple.keylayout.\(name)"))
+        let original = "[bindings]\nwindow_focus_west = \"ctrl+alt-\(key)\"\n"
+        let (store, _) = try load(original, layout: layout)
+        #expect(store.issue == nil)
+        #expect(
+            store.shortcuts?.chords(for: .engine(command: "window_focus_west")) == [Chord([.control, .option], key)])
+    }
+
+    @Test func validatesCharactersAgainWhenTheLayoutChanges() throws {
+        let original = "[bindings]\nwindow_focus_west = \"ctrl+alt-ü\"\n"
+        let (store, _) = try load(original)
+        store.layout = KeyLayout(keys: [.init(code: 0x21, character: "ü")])
+        store.load(reduceMotion: false)
+        #expect(store.issue == nil)
+        store.layout = .positional
+        store.load(reduceMotion: false)
+        #expect(store.issue != nil)
+    }
+
+    @Test func reportsACanonicallyEquivalentCharacterTheEngineDrops() throws {
+        let original = "[bindings]\nwindow_focus_west = \"ctrl+alt-u\u{0308}\"\n"
+        let layout = KeyLayout(keys: [.init(code: 0x21, character: "ü")])
+        let (store, _) = try load(original, layout: layout)
+        #expect(store.issue != nil)
+        #expect(try String(contentsOf: url, encoding: .utf8) == original)
     }
 
     @Test func theStopShortcutYieldsWhenAnotherBindingHasAnUnknownKey() throws {
