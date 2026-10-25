@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `fix/keyboard-focus-pointer`, based on `main` at `41bbae9`
+Updated: 2026-10-26 on branch `fix/keyboard-focus-pointer`, based on `main` at `c4833ce`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -22,7 +22,6 @@ The engine now defaults `focus_follows_mouse` and `mouse_follows_focus` to `fals
 Centre column, display focus, and display moves move the pointer only when `mouse_follows_focus` is on.
 Display focus on a display with no visible window focuses that display's Finder desktop, so its menu bar becomes active without a pointer move.
 `[options].focus_follows_mouse = true` is a hidden key that turns pointer-driven focus back on.
-The pin also brings engine `61c270c` and `4ba2bf0`, which [PR #76](https://github.com/samanyudas/miri/pull/76) pins with its documentation.
 
 On 26 October, the running build at engine `4ba2bf0` reproduced every reported symptom with synthetic input and throwaway Helium windows.
 Pointer movement focused the window under it, and keyboard focus, Centre column, display focus, display moves, a new window, and red-button closes moved the pointer.
@@ -33,6 +32,17 @@ The hidden key restored pointer focus, and the original configuration was restor
 These are automated native observations with synthetic events, not physical mouse or trackpad checks.
 Physical close-button use with a mouse and a trackpad, and closes in an overflowing stack, still need Sam's hardware check.
 Private local evidence is in `/tmp/miri90/` on Sam's Mac.
+
+## Drag target and empty display fixes
+
+[PR #76](https://github.com/samanyudas/miri/pull/76) pinned engine `4ba2bf0`, which merges [engine PR #39](https://github.com/samanyudas/paneru/pull/39) for [#72](https://github.com/samanyudas/miri/issues/72) and [engine PR #40](https://github.com/samanyudas/paneru/pull/40) for [#73](https://github.com/samanyudas/miri/issues/73).
+Engine PR #39 implements the drag rule in [release scope](decisions/release-scope.md#dragging-windows).
+Engine PR #40 implements the expected result in #73, which keeps focus where it is.
+Each change has tests that fail without it, and Sol approved both.
+Live on Miri Developer on 26 October, a stacked Finder window grabbed at the right end of its top bar and dragged straight down showed the bottom insertion line and reordered the stack.
+Closing three Finder windows that filled the primary display, with focus on the built-in display, left Grok Bot and Ghostty in view and focus unchanged.
+Sam's real-mouse check for #72 is still open.
+[#74](https://github.com/samanyudas/miri/issues/74) tracks engine `window_writes` tests that fail under heavy machine load.
 
 ## Unknown-key configuration warnings
 
@@ -63,7 +73,7 @@ The issue stays open until the landed revision passes its acceptance checks.
 
 ## macOS tile restoration fixes
 
-This branch pins engine `03a7420`, which merges [engine PR #38](https://github.com/samanyudas/paneru/pull/38) for [#58](https://github.com/samanyudas/miri/issues/58) on top of engine PRs #36 and #37.
+Engine `03a7420` merges [engine PR #38](https://github.com/samanyudas/paneru/pull/38) for [#58](https://github.com/samanyudas/miri/issues/58) on top of engine PRs #36 and #37.
 When the engine detects a same-display fill or tile, a window dragged onto the menu bar or a screen edge returns to its column from before the drag, with its own size and focus.
 The engine undoes its own drop when macOS tiles the dropped window within one second.
 It also restores a fill that macOS finishes after the restore or puts back after the hold, and it matches move and resize notifications that name no window ID, which Helium sends often.
@@ -440,6 +450,7 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 The `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70), is merged.
 Verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
+Sam runs the real-mouse drag check in #72 on the merged build, then #72 can close.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
