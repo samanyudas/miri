@@ -34,7 +34,7 @@ That layout case exists without this branch and may explain [#58](https://github
 
 ## Maximized windows across displays
 
-This branch pins engine `7e937a1` from [engine PR #44](https://github.com/samanyudas/paneru/pull/44) for [#87](https://github.com/samanyudas/miri/issues/87), and it is stacked on the title-bar maximize branch.
+This branch pins engine `0ce219c` from [engine PR #44](https://github.com/samanyudas/paneru/pull/44) for [#87](https://github.com/samanyudas/miri/issues/87), and it is stacked on the title-bar maximize branch.
 A maximized window that a display command moves, or that a title-bar drag drops on another display, fills that display's usable area.
 A new column that arrives from another display is never wider than the destination's tiling area.
 
@@ -51,7 +51,13 @@ Engine `7e937a1` therefore remembers the pressed window and uses the display und
 With it, title-bar drags down and up filled the same frames, and a low drop within the large display left Finder at `0,885 2560x1410`, although its centre was over the built-in display.
 A drag within one display left the window where it was dropped, and the next double-click restored its slot.
 These are automated observations on real windows, driven by synthetic mouse events and engine commands, not physical input.
-Not checked live: a horizontal display arrangement, a window that macOS Fill filled, and Helium.
+Engine `0ce219c` adds only a test for side-by-side displays, and that test fails without the fix.
+Later on 26 October, with the same fix, a throwaway Helium window passed the same display-command, drag, low-drop, and restore checks with the same frames.
+After macOS Fill, `movedisplay south` gave Helium `1264,1486 958x1270`, inside the built-in display's tiling area.
+Not checked live yet: a horizontal display arrangement and physical mouse input.
+
+macOS Fill on a tiled window on the large display leaves it at `1352,38 1200x1410`, so its bottom edge is 8 points below the display.
+Sam's build from `keyboard-focus-pointer` does the same, so this branch did not cause it.
 
 ## Keyboard focus and pointer separation
 
