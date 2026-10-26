@@ -357,27 +357,29 @@ They do not establish completed modules or verified engine capabilities.
 ### Stacking and default shortcut contracts
 
 Control-Option is the default modifier for strip commands.
-Arrow and Vim alternatives apply where the accepted reference supplies them.
+Every directional action accepts the arrow keys, Vim keys, and W, A, S, and D with the same modifiers, as [issue #79](https://github.com/samanyudas/miri/issues/79) requires.
 The following table records the selected v1 defaults without claiming tested action identifiers or parser syntax.
 
 | Action | Default shortcut | Alternative |
 | --- | --- | --- |
-| Focus column left | Control-Option-Left | Control-Option-H |
-| Focus column right | Control-Option-Right | Control-Option-L |
-| Focus window above within column | Control-Option-Up | Control-Option-K |
-| Focus window below within column | Control-Option-Down | Control-Option-J |
-| Focus first column | Control-Option-Command-Left | |
-| Focus last column | Control-Option-Command-Right | |
+| Focus column left | Control-Option-Left | Control-Option-H, Control-Option-A |
+| Focus column right | Control-Option-Right | Control-Option-L, Control-Option-D |
+| Focus window above within column | Control-Option-Up | Control-Option-K, Control-Option-W |
+| Focus window below within column | Control-Option-Down | Control-Option-J, Control-Option-S |
+| Focus first column or monitor left | Control-Option-Command-Left | Control-Option-Command-H, Control-Option-Command-A |
+| Focus last column or monitor right | Control-Option-Command-Right | Control-Option-Command-L, Control-Option-Command-D |
+| Focus monitor above | Control-Option-Command-Up | Control-Option-Command-K, Control-Option-Command-W |
+| Focus monitor below | Control-Option-Command-Down | Control-Option-Command-J, Control-Option-Command-S |
 | Jump to column 1 through 9 | Control-Option-1 through Control-Option-9 | |
-| Move column left | Control-Option-Shift-Left | Control-Option-Shift-H |
-| Move column right | Control-Option-Shift-Right | Control-Option-Shift-L |
-| Move window up within column | Control-Option-Shift-Up | Control-Option-Shift-K |
-| Move window down within column | Control-Option-Shift-Down | Control-Option-Shift-J |
-| Move column to first position | Control-Option-Command-Shift-Left | |
-| Move column to last position | Control-Option-Command-Shift-Right | |
-| Send focused window to next display | Control-Option-N | |
-| Focus monitor above, left, below, or right | Control-Option-Command with W, A, S, or D, respectively | |
-| Move focused window to monitor above, left, below, or right | Control-Option-Command-Shift with W, A, S, or D, respectively | |
+| Move column left | Control-Option-Shift-Left | Control-Option-Shift-H, Control-Option-Shift-A |
+| Move column right | Control-Option-Shift-Right | Control-Option-Shift-L, Control-Option-Shift-D |
+| Move window up within column | Control-Option-Shift-Up | Control-Option-Shift-K, Control-Option-Shift-W |
+| Move window down within column | Control-Option-Shift-Down | Control-Option-Shift-J, Control-Option-Shift-S |
+| Move column to first position or monitor left | Control-Option-Command-Shift-Left | Control-Option-Command-Shift-H, Control-Option-Command-Shift-A |
+| Move column to last position or monitor right | Control-Option-Command-Shift-Right | Control-Option-Command-Shift-L, Control-Option-Command-Shift-D |
+| Move column to monitor above | Control-Option-Command-Shift-Up | Control-Option-Command-Shift-K, Control-Option-Command-Shift-W |
+| Move column to monitor below | Control-Option-Command-Shift-Down | Control-Option-Command-Shift-J, Control-Option-Command-Shift-S |
+| Send column to next display | Control-Option-N | |
 | Stop window manager | Control-Option-Q | |
 | Cycle preset widths forward | Control-Option-R | |
 | Maximize or restore window | Control-Option-F | |

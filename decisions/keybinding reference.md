@@ -20,47 +20,70 @@ The remaining differences from the accepted behavior are in [Engine mapping](#en
 | ⌘ | Command |
 
 Control-Option leaves ordinary Option typing and Command app commands available.
-Strip navigation and movement accept both arrow keys and Vim keys.
-Directional monitor commands use W, A, S, and D.
+Every directional action accepts the arrow keys, Vim keys, and W, A, S, and D, with the same modifiers.
+Left uses Left Arrow, H, or A.
+Down uses Down Arrow, J, or S.
+Up uses Up Arrow, K, or W.
+Right uses Right Arrow, L, or D.
+No default shortcut needs the Fn key.
+Sam chose this rule in [issue #79](https://github.com/samanyudas/miri/issues/79).
 
 ## Navigation and movement
 
-| Action | Default shortcut | Alternative |
+| Action | Default shortcut | Alternatives |
 | --- | --- | --- |
-| Focus column left | ⌃⌥← | ⌃⌥H |
-| Focus column right | ⌃⌥→ | ⌃⌥L |
-| Focus window above within column | ⌃⌥↑ | ⌃⌥K |
-| Focus window below within column | ⌃⌥↓ | ⌃⌥J |
-| Focus first column | ⌃⌥⌘← | |
-| Focus last column | ⌃⌥⌘→ | |
+| Focus column left | ⌃⌥← | ⌃⌥H, ⌃⌥A |
+| Focus column right | ⌃⌥→ | ⌃⌥L, ⌃⌥D |
+| Focus window above within column | ⌃⌥↑ | ⌃⌥K, ⌃⌥W |
+| Focus window below within column | ⌃⌥↓ | ⌃⌥J, ⌃⌥S |
+| Focus first column or monitor left | ⌃⌥⌘← | ⌃⌥⌘H, ⌃⌥⌘A |
+| Focus last column or monitor right | ⌃⌥⌘→ | ⌃⌥⌘L, ⌃⌥⌘D |
+| Focus monitor above | ⌃⌥⌘↑ | ⌃⌥⌘K, ⌃⌥⌘W |
+| Focus monitor below | ⌃⌥⌘↓ | ⌃⌥⌘J, ⌃⌥⌘S |
 | Jump to column 1 through 9 | ⌃⌥1 through ⌃⌥9 | |
-| Move column left | ⌃⌥⇧← | ⌃⌥⇧H |
-| Move column right | ⌃⌥⇧→ | ⌃⌥⇧L |
-| Move window up within column | ⌃⌥⇧↑ | ⌃⌥⇧K |
-| Move window down within column | ⌃⌥⇧↓ | ⌃⌥⇧J |
-| Move column to first position | ⌃⌥⌘⇧← | |
-| Move column to last position | ⌃⌥⌘⇧→ | |
-| Send focused window to next display | ⌃⌥N | |
-| Focus monitor above | ⌃⌥⌘W | |
-| Focus monitor left | ⌃⌥⌘A | |
-| Focus monitor below | ⌃⌥⌘S | |
-| Focus monitor right | ⌃⌥⌘D | |
-| Move focused window to monitor above | ⌃⌥⌘⇧W | |
-| Move focused window to monitor left | ⌃⌥⌘⇧A | |
-| Move focused window to monitor below | ⌃⌥⌘⇧S | |
-| Move focused window to monitor right | ⌃⌥⌘⇧D | |
+| Move column left | ⌃⌥⇧← | ⌃⌥⇧H, ⌃⌥⇧A |
+| Move column right | ⌃⌥⇧→ | ⌃⌥⇧L, ⌃⌥⇧D |
+| Move window up within column | ⌃⌥⇧↑ | ⌃⌥⇧K, ⌃⌥⇧W |
+| Move window down within column | ⌃⌥⇧↓ | ⌃⌥⇧J, ⌃⌥⇧S |
+| Move column to first position or monitor left | ⌃⌥⌘⇧← | ⌃⌥⌘⇧H, ⌃⌥⌘⇧A |
+| Move column to last position or monitor right | ⌃⌥⌘⇧→ | ⌃⌥⌘⇧L, ⌃⌥⌘⇧D |
+| Move column to monitor above | ⌃⌥⌘⇧↑ | ⌃⌥⌘⇧K, ⌃⌥⌘⇧W |
+| Move column to monitor below | ⌃⌥⌘⇧↓ | ⌃⌥⌘⇧J, ⌃⌥⌘⇧S |
+| Send column to next display | ⌃⌥N | |
 | Stop window manager | ⌃⌥Q | |
+
+These actions have no default shortcut, and Settings lists them for custom shortcuts:
+
+- Focus first column, and Focus last column.
+- Move column to first position, and Move column to last position.
+- Focus monitor left, and Focus monitor right.
+- Move column to monitor left, and Move column to monitor right.
 
 Numbered jumps select columns rather than individual windows.
 Within a stack, the selected column's last-focused window receives focus.
-The W, A, S, and D monitor shortcuts keep the choice made in an earlier design round.
-They choose the display that lies in that direction in the physical arrangement in **System Settings > Displays**.
+
+Focus first column or monitor left focuses the current display's first column.
+When that column already has focus, the same shortcut focuses the display to the left.
+Focus last column or monitor right does the same toward the last column and the display to the right.
+Focus monitor above and Focus monitor below focus the neighboring display at once.
+A focused display gives focus to its last-focused visible window, otherwise to its most visible window.
+These focus commands move no windows, switch no native desktops, and leave the pointer where it is.
+
+Move column to first position or monitor left moves the focused column to the current display's first position.
+When the column is already first, the same shortcut moves it to the display to the left.
+Move column to last position or monitor right does the same toward the last position and the display to the right.
+Move column to monitor above, Move column to monitor below, and Send column to next display move the column at once.
+Every display move takes the whole column, so each stack member moves with it in the same order, and the focused member keeps focus.
+To move one member alone, pop it out into its own column first.
+The arriving column goes immediately after the destination's active column, which is the column a display focus would select there.
+With destination columns X, Y, and Z and Y active, moving column S there gives X, Y, S, Z.
+An empty destination receives the column as its first column.
+When no display lies in the requested direction, the shortcut does nothing, so a column or focus stays at the current display's end.
+
+Display directions follow the physical arrangement in **System Settings > Displays**.
 Focus and movement within a column stay on the current display at the column's top or bottom edge.
-Only the W, A, S, and D monitor shortcuts and ⌃⌥N cross to another display.
+Only the monitor shortcuts, the edge-or-monitor shortcuts at a display's end, and ⌃⌥N cross to another display.
 [Release scope](release-scope.md#multiple-monitors) requires this split, which settles the question in miri#23.
-A monitor move appends the focused window to the destination strip.
-When that strip overflows and automatic centering is off, the arriving column ends at the usable right edge.
-Later scrolling, centering, and snapping can move the strip from that position.
 Stop window manager runs the same Stop as the menu bar, and Miri registers it itself.
 Its shortcuts are customizable and live in `[miri].stop_shortcut`, as one chord string or an array of chord strings in the engine's syntax.
 An absent key means ⌃⌥Q, and an empty array means Stop has no shortcut.
@@ -143,13 +166,16 @@ Any action not listed here maps directly, and the live run confirmed it.
 | Action | Engine command | Difference from the accepted behavior |
 | --- | --- | --- |
 | Focus first or last column, Jump to column 1 through 9 | `window_focus_first`, `window_focus_last`, `window_focus_1` through `window_focus_9` | None. The engine counts columns, and in a stack it focuses the window that last had focus in that column. |
+| Focus first column or monitor left, Focus last column or monitor right | `window_focusedge_west`, `window_focusedge_east` | None. |
+| Move column to first position or monitor left, Move column to last position or monitor right | `window_moveedge_west`, `window_moveedge_east` | None. |
 | Cycle preset widths forward | `window_resize` | None. |
 | Make column wider or narrower | `window_step_grow`, `window_step_shrink` | None. Each press changes the width by `window_resize_step` of the display, 0.05 by default, and stops at full width without wrapping. |
 | Make window taller or shorter | `window_vertical_step_grow`, `window_vertical_step_shrink` | The height changes only for a window in a stack, because a column's only window always fills the display height. The neighbouring window absorbs the change and keeps a layout slot of at least 200 points, including the gap. With the default 8-point gap, the native window keeps at least 192 points, subject to its own minimum height. |
 | Centre column | `window_center` | None. The pointer stays where it is. |
 | Maximize or restore window | `window_maximize` | None. `window_fullwidth` is the engine's older name for the same command, so a file that binds it keeps working, and Settings lists it under this action. |
 | Focus monitor above, left, below, or right | `window_focusdisplay_north`, `_west`, `_south`, `_east` | None. Focus goes to the display's last-focused window when it is visible, otherwise to its most visible window. A display with no visible window gets its desktop focused, so its menu bar becomes active and shows Finder. The pointer stays where it is. |
-| Move focused window to monitor above, left, below, or right | `window_movedisplay_north`, `_west`, `_south`, `_east` | None. Focus follows the window. |
+| Move column to monitor above, left, below, or right | `window_movedisplay_north`, `_west`, `_south`, `_east` | None. Focus follows the column. |
+| Send column to next display | `window_nextdisplay` | None. Focus follows the column. |
 | Stop window manager | | Miri's own shortcut, because the engine `quit` command ends the engine, and the app treats that exit as a crash and restarts it. |
 | Toggle column between stacked and tabbed | | This action is deferred to v2. |
 
@@ -167,10 +193,23 @@ A join binding that the user changed or deleted stays as it is.
 An unversioned file and a `[bindings]` table in a form Miri does not rewrite keep their join bindings until the user resets the shortcuts.
 The engine adds no bracket bindings of its own, because its default configuration has an empty `[bindings]` table.
 
+Version 4 of the default set gives every directional action its arrow, Vim, and W, A, S, and D chords ([#79](https://github.com/samanyudas/miri/issues/79)).
+It retires the defaults of Focus first column, Focus last column, Move column to first position, Move column to last position, Focus monitor left, Focus monitor right, Move column to monitor left, and Move column to monitor right.
+The four edge-or-monitor actions take over their chords.
+On upgrade from a recorded version 1, 2, or 3, Miri removes each retired default only while it still has the exact value Miri wrote.
+It adds the new chords to a directional binding only while that binding still has the exact value Miri wrote and every new chord is free.
+It then adds each edge-or-monitor action with its free chords.
+When the user deleted every retired default that an edge-or-monitor action replaces, that action stays unbound.
+A binding the user changed stays as it is.
+When another binding holds a chord that version 4 would add, that binding keeps the chord, and the Shortcuts settings page reports which action lacks it and which action holds it.
+An unversioned file keeps its bindings, gains no new chords on existing actions, and gains no edge-or-monitor action while it binds an action that one replaces.
+A `[bindings]` table in a form Miri does not rewrite stays unchanged.
+Reset to Defaults writes the version 4 set in every case.
+
 Before [#106](https://github.com/samanyudas/miri/issues/106), the default for ⌃⌥F was `window_fullwidth`, which made a full-width column with gaps.
 Miri now writes `window_maximize` for a new file or a reset to defaults.
 An existing `window_fullwidth` binding stays as it is, because the engine reads it as `window_maximize`.
-The default set therefore stays at version 3, and Miri adds no second binding for the action.
+Miri adds no second binding for the action.
 
 ## Binding customization
 

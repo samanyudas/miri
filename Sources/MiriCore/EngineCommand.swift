@@ -39,6 +39,7 @@ enum EngineCommand {
             let direction = argument == nil || argument == form ? words.count > 2 ? words[2] : nil : argument
             return resizeDirection(direction).map { ["vertical", form, $0] }
         case "focusdisplay", "movedisplay": return argument.flatMap(compass).map { [verb, $0] }
+        case "focusedge", "moveedge": return argument == "west" || argument == "east" ? [verb, argument!] : nil
         case "stack": return side(argument, default: "west").map { [verb, $0] }
         case "unstack": return side(argument, default: "east").map { [verb, $0] }
         // `fullwidth` is the engine's older name for `maximize` (argv.rs line 99).

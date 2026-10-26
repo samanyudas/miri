@@ -31,7 +31,7 @@ public final class ConfigurationStore {
     /// The Stop shortcuts Miri registers: `[miri].stop_shortcut` without the chords a `[bindings]` entry uses.
     /// When the engine would reject `[bindings]`, this keeps its previous value, as the engine keeps its old bindings.
     public private(set) var stopChordsToRegister = [DefaultBinding.stopChord]
-    /// The moved defaults that kept their old chord, because another binding holds the new one.
+    /// The default chords that an upgrade could not give an action, because another binding holds them.
     public private(set) var keptDefaults: [KeptDefault] = []
     /// The current file, when it was read correctly. Writes require it.
     private var document: TOMLDocument?
@@ -177,16 +177,40 @@ public final class ConfigurationStore {
         refreshKeptDefaults(in: next)
     }
 
-    /// Reports each moved default that kept its old chord because another binding holds the new one.
+    /// Reports each changed default that kept its old chords, and each chord of a version 4 or later action that
+    /// another binding holds, because another binding holds the chord it would have received.
     private func refreshKeptDefaults(in document: TOMLDocument) {
         let shortcuts = Shortcuts(document: document, layout: layout)
-        keptDefaults = DefaultBinding.keptMoves(in: document).compactMap { move in
-            let action = ShortcutAction.engine(command: EngineCommand.canonical(move.command)!)
-            guard case .usedBy(let owner) = shortcuts.rejection(adding: move.to, to: action, layout: layout) else {
+        func owner(of chord: Chord, for action: ShortcutAction) -> String? {
+            guard case .usedBy(let owner) = shortcuts.rejection(adding: chord, to: action, layout: layout) else {
                 return nil
             }
-            return KeptDefault(action: action, kept: move.from, wanted: move.to, owner: owner)
+            return owner
         }
+        let changes = DefaultBinding.keptChanges(in: document).compactMap { change -> KeptDefault? in
+            let action = ShortcutAction.engine(command: EngineCommand.canonical(change.command)!)
+            return change.wanted.lazy.compactMap { chord in
+                owner(of: chord, for: action).map {
+                    KeptDefault(action: action, kept: change.kept, wanted: chord, owner: $0)
+                }
+            }.first
+        }
+        guard case .integer(let offered) = document.value(at: ["miri", "default_bindings_version"]) else {
+            keptDefaults = changes
+            return
+        }
+        let additions = DefaultBinding.table.filter {
+            $0.version >= DefaultBinding.reportsHeldChordsSince && $0.version <= offered
+        }.flatMap { row -> [KeptDefault] in
+            let action = ShortcutAction.engine(command: EngineCommand.canonical(row.command)!)
+            let kept = shortcuts.chords(for: action)
+            return row.chords.filter { chord in !kept.contains { layout.conflicts($0, chord) } }.compactMap { chord in
+                owner(of: chord, for: action).map {
+                    KeptDefault(action: action, kept: kept, wanted: chord, owner: $0)
+                }
+            }
+        }
+        keptDefaults = changes + additions
     }
 
     /// Replaces the file with `next`, after backing up `current` when `backupReason` names why.

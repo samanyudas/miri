@@ -206,7 +206,7 @@ import Testing
             inner_gap = 12
             """
         let result = try shortcuts(original).resettingToDefaults()
-        let defaults = DefaultBinding.table.map { row in
+        let defaults = DefaultBinding.table.filter { !$0.chords.isEmpty }.map { row in
             let value =
                 row.chords.count == 1
                 ? "\"\(row.chords[0])\"" : "[" + row.chords.map { "\"\($0)\"" }.joined(separator: ", ") + "]"
@@ -221,13 +221,13 @@ import Testing
             \(defaults)# Custom set.
 
             [miri]
-            default_bindings_version = 3
+            default_bindings_version = 4
             inner_gap = 12
             """
         #expect(result.text == expected)
         #expect(
             result.value(at: ["bindings", "window_focus_west"])
-                == .array([.string("ctrl+alt-leftarrow"), .string("ctrl+alt-h")]))
+                == .array([.string("ctrl+alt-leftarrow"), .string("ctrl+alt-h"), .string("ctrl+alt-a")]))
         #expect(result.value(at: ["bindings", "window_resize"]) == .string("ctrl+alt-r"))
     }
 
@@ -303,7 +303,7 @@ import Testing
         let after = try TOMLDocument(String(contentsOf: url, encoding: .utf8))
         #expect(
             after.value(at: ["bindings", "window_focus_west"])
-                == .array([.string("ctrl+alt-leftarrow"), .string("ctrl+alt-h")]))
+                == .array([.string("ctrl+alt-leftarrow"), .string("ctrl+alt-h"), .string("ctrl+alt-a")]))
         #expect(store.shortcuts?.document.text == after.text)
     }
 
