@@ -2,8 +2,8 @@ import Foundation
 
 /// The engine's reading of a chord's text, such as `ctrl+alt-leftarrow`, so Miri can report a chord it cannot read.
 ///
-/// The engine splits the text on `-` and trims each part (`vendor/paneru/src/config.rs` line 1379), reads the
-/// modifiers with `parse_modifiers` (line 1736), and looks the key up with `keycode_for_key_name` (line 1718).
+/// The engine splits the text on `-` and trims each part (`resolve_keybinding_str` in `vendor/paneru/src/config.rs`),
+/// reads the modifiers with `parse_modifiers`, and looks the key up with `keycode_for_key_name`.
 /// Names are case-sensitive. `scripts/check-compat.py` checks the tables below against the engine's.
 enum EngineKey {
     enum Problem {
@@ -54,8 +54,8 @@ enum EngineKey {
         "alt", "lalt", "ralt", "shift", "lshift", "rshift", "cmd", "lcmd", "rcmd", "ctrl", "lctrl", "rctrl", "fn",
     ]
 
-    /// `virtual_keycode` (config.rs line 1836): keys named by their position on a US keyboard, in the engine's order,
-    /// which is also the order it reads the layout's characters in.
+    /// `virtual_keycode`: keys named by their position on a US keyboard, in the engine's order, which is also the order
+    /// it reads the layout's characters in.
     static let layoutKeys: [(name: String, code: UInt16)] = [
         ("a", 0x00), ("s", 0x01), ("d", 0x02), ("f", 0x03), ("h", 0x04), ("g", 0x05), ("z", 0x06), ("x", 0x07),
         ("c", 0x08), ("v", 0x09), ("section", 0x0a), ("b", 0x0b), ("q", 0x0c), ("w", 0x0d), ("e", 0x0e), ("r", 0x0f),
@@ -70,7 +70,12 @@ enum EngineKey {
         ("keypad8", 0x5b), ("keypad9", 0x5c),
     ]
 
-    /// `literal_keycode` (config.rs line 1931): keys that every layout places in the same position.
+    /// `is_keypad`: whether a key code is on the numeric keypad.
+    static func isKeypad(_ code: UInt16) -> Bool {
+        layoutKeys.contains { $0.code == code && $0.name.hasPrefix("keypad") }
+    }
+
+    /// `literal_keycode`: keys that every layout places in the same position.
     static let literalKeys: [(name: String, code: UInt16)] = [
         ("return", 0x24), ("tab", 0x30), ("space", 0x31), ("delete", 0x33), ("escape", 0x35), ("command", 0x37),
         ("shift", 0x38), ("capslock", 0x39), ("option", 0x3a), ("control", 0x3b), ("rightcommand", 0x36),

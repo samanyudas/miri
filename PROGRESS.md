@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `fix/move-refused-width-visible`, based on `main` at `3710a40`
+Updated: 2026-10-26 on branch `fix/azerty-digit-shortcuts`, based on `main` at `12323e5`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,19 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## AZERTY digit shortcuts
+
+[#31](https://github.com/samanyudas/miri/issues/31) is implemented on this branch, which pins engine `28f550f` from [engine PR #53](https://github.com/samanyudas/paneru/pull/53).
+On AZERTY only the keypad types digits without Shift, so the engine bound `ctrl+alt-1` to keypad 1.
+A key name now matches a main key's character, then a US position, then a keypad key's character, then a fixed key.
+The digit names therefore press the top row, and `keypad1` and the other keypad names still press the keypad.
+`KeyLayout.keyCode(for:)` follows the same order, so Settings labels ⌃⌥1 as ⌃⌥& on AZERTY, which is the key's unshifted character.
+
+On 26 October, a probe test that calls the engine's own `generate_virtual_keymap` ran with the French layout selected.
+Engine `d7a4c3f` resolved `1`, `2`, and `0` to keypad codes 83, 84, and 82, and the fix resolved them to top-row codes 18, 19, and 29.
+The fixed app's engine, started under French, logged the same top-row bindings for ⌃⌥1, ⌃⌥2, and ⌃⌥0.
+Synthetic key presses were unreliable in that run with both builds, so no press result counts as evidence.
 
 ## macOS Fill near the screen bottom
 
@@ -538,8 +551,8 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
   With French, German, and Dvorak each selected, the recorder wrote `ctrl+alt+shift-a`, `-q`, and `-'` for the key at the US Q position.
   A freshly started engine ran each recorded binding.
   With the engine running, switching to French and back to Australian restarted the engine each time, with process IDs 5840, 6259, and 6268.
-  On AZERTY the default digit shortcuts, such as ⌃⌥1, reach the keypad digits, because the top row types symbols without Shift.
-  The page labels them as keypad keys, and [#31](https://github.com/samanyudas/miri/issues/31) tracks the engine fix.
+  On AZERTY the default digit shortcuts, such as ⌃⌥1, reached the keypad digits, because the top row types symbols without Shift.
+  [#31](https://github.com/samanyudas/miri/issues/31) later moved them to the top row.
   GPT-6.1 Sol reviewed the branch in four rounds and approved it after the layout restart and the upgrade fixes.
 - `feat/gesture-controls` is phase 3a, the strip gesture controls without pointer-versus-focus targeting.
   Settings has a Gestures tab with Off, Three fingers, and Four fingers (recommended), and Reverse swipe direction.
