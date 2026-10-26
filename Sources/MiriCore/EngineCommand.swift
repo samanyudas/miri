@@ -1,9 +1,9 @@
 /// The engine's reading of a `[bindings]` key, so that two spellings of one command compare equal.
 ///
-/// The engine splits a key on `_` (`vendor/paneru/src/config.rs` line 1177), parses the words with `parse_command`
-/// (`vendor/paneru/src/types/argv.rs` lines 43-168), and ignores words after the ones a command needs. Several keys
+/// The engine splits a key on `_` (`vendor/paneru/src/config.rs` line 1214), parses the words with `parse_command`
+/// (`vendor/paneru/src/types/argv.rs` lines 43-171), and ignores words after the ones a command needs. Several keys
 /// therefore name one command, such as `window_grow`, `window_resize`, and `window_resize_grow`. This mirrors that
-/// parser at the pinned engine and writes the result in the engine's own encoding (`to_argv`, argv.rs lines 176-256).
+/// parser at the pinned engine and writes the result in the engine's own encoding (`to_argv`, argv.rs lines 173-262).
 enum EngineCommand {
     /// The engine's own spelling of the command a key names, such as `window_resize_grow` for `window_grow`.
     /// Returns `nil` for a key the engine rejects.
@@ -41,7 +41,9 @@ enum EngineCommand {
         case "focusdisplay", "movedisplay": return argument.flatMap(compass).map { [verb, $0] }
         case "stack": return side(argument, default: "west").map { [verb, $0] }
         case "unstack": return side(argument, default: "east").map { [verb, $0] }
-        case "center", "fullwidth", "manage", "equalize", "balance", "tabbeddisplay", "nextdisplay",
+        // `fullwidth` is the engine's older name for `maximize` (argv.rs line 99).
+        case "fullwidth": return ["maximize"]
+        case "center", "maximize", "manage", "equalize", "balance", "tabbeddisplay", "nextdisplay",
             "nextdisplaysend", "snap", "copyrule", "virtualadd", "togglefloatlayer":
             return [verb]
         case "virtualfocus": return argument.flatMap(direction).map { [verb, $0] }
@@ -49,7 +51,7 @@ enum EngineCommand {
             return argument.flatMap(workspace).map { [verb, $0] }
         case "virtual", "virtualmove", "virtualsend":
             guard let argument else { return nil }
-            // A number selects the `num` form, so `window_virtual_2` is `window_virtualnum_2` (argv.rs line 155).
+            // A number selects the `num` form, so `window_virtual_2` is `window_virtualnum_2` (argv.rs line 158).
             if number(argument, max: UInt64(UInt32.max)) != nil {
                 return workspace(argument).map { [verb + "num", $0] }
             }
@@ -80,13 +82,13 @@ enum EngineCommand {
         return String(value)
     }
 
-    /// `ResizeDirection::parse` (commands.rs line 208), with `grow` when the word is absent (argv.rs line 140).
+    /// `ResizeDirection::parse` (commands.rs line 208), with `grow` when the word is absent (argv.rs line 143).
     private static func resizeDirection(_ word: String?) -> String? {
         guard let word else { return "grow" }
         return word == "grow" || word == "shrink" ? word : nil
     }
 
-    /// `Side::parse` (commands.rs line 179), with the default for an absent side (argv.rs line 145).
+    /// `Side::parse` (commands.rs line 179), with the default for an absent side (argv.rs line 148).
     private static func side(_ word: String?, default fallback: String) -> String? {
         guard let word else { return fallback }
         return word == "west" || word == "east" ? word : nil

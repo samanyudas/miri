@@ -154,7 +154,8 @@ public struct DefaultBinding: Sendable {
                 "Move focused window to monitor right", "window_movedisplay_east", ctrlAlt("d", .command, .shift),
                 version: 2),
             DefaultBinding("Cycle preset widths forward", "window_resize", ctrlAlt("r")),
-            DefaultBinding("Make column full width", "window_fullwidth", ctrlAlt("f")),
+            // Version 1 offered this as `window_fullwidth`, which the engine still reads as `window_maximize`.
+            DefaultBinding("Maximize or restore window", "window_maximize", ctrlAlt("f")),
             DefaultBinding("Centre column", "window_center", ctrlAlt("c")),
             DefaultBinding("Make column wider", "window_step_grow", ctrlAlt("equal"), version: 2),
             DefaultBinding("Make column narrower", "window_step_shrink", ctrlAlt("minus"), version: 2),
