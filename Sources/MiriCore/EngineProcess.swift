@@ -93,7 +93,10 @@ public struct ProcessEngineLauncher: EngineLauncher {
         let process = Process()
         process.executableURL = paths.executable
         process.arguments = ["launch"]
-        process.environment = paths.environment(from: ProcessInfo.processInfo.environment)
+        var environment = paths.environment(from: ProcessInfo.processInfo.environment)
+        // The engine exits when this process does, so a crashed or killed Miri leaves no engine behind.
+        environment["PANERU_PARENT_PID"] = String(getpid())
+        process.environment = environment
         process.currentDirectoryURL = paths.support
         let output = Pipe()
         process.standardOutput = output

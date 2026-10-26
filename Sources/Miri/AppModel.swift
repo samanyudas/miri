@@ -75,6 +75,7 @@ import ServiceManagement
 
     /// Loads the configuration, watches it, and starts management unless the user stopped it.
     func launch() {
+        stopOrphanedEngines()
         stopShortcut = StopShortcut { [weak self] in self?.stopFromShortcut() }
         // The first write of the file needs the gesture settings and conflicts, so the swipe stays on across launches.
         refreshSetup()
@@ -90,6 +91,15 @@ import ServiceManagement
         syncLoginItem()
         watchGestureSettings()
         if !stoppedByUser { start() } else { refreshSetup() }
+    }
+
+    /// Stops engines that an earlier Miri left running when it died, then recovers the windows they managed.
+    private func stopOrphanedEngines() {
+        let orphans = OrphanedEngines.find()
+        guard !orphans.isEmpty else { return }
+        log.append(Data("--- Miri stopped engines left running without an app: \(orphans) ---\n".utf8))
+        OrphanedEngines.stop(orphans, timeout: EngineSupervisor.stopTimeout)
+        WindowRestorer.recover()
     }
 
     func reloadConfiguration() {

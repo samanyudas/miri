@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `feat/maximized-column`, based on `main` at `a327d90`
+Updated: 2026-10-27 on branch `fix/engine-exits-with-app`, based on `main` at `7bbecc5`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,26 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Engine left running after Miri dies
+
+[#33](https://github.com/samanyudas/miri/issues/33) is implemented on this branch.
+The fix is engine `4158e8f`, the merge of [engine PR #61](https://github.com/samanyudas/paneru/pull/61), which the engine pin `3fee523` from `main` includes.
+Sol approved engine PR #61 in round 2 of sol-loop, after round 1 found that an exit during engine startup was lost, which `aa10128` fixes.
+Miri passes its PID to the engine in `PANERU_PARENT_PID`.
+The engine watches that process with a kqueue `NOTE_EXIT` filter and exits through its normal cleanup when the process ends.
+Miri also treats SIGTERM as Quit, so `kill` stops the engine and recovers windows.
+At launch, Miri stops any `miri-engine` whose parent is launchd, then recovers windows, because such an engine holds the Mach service.
+
+Unit tests cover the parent watch, the environment, and finding and stopping an orphan.
+
+On 27 October, `/tmp/miri33/live-check.sh` ran against the real app, with the `azerty-digits` build as the build before the fix.
+After SIGTERM on that build, its engine survived with parent PID 1.
+The fixed build stopped that orphan at launch.
+SIGTERM on the fixed app ended the app within 400 ms, together with its engine.
+SIGKILL on the fixed app ended its engine within 600 ms.
+The first run found that the SIGTERM handler deadlocked, because it called terminate inside a main-queue callout, and the fix is on this branch.
+That run also showed that an engine interrupted during its startup can panic with "Resource does not exist". No issue tracks this yet.
 
 ## Maximized column
 
