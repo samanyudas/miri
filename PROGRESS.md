@@ -88,6 +88,18 @@ Quitting Calculator emptied `tile-overrides.json`.
 These checks ran before the last engine review fixes, which tests cover.
 [#101](https://github.com/samanyudas/miri/issues/101) tracks a false minimum height that a resizable window records when it refuses a small shrink at the bottom of the screen.
 
+## False minimum height at the screen bottom
+
+This branch pins engine `8639fdb` for [#101](https://github.com/samanyudas/miri/issues/101), which merges [engine PR #48](https://github.com/samanyudas/paneru/pull/48).
+macOS ignores a small shrink that leaves a window's bottom edge near the bottom of the screen.
+The engine took such a kept height as the window's minimum, so a window stacked under it overlapped.
+The size check now lowers the window and grows it back once, and only a height the window keeps after that counts as its minimum.
+
+On 26 October, Font Book was resized through Accessibility to end at the screen's bottom edge, and Miri was restarted.
+The previous engine logged that Font Book and T3 Code kept 1410 and 1418 points when asked for 1402, and recorded those heights as minimums.
+The candidate engine brought both to the asked height with no refusal logged.
+A window on another macOS Space, which Accessibility does not list, still keeps its height, which is close to [#68](https://github.com/samanyudas/miri/issues/68).
+
 ## Bracket directions for stack shortcuts
 
 [#92](https://github.com/samanyudas/miri/issues/92) is implemented on this branch.
