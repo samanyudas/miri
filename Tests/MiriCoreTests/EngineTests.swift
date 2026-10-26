@@ -257,3 +257,59 @@ struct RotatingLogTests {
         #expect(throws: CocoaError.self) { try launcher.launch { _ in } }
     }
 }
+
+/// Runs copies of `sleep` under a test name, the way an engine runs either as Miri's child or after Miri dies.
+struct OrphanedEnginesTests {
+    private let name = "fake-engine-\(UUID().uuidString.prefix(8))"
+
+    private func executable() throws -> URL {
+        let directory = FileManager.default.temporaryDirectory.appending(path: "miri-orphan-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let executable = directory.appending(path: name)
+        try FileManager.default.copyItem(at: URL(filePath: "/bin/sleep"), to: executable)
+        // macOS kills a copied platform binary at launch unless it is signed again.
+        let sign = try Process.run(URL(filePath: "/usr/bin/codesign"), arguments: ["-f", "-s", "-", executable.path])
+        sign.waitUntilExit()
+        try #require(sign.terminationStatus == 0)
+        return executable
+    }
+
+    /// Starts the process from a shell that exits at once, so launchd adopts it.
+    private func startOrphan() throws -> pid_t {
+        let executable = try executable()
+        let pidFile = executable.deletingLastPathComponent().appending(path: "pid")
+        let shell = Process()
+        shell.executableURL = URL(filePath: "/bin/sh")
+        shell.arguments = ["-c", "'\(executable.path)' 30 & echo $! > '\(pidFile.path)'"]
+        try shell.run()
+        shell.waitUntilExit()
+        let pid = String(decoding: try Data(contentsOf: pidFile), as: UTF8.self)
+        return try #require(pid_t(pid.trimmingCharacters(in: .whitespacesAndNewlines)))
+    }
+
+    /// A background job of `sh` ignores SIGINT, so this orphan also covers the kill after the timeout.
+    @Test func findsAndStopsAnEngineThatOutlivedItsApp() async throws {
+        let orphan = try startOrphan()
+        defer { kill(orphan, SIGKILL) }
+        var found: [pid_t] = []
+        for _ in 0..<100 where found.isEmpty {
+            try await Task.sleep(for: .milliseconds(20))
+            found = OrphanedEngines.find(executableName: name)
+        }
+        #expect(found == [orphan])
+        OrphanedEngines.stop([orphan], timeout: .milliseconds(200))
+        #expect(kill(orphan, 0) == -1)
+        #expect(OrphanedEngines.find(executableName: name).isEmpty)
+    }
+
+    @Test func leavesAnEngineThatStillHasItsApp() throws {
+        let child = Process()
+        child.executableURL = try executable()
+        child.arguments = ["30"]
+        try child.run()
+        defer { child.terminate() }
+        try #require(child.isRunning)
+        #expect(OrphanedEngines.find(executableName: name).isEmpty)
+        #expect(child.isRunning)
+    }
+}

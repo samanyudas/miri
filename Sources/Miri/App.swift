@@ -21,8 +21,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let experiment = PermissionExperiment()
     lazy var presenter = WindowPresenter(model: model, experiment: experiment)
     private var quitting = false
+    private var terminationSignal: DispatchSourceSignal?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        quitOnTerminationSignal()
         let arguments = Array(CommandLine.arguments.dropFirst())
         // Arguments that start with a single dash are user defaults overrides, such as `-managementStopped YES`.
         guard let command = arguments.first, command.hasPrefix("--") else {
@@ -46,6 +48,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         quitting = true
         model.prepareToQuit { sender.reply(toApplicationShouldTerminate: true) }
         return .terminateLater
+    }
+
+    /// `kill` sends SIGTERM, which by default ends the app at once, before the engine stops and windows recover.
+    private func quitOnTerminationSignal() {
+        signal(SIGTERM, SIG_IGN)
+        let source = DispatchSource.makeSignalSource(signal: SIGTERM, queue: .main)
+        source.setEventHandler { NSApp.terminate(nil) }
+        source.resume()
+        terminationSignal = source
     }
 
     /// Selftest commands for scripts/test-permission-prototype.sh and scripts/test-window-recovery.sh.
