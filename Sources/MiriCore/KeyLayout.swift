@@ -3,9 +3,9 @@ import Foundation
 
 /// A keyboard layout as the engine reads it, so Miri resolves a key name to the same physical key the engine does.
 ///
-/// The engine translates each key in its US-position table with no modifiers (`generate_virtual_keymap`,
-/// `vendor/paneru/src/config.rs` line 2003) and reads the layout once when it starts. On AZERTY, `a` therefore names
-/// the key at the US Q position, while `minus` always names the US minus position.
+/// The engine translates each key in its US-position table with no modifiers (`generate_virtual_keymap` in
+/// `vendor/paneru/src/config.rs`) and reads the layout once when it starts. On AZERTY, `a` therefore names the key at
+/// the US Q position, while `minus` always names the US minus position.
 public struct KeyLayout: Equatable, Sendable {
     struct Key: Equatable, Sendable {
         let code: UInt16
@@ -60,11 +60,17 @@ public struct KeyLayout: Equatable, Sendable {
         self.init(keys: keys)
     }
 
-    /// The key the engine binds for `name`: the layout's character first, then the US position, then a fixed key.
+    /// The key the engine binds for `name` (`keycode_for_key_name`): a main key's character first, then the US
+    /// position, then a keypad key's character, then a fixed key. On AZERTY only the keypad types digits, so `1` still
+    /// names the top-row key.
     public func keyCode(for name: String) -> UInt16? {
         // Rust compares UTF-8 bytes, whereas Swift String equality also accepts canonical Unicode equivalents.
-        keys.first { $0.character.utf8.elementsEqual(name.utf8) }?.code
+        func typed(onKeypad: Bool) -> UInt16? {
+            keys.first { $0.character.utf8.elementsEqual(name.utf8) && EngineKey.isKeypad($0.code) == onKeypad }?.code
+        }
+        return typed(onKeypad: false)
             ?? EngineKey.layoutKeys.first { $0.name == name }?.code
+            ?? typed(onKeypad: true)
             ?? EngineKey.literalKeys.first { $0.name == name }?.code
     }
 
@@ -116,9 +122,7 @@ public struct KeyLayout: Equatable, Sendable {
         if let code = keyCode(for: name), let character = keys.first(where: { $0.code == code })?.character,
             Self.isPrintable(character)
         {
-            // On AZERTY the digit names reach the keypad, because the top row types symbols without Shift.
-            let isKeypad = EngineKey.layoutKeys.contains { $0.code == code && $0.name.hasPrefix("keypad") }
-            return (isKeypad ? "Keypad " : "") + character.uppercased()
+            return (EngineKey.isKeypad(code) ? "Keypad " : "") + character.uppercased()
         }
         return name
     }

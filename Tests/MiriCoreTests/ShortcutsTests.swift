@@ -25,6 +25,19 @@ import Testing
         #expect(azerty.name(for: 22) == "§")
     }
 
+    @Test func azertyDigitNamesPressTheTopRow() throws {
+        let azerty = try layout("French")
+        // Only the keypad types digits without Shift, and the digit names still press the top row.
+        #expect(azerty.keyCode(for: "1") == 18)
+        #expect(azerty.keyCode(for: "0") == 29)
+        #expect(azerty.keyCode(for: "keypad1") == 83)
+        #expect(azerty.name(for: 83) == "keypad1")
+        #expect(azerty.conflicts(Chord([.control, .option], "1"), Chord([.control, .option], "&")))
+        #expect(!azerty.conflicts(Chord([.control, .option], "1"), Chord([.control, .option], "keypad1")))
+        // A character that only a keypad key types still names that key.
+        #expect(azerty.keyCode(for: "*") == 67)
+    }
+
     @Test func qwertzAndDvorakNameKeysByTheirCharacters() throws {
         let qwertz = try layout("German")
         #expect(qwertz.name(for: 16) == "z")
@@ -58,7 +71,8 @@ import Testing
         #expect(us.label(for: Chord([.command], "space")) == "⌘Space")
         #expect(us.label(for: Chord([.control], "f2")) == "⌃F2")
         #expect(try layout("French").label(for: Chord([.control, .option], "minus")) == "⌃⌥)")
-        #expect(try layout("French").label(for: Chord([.control, .option], "1")) == "⌃⌥Keypad 1")
+        #expect(try layout("French").label(for: Chord([.control, .option], "1")) == "⌃⌥&")
+        #expect(try layout("French").label(for: Chord([.control, .option], "keypad1")) == "⌃⌥Keypad 1")
     }
 
     @Test func chordsConflictWhenTheyPressTheSameKeys() throws {
