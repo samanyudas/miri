@@ -16,7 +16,8 @@ The public release path and the complete acceptance runs follow.
 
 ## Title-bar maximize
 
-This branch pins engine `e6c8ebc`, the merge of [engine PR #43](https://github.com/samanyudas/paneru/pull/43), for [#88](https://github.com/samanyudas/miri/issues/88), and records the rules in the [release scope](decisions/release-scope.md#maximizing-a-window).
+Engine `e6c8ebc`, the merge of [engine PR #43](https://github.com/samanyudas/paneru/pull/43), built this for [#88](https://github.com/samanyudas/miri/issues/88), and the branch now pins the later engine `ab3ce39`.
+The [release scope](decisions/release-scope.md#maximizing-a-window) records the rules.
 A double-click on a window's top bar fills the usable area of its display, and the next one restores it.
 The window keeps its place in the layout while maximized, so its neighbors never move.
 
