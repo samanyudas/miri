@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `fix/engine-exits-with-app`, based on `main` at `7bbecc5`
+Updated: 2026-10-27 on branch `docs/maximize-spec-88`, based on `main` at `3b0badf`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -93,6 +93,11 @@ The [release scope](decisions/release-scope.md#maximizing-a-window) records the 
 A double-click on a window's top bar fills the usable area of its display, and the next one restores it.
 The window keeps its place in the layout while maximized, so its neighbors never move.
 [#106](https://github.com/samanyudas/miri/issues/106) replaces this model with a maximized column that stays in its row.
+
+#88 stays open until an agent verifies its criteria on the merged code, as #106 revised them, and records the result on the issue.
+All of #88's code is on `main` through #97, #99, and #116, and ⌃⌥F and the double-click send the same `ToggleMaximize` trigger.
+[Engine PR #65](https://github.com/samanyudas/paneru/pull/65) adds a test that a maximized window on an unplugged display stays maximized and restorable, which no test covered.
+It passes on engine `3fee523` without a code change, so `main` needs no new pin for it.
 
 On 26 October, current `main` with engine `6325638` reproduced the defect on the primary display.
 A double-click on a Finder title bar let macOS zoom Finder to 868 points wide, and the engine took that as the column's width, which moved T3 Code 156 points left.
