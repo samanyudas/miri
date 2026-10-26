@@ -221,6 +221,9 @@ The layout reserves space for the visible macOS Dock without a separate v1 setti
 Miri respects macOS Reduce Motion and provides a setting to disable animation.
 Either Reduce Motion or the disable-animation setting makes strip movement instant.
 Numbered jumps select columns and focus the last-focused window within the selected column.
+Moving the pointer alone does not change focus, and Miri keyboard commands do not move the pointer.
+Clicks, keyboard commands, and macOS window switching still change focus.
+Sam confirmed this rule in [issue #90](https://github.com/samanyudas/miri/issues/90).
 
 Directional monitor focus uses Control-Option-Command with W, A, S, and D for up, left, down, and right.
 Adding Shift moves the focused window in the corresponding monitor direction.

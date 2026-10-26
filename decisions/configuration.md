@@ -63,13 +63,18 @@ Confirm each additional key against the pinned engine before adding it to Miri's
 
 ## Focus and pointer controls
 
+The engine defaults `[options].focus_follows_mouse` and `[options].mouse_follows_focus` to `false`.
+A configuration without these keys therefore keeps pointer-driven focus and pointer movement off after a restart or an upgrade.
+`focus_follows_mouse = true` is a hidden key that turns pointer-driven focus back on.
+Settings does not show it, and Miri preserves it when Settings writes the file.
+The engine also accepts `mouse_follows_focus = true`, which restores its pointer movement after focus changes and display commands.
+Miri does not offer that key as a setting.
+
 Focus borders and pointer-following controls are deferred to v2.
 The following option names and defaults remain proposals for that future work, pending verification against the pinned engine.
 
 | Proposed option | Proposed default | Behavior |
 | --- | --- | --- |
-| `focus_follows_mouse` | `false` | Focus the window under the pointer. |
-| `mouse_follows_focus` | `false` | Move the pointer to a window focused by keyboard. |
 | `focus_border` | `false` | Draw an overlay around the focused window. |
 | `focus_border_width` | Unresolved | Border width. |
 | `focus_border_color` | Unresolved | Color in `#RRGGBB` or `#RRGGBBAA` format. |

@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `feat/reserve-constrained-width`, based on `main` at `bf4529e`
+Updated: 2026-10-26 on branch `fix/keyboard-focus-pointer`, based on `main` at `7d7301e`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,26 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Keyboard focus and pointer separation
+
+[#90](https://github.com/samanyudas/miri/issues/90) is implemented on this branch, which pins engine `58e5c7d`, the squash merge of [engine PR #41](https://github.com/samanyudas/paneru/pull/41).
+Its tree is identical to the tested `d4340b7`.
+The engine now defaults `focus_follows_mouse` and `mouse_follows_focus` to `false`.
+Centre column, display focus, and display moves move the pointer only when `mouse_follows_focus` is on.
+Display focus on a display with no visible window focuses that display's Finder desktop, so its menu bar becomes active without a pointer move.
+`[options].focus_follows_mouse = true` is a hidden key that turns pointer-driven focus back on.
+
+On 26 October, the running build at engine `4ba2bf0` reproduced every reported symptom with synthetic input and throwaway Helium windows.
+Pointer movement focused the window under it, and keyboard focus, Centre column, display focus, display moves, a new window, and red-button closes moved the pointer.
+The candidate build kept the pointer in place in all of those cases, and pointer movement no longer changed focus.
+Closing a background window kept the focused window, and closing the focused window changed focus once to its neighbour, in columns and in a three-window stack.
+An empty display, made with an empty virtual workspace on the built-in display, became the active display with Finder frontmost and no false focused window.
+The hidden key restored pointer focus, and the original configuration was restored byte-for-byte afterwards.
+These are automated native observations with synthetic events.
+On 26 October Sam closed a background window and the focused window with their red buttons, using a mouse and the trackpad, and reported that it works as expected.
+Sam also closed windows in an overflowing stack and reported that it works as expected.
+Private local evidence is in `/tmp/miri90/` on Sam's Mac.
 
 ## Constrained window width and tile override
 
