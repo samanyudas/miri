@@ -110,6 +110,8 @@ Never leave windows stranded off-screen.
 7. Open fixed-size windows and Miri's settings.
    Those windows float automatically.
    Clicking and macOS window switching provide access to floating windows.
+   Open a Picture-in-Picture video from Chrome while another app is focused.
+   The video window floats above ordinary windows on every Space, takes keyboard focus once, and closing it leaves the layout unchanged.
 8. Focus different columns in a strip that fits, then in a strip that overflows.
    The strip moves only as far as needed to show the focused column fully, and a fully visible column does not move.
    After a trackpad swipe, the strip settles on a column and that column takes focus.
