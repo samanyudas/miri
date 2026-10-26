@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `fix/maximized-display-move`, stacked on `feat/title-bar-maximize` at `d1b8952`
+Updated: 2026-10-26 on branch `fix/maximized-display-move`, stacked on `feat/title-bar-maximize`, with `main` at `e158acd` merged in
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -107,8 +107,41 @@ With the candidate, the column reserves 808 points, Spotify stays fully visible,
 Unstacking, restacking, reordering, a width step, a second stacked column of two Helium windows, and a move to the built-in display and back all kept that spacing.
 Miri Settings stayed tiled after an engine-only restart, and floating it again or closing it removed its override entry.
 These are automated observations on the real windows, driven through the engine's command socket, not physical keyboard input.
-A Miri restart with a non-Miri window under a floating rule was not observed, because Sam's configuration floats only Miri Settings, which closes when Miri quits.
-Automatic floating of fixed-size windows is still not built, so the override currently applies to rule-based floating only.
+
+### Automatic floating of fixed-size windows
+
+This branch pins engine `ae05362`.
+A window whose size macOS reports as not settable now floats when it opens, unless a rule sets `floating = false`.
+The float toggle tiles such a window with the same override as a rule-floated window.
+A window that opens floating now also takes focus.
+A floating window that is minimized, including one minimized when the engine starts, floats again when it is restored instead of tiling.
+Before, macOS reported its focus before the engine tracked it, so the float toggle acted on the previous window.
+
+On 26 October, synthetic key presses drove the hotkey path on the primary display.
+A fixed-size test app, 420 by 332 points, floated when it opened and took focus.
+Control-Option-T tiled it and wrote its override.
+It stayed tiled after a full Miri restart, a second press floated it and removed the override, and quitting the app removed the override again.
+Stacked under Spotify with Control-Option-], it kept its 420 by 332 size at the column's left edge.
+System Settings stacked onto Spotify with Control-Option-] in an 808-point column, and Ghostty started past Spotify's right edge.
+Moving Settings to the top and moving focus within the stack by key kept that spacing.
+No physical keyboard or mouse input was used.
+
+### Fixed-size windows in stacks
+
+This branch pins engine `3bdae94`, which merges [engine PR #46](https://github.com/samanyudas/paneru/pull/46) and [engine PR #47](https://github.com/samanyudas/paneru/pull/47).
+On 26 October, Sam chose to give a fixed-size window's spare stack height to the other windows.
+A window that cannot be resized now keeps its own height in a stack, and the spare height goes evenly to the resizable windows.
+In a stack of only fixed-size windows, they stack from the top and the rest of the column stays empty below the last one.
+A window that opened floating now gets its padding when it is tiled, so it lines up with its column.
+Quitting an app now ends the tile overrides of its windows, as closing them does.
+
+On 26 October, on the primary display with synthetic key presses:
+Calculator stacked under Spotify left Spotify 994 points with no gap or overlap.
+Digital Color Meter as a third member gave Spotify 777, Calculator 408, and Digital Color Meter 217 points of the 1402-point column.
+After a Miri restart, all three sat at the same left edge with 8-point gaps.
+Quitting Calculator emptied `tile-overrides.json`.
+These checks ran before the last engine review fixes, which tests cover.
+[#101](https://github.com/samanyudas/miri/issues/101) tracks a false minimum height that a resizable window records when it refuses a small shrink at the bottom of the screen.
 
 ## Bracket directions for stack shortcuts
 
