@@ -30,7 +30,8 @@ Sam's own version 3 configuration upgraded to version 4 with only the expected b
 Later that day, with the built-in display moved left of the external display for the session, both edge stages and the crossing worked on every key set for ⌃⌥⌘⇧, and on the arrow keys for ⌃⌥⌘.
 Those runs also hit the side-by-side parking defect in [#103](https://github.com/samanyudas/miri/issues/103).
 Settings > Shortcuts showed every alternative, the actions without a default, and a seeded conflict notice.
-The engine has no key auto-repeat filter, so holding an edge shortcut likely crosses displays on a repeat. This is untested, and [#104](https://github.com/samanyudas/miri/issues/104) forbids it for its own shortcuts.
+A live check showed that the engine runs every auto-repeat key-down as a new press, so holding an edge shortcut would cross displays after it reaches the end.
+[#104](https://github.com/samanyudas/miri/issues/104) forbids that for its own shortcuts, and Sam has not decided it for #79.
 Empty-destination arrival and the refusal for a stack toward a display without a strip are also not verified natively.
 
 ## Engine left running after Miri dies
