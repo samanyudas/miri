@@ -158,7 +158,9 @@ A version 1 resize binding that the user deleted stays unbound after the upgrade
 Version 3 of the default set moves Stack focused window into left column from ⌃⌥] to ⌃⌥[, and Stack focused window into right column from ⌃⌥[ to ⌃⌥].
 On upgrade from a recorded version 1 or 2, Miri moves each of the two only while it still has the exact value Miri wrote and its new chord is free.
 When another binding holds the new chord, the action keeps its old chord, so no chord gets two actions.
-While a join binding has its old default value and another binding holds its new chord, the Shortcuts settings page reports which action kept its old chord and which action holds the new one.
+While a join binding has its old default value and another binding holds its new chord, the Shortcuts settings page shows a notice.
+The notice names the old chord, the new chord, and the action that holds the new chord.
+It tells the user to remove the new chord from that action and then add the new chord to the join action.
 A join binding that the user changed or deleted stays as it is.
 An unversioned file and a `[bindings]` table in a form Miri does not rewrite keep their join bindings until the user resets the shortcuts.
 The engine adds no bracket bindings of its own, because its default configuration has an empty `[bindings]` table.

@@ -29,18 +29,25 @@ struct ShortcutsSettings: View {
             if !model.keptDefaults.isEmpty {
                 Section {
                     ForEach(model.keptDefaults, id: \.self) { kept in
+                        let old = model.keyLayout.label(for: kept.kept)
+                        let new = model.keyLayout.label(for: kept.wanted)
                         Label {
-                            Text(
-                                "\(kept.action.title) kept \(model.keyLayout.label(for: kept.kept)). Its new default, "
-                                    + "\(model.keyLayout.label(for: kept.wanted)), is used by \(kept.owner)."
-                            )
-                            .fixedSize(horizontal: false, vertical: true)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(kept.action.title)
+                                Text(
+                                    "This action still uses \(old). Its new default is \(new), but \(kept.owner) uses "
+                                        + "\(new). To use the new default, remove \(new) from \(kept.owner). Then add "
+                                        + "\(new) to this action."
+                                )
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            }
                         } icon: {
                             Image(systemName: "info.circle.fill").foregroundStyle(.blue)
                         }
                     }
                 } header: {
-                    Text("Updated Default Shortcuts")
+                    Text("New Defaults Not Used")
                 }
             }
             if let shortcuts = model.shortcuts {
