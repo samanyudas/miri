@@ -17,8 +17,8 @@ DEVELOPER_APP_ID = "io.github.samanyudas.miri.dev"
 DEVELOPER_ENGINE_ID = "io.github.samanyudas.miri.dev.engine"
 # Sources/MiriCore/EngineCommand.swift mirrors the engine's command parser, so a change to it needs a review there.
 MIRRORED_PARSER = {
-    "src/types/argv.rs": "44769332476fd84c6bda6b403917c5a78c7c3abfd45fadbe6b3092a35a068ea1",
-    "src/types/commands.rs": "42d470aae2e3b5bdfd1d75c0e59793edd6a9704b2d37cf42162f25a94397040c",
+    "src/types/argv.rs": "8d9b340a71239defa0170ee1f68e7324800c9cbfe381a9ef2d2e767d500408fc",
+    "src/types/commands.rs": "6312e7c3e59dd698902801676fd9a8728a301b11f7dab3750f9df6a651c37fd0",
 }
 
 

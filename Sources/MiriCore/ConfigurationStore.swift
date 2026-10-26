@@ -178,7 +178,7 @@ public final class ConfigurationStore {
     }
 
     /// Reports each changed default that kept its old chords, and each chord of a version 4 or later action that
-    /// another binding holds, because another binding holds the chord it would have received.
+    /// another binding holds.
     private func refreshKeptDefaults(in document: TOMLDocument) {
         let shortcuts = Shortcuts(document: document, layout: layout)
         func owner(of chord: Chord, for action: ShortcutAction) -> String? {
