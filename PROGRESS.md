@@ -52,8 +52,25 @@ With the candidate, the column reserves 808 points, Spotify stays fully visible,
 Unstacking, restacking, reordering, a width step, a second stacked column of two Helium windows, and a move to the built-in display and back all kept that spacing.
 Miri Settings stayed tiled after an engine-only restart, and floating it again or closing it removed its override entry.
 These are automated observations on the real windows, driven through the engine's command socket, not physical keyboard input.
-A Miri restart with a non-Miri window under a floating rule was not observed, because Sam's configuration floats only Miri Settings, which closes when Miri quits.
-Automatic floating of fixed-size windows is still not built, so the override currently applies to rule-based floating only.
+
+### Automatic floating of fixed-size windows
+
+This branch pins engine `ae05362`.
+A window whose size macOS reports as not settable now floats when it opens, unless a rule sets `floating = false`.
+The float toggle tiles such a window with the same override as a rule-floated window.
+A window that opens floating now also takes focus.
+A floating window that is minimized, including one minimized when the engine starts, floats again when it is restored instead of tiling.
+Before, macOS reported its focus before the engine tracked it, so the float toggle acted on the previous window.
+
+On 26 October, synthetic key presses drove the hotkey path on the primary display.
+A fixed-size test app, 420 by 332 points, floated when it opened and took focus.
+Control-Option-T tiled it and wrote its override.
+It stayed tiled after a full Miri restart, a second press floated it and removed the override, and quitting the app removed the override again.
+Stacked under Spotify with Control-Option-], it kept its 420 by 332 size at the column's left edge.
+System Settings stacked onto Spotify with Control-Option-] in an 808-point column, and Ghostty started past Spotify's right edge.
+Moving Settings to the top and moving focus within the stack by key kept that spacing.
+A fixed-size window in a stack still gets an equal share of the height, so the rest of its share below it stays empty.
+No physical keyboard or mouse input was used.
 
 ## Bracket directions for stack shortcuts
 
