@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `fix/azerty-digit-shortcuts`, based on `main` at `12323e5`
+Updated: 2026-10-27 on branch `fix/engine-exits-with-app`, based on `main` at `a327d90`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,17 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Engine left running after Miri dies
+
+[#33](https://github.com/samanyudas/miri/issues/33) is implemented on this branch, which pins engine `1b37a04` from branch `miri/exit-with-parent`.
+Miri passes its PID to the engine in `PANERU_PARENT_PID`.
+The engine watches that process with a kqueue `NOTE_EXIT` filter and exits through its normal cleanup when the process ends.
+Miri also treats SIGTERM as Quit, so `kill` stops the engine and recovers windows.
+At launch, Miri stops any `miri-engine` whose parent is launchd, then recovers windows, because such an engine holds the Mach service.
+
+Unit tests cover the parent watch, the environment, and finding and stopping an orphan.
+The live kill check on the real app has not run yet, because other threads were using the shared Miri Developer app.
 
 ## AZERTY digit shortcuts
 
