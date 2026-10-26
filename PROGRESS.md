@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `fix/engine-exits-with-app`, based on `main` at `7bbecc5`
+Updated: 2026-10-27 on branch `feat/drag-window-centre`, based on `main` at `3b0badf`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -311,6 +311,8 @@ Engine PR #40 implements the expected result in #73, which keeps focus where it 
 Each change has tests that fail without it, and Sol approved both.
 Live on Miri Developer on 26 October, a stacked Finder window grabbed at the right end of its top bar and dragged straight down showed the bottom insertion line and reordered the stack.
 Closing three Finder windows that filled the primary display, with focus on the built-in display, left Grok Bot and Ghostty in view and focus unchanged.
+On 27 October, [engine PR #66](https://github.com/samanyudas/paneru/pull/66) added the missing #72 tests: a stack member grabbed near its left edge, and an edge hold that follows the pointer when the window is grabbed off-centre.
+Each new test fails when its rule is broken.
 Sam's real-mouse check for #72 is still open.
 [#74](https://github.com/samanyudas/miri/issues/74) tracks engine `window_writes` tests that fail under heavy machine load.
 
