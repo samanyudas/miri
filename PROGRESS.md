@@ -31,7 +31,7 @@ An empty display, made with an empty virtual workspace on the built-in display, 
 The hidden key restored pointer focus, and the original configuration was restored byte-for-byte afterwards.
 These are automated native observations with synthetic events.
 On 26 October Sam closed a background window and the focused window with their red buttons, using a mouse and the trackpad, and reported that it works as expected.
-Closes in an overflowing stack were not exercised.
+Sam also closed windows in an overflowing stack and reported that it works as expected.
 Private local evidence is in `/tmp/miri90/` on Sam's Mac.
 
 ## Constrained window width and tile override
