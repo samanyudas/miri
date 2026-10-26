@@ -16,7 +16,8 @@ The public release path and the complete acceptance runs follow.
 
 ## Engine left running after Miri dies
 
-[#33](https://github.com/samanyudas/miri/issues/33) is implemented on this branch, which pins engine `1b37a04` from branch `miri/exit-with-parent`.
+[#33](https://github.com/samanyudas/miri/issues/33) is implemented on this branch, which pins engine `cbd3cb0` from branch `miri/exit-with-parent` ([engine PR #61](https://github.com/samanyudas/paneru/pull/61)).
+Sol approved engine PR #61 in round 2 of sol-loop, after round 1 found that an exit during engine startup was lost, which `aa10128` fixes.
 Miri passes its PID to the engine in `PANERU_PARENT_PID`.
 The engine watches that process with a kqueue `NOTE_EXIT` filter and exits through its normal cleanup when the process ends.
 Miri also treats SIGTERM as Quit, so `kill` stops the engine and recovers windows.
