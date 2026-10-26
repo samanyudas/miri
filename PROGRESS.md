@@ -69,8 +69,24 @@ It stayed tiled after a full Miri restart, a second press floated it and removed
 Stacked under Spotify with Control-Option-], it kept its 420 by 332 size at the column's left edge.
 System Settings stacked onto Spotify with Control-Option-] in an 808-point column, and Ghostty started past Spotify's right edge.
 Moving Settings to the top and moving focus within the stack by key kept that spacing.
-A fixed-size window in a stack still gets an equal share of the height, so the rest of its share below it stays empty.
 No physical keyboard or mouse input was used.
+
+### Fixed-size windows in stacks
+
+This branch pins engine `3bdae94`, which merges [engine PR #46](https://github.com/samanyudas/paneru/pull/46) and [engine PR #47](https://github.com/samanyudas/paneru/pull/47).
+On 26 October, Sam chose to give a fixed-size window's spare stack height to the other windows.
+A window that cannot be resized now keeps its own height in a stack, and the spare height goes evenly to the resizable windows.
+In a stack of only fixed-size windows, they stack from the top and the rest of the column stays empty below the last one.
+A window that opened floating now gets its padding when it is tiled, so it lines up with its column.
+Quitting an app now ends the tile overrides of its windows, as closing them does.
+
+On 26 October, on the primary display with synthetic key presses:
+Calculator stacked under Spotify left Spotify 994 points with no gap or overlap.
+Digital Color Meter as a third member gave Spotify 777, Calculator 408, and Digital Color Meter 217 points of the 1402-point column.
+After a Miri restart, all three sat at the same left edge with 8-point gaps.
+Quitting Calculator emptied `tile-overrides.json`.
+These checks ran before the last engine review fixes, which tests cover.
+[#101](https://github.com/samanyudas/miri/issues/101) tracks a false minimum height that a resizable window records when it refuses a small shrink at the bottom of the screen.
 
 ## Bracket directions for stack shortcuts
 
