@@ -82,6 +82,9 @@ Strips return to their display when macOS returns their Space.
    Miri restarts it, and startup session restore returns the layout.
 2. Force-quit the engine 3 times within 5 minutes.
    Miri stops restarting it and shows the failure, logs, and a manual restart control.
+3. Maximize a tiled window on each display, including a window from a stack, then force-quit the engine.
+   After the restart, each window is maximized and fills its display's usable area.
+   A later restore returns each window to its width before maximizing, and the stacked window to its stack when it has room.
 
 ### Endurance
 

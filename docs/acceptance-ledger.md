@@ -135,6 +135,9 @@ Source: [App acceptance](../decisions/v1-app-acceptance-checklist.md).
 | AS-12 | Check v1 controls and bindings for deferred work. | | | | | Pending | |
 | AS-13 | Record a shortcut already assigned to a different Miri action. | | | | | Pending | |
 | AS-14 | Record a shortcut with a known macOS conflict. | | | | | Pending | |
+| AS-15 | Maximize a tiled window with ⌃⌥F, then move focus to the left and right past it, and swipe the strip past it. | | | | | Pending | |
+| AS-16 | Set **Maximized stacked window opens** to **Left of its stack**, then to **Right of its stack**, and maximize a stacked window each time. | | | | | Pending | |
+| AS-17 | Start Miri with a configuration that binds `window_fullwidth` to a shortcut. | | | | | Pending | |
 
 ### Strip gestures and conflict handling
 
@@ -228,6 +231,7 @@ Source: [Multi-monitor acceptance](../decisions/v1-acceptance-checklist.md).
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | HR-1 | Force-quit the engine 10 times during a multi-monitor session. | | | | | Pending | |
 | HR-2 | Force-quit the engine 3 times within 5 minutes. | | | | | Pending | |
+| HR-3 | Maximize a tiled window on each display, including a window from a stack, then force-quit the engine. | | | | | Pending | |
 
 ### Endurance
 

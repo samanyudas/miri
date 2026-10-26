@@ -52,6 +52,10 @@ _Avoid_: Automatically verified
 **Column**:
 A position in a scrolling strip containing a window or a group of windows.
 
+**Maximized column**:
+A column as wide as the display whose window fills the display's usable area, and which stays in its scrolling strip.
+_Avoid_: Full-width column, native fullscreen
+
 **Floating window**:
 A window outside the scrolling strip whose position is independent of the strip's columns.
 _Avoid_: Tiled window

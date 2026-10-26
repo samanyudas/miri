@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `fix/azerty-digit-shortcuts`, based on `main` at `12323e5`
+Updated: 2026-10-27 on branch `feat/maximized-column`, based on `main` at `a327d90`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,21 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Maximized column
+
+[#106](https://github.com/samanyudas/miri/issues/106) keeps a maximized window in its row, so focus moves and swipes scroll past it.
+[Maximizing a window](decisions/release-scope.md#maximizing-a-window) records the rules Sam chose on 26 October.
+Engine PRs [#57](https://github.com/samanyudas/paneru/pull/57), [#58](https://github.com/samanyudas/paneru/pull/58), and [#60](https://github.com/samanyudas/paneru/pull/60) are merged into the fork branch.
+They make a maximized tiled window a display-wide column, make `maximize` the one toggle with `fullwidth` as its older name, and add `[options].maximized_window_side`.
+Two engine units are still in review: width and stack commands that restore first, and maximize in the saved session.
+
+This branch builds the app part.
+Layout settings has a **Maximized stacked window opens** picker, and the ⌃⌥F default is now `window_maximize`, labeled Maximize or restore window.
+A file that binds `window_fullwidth` keeps that binding, and Settings lists it under the same action.
+The Swift tests pass with the engine checkout at `d1f4cab`, but the recorded engine pin is still `28f550f`.
+Next: re-pin the engine after the two remaining engine PRs merge, then run AS-15 to AS-17 and HR-3 in the [acceptance ledger](docs/acceptance-ledger.md) on the real app.
+Nothing on this branch is checked live yet.
 
 ## AZERTY digit shortcuts
 
@@ -44,6 +59,7 @@ Engine `e6c8ebc`, the merge of [engine PR #43](https://github.com/samanyudas/pan
 The [release scope](decisions/release-scope.md#maximizing-a-window) records the rules.
 A double-click on a window's top bar fills the usable area of its display, and the next one restores it.
 The window keeps its place in the layout while maximized, so its neighbors never move.
+[#106](https://github.com/samanyudas/miri/issues/106) replaces this model with a maximized column that stays in its row.
 
 On 26 October, current `main` with engine `6325638` reproduced the defect on the primary display.
 A double-click on a Finder title bar let macOS zoom Finder to 868 points wide, and the engine took that as the column's width, which moved T3 Code 156 points left.
