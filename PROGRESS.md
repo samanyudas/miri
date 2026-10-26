@@ -89,7 +89,12 @@ Closing it left the Chrome source window's tile unchanged, and an engine restart
 The macOS system Picture-in-Picture window, owned by `PIPAgent` at level 19, is the one Safari and IINA use.
 Miri does not manage it, and it ignored the keyboard even when made frontmost, so it cannot take keyboard focus.
 IINA's player window, which Sam's IINA keeps on top with `alwaysFloatOnTop`, now floats too.
-No tested provider turns its Picture-in-Picture window back into a normal window, so the restore-on-exit rule had nothing to act on.
+QuickTime Player and IINA hide their player window during system Picture-in-Picture, and its Restore button brings the same window back.
+On 26 October at engine `d7a4c3f`, QuickTime came back at the same 640 by 360 frame in its old column, and the whole display layout matched the layout before Picture-in-Picture.
+IINA, which floats, came back at the same frame.
+For the fallback, QuickTime sat alone in virtual workspace 2, entered Picture-in-Picture, and the display switched to workspace 1.
+After Restore, it appeared on the shown workspace 1 at its old size, fully visible at the right edge of the display.
+Sam accepted the system Picture-in-Picture focus limit and chose that a Picture-in-Picture window stays on the display where it opened.
 These are automated observations driven through the Chrome DevTools protocol and Accessibility, not physical input.
 Private local evidence is in `/tmp/miri77/` on Sam's Mac.
 
