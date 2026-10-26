@@ -23,7 +23,14 @@ Miri also treats SIGTERM as Quit, so `kill` stops the engine and recovers window
 At launch, Miri stops any `miri-engine` whose parent is launchd, then recovers windows, because such an engine holds the Mach service.
 
 Unit tests cover the parent watch, the environment, and finding and stopping an orphan.
-The live kill check on the real app has not run yet, because other threads were using the shared Miri Developer app.
+
+On 27 October, `/tmp/miri33/live-check.sh` ran against the real app, with the `azerty-digits` build as the build before the fix.
+After SIGTERM on that build, its engine survived with parent PID 1.
+The fixed build stopped that orphan at launch.
+SIGTERM on the fixed app ended the app within 400 ms, together with its engine.
+SIGKILL on the fixed app ended its engine within 600 ms.
+The first run found that the SIGTERM handler deadlocked, because it called terminate inside a main-queue callout, and the fix is on this branch.
+That run also showed that an engine interrupted during its startup can panic with "Resource does not exist". No issue tracks this yet.
 
 ## AZERTY digit shortcuts
 
