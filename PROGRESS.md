@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `feat/title-bar-maximize`, based on `main` at `e151c5b`
+Updated: 2026-10-26 on branch `fix/maximized-display-move`, stacked on `feat/title-bar-maximize` at `d1b8952`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -31,6 +31,27 @@ macOS ignores a small shrink that leaves a window's bottom edge near the bottom 
 A restore therefore first ends 100 points above the slot and then grows into it.
 The same rule can also stop the layout from shrinking a newly opened window that touches the screen bottom into its slot.
 That layout case exists without this branch and may explain [#58](https://github.com/samanyudas/miri/issues/58).
+
+## Maximized windows across displays
+
+This branch pins engine `7e937a1` from [engine PR #44](https://github.com/samanyudas/paneru/pull/44) for [#87](https://github.com/samanyudas/miri/issues/87), and it is stacked on the title-bar maximize branch.
+A maximized window that a display command moves, or that a title-bar drag drops on another display, fills that display's usable area.
+A new column that arrives from another display is never wider than the destination's tiling area.
+
+On 26 October, the build of `feat/title-bar-maximize` with engine `e6c8ebc` reproduced the defect.
+A maximized Finder window moved south by `movedisplay south` stayed at `0,30 2560x1410` on the large display, while the engine placed its slot on the built-in display.
+Dragged by its title bar to the built-in display, it ended at `-6,1505 800x1278`, partly off the display.
+A Helium window on the built-in display had kept a frame 8 points wider than the tiling area from an earlier move, with its left edge off the display.
+
+With engine `39de6ed`, `movedisplay north` and `movedisplay south` made a maximized Finder window fill `0,30 2560x1410` and `182,1486 2048x1286`, and it kept focus.
+That engine found the dropped window under the pointer, and its title-bar drag failed live, because macOS dropped Finder 18 points below the pointer.
+Engine `4f07509` chose the display by the window's centre, and drags in both directions then filled the same frames.
+Review found that a low drop within the large display could put the centre on the built-in display, while macOS keeps the window on the display under the pointer.
+Engine `7e937a1` therefore remembers the pressed window and uses the display under the pointer at the release.
+With it, title-bar drags down and up filled the same frames, and a low drop within the large display left Finder at `0,885 2560x1410`, although its centre was over the built-in display.
+A drag within one display left the window where it was dropped, and the next double-click restored its slot.
+These are automated observations on real windows, driven by synthetic mouse events and engine commands, not physical input.
+Not checked live: a horizontal display arrangement, a window that macOS Fill filled, and Helium.
 
 ## Keyboard focus and pointer separation
 
