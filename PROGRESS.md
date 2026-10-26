@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `feat/title-bar-maximize`, which includes `fix/maximized-display-move` and `main` at `f6bff95`
+Updated: 2026-10-26 on branch `fix/fill-overflow`, based on `main` at `9bfa927`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,17 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## macOS Fill near the screen bottom
+
+[#108](https://github.com/samanyudas/miri/issues/108) is fixed on this branch, which pins engine `594a6c5`, the merge of [engine PR #52](https://github.com/samanyudas/paneru/pull/52).
+After macOS Window > Fill, a tiled window now returns to its slot instead of keeping the Fill height past the display's bottom edge.
+
+On 26 October, a throwaway Helium window in its slot at `1352,38 1200x1394` on the 2560x1440 display ended at `1352,38 1200x1410` after Fill, 8 points past the bottom.
+The engine harness reproduced it with the mock's sticky bottom, which models macOS ignoring a small shrink near the screen bottom.
+The tile restore had turned off the size check that lowers and regrows a window in that case, and then kept the frame as the app's refusal.
+With engine `7bcd7d6`, 3 of 3 Fills returned the same window to `1352,38 1200x1394`, and a Fill on the built-in display left it at its slot.
+These are automated observations driven by menu clicks through Accessibility, not physical input.
 
 ## Title-bar maximize
 
