@@ -380,7 +380,7 @@ The following table records the selected v1 defaults without claiming tested act
 | Move focused window to monitor above, left, below, or right | Control-Option-Command-Shift with W, A, S, or D, respectively | |
 | Stop window manager | Control-Option-Q | |
 | Cycle preset widths forward | Control-Option-R | |
-| Make column full width | Control-Option-F | |
+| Maximize or restore window | Control-Option-F | |
 | Center column | Control-Option-C | |
 | Make column wider | Control-Option-Equals | |
 | Make column narrower | Control-Option-Minus | |

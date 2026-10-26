@@ -55,7 +55,7 @@ struct DefaultBindingsTests {
             "window_movedisplay_south": .string("ctrl+alt+cmd+shift-s"),
             "window_movedisplay_east": .string("ctrl+alt+cmd+shift-d"),
             "window_resize": .string("ctrl+alt-r"),
-            "window_fullwidth": .string("ctrl+alt-f"),
+            "window_maximize": .string("ctrl+alt-f"),
             "window_center": .string("ctrl+alt-c"),
             "window_step_grow": .string("ctrl+alt-equal"),
             "window_step_shrink": .string("ctrl+alt-minus"),
@@ -89,6 +89,18 @@ struct DefaultBindingsTests {
         // The only default chord for wider is taken, so the action stays unbound.
         #expect(bindings?["window_step_grow"] == nil)
         #expect(bindings?["window_focus_north"] == .array([.string("ctrl+alt-uparrow"), .string("ctrl+alt-k")]))
+    }
+
+    @Test func anOlderFullWidthBindingStaysAndCountsAsTheMaximizeToggle() throws {
+        let original = """
+            [bindings]
+            window_fullwidth = "ctrl+alt-m"
+            """
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        #expect(document.text.hasPrefix(original + "\n"))
+        #expect(document.value(at: ["bindings", "window_maximize"]) == nil)
+        #expect(document.value(at: ["bindings", "window_center"]) == .string("ctrl+alt-c"))
     }
 
     @Test func aDeletedDefaultStaysDeleted() throws {
@@ -750,6 +762,9 @@ struct DefaultBindingsTests {
         ("window_vertical_step_shrink_now", "window_vertical_step_shrink"),
         ("window_focusdisplay_north", "window_focusdisplay_north"),
         ("window_movedisplay_east", "window_movedisplay_east"),
+        ("window_maximize", "window_maximize"),
+        ("window_fullwidth", "window_maximize"),
+        ("window_maximize_now", "window_maximize"),
         ("quit_now", "quit"),
         ("showmenu", "showmenu"),
         ("hidemenu", "hidemenu"),

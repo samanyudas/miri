@@ -73,7 +73,7 @@ If the engine rejects the binding section, or `[miri].stop_shortcut` is invalid,
 | Action | Default shortcut |
 | --- | --- |
 | Cycle preset widths forward | ⌃⌥R |
-| Make column full width | ⌃⌥F |
+| Maximize or restore window | ⌃⌥F |
 | Centre column | ⌃⌥C |
 | Make column wider | ⌃⌥= |
 | Make column narrower | ⌃⌥- |
@@ -87,7 +87,10 @@ Within one run of width changes, Miri remembers where the column started, so ret
 That memory ends when focus or the strip moves.
 Sam accepted this behavior on 19 October 2026.
 
-Full column width is separate from native macOS fullscreen.
+Maximize or restore window is the same toggle as a double-click on the window's title bar.
+A maximized window is a column as wide as the display, and focus moves scroll past it.
+It never creates a native full-screen Space.
+[Maximizing a window](release-scope.md#maximizing-a-window) records the rules.
 The width and height adjustment increment follows [Default shortcuts and layout](release-scope.md#default-shortcuts-and-layout).
 
 ## Stacks, tabs, and floating
@@ -144,6 +147,7 @@ Any action not listed here maps directly, and the live run confirmed it.
 | Make column wider or narrower | `window_step_grow`, `window_step_shrink` | None. Each press changes the width by `window_resize_step` of the display, 0.05 by default, and stops at full width without wrapping. |
 | Make window taller or shorter | `window_vertical_step_grow`, `window_vertical_step_shrink` | The height changes only for a window in a stack, because a column's only window always fills the display height. The neighbouring window absorbs the change and keeps a layout slot of at least 200 points, including the gap. With the default 8-point gap, the native window keeps at least 192 points, subject to its own minimum height. |
 | Centre column | `window_center` | None. The pointer stays where it is. |
+| Maximize or restore window | `window_maximize` | None. `window_fullwidth` is the engine's older name for the same command, so a file that binds it keeps working, and Settings lists it under this action. |
 | Focus monitor above, left, below, or right | `window_focusdisplay_north`, `_west`, `_south`, `_east` | None. Focus goes to the display's last-focused window when it is visible, otherwise to its most visible window. A display with no visible window gets its desktop focused, so its menu bar becomes active and shows Finder. The pointer stays where it is. |
 | Move focused window to monitor above, left, below, or right | `window_movedisplay_north`, `_west`, `_south`, `_east` | None. Focus follows the window. |
 | Stop window manager | | Miri's own shortcut, because the engine `quit` command ends the engine, and the app treats that exit as a crash and restarts it. |
@@ -162,6 +166,11 @@ While a join binding has its old default value and another binding holds its new
 A join binding that the user changed or deleted stays as it is.
 An unversioned file and a `[bindings]` table in a form Miri does not rewrite keep their join bindings until the user resets the shortcuts.
 The engine adds no bracket bindings of its own, because its default configuration has an empty `[bindings]` table.
+
+Before [#106](https://github.com/samanyudas/miri/issues/106), the default for ⌃⌥F was `window_fullwidth`, which made a full-width column with gaps.
+Miri now writes `window_maximize` for a new file or a reset to defaults.
+An existing `window_fullwidth` binding stays as it is, because the engine reads it as `window_maximize`.
+The default set therefore stays at version 3, and Miri adds no second binding for the action.
 
 ## Binding customization
 
