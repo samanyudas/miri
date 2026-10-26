@@ -218,12 +218,13 @@ struct RotatingLogTests {
     }
 
     @Test func passesTheEnvironmentAndCapturesOutput() async throws {
-        let launcher = try launcher(script: "echo \"$1 $PANERU_CONFIG $PANERU_MACH_SERVICE\"; echo oops >&2; exit 3\n")
+        let launcher = try launcher(
+            script: "echo \"$1 $PANERU_CONFIG $PANERU_MACH_SERVICE $PANERU_PARENT_PID\"; echo oops >&2; exit 3\n")
         var status: Int32?
         _ = try launcher.launch { status = $0 }
         #expect(try await waitForExit { status } == 3)
         let log = launcher.log.tail(maximum: 10_000)
-        #expect(log.contains("launch \(launcher.paths.configuration.path) test.miri.engine\n"))
+        #expect(log.contains("launch \(launcher.paths.configuration.path) test.miri.engine \(getpid())\n"))
         #expect(log.contains("oops\n"))
     }
 
