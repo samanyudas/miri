@@ -341,9 +341,15 @@ Otherwise the window stays a column of its own, at the restored width.
 Miri never closes or moves other windows to make room.
 
 Width commands, which grow, shrink, step, or cycle preset widths, restore a maximized window first and then apply.
+Stack and unstack commands also restore it first, where it stands, and then apply.
+Making a maximized window float restores it first, so it floats at its earlier size.
+Dragging the edge of a maximized window with the pointer ends maximization and keeps the new width.
+Equalize and balance leave a maximized column alone.
 A new window opens beside a maximized window as usual, and the maximized window stays maximized.
 A title-bar drag within the window's display works like any tiled drag.
 It shows the drop line and reorders the row, and the window stays maximized at its new place.
+A drop into a stack restores the window first and then joins that stack.
+A window dropped onto a maximized column restores that column first.
 
 A display move does not cancel maximization ([#87](https://github.com/samanyudas/miri/issues/87)).
 A maximized window that a display command moves, or that a title-bar drag drops on another display, fills that display's usable area.

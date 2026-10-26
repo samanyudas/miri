@@ -18,16 +18,17 @@ The public release path and the complete acceptance runs follow.
 
 [#106](https://github.com/samanyudas/miri/issues/106) keeps a maximized window in its row, so focus moves and swipes scroll past it.
 [Maximizing a window](decisions/release-scope.md#maximizing-a-window) records the rules Sam chose on 26 October.
-Engine PRs [#57](https://github.com/samanyudas/paneru/pull/57), [#58](https://github.com/samanyudas/paneru/pull/58), and [#60](https://github.com/samanyudas/paneru/pull/60) are merged into the fork branch.
+This branch pins engine `3fee523`, which includes engine PRs [#57](https://github.com/samanyudas/paneru/pull/57), [#58](https://github.com/samanyudas/paneru/pull/58), [#60](https://github.com/samanyudas/paneru/pull/60), [#63](https://github.com/samanyudas/paneru/pull/63), and [#64](https://github.com/samanyudas/paneru/pull/64).
 They make a maximized tiled window a display-wide column, make `maximize` the one toggle with `fullwidth` as its older name, and add `[options].maximized_window_side`.
-Two engine units are still in review: width and stack commands that restore first, and maximize in the saved session.
+They also restore a maximized window before width, stack, float, and drop actions, and keep maximize in the saved session across an engine restart.
+The pin also brings the Picture-in-Picture level fixes from engine PRs [#56](https://github.com/samanyudas/paneru/pull/56) and [#59](https://github.com/samanyudas/paneru/pull/59), and engine PRs #53, #55, #61, and #62.
 
 This branch builds the app part.
 Layout settings has a **Maximized stacked window opens** picker, and the ⌃⌥F default is now `window_maximize`, labeled Maximize or restore window.
 A file that binds `window_fullwidth` keeps that binding, and Settings lists it under the same action.
-The Swift tests pass with the engine checkout at `d1f4cab`, but the recorded engine pin is still `28f550f`.
-Next: re-pin the engine after the two remaining engine PRs merge, then run AS-15 to AS-17 and HR-3 in the [acceptance ledger](docs/acceptance-ledger.md) on the real app.
-Nothing on this branch is checked live yet.
+After a restart, the engine still focuses the first column, so a maximized window in another column comes back partly in view until it is focused, like any wide column.
+An unfocused Lua `SetWidth` stores its ratio but never applies it, for any window.
+This predates #106.
 
 ## AZERTY digit shortcuts
 
