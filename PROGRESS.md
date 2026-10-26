@@ -30,6 +30,18 @@ After a restart, the engine still focuses the first column, so a maximized windo
 An unfocused Lua `SetWidth` stores its ratio but never applies it, for any window.
 This predates #106.
 
+On 27 October, this branch's build at engine `3fee523` ran a live check on the 2560 by 1440 main display and the built-in display, with throwaway Finder windows and synthetic input.
+First, the build from `main` reproduced the defect: a maximized window filled `0,30 2560x1410`, and after a focus move its neighbor showed on top of it at its slot.
+With this branch, a maximized window filled `0,30 2560x1410`, and focus moves east and west scrolled past it 3 of 3 times with no overlap and no change of size.
+⌃⌥F, through Sam's `window_fullwidth` binding, and a title-bar double-click toggled the same state, and restore returned the exact earlier slot.
+On a floating window, both filled the usable area and restored the exact floating frame.
+A stacked window popped out to the right, and to the left after the Settings picker was changed to **Left of its stack**, and restore put it back in its stack slot.
+Grow restored first and then grew from the earlier width, a stack command restored first, and a new window opened beside a maximized window, which stayed maximized.
+Display moves filled the built-in display and then the main display again, and no native full-screen Space appeared.
+After the engine was killed, the session file held the maximize with width share 0.5, the restarted engine showed the window maximized, and the toggle restored its 1276 point width.
+Synthetic title-bar drags of the maximized window did not register, so the drag rules and the pointer edge resize are checked only by engine tests.
+The acceptance ledger rows stay Pending until a frozen release candidate runs them.
+
 ## AZERTY digit shortcuts
 
 [#31](https://github.com/samanyudas/miri/issues/31) is implemented on this branch, which pins engine `28f550f` from [engine PR #53](https://github.com/samanyudas/paneru/pull/53).
