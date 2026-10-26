@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `feat/title-bar-maximize`, which includes `fix/maximized-display-move` and `main` at `e158acd`
+Updated: 2026-10-26 on branch `feat/title-bar-maximize`, which includes `fix/maximized-display-move` and `main` at `f6bff95`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,7 +16,7 @@ The public release path and the complete acceptance runs follow.
 
 ## Title-bar maximize
 
-Engine `e6c8ebc`, the merge of [engine PR #43](https://github.com/samanyudas/paneru/pull/43), built this for [#88](https://github.com/samanyudas/miri/issues/88), and the branch now pins the later engine `ab3ce39`.
+Engine `e6c8ebc`, the merge of [engine PR #43](https://github.com/samanyudas/paneru/pull/43), built this for [#88](https://github.com/samanyudas/miri/issues/88), and the branch now pins the later engine `d7a4c3f`.
 The [release scope](decisions/release-scope.md#maximizing-a-window) records the rules.
 A double-click on a window's top bar fills the usable area of its display, and the next one restores it.
 The window keeps its place in the layout while maximized, so its neighbors never move.
@@ -35,7 +35,7 @@ That layout case exists without this branch and may explain [#58](https://github
 
 ## Maximized windows across displays
 
-This branch pins engine `ab3ce39`, the merge of [engine PR #49](https://github.com/samanyudas/paneru/pull/49), which follows [engine PR #44](https://github.com/samanyudas/paneru/pull/44), for [#87](https://github.com/samanyudas/miri/issues/87), and it is stacked on the title-bar maximize branch.
+Engine `ab3ce39`, the merge of [engine PR #49](https://github.com/samanyudas/paneru/pull/49), which follows [engine PR #44](https://github.com/samanyudas/paneru/pull/44), built this for [#87](https://github.com/samanyudas/miri/issues/87), and the branch now pins the later engine `d7a4c3f`.
 A maximized window that a display command moves, or that a title-bar drag drops on another display, fills that display's usable area.
 A new column that arrives from another display is never wider than the destination's tiling area.
 
@@ -69,6 +69,29 @@ Not checked live yet: a horizontal display arrangement, which waits for #103.
 
 macOS Fill on a tiled window on the large display leaves it at `1352,38 1200x1410`, so its bottom edge is 8 points below the display.
 Sam's build from `keyboard-focus-pointer` does the same, so this branch did not cause it.
+
+## Picture-in-Picture windows
+
+[#77](https://github.com/samanyudas/miri/issues/77) is implemented on this branch, which pins engine `d7a4c3f`.
+That pin includes [engine PR #50](https://github.com/samanyudas/paneru/pull/50) for this issue and [engine PR #51](https://github.com/samanyudas/paneru/pull/51), which stops a flaky SIGABRT in the engine tests.
+It also includes engine PRs #44, #48, and #49, which merged into the fork branch first.
+A window that its app keeps above the normal window level now floats when it opens, unless a rule sets `floating = false`.
+Such a window also takes keyboard focus once when it opens, because Chrome opens its Picture-in-Picture window without focus.
+The float toggle and tile overrides work on it as on any other automatically floating window.
+
+On 26 October, the running build at engine `58e5c7d` reproduced the defect with a throwaway Chrome instance.
+The Chrome video window and the Document Picture-in-Picture window both sit at window level 3 with the macOS all-Spaces tag.
+Miri tiled both, stretched them to the column height, and left focus on the previous app.
+With the candidate, both floated and took keyboard focus once, and Chrome became frontmost.
+Focus then moved to T3 Code and stayed there, and the video window stayed above every ordinary window.
+On the primary display, the video window belonged to both native Spaces and stayed visible above Notes after a Space switch and back.
+Closing it left the Chrome source window's tile unchanged, and an engine restart with the window open floated it without taking focus.
+The macOS system Picture-in-Picture window, owned by `PIPAgent` at level 19, is the one Safari and IINA use.
+Miri does not manage it, and it ignored the keyboard even when made frontmost, so it cannot take keyboard focus.
+IINA's player window, which Sam's IINA keeps on top with `alwaysFloatOnTop`, now floats too.
+No tested provider turns its Picture-in-Picture window back into a normal window, so the restore-on-exit rule had nothing to act on.
+These are automated observations driven through the Chrome DevTools protocol and Accessibility, not physical input.
+Private local evidence is in `/tmp/miri77/` on Sam's Mac.
 
 ## Keyboard focus and pointer separation
 

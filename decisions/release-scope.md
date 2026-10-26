@@ -213,6 +213,9 @@ Settling is always on in v1 and has no setting.
 V1 includes keyboard navigation, column resizing, window stacking, floating windows, and trackpad scrolling.
 V1 uses clicking and macOS window switching to access floating windows instead of a dedicated floating-to-tiled focus shortcut.
 Fixed-size windows and Miri's settings float automatically.
+Picture-in-Picture windows float automatically, stay above ordinary windows, and take keyboard focus once when they open.
+Miri treats any window that its app keeps above the normal window level as such a window, so it also floats an app's own always-on-top window.
+The macOS system Picture-in-Picture window, which Safari and IINA use, never takes keyboard focus, so Miri leaves it alone.
 When focus moves, the strip moves only as far as needed to show the focused column fully.
 A partly hidden column ends with its edge on the screen edge, and a fully visible column does not move.
 Keyboard focus and trackpad or modifier scrolling follow this rule, and the Centre column command still centers on demand.
