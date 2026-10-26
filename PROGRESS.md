@@ -20,8 +20,9 @@ The public release path and the complete acceptance runs follow.
 Version 4 of the default set gives every directional action the same modifiers on the arrow keys, HJKL, and WASD.
 Four edge-or-monitor actions take the ⌃⌥⌘ and ⌃⌥⌘⇧ left and right chords: the first press reaches the strip's end, and a press at the end crosses to the display on that side.
 Every display move now takes the whole column and inserts it after the destination's active column.
-The engine half is [engine PR #67](https://github.com/samanyudas/paneru/pull/67), and this branch pins its unmerged head `e58657f`.
-After engine PR #67 merges, repin to the merge commit and compare trees before this PR merges.
+The engine half is [engine PR #67](https://github.com/samanyudas/paneru/pull/67), merged as `0d627e7`, which this branch pins.
+Its #67 code matches the tested head `e58657f`, and the only other change in the range is the drag tests from engine PR #66.
+Sol approved the merged engine change in one sol-loop round, with no findings.
 [The keybinding reference](decisions/keybinding%20reference.md) records the table and the version 4 upgrade rules.
 
 On 27 October, real key events through every key set on the built-in display below a 2560 by 1440 display gave the same focus, order, stack membership, and native frames.
