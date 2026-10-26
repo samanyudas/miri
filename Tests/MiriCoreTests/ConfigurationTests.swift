@@ -21,6 +21,7 @@ struct ConfigurationStoreTests {
                 == .array([0.25, 0.33, 0.5, 0.66, 0.75].map(TOMLValue.float)))
         #expect(document.value(at: ["options", "animation_speed"]) == .float(14))
         #expect(document.value(at: ["options", "stack_limit"]) == .integer(5))
+        #expect(document.value(at: ["options", "maximized_window_side"]) == .string("right"))
         for side in ["top", "right", "bottom", "left"] {
             #expect(document.value(at: ["padding", side]) == .integer(4))
         }
@@ -212,6 +213,53 @@ struct StackLimitConfigurationTests {
         #expect(StackLimit.offeredCounts(fit: 3, configured: .count(9)) == [1, 2, 3, 9])
         #expect(StackLimit.offeredCounts(fit: 6, configured: .count(Int.max)) == [1, 2, 3, 4, 5, 6, Int.max])
         #expect(StackLimit.offeredCounts(fit: 0, configured: .fit) == [1])
+    }
+}
+
+struct MaximizedWindowSideConfigurationTests {
+    private let directory = FileManager.default.temporaryDirectory.appending(
+        path: "miri-maximized-side-\(UUID().uuidString)")
+    private var url: URL { directory.appending(path: "config.toml") }
+
+    private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
+
+    private func store(_ text: String) throws -> ConfigurationStore {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try text.write(to: url, atomically: true, encoding: .utf8)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
+        store.load(reduceMotion: false)
+        return store
+    }
+
+    @Test func defaultsToTheRightOfTheStack() throws {
+        #expect(try store("").settings.maximizedWindowSide == .right)
+    }
+
+    @Test func readsLeftOrRight() throws {
+        #expect(try store("[options]\nmaximized_window_side = \"left\"\n").settings.maximizedWindowSide == .left)
+        #expect(try store("[options]\nmaximized_window_side = \"right\"\n").settings.maximizedWindowSide == .right)
+    }
+
+    @Test func writesTheChoiceAsTheEngineReadsIt() throws {
+        let store = try store("")
+        try store.update(reduceMotion: false) { $0.maximizedWindowSide = .left }
+        #expect(try TOMLDocument(contents()).value(at: ["options", "maximized_window_side"]) == .string("left"))
+        #expect(store.settings.maximizedWindowSide == .left)
+        try store.update(reduceMotion: false) { $0.maximizedWindowSide = .right }
+        #expect(try TOMLDocument(contents()).value(at: ["options", "maximized_window_side"]) == .string("right"))
+    }
+
+    @Test func rejectsValuesTheEngineRejects() throws {
+        for bad in ["\"up\"", "\"Left\"", "\"\"", "1", "true"] {
+            let text = "[options]\nmaximized_window_side = \(bad)\n"
+            let store = try store(text)
+            #expect(
+                store.issue
+                    == .invalidValue(
+                        key: "options.maximized_window_side",
+                        message: "options.maximized_window_side must be \"left\" or \"right\"."), "\(bad)")
+            #expect(try contents() == text)
+        }
     }
 }
 

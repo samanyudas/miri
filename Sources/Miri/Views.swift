@@ -187,6 +187,17 @@ struct LayoutSettings: View {
                 )
                 .foregroundStyle(.secondary)
             }
+            Section {
+                Picker("Maximized stacked window opens", selection: maximizedWindowSide) {
+                    Text("Left of its stack").tag(MaximizedWindowSide.left)
+                    Text("Right of its stack").tag(MaximizedWindowSide.right)
+                }
+            } footer: {
+                Text(
+                    "Maximizing a stacked window moves it out of its stack into a column of its own. When you restore it, it returns to the stack if the stack has room."
+                )
+                .foregroundStyle(.secondary)
+            }
         }
         .formStyle(.grouped)
         .onAppear(perform: showPresets)
@@ -199,6 +210,12 @@ struct LayoutSettings: View {
 
     private var stackLimit: Binding<StackLimit> {
         Binding(get: { model.settings.stackLimit }, set: { value in model.update { $0.stackLimit = value } })
+    }
+
+    private var maximizedWindowSide: Binding<MaximizedWindowSide> {
+        Binding(
+            get: { model.settings.maximizedWindowSide },
+            set: { value in model.update { $0.maximizedWindowSide = value } })
     }
 
     /// How many windows fit in a column on the display with the menu bar, as the engine counts them.
