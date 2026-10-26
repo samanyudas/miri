@@ -54,7 +54,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func quitOnTerminationSignal() {
         signal(SIGTERM, SIG_IGN)
         let source = DispatchSource.makeSignalSource(signal: SIGTERM, queue: .main)
-        source.setEventHandler { NSApp.terminate(nil) }
+        // Terminating inside this main-queue callout would wait for the engine's exit, which also needs the main
+        // queue, so the quit would never finish. The run loop calls terminate after the callout returns.
+        source.setEventHandler { RunLoop.main.perform { NSApp.terminate(nil) } }
         source.resume()
         terminationSignal = source
     }
