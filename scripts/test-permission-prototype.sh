@@ -47,40 +47,55 @@ def wait_file(path, process):
             raise RuntimeError(f'Process did not create {path}')
         time.sleep(.02)
 
+def launch_observed(bundle, report, target, log_path):
+    with log_path.open('w') as log:
+        return subprocess.Popen(['open', '-n', '-W', str(bundle), '--args',
+                                 '--permission-observation', str(report), '--target-pid', str(target)],
+                                stdout=log, stderr=log)
+
 def observe(bundle, name, target):
     report = evidence / f'{name}.json'
-    with (evidence / f'{name}-launch.log').open('w') as log:
-        launch = subprocess.Popen(['open', '-n', '-W', str(bundle), '--args',
-                                   '--permission-observation', str(report), '--target-pid', str(target)],
-                                  stdout=log, stderr=log)
+    sidecar = report.with_suffix('.json.pid')
+    log_path = evidence / f'{name}-launch.log'
+    launch = launch_observed(bundle, report, target, log_path)
+    try:
         try:
-            sidecar = report.with_suffix('.json.pid')
             wait_file(sidecar, launch)
-            pid = int(sidecar.read_text())
-            owned_apps[pid] = bundle / 'Contents/Helpers/miri-engine'
-            launch.wait(timeout=12)
-            launch_log = (evidence / f'{name}-launch.log').read_text().strip()
-            # `open -W` fails this way when the app exits before LaunchServices
-            # starts waiting for it. The app has finished, so the checks below
-            # on its report and its exit decide the result.
-            exited_early = 'kevent() failed: No such process' in launch_log
-            assert launch.returncode == 0 or exited_early, (
-                f'LaunchServices failed for {name} with exit code {launch.returncode}: {launch_log}')
-            assert report.exists(), 'The app exited without an observation report'
-            result = json.loads(report.read_text())
-            assert result['schemaVersion'] == 1
-            assert result['permissionAttribution'] == 'unresolved'
-            reported_pid = result['appPid'] if 'failure' in result else result['app']['pid']
-            assert reported_pid == pid, 'The report app PID differs from the launched app'
-            end = time.monotonic() + 2
-            while alive(pid) and time.monotonic() < end:
-                time.sleep(.02)
-            assert not alive(pid), 'The observed app survived its exit'
-            return result
-        finally:
-            if launch.poll() is None:
-                launch.kill()
+        except RuntimeError:
+            # LaunchServices can refuse a launch with error -600 while it
+            # updates its record of a bundle, such as one rebuilt while another
+            # copy runs. The app never started, so one more launch is safe.
+            if sidecar.exists() or 'failed with error -600' not in log_path.read_text():
+                raise
             launch.wait(timeout=5)
+            time.sleep(1)
+            launch = launch_observed(bundle, report, target, log_path)
+            wait_file(sidecar, launch)
+        pid = int(sidecar.read_text())
+        owned_apps[pid] = bundle / 'Contents/Helpers/miri-engine'
+        launch.wait(timeout=12)
+        launch_log = log_path.read_text().strip()
+        # `open -W` fails this way when the app exits before LaunchServices
+        # starts waiting for it. The app has finished, so the checks below
+        # on its report and its exit decide the result.
+        exited_early = 'kevent() failed: No such process' in launch_log
+        assert launch.returncode == 0 or exited_early, (
+            f'LaunchServices failed for {name} with exit code {launch.returncode}: {launch_log}')
+        assert report.exists(), 'The app exited without an observation report'
+        result = json.loads(report.read_text())
+        assert result['schemaVersion'] == 1
+        assert result['permissionAttribution'] == 'unresolved'
+        reported_pid = result['appPid'] if 'failure' in result else result['app']['pid']
+        assert reported_pid == pid, 'The report app PID differs from the launched app'
+        end = time.monotonic() + 2
+        while alive(pid) and time.monotonic() < end:
+            time.sleep(.02)
+        assert not alive(pid), 'The observed app survived its exit'
+        return result
+    finally:
+        if launch.poll() is None:
+            launch.kill()
+        launch.wait(timeout=5)
 
 assert engine.is_file() and fixture.is_file(), 'Run build-app.sh first'
 metadata = {

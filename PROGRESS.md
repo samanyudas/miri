@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `feat/title-bar-maximize`, based on `main` at `e151c5b`
+Updated: 2026-10-26 on branch `fix/maximized-display-move`, stacked on `feat/title-bar-maximize`, with `main` at `e158acd` merged in
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -31,6 +31,43 @@ macOS ignores a small shrink that leaves a window's bottom edge near the bottom 
 A restore therefore first ends 100 points above the slot and then grows into it.
 The same rule can also stop the layout from shrinking a newly opened window that touches the screen bottom into its slot.
 That layout case exists without this branch and may explain [#58](https://github.com/samanyudas/miri/issues/58).
+
+## Maximized windows across displays
+
+This branch pins engine `ab3ce39`, the merge of [engine PR #49](https://github.com/samanyudas/paneru/pull/49), which follows [engine PR #44](https://github.com/samanyudas/paneru/pull/44), for [#87](https://github.com/samanyudas/miri/issues/87), and it is stacked on the title-bar maximize branch.
+A maximized window that a display command moves, or that a title-bar drag drops on another display, fills that display's usable area.
+A new column that arrives from another display is never wider than the destination's tiling area.
+
+On 26 October, the build of `feat/title-bar-maximize` with engine `e6c8ebc` reproduced the defect.
+A maximized Finder window moved south by `movedisplay south` stayed at `0,30 2560x1410` on the large display, while the engine placed its slot on the built-in display.
+Dragged by its title bar to the built-in display, it ended at `-6,1505 800x1278`, partly off the display.
+A Helium window on the built-in display had kept a frame 8 points wider than the tiling area from an earlier move, with its left edge off the display.
+
+With engine `39de6ed`, `movedisplay north` and `movedisplay south` made a maximized Finder window fill `0,30 2560x1410` and `182,1486 2048x1286`, and it kept focus.
+That engine found the dropped window under the pointer, and its title-bar drag failed live, because macOS dropped Finder 18 points below the pointer.
+Engine `4f07509` chose the display by the window's centre, and drags in both directions then filled the same frames.
+Review found that a low drop within the large display could put the centre on the built-in display, while macOS keeps the window on the display under the pointer.
+Engine `7e937a1` therefore remembers the pressed window and uses the display under the pointer at the release.
+With it, title-bar drags down and up filled the same frames, and a low drop within the large display left Finder at `0,885 2560x1410`, although its centre was over the built-in display.
+A drag within one display left the window where it was dropped, and the next double-click restored its slot.
+These are automated observations on real windows, driven by synthetic mouse events and engine commands, not physical input.
+Engine `0ce219c` adds only a test for side-by-side displays, and that test fails without the fix.
+Later on 26 October, with the same fix, a throwaway Helium window passed the same display-command, drag, low-drop, and restore checks with the same frames.
+After macOS Fill, `movedisplay south` gave Helium `1264,1486 958x1270`, inside the built-in display's tiling area.
+Sam checked the stacked arrangement by hand, with a real mouse, and steps 1 to 5 passed.
+With the displays side by side, the off-screen columns moved to the other display, so the side-by-side check could not run (#103).
+Sam also found that a drag of a maximized window showed no drop line, which a drag after a restore did show.
+Engine PR #49 shows the line while a maximized window is over another display, and the drop puts the window in that display's layout at the line.
+Over its own display the drag stays a free move with no line.
+With engine `1b55f53`, a maximized Finder window dragged within the large display moved to `0,586 2560x1410`, and the layouts did not change.
+Dragged onto the built-in display, it filled `234,1486 2048x1286`, kept focus, and joined the built-in display's layout after the Helium column.
+The next double-click restored it to its new slot at `1636,1494 638x1270`.
+The synthetic run could not show the line clearly, because the built-in display's full-width column puts it at the display edge.
+Sam then dragged a maximized window by hand on 26 October and confirmed that the drag works.
+Not checked live yet: a horizontal display arrangement, which waits for #103.
+
+macOS Fill on a tiled window on the large display leaves it at `1352,38 1200x1410`, so its bottom edge is 8 points below the display.
+Sam's build from `keyboard-focus-pointer` does the same, so this branch did not cause it.
 
 ## Keyboard focus and pointer separation
 
@@ -70,8 +107,41 @@ With the candidate, the column reserves 808 points, Spotify stays fully visible,
 Unstacking, restacking, reordering, a width step, a second stacked column of two Helium windows, and a move to the built-in display and back all kept that spacing.
 Miri Settings stayed tiled after an engine-only restart, and floating it again or closing it removed its override entry.
 These are automated observations on the real windows, driven through the engine's command socket, not physical keyboard input.
-A Miri restart with a non-Miri window under a floating rule was not observed, because Sam's configuration floats only Miri Settings, which closes when Miri quits.
-Automatic floating of fixed-size windows is still not built, so the override currently applies to rule-based floating only.
+
+### Automatic floating of fixed-size windows
+
+This branch pins engine `ae05362`.
+A window whose size macOS reports as not settable now floats when it opens, unless a rule sets `floating = false`.
+The float toggle tiles such a window with the same override as a rule-floated window.
+A window that opens floating now also takes focus.
+A floating window that is minimized, including one minimized when the engine starts, floats again when it is restored instead of tiling.
+Before, macOS reported its focus before the engine tracked it, so the float toggle acted on the previous window.
+
+On 26 October, synthetic key presses drove the hotkey path on the primary display.
+A fixed-size test app, 420 by 332 points, floated when it opened and took focus.
+Control-Option-T tiled it and wrote its override.
+It stayed tiled after a full Miri restart, a second press floated it and removed the override, and quitting the app removed the override again.
+Stacked under Spotify with Control-Option-], it kept its 420 by 332 size at the column's left edge.
+System Settings stacked onto Spotify with Control-Option-] in an 808-point column, and Ghostty started past Spotify's right edge.
+Moving Settings to the top and moving focus within the stack by key kept that spacing.
+No physical keyboard or mouse input was used.
+
+### Fixed-size windows in stacks
+
+This branch pins engine `3bdae94`, which merges [engine PR #46](https://github.com/samanyudas/paneru/pull/46) and [engine PR #47](https://github.com/samanyudas/paneru/pull/47).
+On 26 October, Sam chose to give a fixed-size window's spare stack height to the other windows.
+A window that cannot be resized now keeps its own height in a stack, and the spare height goes evenly to the resizable windows.
+In a stack of only fixed-size windows, they stack from the top and the rest of the column stays empty below the last one.
+A window that opened floating now gets its padding when it is tiled, so it lines up with its column.
+Quitting an app now ends the tile overrides of its windows, as closing them does.
+
+On 26 October, on the primary display with synthetic key presses:
+Calculator stacked under Spotify left Spotify 994 points with no gap or overlap.
+Digital Color Meter as a third member gave Spotify 777, Calculator 408, and Digital Color Meter 217 points of the 1402-point column.
+After a Miri restart, all three sat at the same left edge with 8-point gaps.
+Quitting Calculator emptied `tile-overrides.json`.
+These checks ran before the last engine review fixes, which tests cover.
+[#101](https://github.com/samanyudas/miri/issues/101) tracks a false minimum height that a resizable window records when it refuses a small shrink at the bottom of the screen.
 
 ## Bracket directions for stack shortcuts
 
