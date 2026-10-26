@@ -13,6 +13,7 @@ public struct MiriSettings: Equatable, Sendable {
     public var outerGap = 8
     public var widthPresets = [0.25, 0.33, 0.5, 0.66, 0.75]
     public var stackLimit = StackLimit.count(5)
+    public var maximizedWindowSide = MaximizedWindowSide.right
     public var animations = true
     public var launchAtLogin = true
     public var stripGesture = StripGesture.off
@@ -57,6 +58,14 @@ public struct MiriSettings: Equatable, Sendable {
             case .string("fit"): stackLimit = .fit
             default: throw Self.stackLimitIssue
             }
+        }
+        if let value = document.value(at: ["options", "maximized_window_side"]) {
+            guard case .string(let name) = value, let side = MaximizedWindowSide(rawValue: name) else {
+                throw .invalidValue(
+                    key: "options.maximized_window_side",
+                    message: "options.maximized_window_side must be \"left\" or \"right\".")
+            }
+            maximizedWindowSide = side
         }
         try validate()
     }
@@ -120,6 +129,7 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.boolean(reverseSwipe), ["miri"], "reverse_swipe")
         try set(.array(widthPresets.map(TOMLValue.float)), ["options"], "preset_column_widths")
         try set(stackLimit.tomlValue, ["options"], "stack_limit")
+        try set(.string(maximizedWindowSide.rawValue), ["options"], "maximized_window_side")
         if animations && !reduceMotion {
             if result.value(at: ["options", "animation_speed"]) == nil {
                 try set(.float(Self.animationSpeed), ["options"], "animation_speed")
@@ -186,6 +196,12 @@ public struct MiriSettings: Equatable, Sendable {
         key: "options.stack_limit",
         message: "options.stack_limit must be a whole number from 1 or \"fit\"."
     )
+}
+
+/// The side of its stack where a maximized stacked window opens as a column of its own. The raw value is the engine's
+/// `[options].maximized_window_side`.
+public enum MaximizedWindowSide: String, CaseIterable, Sendable {
+    case left, right
 }
 
 /// How many windows one stack holds. The engine caps a count at what fits on the display the stack is on.

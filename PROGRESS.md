@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `fix/engine-exits-with-app`, based on `main` at `a327d90`
+Updated: 2026-10-27 on branch `fix/engine-exits-with-app`, based on `main` at `7bbecc5`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,7 +16,8 @@ The public release path and the complete acceptance runs follow.
 
 ## Engine left running after Miri dies
 
-[#33](https://github.com/samanyudas/miri/issues/33) is implemented on this branch, which pins engine `4158e8f`, the merge of [engine PR #61](https://github.com/samanyudas/paneru/pull/61).
+[#33](https://github.com/samanyudas/miri/issues/33) is implemented on this branch.
+The fix is engine `4158e8f`, the merge of [engine PR #61](https://github.com/samanyudas/paneru/pull/61), which the engine pin `3fee523` from `main` includes.
 Sol approved engine PR #61 in round 2 of sol-loop, after round 1 found that an exit during engine startup was lost, which `aa10128` fixes.
 Miri passes its PID to the engine in `PANERU_PARENT_PID`.
 The engine watches that process with a kqueue `NOTE_EXIT` filter and exits through its normal cleanup when the process ends.
@@ -32,6 +33,34 @@ SIGTERM on the fixed app ended the app within 400 ms, together with its engine.
 SIGKILL on the fixed app ended its engine within 600 ms.
 The first run found that the SIGTERM handler deadlocked, because it called terminate inside a main-queue callout, and the fix is on this branch.
 That run also showed that an engine interrupted during its startup can panic with "Resource does not exist". No issue tracks this yet.
+
+## Maximized column
+
+[#106](https://github.com/samanyudas/miri/issues/106) keeps a maximized window in its row, so focus moves and swipes scroll past it.
+[Maximizing a window](decisions/release-scope.md#maximizing-a-window) records the rules Sam chose on 26 October.
+This branch pins engine `3fee523`, which includes engine PRs [#57](https://github.com/samanyudas/paneru/pull/57), [#58](https://github.com/samanyudas/paneru/pull/58), [#60](https://github.com/samanyudas/paneru/pull/60), [#63](https://github.com/samanyudas/paneru/pull/63), and [#64](https://github.com/samanyudas/paneru/pull/64).
+They make a maximized tiled window a display-wide column, make `maximize` the one toggle with `fullwidth` as its older name, and add `[options].maximized_window_side`.
+They also restore a maximized window before width, stack, float, and drop actions, and keep maximize in the saved session across an engine restart.
+The pin also brings the Picture-in-Picture level fixes from engine PRs [#56](https://github.com/samanyudas/paneru/pull/56) and [#59](https://github.com/samanyudas/paneru/pull/59), and engine PRs #53, #55, #61, and #62.
+
+This branch builds the app part.
+Layout settings has a **Maximized stacked window opens** picker, and the ⌃⌥F default is now `window_maximize`, labeled Maximize or restore window.
+A file that binds `window_fullwidth` keeps that binding, and Settings lists it under the same action.
+After a restart, the engine still focuses the first column, so a maximized window in another column comes back partly in view until it is focused, like any wide column.
+An unfocused Lua `SetWidth` stores its ratio but never applies it, for any window.
+This predates #106.
+
+On 27 October, this branch's build at engine `3fee523` ran a live check on the 2560 by 1440 main display and the built-in display, with throwaway Finder windows and synthetic input.
+First, the build from `main` reproduced the defect: a maximized window filled `0,30 2560x1410`, and after a focus move its neighbor showed on top of it at its slot.
+With this branch, a maximized window filled `0,30 2560x1410`, and focus moves east and west scrolled past it 3 of 3 times with no overlap and no change of size.
+⌃⌥F, through Sam's `window_fullwidth` binding, and a title-bar double-click toggled the same state, and restore returned the exact earlier slot.
+On a floating window, both filled the usable area and restored the exact floating frame.
+A stacked window popped out to the right, and to the left after the Settings picker was changed to **Left of its stack**, and restore put it back in its stack slot.
+Grow restored first and then grew from the earlier width, a stack command restored first, and a new window opened beside a maximized window, which stayed maximized.
+Display moves filled the built-in display and then the main display again, and no native full-screen Space appeared.
+After the engine was killed, the session file held the maximize with width share 0.5, the restarted engine showed the window maximized, and the toggle restored its 1276 point width.
+Synthetic title-bar drags of the maximized window did not register, so the drag rules and the pointer edge resize are checked only by engine tests.
+The acceptance ledger rows stay Pending until a frozen release candidate runs them.
 
 ## AZERTY digit shortcuts
 
@@ -63,6 +92,7 @@ Engine `e6c8ebc`, the merge of [engine PR #43](https://github.com/samanyudas/pan
 The [release scope](decisions/release-scope.md#maximizing-a-window) records the rules.
 A double-click on a window's top bar fills the usable area of its display, and the next one restores it.
 The window keeps its place in the layout while maximized, so its neighbors never move.
+[#106](https://github.com/samanyudas/miri/issues/106) replaces this model with a maximized column that stays in its row.
 
 On 26 October, current `main` with engine `6325638` reproduced the defect on the primary display.
 A double-click on a Finder title bar let macOS zoom Finder to 868 points wide, and the engine took that as the column's width, which moved T3 Code 156 points left.
@@ -140,6 +170,20 @@ After Restore, it appeared on the shown workspace 1 at its old size, fully visib
 Sam accepted the system Picture-in-Picture focus limit and chose that a Picture-in-Picture window stays on the display where it opened.
 These are automated observations driven through the Chrome DevTools protocol and Accessibility, not physical input.
 Private local evidence is in `/tmp/miri77/` on Sam's Mac.
+
+A recheck on `main` `12323e5` found a race in criterion 2 and criterion 4.
+In 1 of 8 trials, the first Picture-in-Picture window in a fresh Chrome profile tiled at 2013 by 1402 and did not take focus.
+Chrome shows that window at the normal level and raises it to level 3 between 20 ms and 90 ms later, and the engine read the level only once.
+[Engine PR #56](https://github.com/samanyudas/paneru/pull/56) reads a newly tiled window's level again each frame for one second.
+If the level rises, the engine floats the window, gives back the frame it opened with, and focuses it once.
+A native test app that raises its window 150 ms after it opens tiled on the old engine.
+With engine `aba75ea`, raises after 60, 150, 300, and 600 ms all kept the window floating at its own frame.
+The engine query leaves out that test app's floating-level window, before and after the change, but it lists Chrome Picture-in-Picture windows.
+A Sol review found that a window arriving without a size could be tiled before its level was known.
+[Engine PR #59](https://github.com/samanyudas/paneru/pull/59) leaves such a window untiled until its level check ends, so a raised window floats at the frame its app gave it.
+Both fixes reached `main` with the engine pin `3fee523` from [#116](https://github.com/samanyudas/miri/pull/116).
+On 27 October, the build at engine `3fee523` floated and focused 3 of 3 first-time Chrome Picture-in-Picture windows, and the test app kept its frame for raises after 150, 300, and 600 ms.
+Private local evidence is in `/tmp/miri77b/` on Sam's Mac.
 
 ## Keyboard focus and pointer separation
 

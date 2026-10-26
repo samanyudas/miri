@@ -34,6 +34,7 @@ The initial default installation also backs up the file before adding its versio
 | Inner gap | `8` points | `[miri].inner_gap`. Miri writes half of it as per-window padding in `[windows.miri-gaps]`. |
 | Outer gap | `8` points | `[miri].outer_gap`. Miri writes it minus the per-window padding to each `[padding]` side. |
 | Stack limit | `5` windows | `[options].stack_limit`, a number from 1 or `"fit"`. The engine caps it at what fits on each display. |
+| Maximized stacked window opens | Right of its stack | `[options].maximized_window_side`, `"left"` or `"right"`. |
 
 Paneru v0.5.2 has no `gap_inner` or `gap_outer` configuration keys.
 Its outer padding has separate top, right, bottom, and left fields.
@@ -56,6 +57,8 @@ Miri must implement the accepted incremental behavior through its integration.
 Focus reveal and Dock reservation follow [V1 interactions](release-scope.md#v1-interactions).
 The stack limit is an engine option, `[options].stack_limit`, which holds a number from 1 or `"fit"` and defaults to `5`.
 Settings writes it, and the engine caps it at what fits on each display.
+The side where a maximized stacked window opens is an engine option, `[options].maximized_window_side`, which holds `"left"` or `"right"` and defaults to `"right"`.
+Settings writes it as **Maximized stacked window opens**, and [Maximizing a window](release-scope.md#maximizing-a-window) records the behavior.
 Alternative centering modes, `never` and `always`, remain proposals rather than accepted v1 controls.
 The allowed gap range remains unresolved.
 Fixed-pixel width presets are deferred to v2.

@@ -36,6 +36,8 @@ The native app is implemented, but no complete acceptance run has passed.
 - [Stacks](release-scope.md#stacks) keep equal heights after membership changes and never overlap while they fit.
   An overflowing stack overlaps each window below the top bar of the window above, and the focused window comes to the front.
 - Dragging a tiled window moves it into a column or to a new column at the drop position, on any display.
+- A maximized tiled window is a column as wide as the display that stays in its row, so focus moves and swipes scroll past it.
+  Control-Option-F and a title-bar double-click are one toggle, as [Maximizing a window](release-scope.md#maximizing-a-window) describes.
 - The stack limit is an engine option that defaults to 5, never exceeds what fits on the display, and a Stack command past it starts a new column.
 - The layout reserves space for the visible Dock without a separate v1 setting.
 - V2 includes an optional custom Miri dock that can be enabled or disabled.
@@ -150,6 +152,8 @@ This list holds only work that has no implementation on `main` at `e516edd`.
 - Implement dragging windows into columns and to new columns, on one display and across displays ([#43](https://github.com/samanyudas/miri/issues/43)).
 - Run the stack limit hardware check, S-7 in the [acceptance ledger](../docs/acceptance-ledger.md).
   The engine option and its Settings control are built, pending that check ([#44](https://github.com/samanyudas/miri/issues/44)).
+- Finish [#106](https://github.com/samanyudas/miri/issues/106): width commands that restore a maximized window first, and maximize that survives an engine restart.
+  Then run AS-15 to AS-17 and HR-3 in the [acceptance ledger](../docs/acceptance-ledger.md).
 - Integrate Sparkle updates with the accepted update policy.
 - Configure Developer ID signing, notarization, signed update feeds, the release disk image, and the Homebrew cask.
 - Recheck app and helper Accessibility attribution on the Developer ID signed, notarized bundle.

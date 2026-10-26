@@ -16,7 +16,7 @@ Existing windows retain their widths.
 
 Give each managed display and each macOS Space its own strip.
 Keep column order, widths, stacks, focus, and scroll position independent between displays.
-Restore column order, widths, and stacks after restarting.
+Restore column order, widths, stacks, and maximized windows after restarting.
 
 Keep scrolled windows on their assigned displays without macOS relocating them.
 Verify the edge-handling mechanism on real hardware before selecting an implementation.
@@ -77,7 +77,7 @@ The Miri dock dims when inactive-window dimming is enabled.
 A stack containing windows from multiple apps shows multiple app icons in its dock entry.
 The [Miri dock plan](v2-roadmap.md#miri-dock) defines column entries, same-app window-count badges, and a window-title picker for individual window selection.
 
-Offer configurable width presets, full column width, width adjustments, height adjustments, and equal heights within a stack.
+Offer configurable width presets, a maximize toggle, width adjustments, height adjustments, and equal heights within a stack.
 Reserve Dock space as described in [V1 interactions](release-scope.md#v1-interactions).
 Allow separate gaps between windows and at display edges, including zero gaps.
 

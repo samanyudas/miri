@@ -128,6 +128,15 @@ Never leave windows stranded off-screen.
     Miri rejects the conflicting assignment and leaves the existing binding unchanged.
 14. Record a shortcut with a known macOS conflict.
     Miri warns about the conflict and never silently replaces another binding.
+15. Maximize a tiled window with ⌃⌥F, then move focus to the left and right past it, and swipe the strip past it.
+    The window stays maximized and fills the usable area whenever it is in view, and no neighbor shows on top of it.
+    A title-bar double-click restores it, the column returns to its earlier width, and the neighbors keep their sizes.
+    ⌃⌥F and the double-click do the same on a floating window, and no action creates a native full-screen Space.
+16. Set **Maximized stacked window opens** to **Left of its stack**, then to **Right of its stack**, and maximize a stacked window each time.
+    The window leaves its stack for a column of its own on the chosen side.
+    On restore it returns to its old position in the stack when the stack still exists and has room.
+17. Start Miri with a configuration that binds `window_fullwidth` to a shortcut.
+    The shortcut toggles maximize, Settings lists it under Maximize or restore window, and Miri adds no second binding.
 
 ## Strip gestures and conflict handling
 

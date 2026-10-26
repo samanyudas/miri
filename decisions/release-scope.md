@@ -308,19 +308,49 @@ If macOS tiles the window instead, the engine returns it to its place in the lay
 
 ### Maximizing a window
 
-Sam accepted these rules on 25 October 2026 ([#88](https://github.com/samanyudas/miri/issues/88)).
-A double-click on a window's title bar, toolbar, or navigation bar fills the usable area of the display the pointer is on.
-The usable area excludes the menu bar and the visible Dock.
-The next double-click on that window's top bar restores it.
-There is no timer, and no toggle creates a native full-screen Space.
-A double-click on a control in the top bar, such as a button, text field, or tab, stays the control's own.
-Make column full width, Control-Option-F, stays a separate column-width action.
+Sam accepted the first rules on 25 October 2026 ([#88](https://github.com/samanyudas/miri/issues/88)).
+On 26 October 2026, Sam replaced the model and the toggle ([#106](https://github.com/samanyudas/miri/issues/106)).
 
-A maximized window may cover the windows around it, and they keep their sizes and places.
-The maximized window keeps its place in the layout while it is maximized.
-A tiled window returns to that place, so a stacked window returns to its stack, at the position the stack gives it at that time.
+A maximized tiled window is a column as wide as the display, and the window fills the usable area of its display.
+The usable area excludes the menu bar and the visible Dock.
+No action creates a native full-screen Space.
+The maximized column stays in its row, and its neighbors sit beside it off-screen, as with any wide column.
+Focus moves to the left or right and strip swipes scroll past it as usual.
+The maximized window slides away and back and stays maximized, and no neighbor shows on top of it.
+This matches niri's `maximize-column`.
+
+Control-Option-F and a double-click on a window's title bar, toolbar, or navigation bar are one toggle.
+Each maximizes the window, or restores it when it is maximized.
+Control-Option-F acts on the focused window, and the double-click acts on the clicked window.
+There is no timer.
+A double-click on a control in the top bar, such as a button, text field, or tab, stays the control's own.
+The separate Make column full width action is no longer one of Miri's defaults or listed actions.
+A configuration that binds `window_fullwidth` keeps working, because the engine reads it as the maximize toggle.
+
+Restore returns the column to its width just before maximizing, and the window to its earlier height.
+The neighbors keep their sizes.
+On a floating window, both triggers fill the usable area over the layout.
 A floating window returns to its earlier size, at the same offset from the top-left corner of the usable area, moved and shrunk as needed to stay on the display.
-Because the window never leaves its place, the stack-capacity and missing-stack fallbacks in #88 do not occur.
+
+Maximizing a stacked window moves it out of its stack into a column of its own.
+The **Maximized stacked window opens** setting chooses the side, **Left of its stack** or **Right of its stack**.
+The default is the right side, and the engine key is `[options].maximized_window_side`.
+The stack keeps its width, and focus commands reach it like any neighbor.
+On restore, the window returns to its old position in the stack when a window from that stack is still in a column that is not maximized and has room.
+Otherwise the window stays a column of its own, at the restored width.
+Miri never closes or moves other windows to make room.
+
+Width commands, which grow, shrink, step, or cycle preset widths, restore a maximized window first and then apply.
+Stack and unstack commands also restore it first, where it stands, and then apply.
+Making a maximized window float restores it first, so it floats at its earlier size.
+Dragging the edge of a maximized window with the pointer ends maximization and keeps the new width.
+Equalize and balance leave a maximized column alone.
+A new window opens beside a maximized window as usual, and the maximized window stays maximized.
+A title-bar drag within the window's display works like any tiled drag.
+It shows the drop line and reorders the row, and the window stays maximized at its new place.
+A drop into a stack restores the window first and then joins that stack.
+A window dropped onto a maximized column restores that column first.
+
 A display move does not cancel maximization ([#87](https://github.com/samanyudas/miri/issues/87)).
 A maximized window that a display command moves, or that a title-bar drag drops on another display, fills that display's usable area.
 The display under the pointer at the drop is the destination.
@@ -329,9 +359,12 @@ A display command puts it at the end of the destination's strip.
 While a drag is over another display, Miri shows the same drop line as for any tiled window, and the drop puts the window there.
 A floating maximized window has no place in a layout, so a drag shows no line.
 
+The saved session records, for each maximized window, that it is maximized, its width before maximizing, and the stack it came from.
+After an engine restart or a session restore, the window fills its display's usable area again, and a later restore works as usual.
+A window that comes back on another display fills that display.
+
 macOS also runs its own double-click action, such as Zoom.
 For one second after each toggle, Miri puts the window back at the frame the toggle gave it, so that action does not change the result.
-Dragging a maximized window within its display shows no drop line and moves only that window, and the next double-click returns it to its place.
 
 Known limitations:
 
