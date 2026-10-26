@@ -27,8 +27,10 @@ Sol approved the merged engine change in one sol-loop round, with no findings.
 
 On 27 October, real key events through every key set on the built-in display below a 2560 by 1440 display gave the same focus, order, stack membership, and native frames.
 Sam's own version 3 configuration upgraded to version 4 with only the expected binding changes, and the test then restored it.
-Left and right display crossing is not verified natively, because no display lies left or right of the built-in display in Sam's arrangement.
-Engine mock tests cover it.
+Later that day, with the built-in display moved left of the external display for the session, both edge stages and the crossing worked on every key set for ⌃⌥⌘⇧, and on the arrow keys for ⌃⌥⌘.
+Those runs also hit the side-by-side parking defect in [#103](https://github.com/samanyudas/miri/issues/103).
+Settings > Shortcuts showed every alternative, the actions without a default, and a seeded conflict notice.
+Key auto-repeat on the edge shortcuts crosses displays, which [#104](https://github.com/samanyudas/miri/issues/104) forbids for its own shortcuts.
 Empty-destination arrival and the refusal for a stack toward a display without a strip are also not verified natively.
 
 ## Engine left running after Miri dies
