@@ -151,6 +151,20 @@ Sam accepted the system Picture-in-Picture focus limit and chose that a Picture-
 These are automated observations driven through the Chrome DevTools protocol and Accessibility, not physical input.
 Private local evidence is in `/tmp/miri77/` on Sam's Mac.
 
+A recheck on `main` `12323e5` found a race in criterion 2 and criterion 4.
+In 1 of 8 trials, the first Picture-in-Picture window in a fresh Chrome profile tiled at 2013 by 1402 and did not take focus.
+Chrome shows that window at the normal level and raises it to level 3 between 20 ms and 90 ms later, and the engine read the level only once.
+[Engine PR #56](https://github.com/samanyudas/paneru/pull/56) reads a newly tiled window's level again each frame for one second.
+If the level rises, the engine floats the window, gives back the frame it opened with, and focuses it once.
+A native test app that raises its window 150 ms after it opens tiled on the old engine.
+With engine `aba75ea`, raises after 60, 150, 300, and 600 ms all kept the window floating at its own frame.
+The engine query leaves out that test app's floating-level window, before and after the change, but it lists Chrome Picture-in-Picture windows.
+A Sol review found that a window arriving without a size could be tiled before its level was known.
+[Engine PR #59](https://github.com/samanyudas/paneru/pull/59) leaves such a window untiled until its level check ends, so a raised window floats at the frame its app gave it.
+Both fixes reached `main` with the engine pin `3fee523` from [#116](https://github.com/samanyudas/miri/pull/116).
+On 27 October, the build at engine `3fee523` floated and focused 3 of 3 first-time Chrome Picture-in-Picture windows, and the test app kept its frame for raises after 150, 300, and 600 ms.
+Private local evidence is in `/tmp/miri77b/` on Sam's Mac.
+
 ## Keyboard focus and pointer separation
 
 [#90](https://github.com/samanyudas/miri/issues/90) is implemented on this branch, which pins engine `58e5c7d`, the squash merge of [engine PR #41](https://github.com/samanyudas/paneru/pull/41).
