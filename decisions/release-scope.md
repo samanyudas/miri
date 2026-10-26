@@ -293,6 +293,7 @@ Sam accepted this rule on 25 October 2026 ([#72](https://github.com/samanyudas/m
 - A drop with the window's centre over the outer quarter of a column moves the window to a new column on that side.
 - A drop with the window's centre over empty space moves the window to a new column at the nearest end of that strip.
 - A window that becomes a new column keeps its width relative to its display.
+  It is never wider than the destination's tiling area, so a window that macOS filled fits the new display.
 
 While dragging, a horizontal insertion line shows a drop into a column, and a vertical line shows a new column.
 A drop into a stack at its limit, or past what the destination display fits, is refused.
@@ -300,6 +301,39 @@ Miri shows a not-allowed indicator, and the window returns to its place.
 Holding the pointer near a display edge with no neighboring display for about half a second scrolls the strip.
 After a drop, the dropped window keeps focus, and the strip moves only as far as needed to show it.
 If macOS tiles the window instead, the engine returns it to its place in the layout.
+
+### Maximizing a window
+
+Sam accepted these rules on 25 October 2026 ([#88](https://github.com/samanyudas/miri/issues/88)).
+A double-click on a window's title bar, toolbar, or navigation bar fills the usable area of the display the pointer is on.
+The usable area excludes the menu bar and the visible Dock.
+The next double-click on that window's top bar restores it.
+There is no timer, and no toggle creates a native full-screen Space.
+A double-click on a control in the top bar, such as a button, text field, or tab, stays the control's own.
+Make column full width, Control-Option-F, stays a separate column-width action.
+
+A maximized window may cover the windows around it, and they keep their sizes and places.
+The maximized window keeps its place in the layout while it is maximized.
+A tiled window returns to that place, so a stacked window returns to its stack, at the position the stack gives it at that time.
+A floating window returns to its earlier size, at the same offset from the top-left corner of the usable area, moved and shrunk as needed to stay on the display.
+Because the window never leaves its place, the stack-capacity and missing-stack fallbacks in #88 do not occur.
+A display move does not cancel maximization ([#87](https://github.com/samanyudas/miri/issues/87)).
+A maximized window that a display command moves, or that a title-bar drag drops on another display, fills that display's usable area.
+The display under the pointer at the drop is the destination.
+Its place in the layout moves with it.
+A display command puts it at the end of the destination's strip.
+While a drag is over another display, Miri shows the same drop line as for any tiled window, and the drop puts the window there.
+A floating maximized window has no place in a layout, so a drag shows no line.
+
+macOS also runs its own double-click action, such as Zoom.
+For one second after each toggle, Miri puts the window back at the frame the toggle gave it, so that action does not change the result.
+Dragging a maximized window within its display shows no drop line and moves only that window, and the next double-click returns it to its place.
+
+Known limitations:
+
+- A window with a maximum size grows only to that size, at the top-left corner of the usable area.
+- Chromium-based browsers can hide their tabs from Accessibility.
+  In such a browser, a double-click on a tab also maximizes the window.
 
 ## V2
 
