@@ -16,9 +16,8 @@ The public release path and the complete acceptance runs follow.
 
 ## Keyboard focus and pointer separation
 
-[#90](https://github.com/samanyudas/miri/issues/90) is implemented on this branch with engine commit `8fa68be` from [engine PR #41](https://github.com/samanyudas/paneru/pull/41).
-The branch pins `d4340b7`, which merges that commit with the current engine branch at `6325638`.
-The pin moves to the engine merge commit after engine PR #41 merges, and `make compat` passes only then.
+[#90](https://github.com/samanyudas/miri/issues/90) is implemented on this branch, which pins engine `58e5c7d`, the squash merge of [engine PR #41](https://github.com/samanyudas/paneru/pull/41).
+Its tree is identical to the tested `d4340b7`.
 The engine now defaults `focus_follows_mouse` and `mouse_follows_focus` to `false`.
 Centre column, display focus, and display moves move the pointer only when `mouse_follows_focus` is on.
 Display focus on a display with no visible window focuses that display's Finder desktop, so its menu bar becomes active without a pointer move.
@@ -30,8 +29,9 @@ The candidate build kept the pointer in place in all of those cases, and pointer
 Closing a background window kept the focused window, and closing the focused window changed focus once to its neighbour, in columns and in a three-window stack.
 An empty display, made with an empty virtual workspace on the built-in display, became the active display with Finder frontmost and no false focused window.
 The hidden key restored pointer focus, and the original configuration was restored byte-for-byte afterwards.
-These are automated native observations with synthetic events, not physical mouse or trackpad checks.
-Physical close-button use with a mouse and a trackpad, and closes in an overflowing stack, still need Sam's hardware check.
+These are automated native observations with synthetic events.
+On 26 October Sam closed a background window and the focused window with their red buttons, using a mouse and the trackpad, and reported that it works as expected.
+Closes in an overflowing stack were not exercised.
 Private local evidence is in `/tmp/miri90/` on Sam's Mac.
 
 ## Constrained window width and tile override
