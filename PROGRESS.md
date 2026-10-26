@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `fix/fill-overflow`, based on `main` at `9bfa927`
+Updated: 2026-10-26 on branch `fix/move-refused-width-visible`, based on `main` at `3710a40`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -182,6 +182,18 @@ After a Miri restart, all three sat at the same left edge with 8-point gaps.
 Quitting Calculator emptied `tile-overrides.json`.
 These checks ran before the last engine review fixes, which tests cover.
 [#101](https://github.com/samanyudas/miri/issues/101) tracks a false minimum height that a resizable window records when it refuses a small shrink at the bottom of the screen.
+
+### Refused width after a display move
+
+This branch pins engine `f9c4837`, the merge of [engine PR #54](https://github.com/samanyudas/paneru/pull/54).
+A window moved to a narrower display gets a width scaled by the two displays' widths, and the strip scrolls for that width.
+A window that refuses the narrower width keeps its own, and the strip now scrolls again so the focused window stays on the display.
+
+On 26 October, `main` at `9bfa927` left two moved windows partly past the right edge of the 2048-point built-in display until the next focus change.
+A window with an 1100-point minimum width was asked for 886 points and kept 1108, so 214 points stayed off the display.
+A fixed-size 600-point window tiled with ⌃⌥T was asked for 486 points and kept 608, so 114 points stayed off the display.
+With engine `4216682`, which has the same files as `f9c4837`, both windows ended at x=2323, inside the display.
+These are automated observations with synthetic key presses, not physical input.
 
 ## False minimum height at the screen bottom
 
