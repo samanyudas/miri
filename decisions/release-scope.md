@@ -317,11 +317,14 @@ Because the window never leaves its place, the stack-capacity and missing-stack 
 A display move does not cancel maximization ([#87](https://github.com/samanyudas/miri/issues/87)).
 A maximized window that a display command moves, or that a title-bar drag drops on another display, fills that display's usable area.
 The display under the pointer at the drop is the destination.
-Its place in the layout follows the display command, but a drag leaves it in the layout of its old display.
+Its place in the layout moves with it.
+A display command puts it at the end of the destination's strip.
+While a drag is over another display, Miri shows the same drop line as for any tiled window, and the drop puts the window there.
+A floating maximized window has no place in a layout, so a drag shows no line.
 
 macOS also runs its own double-click action, such as Zoom.
 For one second after each toggle, Miri puts the window back at the frame the toggle gave it, so that action does not change the result.
-Dragging a maximized window within its display moves only that window, and the next double-click returns it to its place.
+Dragging a maximized window within its display shows no drop line and moves only that window, and the next double-click returns it to its place.
 
 Known limitations:
 
