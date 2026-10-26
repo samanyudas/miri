@@ -34,7 +34,7 @@ That layout case exists without this branch and may explain [#58](https://github
 
 ## Maximized windows across displays
 
-This branch pins engine `1b55f53` from [engine PR #49](https://github.com/samanyudas/paneru/pull/49), on top of `79c4271`, the merge of [engine PR #44](https://github.com/samanyudas/paneru/pull/44), for [#87](https://github.com/samanyudas/miri/issues/87), and it is stacked on the title-bar maximize branch.
+This branch pins engine `ab3ce39`, the merge of [engine PR #49](https://github.com/samanyudas/paneru/pull/49), which follows [engine PR #44](https://github.com/samanyudas/paneru/pull/44), for [#87](https://github.com/samanyudas/miri/issues/87), and it is stacked on the title-bar maximize branch.
 A maximized window that a display command moves, or that a title-bar drag drops on another display, fills that display's usable area.
 A new column that arrives from another display is never wider than the destination's tiling area.
 
@@ -62,7 +62,8 @@ Over its own display the drag stays a free move with no line.
 With engine `1b55f53`, a maximized Finder window dragged within the large display moved to `0,586 2560x1410`, and the layouts did not change.
 Dragged onto the built-in display, it filled `234,1486 2048x1286`, kept focus, and joined the built-in display's layout after the Helium column.
 The next double-click restored it to its new slot at `1636,1494 638x1270`.
-The synthetic run could not show the line clearly, because the built-in display's full-width column puts it at the display edge, so Sam checks the line by hand.
+The synthetic run could not show the line clearly, because the built-in display's full-width column puts it at the display edge.
+Sam then dragged a maximized window by hand on 26 October and confirmed that the drag works.
 Not checked live yet: a horizontal display arrangement, which waits for #103.
 
 macOS Fill on a tiled window on the large display leaves it at `1352,38 1200x1410`, so its bottom edge is 8 points below the display.
