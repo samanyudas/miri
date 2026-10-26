@@ -25,6 +25,15 @@ public enum ShortcutRejection: Error, Equatable, Sendable {
     case alreadyAssigned
 }
 
+/// A default shortcut that an upgrade left on its old chord, because another binding holds its new chord.
+public struct KeptDefault: Hashable, Sendable {
+    public let action: ShortcutAction
+    public let kept: Chord
+    public let wanted: Chord
+    /// The title of the action that holds `wanted`, or its `[bindings]` key when Miri does not list the command.
+    public let owner: String
+}
+
 /// A change the Shortcuts settings page makes.
 public enum ShortcutEdit: Equatable, Sendable {
     case add(Chord, to: ShortcutAction)

@@ -85,6 +85,11 @@ Three crashes within five minutes count as repeated crashes.
 Paneru's startup session restore is on, so the layout returns after an engine start or crash restart.
 A current floating rule wins over a saved tiled placement, so a window that matches a floating rule floats after a restart even if it was tiled when the layout was saved.
 Sam decided this on 16 October 2026 in #15.
+One exception applies, which Sam accepted on 25 October 2026 in [#93](https://github.com/samanyudas/miri/issues/93).
+When the user tiles a window with the float toggle while a floating rule matches it, that window stays tiled after an engine or Miri restart.
+The override lasts while that native window stays open, and it ends when the window floats again or closes.
+It never passes to another window, and a saved tiled placement alone does not create it.
+Dragging a floating window does not create it either.
 A successful manual restart resets the count.
 
 ## Setup and conflicts
@@ -241,6 +246,11 @@ When a window joins or leaves a stack, every window in that column gets an equal
 Heights set with the vertical resize shortcuts are kept until the stack's members change.
 A window that refuses its share keeps the height it accepts, and the other windows share the rest.
 While the windows fit, stacked windows never overlap.
+
+Sam accepted the width rule for windows with size constraints on 25 October 2026 ([#93](https://github.com/samanyudas/miri/issues/93)).
+A stacked window that cannot grow to the column's width keeps its own size, aligned with the column's left edge.
+The column keeps the width of its wider members, and the space to the right of the narrow window stays empty, so the desktop or other content behind it shows through.
+A window that cannot shrink to the column's width widens the column, so the next column never covers it.
 
 Sam accepted the overflow rule on 20 October 2026 ([#42](https://github.com/samanyudas/miri/issues/42)).
 When the stacked windows cannot shrink further, each lower window overlaps the window above it, but only below that window's top bar.

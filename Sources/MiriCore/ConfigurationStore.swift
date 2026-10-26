@@ -31,6 +31,8 @@ public final class ConfigurationStore {
     /// The Stop shortcuts Miri registers: `[miri].stop_shortcut` without the chords a `[bindings]` entry uses.
     /// When the engine would reject `[bindings]`, this keeps its previous value, as the engine keeps its old bindings.
     public private(set) var stopChordsToRegister = [DefaultBinding.stopChord]
+    /// The moved defaults that kept their old chord, because another binding holds the new one.
+    public private(set) var keptDefaults: [KeptDefault] = []
     /// The current file, when it was read correctly. Writes require it.
     private var document: TOMLDocument?
 
@@ -107,6 +109,7 @@ public final class ConfigurationStore {
         }
         try commit(next, replacing: current, backingUpBefore: edit == .resetToDefaults ? "resetting shortcuts" : nil)
         issue = nil
+        refreshKeptDefaults(in: next)
         stopChordsToRegister = Shortcuts(document: next, layout: layout).stopChordsToRegister(layout: layout)
     }
 
@@ -171,6 +174,19 @@ public final class ConfigurationStore {
         let upgrades = current.value(at: versionPath) != next.value(at: versionPath)
         try commit(next, replacing: current, backingUpBefore: upgrades ? "upgrading it" : nil)
         writtenGestureFingers = fingers
+        refreshKeptDefaults(in: next)
+    }
+
+    /// Reports each moved default that kept its old chord because another binding holds the new one.
+    private func refreshKeptDefaults(in document: TOMLDocument) {
+        let shortcuts = Shortcuts(document: document, layout: layout)
+        keptDefaults = DefaultBinding.keptMoves(in: document).compactMap { move in
+            let action = ShortcutAction.engine(command: EngineCommand.canonical(move.command)!)
+            guard case .usedBy(let owner) = shortcuts.rejection(adding: move.to, to: action, layout: layout) else {
+                return nil
+            }
+            return KeptDefault(action: action, kept: move.from, wanted: move.to, owner: owner)
+        }
     }
 
     /// Replaces the file with `next`, after backing up `current` when `backupReason` names why.

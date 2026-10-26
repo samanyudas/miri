@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-26 on branch `fix/keyboard-focus-pointer`, based on `main` at `c4833ce`
+Updated: 2026-10-26 on branch `fix/keyboard-focus-pointer`, based on `main` at `7d7301e`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,7 +16,8 @@ The public release path and the complete acceptance runs follow.
 
 ## Keyboard focus and pointer separation
 
-[#90](https://github.com/samanyudas/miri/issues/90) is implemented on this branch with engine commit `8fa68be` from [engine PR #41](https://github.com/samanyudas/paneru/pull/41), on top of `4ba2bf0`.
+[#90](https://github.com/samanyudas/miri/issues/90) is implemented on this branch with engine commit `8fa68be` from [engine PR #41](https://github.com/samanyudas/paneru/pull/41).
+The branch pins `d4340b7`, which merges that commit with the current engine branch at `6325638`.
 The pin moves to the engine merge commit after engine PR #41 merges, and `make compat` passes only then.
 The engine now defaults `focus_follows_mouse` and `mouse_follows_focus` to `false`.
 Centre column, display focus, and display moves move the pointer only when `mouse_follows_focus` is on.
@@ -33,9 +34,50 @@ These are automated native observations with synthetic events, not physical mous
 Physical close-button use with a mouse and a trackpad, and closes in an overflowing stack, still need Sam's hardware check.
 Private local evidence is in `/tmp/miri90/` on Sam's Mac.
 
+## Constrained window width and tile override
+
+This branch pins engine `6325638` for [#93](https://github.com/samanyudas/miri/issues/93), which merges [engine PR #42](https://github.com/samanyudas/paneru/pull/42).
+The [release scope](decisions/release-scope.md#stacks) records both accepted rules.
+A stacked window records the widest and narrowest widths it refused.
+A member at its widest no longer sets the column width, so it keeps its own size at the left edge and the rest of the column stays empty.
+A column also reserves a member's refused minimum width.
+Tiling a window with the float toggle while a floating rule matches it records an override in the engine's `tile-overrides.json`.
+The override survives an engine or Miri restart while that window stays open, and floating the window again or closing it ends the override.
+A window is known by its window number, process ID, and process start time.
+
+On 26 October, current `main` reproduced the defect on the primary display.
+System Settings, which accepts no more than 740 points of width, sat above Spotify, which accepts no less than 800.
+The column took 748 points, so T3 Code covered the right 52 points of Spotify.
+With the candidate, the column reserves 808 points, Spotify stays fully visible, and the desktop shows to the right of System Settings.
+Unstacking, restacking, reordering, a width step, a second stacked column of two Helium windows, and a move to the built-in display and back all kept that spacing.
+Miri Settings stayed tiled after an engine-only restart, and floating it again or closing it removed its override entry.
+These are automated observations on the real windows, driven through the engine's command socket, not physical keyboard input.
+A Miri restart with a non-Miri window under a floating rule was not observed, because Sam's configuration floats only Miri Settings, which closes when Miri quits.
+Automatic floating of fixed-size windows is still not built, so the override currently applies to rule-based floating only.
+
+## Bracket directions for stack shortcuts
+
+[#92](https://github.com/samanyudas/miri/issues/92) is implemented on this branch.
+An opening bracket now means left and a closing bracket means right for joining and popping out.
+⌃⌥[ joins the column on the left, and ⌃⌥] joins the column on the right.
+The pop-out shortcuts already followed this rule and did not change.
+Default-set version 3 moves an upgraded file's join bindings only while they keep the exact value Miri wrote and the new chord is free.
+A blocked move keeps the old chord, and the Shortcuts settings page reports it.
+The engine's default configuration has an empty `[bindings]` table, so it adds no bracket bindings of its own.
+
+On 26 October, the running pre-change build from the PR #76 worktree reproduced the old direction: ⌃⌥[ joined the middle test window into the column on its right.
+The branch build then upgraded Sam's real version 2 configuration: only the version and the two join lines changed, after a byte-identical backup.
+On three throwaway Helium windows, synthetic key events showed each join and pop-out direction, a join from inside a stack, a repeated join, and no-ops at both strip edges and for a pop-out outside a stack.
+Focus stayed on the moved window, and all three windows stayed visible.
+A fresh install wrote the new defaults at version 3.
+A customized version 2 file kept both join bindings, and Settings showed the kept-chord notice and the actual chords.
+These are synthetic key events in the real app, not physical key presses.
+Sam's configuration and the previously running build were restored byte-for-byte afterward.
+Private local evidence is in `/tmp/miri92/`.
+
 ## Drag target and empty display fixes
 
-[PR #76](https://github.com/samanyudas/miri/pull/76) pinned engine `4ba2bf0`, which merges [engine PR #39](https://github.com/samanyudas/paneru/pull/39) for [#72](https://github.com/samanyudas/miri/issues/72) and [engine PR #40](https://github.com/samanyudas/paneru/pull/40) for [#73](https://github.com/samanyudas/miri/issues/73).
+This branch pins engine `4ba2bf0`, which merges [engine PR #39](https://github.com/samanyudas/paneru/pull/39) for [#72](https://github.com/samanyudas/miri/issues/72) and [engine PR #40](https://github.com/samanyudas/paneru/pull/40) for [#73](https://github.com/samanyudas/miri/issues/73).
 Engine PR #39 implements the drag rule in [release scope](decisions/release-scope.md#dragging-windows).
 Engine PR #40 implements the expected result in #73, which keeps focus where it is.
 Each change has tests that fail without it, and Sol approved both.
@@ -450,6 +492,7 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 The `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70), is merged.
 Verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
+Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
 Sam runs the real-mouse drag check in #72 on the merged build, then #72 can close.
 
 Each phase lands as its own PR or PRs.

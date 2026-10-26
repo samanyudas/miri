@@ -199,7 +199,7 @@ import Testing
             \(defaults)# Custom set.
 
             [miri]
-            default_bindings_version = 2
+            default_bindings_version = 3
             inner_gap = 12
             """
         #expect(result.text == expected)
@@ -269,7 +269,9 @@ import Testing
     }
 
     @Test func resetBacksUpTheFileFirst() throws {
-        let store = try store("[bindings]\nwindow_focus_west = \"cmd-h\"\n[miri]\ndefault_bindings_version = 2\n")
+        let store = try store(
+            "[bindings]\nwindow_focus_west = \"cmd-h\"\n[miri]\ndefault_bindings_version = \(DefaultBinding.currentVersion)\n"
+        )
         let before = try String(contentsOf: url, encoding: .utf8)
         try store.apply(.resetToDefaults)
         let backups = try FileManager.default.contentsOfDirectory(
