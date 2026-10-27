@@ -17,8 +17,7 @@ The public release path and the complete acceptance runs follow.
 ## Windows of busy apps on a hidden Space
 
 [#68](https://github.com/samanyudas/miri/issues/68) is implemented on this branch.
-The fix is [engine PR #68](https://github.com/samanyudas/paneru/pull/68), pinned here at its branch commit `bd5a50f`.
-Re-pin to the engine merge commit after Sam merges engine PR #68.
+The fix is [engine PR #68](https://github.com/samanyudas/paneru/pull/68), merged as `23bcf1b`, which this branch pins.
 The pin also brings engine `7b180e6` and `0d627e7`, which [#118](https://github.com/samanyudas/miri/pull/118) and [#119](https://github.com/samanyudas/miri/pull/119) pin.
 
 The startup brute-force scan stopped after 250 ms and at element 0x7fff.
@@ -753,7 +752,7 @@ Verify #40 and #42 against their full acceptance criteria on the merged build, a
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
 Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
 Sam runs the real-mouse drag check in #72 on the merged build, then #72 can close.
-After Sam merges engine PR #68, re-pin this branch to its merge commit, then verify #68 on the merged build and close it if its criteria hold.
+After this branch merges, verify #68 on the merged build and close it if its criteria hold.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
