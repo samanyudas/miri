@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `docs/narrow-121-limitation`, based on `main` at `7499990`
+Updated: 2026-10-27 on branch `fix/retile-slot`, based on `main` at `9e8c450`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,21 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Re-tiled window slot
+
+[#125](https://github.com/samanyudas/miri/issues/125) is implemented in [engine PR #69](https://github.com/samanyudas/paneru/pull/69), merged as `d829a65`.
+Floating a tiled window now records its slot, and tiling it again returns it there while its row is on screen.
+For a floated window, that slot wins over a rule's `index`.
+Minimized windows keep their old behaviour.
+Its tree matches the tested PR head `10ea677`, and `main`'s engine pin `1fd95b1` includes it.
+This branch removes its entry from [Known limitations](docs/limitations.md).
+
+On 27 October, a live check with three Finder windows ran on Miri Developer.
+On the `maximize-app` build, a floated window that popped right re-tiled after its neighbour.
+On this branch's build, the same geometry returned the window to its slot.
+Sol approved the engine change in round 2 of sol-loop, after round 1 found the rule `index` case.
+Later on 27 October, a build of `main` with engine `1fd95b1` passed the same check: B popped from x=490 to x=522, right of its neighbour A, and re-tiled between C and A.
 
 ## Engine panic when stopped during startup
 
