@@ -90,7 +90,7 @@ The fixed build stopped that orphan at launch.
 SIGTERM on the fixed app ended the app within 400 ms, together with its engine.
 SIGKILL on the fixed app ended its engine within 600 ms.
 The first run found that the SIGTERM handler deadlocked, because it called terminate inside a main-queue callout, and the fix is on this branch.
-That run also showed that an engine interrupted during its startup can panic with "Resource does not exist". No issue tracks this yet.
+That run also showed that an engine interrupted during its startup can panic with "Resource does not exist", which [#121](https://github.com/samanyudas/miri/issues/121) tracks.
 
 ## Maximized column
 
