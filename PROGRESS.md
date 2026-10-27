@@ -34,7 +34,7 @@ Rows that older builds saved stay in the session until their windows move.
 On Sam's Mac, `virtualmovenum` moved Spotify and one Helium window back into their Spaces' visible rows.
 On 28 October Sam passed the original Mission Control drag by hand, and the same drag followed by sleep and wake.
 Unplugging and replugging the external display left the built-in display's windows on the external display, as on `main`.
-[#142](https://github.com/samanyudas/miri/issues/142) restores them, which Sam decided, and [#143](https://github.com/samanyudas/miri/issues/143) and [#144](https://github.com/samanyudas/miri/issues/144) track the cross-display drag and broken stacks.
+[#142](https://github.com/samanyudas/miri/issues/142) tracks the planned restoration that Sam decided, and [#143](https://github.com/samanyudas/miri/issues/143) and [#144](https://github.com/samanyudas/miri/issues/144) track the cross-display drag and broken stacks.
 
 ## Re-tiled window slot
 
