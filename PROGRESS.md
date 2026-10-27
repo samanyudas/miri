@@ -36,7 +36,7 @@ The test `a_menu_bar_app_that_becomes_regular_later_is_tiled` fails before the f
 On 27 October, a live check on Miri Developer closed the Docker dashboard, restarted Miri, and opened the dashboard from Docker's menu.
 The `main` build at `7bbecc5` never tracked the dashboard.
 The fixed build tiled it as a full-height column and focused it.
-No issue tracks this defect.
+[#133](https://github.com/samanyudas/miri/issues/133) tracks this defect and stays open until it is verified on `main`.
 
 ## Engine left running after Miri dies
 
