@@ -762,6 +762,8 @@ struct DefaultBindingsTests {
         ("window_vertical_step_shrink_now", "window_vertical_step_shrink"),
         ("window_focusdisplay_north", "window_focusdisplay_north"),
         ("window_movedisplay_east", "window_movedisplay_east"),
+        ("window_focusedge_west", "window_focusedge_west"),
+        ("window_moveedge_east_now", "window_moveedge_east"),
         ("window_maximize", "window_maximize"),
         ("window_fullwidth", "window_maximize"),
         ("window_maximize_now", "window_maximize"),
@@ -777,7 +779,8 @@ struct DefaultBindingsTests {
         "window_focus_0", "window_focus", "window_focus_", "window_focus_-1", "window_swap_2", "window_resize_up",
         "window_stack_north", "window_virtual_0", "window", "Window_center", "window__center", "mouse", "",
         "window_step_up", "window_vertical_step_up", "window_focusdisplay_first", "window_focusdisplay",
-        "window_movedisplay_2",
+        "window_movedisplay_2", "window_focusedge", "window_focusedge_north", "window_moveedge_first",
+        "window_moveedge_2",
         "showmenu_extra", "hidemenu_extra", "showmenu_", "hidemenu_",
     ])
     func rejectsBindingsKeysTheEngineRejects(key: String) {
