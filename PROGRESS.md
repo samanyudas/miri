@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `docs/limitations-inventory`, based on `main` at `6882f8a`
+Updated: 2026-10-27 on branch `fix/engine-startup-stop-panic`, based on `main` at `ace274c`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,19 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Engine panic when stopped during startup
+
+[#121](https://github.com/samanyudas/miri/issues/121) is implemented on this branch.
+The fix is engine `1779988` on branch `fix/exit-before-initial-config`, in [engine PR #71](https://github.com/samanyudas/paneru/pull/71).
+The ECS used to get `Config` from an `Event::InitialConfig` copy in the event channel, and a stop during startup queued `Event::Exit` ahead of it.
+The first frame then ran without `Config` and panicked with "Resource does not exist".
+The engine now inserts the config at build time, and `Event::InitialConfig` is gone.
+A probe launched the real engine with temporary XDG folders and its own Mach service name, then sent SIGINT after 25 or 50 ms.
+It panicked in 10 of 10 runs before the fix and exited with code 0 in 10 of 10 runs after it.
+The pin also brings engine PRs #67 to #69, so this PR lands after #119, #127, and #129.
+After engine PR #71 merges, repin to its merge commit.
+When #121 closes, remove its row from [Known limitations](docs/limitations.md).
 
 ## Known limitations inventory
 
