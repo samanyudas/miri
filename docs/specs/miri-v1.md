@@ -143,7 +143,7 @@ They describe documented intent, not separately accepted product choices or comp
 74. As a Miri user, I want to move the focused column to the first position, so that I can place it at the strip's start.
 75. As a Miri user, I want to move the focused column to the last position, so that I can place it at the strip's end.
 76. As a Miri user, I want to cycle column width presets forward, so that I can select a configured width through one command.
-77. As a Miri user, I want a full-width column command distinct from native fullscreen, so that I can enlarge a tiled column.
+77. As a Miri user, I want one toggle, Control-Option-F or a title-bar double-click, that makes a window a maximized column without native fullscreen, so that I can enlarge a window and return it to its place.
 78. As a Miri user, I want an explicit center-column command, so that I can request centering through a shortcut.
 79. As a Miri user, I want each wider command to add five percentage points of display width, so that width adjustments use fixed increments.
 80. As a Miri user, I want each narrower command to remove five percentage points of display width, so that I can reverse width adjustments.
@@ -395,7 +395,7 @@ The following table records the selected v1 defaults without claiming tested act
 
 - Numbered jumps select columns and focus the selected stack's last-focused window.
   They do not number individual windows.
-- Full column width is distinct from native macOS fullscreen.
+- A maximized column is distinct from native macOS fullscreen.
   macOS Space switching, fullscreen, app switching, closing, and ordinary app commands remain macOS or application interactions.
 - `[` means left and `]` means right for both stacking and popping out, as selected in the reference.
   Stacking moves only the focused window, so Miri must change Paneru's whole-column behavior.
