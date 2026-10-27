@@ -50,7 +50,8 @@ Keep action descriptions available after the settings window closes.
 ## Grant Accessibility permission
 
 Explain why Miri needs permission to move windows.
-Direct users to **System Settings > Privacy & Security > Accessibility**.
+Direct users to **System Settings > Privacy & Security > Device Control and Data Access**.
+On macOS 27, this pane holds the Accessibility permission.
 
 Whether macOS attributes permission to `Miri.app` or its engine helper requires a prototype.
 Verify that identity before finalizing the permission instructions.
