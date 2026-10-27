@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `fix/89-one-strip-per-space`, based on `main` at `fd16a22`
+Updated: 2026-10-27 on branch `fix/89-one-strip-per-space`, based on `main` at `5d4c1bf`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -189,10 +189,23 @@ A double-click on a window's top bar fills the usable area of its display, and t
 The window keeps its place in the layout while maximized, so its neighbors never move.
 [#106](https://github.com/samanyudas/miri/issues/106) replaces this model with a maximized column that stays in its row.
 
-#88 stays open until an agent verifies its criteria on the merged code, as #106 revised them, and records the result on the issue.
 All of #88's code is on `main` through #97, #99, and #116, and ⌃⌥F and the double-click send the same `ToggleMaximize` trigger.
 [Engine PR #65](https://github.com/samanyudas/paneru/pull/65) adds a test that a maximized window on an unplugged display stays maximized and restorable, which no test covered.
-It passes on engine `3fee523` without a code change, so `main` needs no new pin for it.
+
+On 27 October, the build of `main` at `fd16a22`, with engine `1fd95b1`, passed the #88 criteria as #106 revised them, except the gaps below.
+Since the earlier check on `3fee523`, that engine adds display moves from engine PR #67, the re-tile slot from #69, and the hidden-Space scan from #68.
+A tiled Finder window filled `0,30 2560x1410` and restored its exact frame.
+Its neighbors kept their sizes, scrolled aside while it was maximized, and returned to their exact frames on restore.
+Four cycles that mixed the double-click and `window maximize` returned the same frames, and focus moves scrolled past the maximized window.
+A stacked window returned to its stack slot, and with its stack mate closed it became a full-height column at its old width.
+With `stack_limit = "fit"`, a window maximized out of a full 7-window stack returned as a column right after the stack once the stack was full again.
+A floating window filled the usable area and returned to its floating frame by both triggers.
+`movedisplay south` filled the built-in display at `302,1486 2048x1286`, the restore there kept the width share, and a move back north restored on the large display.
+The window stayed maximized while its display switched to another native Space and back.
+System Settings filled the height at its 740 point width limit, a throwaway Helium window passed 2 cycles on its tab strip, and `AXFullScreen` stayed false.
+A double-click on Finder's view switcher left the window alone, a title-bar drag reordered the row, and the close button closed the window.
+These are automated observations on real windows, driven by synthetic mouse events and engine commands, not physical input.
+Not checked on this build: physical input, a drag of a maximized window, a real display unplug, and side-by-side displays, which wait for [#103](https://github.com/samanyudas/miri/issues/103).
 
 On 26 October, current `main` with engine `6325638` reproduced the defect on the primary display.
 A double-click on a Finder title bar let macOS zoom Finder to 868 points wide, and the engine took that as the column's width, which moved T3 Code 156 points left.
