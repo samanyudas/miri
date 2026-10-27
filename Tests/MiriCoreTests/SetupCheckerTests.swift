@@ -40,6 +40,16 @@ struct SetupCheckerTests {
         #expect(spaces.contains("log out"))
     }
 
+    @Test func namesTheMacOS27PermissionPane() {
+        var observation = ready
+        observation.accessibilityTrusted = false
+        guard case .problem(let message) = status(.accessibility, observation) else {
+            Issue.record("Expected an Accessibility problem")
+            return
+        }
+        #expect(message.contains("System Settings > Privacy & Security > Device Control and Data Access"))
+    }
+
     @Test func neverReportsAnUnreadableSettingAsPassed() {
         let unknown = SetupObservation(
             accessibilityTrusted: true, spansDisplays: nil, stageManager: nil, threeFingerSwipe: nil,

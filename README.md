@@ -16,6 +16,7 @@ The app runs from the menu bar, starts and stops the bundled engine, and owns it
 It checks macOS setup, recovers stranded windows when the engine stops, and previews redacted diagnostics.
 Development builds have run on Sam's Mac with the built-in display and an external display.
 The full v1 acceptance checklists have not run.
+[Known limitations](docs/limitations.md) lists every known limitation, with its evidence and workaround.
 [PROGRESS.md](PROGRESS.md) records the current work and next steps.
 
 ## Requirements

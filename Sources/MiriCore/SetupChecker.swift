@@ -89,7 +89,7 @@ public enum SetupChecker {
                 status: observation.accessibilityTrusted
                     ? .passed
                     : .problem(
-                        "Turn on Miri in System Settings > Privacy & Security > Accessibility. Miri needs it to move windows."
+                        "Turn on Miri in System Settings > Privacy & Security > Device Control and Data Access. Miri needs this Accessibility permission to move windows."
                     ),
                 blocksStart: true, settingsURL: accessibilityURL),
             SetupCheck(

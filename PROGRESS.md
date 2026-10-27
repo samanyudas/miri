@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `docs/maximize-spec-88`, based on `main` at `3b0badf`
+Updated: 2026-10-27 on branch `docs/maximize-spec-88`, based on `main` at `b8887ef`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,30 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Known limitations inventory
+
+[#91](https://github.com/samanyudas/miri/issues/91) is implemented on this branch as [Known limitations](docs/limitations.md).
+The README and SUPPORT.md link to it.
+The audit filed [#120](https://github.com/samanyudas/miri/issues/120) to [#125](https://github.com/samanyudas/miri/issues/125) for confirmed defects that had no issue, and Sam chooses each fix.
+#120 is fixed and closed, so the page no longer lists it.
+Add each newly confirmed limitation to that page, and remove an entry when its fix is verified.
+
+## Menu-bar apps that open windows later
+
+`main` pins engine `0d023e2`, the merge of [engine PR #70](https://github.com/samanyudas/paneru/pull/70).
+Docker Desktop runs as a menu-bar app until its dashboard opens, and then it becomes a regular app.
+The engine dropped such an app when it was not regular at engine start, or 5 seconds after its launch, so the dashboard was never tiled.
+The engine now keeps the process, and its activation-policy observer starts a new launch watch when the app becomes regular.
+Sol approved engine PR #70 in round 1 of sol-loop.
+The pin also brings engine PRs #67, #68, and #69, which open PRs #127 and #129 pin on their own.
+Engine PR #67 added the `focusedge` and `moveedge` verbs, so `EngineCommand.swift` now mirrors them and `check-compat.py` records the new parser hashes.
+
+The test `a_menu_bar_app_that_becomes_regular_later_is_tiled` fails before the fix and passes after it.
+On 27 October, a live check on Miri Developer closed the Docker dashboard, restarted Miri, and opened the dashboard from Docker's menu.
+The `main` build at `7bbecc5` never tracked the dashboard.
+The fixed build tiled it as a full-height column and focused it.
+[#133](https://github.com/samanyudas/miri/issues/133) is verified on `main` at `b8887ef` and closed.
 
 ## Engine left running after Miri dies
 
@@ -316,7 +340,21 @@ Engine PR #40 implements the expected result in #73, which keeps focus where it 
 Each change has tests that fail without it, and Sol approved both.
 Live on Miri Developer on 26 October, a stacked Finder window grabbed at the right end of its top bar and dragged straight down showed the bottom insertion line and reordered the stack.
 Closing three Finder windows that filled the primary display, with focus on the built-in display, left Grok Bot and Ghostty in view and focus unchanged.
-Sam's real-mouse check for #72 is still open.
+On 27 October, [engine PR #66](https://github.com/samanyudas/paneru/pull/66) added the missing #72 tests: a stack member grabbed near its left edge, and an edge hold that follows the pointer when the window is grabbed off-centre.
+Each new test fails when its rule is broken.
+On 27 October, Sam's real-mouse check passed the left-edge grab.
+Sam's right-edge grab dragged straight down moved the window to the built-in display, because that display sits directly below the primary display and the pointer crossed onto it.
+The same day, an agent ran synthetic drags with two Finder windows on Miri Developer built from engine `3fee523`, with the primary display above the built-in display:
+
+- A right-edge grab and a left-edge grab, each released over the lower window of its own stack on the primary display, showed the bottom insertion line and reordered the stack.
+- A right-edge grab dragged past the primary display's bottom edge became a new column on the built-in display.
+- A drag from the built-in display into a primary-display column showed one insertion line, on the primary display only, and joined that column.
+
+Synthetic drags do not replace Sam's real-mouse check (#71).
+Later on 27 October, Sam's real-mouse right-edge grab, released over the lower window of its own stack on the primary display, reordered the stack.
+Sam ran every real-mouse check on Miri Developer built from `main` at `7bbecc5` with engine `3fee523`.
+The faint white insertion line over white windows belongs to [#86](https://github.com/samanyudas/miri/issues/86).
+#72 can close after this PR merges, because the engine tests for the left-edge grab and the edge hold land with it.
 [#74](https://github.com/samanyudas/miri/issues/74) tracks engine `window_writes` tests that fail under heavy machine load.
 
 ## Unknown-key configuration warnings
@@ -726,7 +764,7 @@ The `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70), is me
 Verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
 Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
-Sam runs the real-mouse drag check in #72 on the merged build, then #72 can close.
+Triage #121 to #125 from the limitations audit.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
