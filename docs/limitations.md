@@ -64,7 +64,6 @@ Working notes in PROGRESS.md and issue comments do not count as documentation.
 
 | Limitation | Kind | Trigger and impact | Workaround | Evidence and tracking |
 | --- | --- | --- | --- | --- |
-| A window on a hidden macOS Space, or minimized when the engine starts, can stay unmanaged after a start or restart. | Confirmed defect, previously undocumented | Engine start or restart. The window does not join its strip. | Show the window's Space, or focus the window. | [#68](https://github.com/samanyudas/miri/issues/68). |
 | Windows of an app whose main thread stays busy at launch can wait unmanaged. | Confirmed defect with test apps only, previously undocumented | A busy app launches. In 4 of 32 rounds, one test app's windows stayed unmanaged. | None known. | [#63](https://github.com/samanyudas/miri/issues/63). |
 | After an engine restart, each strip starts at its first column. The window that was in view can sit off-screen, and a maximized window can come back partly in view. | Confirmed defect, previously undocumented | Restart Engine, a crash restart, or relaunching Miri. | Focus the window. | [#69](https://github.com/samanyudas/miri/issues/69). |
 | Session restore drops windows that no longer exist and closes the gaps they leave. It keeps no state for a display that is not connected. | Platform constraint, previously undocumented | Restart after windows close or a display disconnects. | None. | The engine's [session restore](https://github.com/samanyudas/paneru/blob/3fee523670ebf929ad936ba98beb999b0319930b/CONFIGURATION.md) documentation. |
