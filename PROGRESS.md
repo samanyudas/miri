@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `fix/apps-turn-regular`, based on `main` at `ace274c`
+Updated: 2026-10-27 on branch `docs/maximize-spec-88`, based on `main` at `b8887ef`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -24,7 +24,7 @@ Add each newly confirmed limitation to that page, and remove an entry when its f
 
 ## Menu-bar apps that open windows later
 
-This branch pins engine `0d023e2`, the merge of [engine PR #70](https://github.com/samanyudas/paneru/pull/70).
+`main` pins engine `0d023e2`, the merge of [engine PR #70](https://github.com/samanyudas/paneru/pull/70).
 Docker Desktop runs as a menu-bar app until its dashboard opens, and then it becomes a regular app.
 The engine dropped such an app when it was not regular at engine start, or 5 seconds after its launch, so the dashboard was never tiled.
 The engine now keeps the process, and its activation-policy observer starts a new launch watch when the app becomes regular.
@@ -36,7 +36,7 @@ The test `a_menu_bar_app_that_becomes_regular_later_is_tiled` fails before the f
 On 27 October, a live check on Miri Developer closed the Docker dashboard, restarted Miri, and opened the dashboard from Docker's menu.
 The `main` build at `7bbecc5` never tracked the dashboard.
 The fixed build tiled it as a full-height column and focused it.
-[#133](https://github.com/samanyudas/miri/issues/133) tracks this defect and stays open until it is verified on `main`.
+[#133](https://github.com/samanyudas/miri/issues/133) is verified on `main` at `b8887ef` and closed.
 
 ## Engine left running after Miri dies
 
@@ -117,6 +117,11 @@ The [release scope](decisions/release-scope.md#maximizing-a-window) records the 
 A double-click on a window's top bar fills the usable area of its display, and the next one restores it.
 The window keeps its place in the layout while maximized, so its neighbors never move.
 [#106](https://github.com/samanyudas/miri/issues/106) replaces this model with a maximized column that stays in its row.
+
+#88 stays open until an agent verifies its criteria on the merged code, as #106 revised them, and records the result on the issue.
+All of #88's code is on `main` through #97, #99, and #116, and ⌃⌥F and the double-click send the same `ToggleMaximize` trigger.
+[Engine PR #65](https://github.com/samanyudas/paneru/pull/65) adds a test that a maximized window on an unplugged display stays maximized and restorable, which no test covered.
+It passes on engine `3fee523` without a code change, so `main` needs no new pin for it.
 
 On 26 October, current `main` with engine `6325638` reproduced the defect on the primary display.
 A double-click on a Finder title bar let macOS zoom Finder to 868 points wide, and the engine took that as the column's width, which moved T3 Code 156 points left.
