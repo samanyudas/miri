@@ -292,8 +292,8 @@ public struct DefaultBinding: Sendable {
 
     /// The replacements for retired defaults that Miri must not add.
     ///
-    /// In a recorded version, a replacement is skipped when the user deleted every retired default it replaces that
-    /// Miri had written. A file with no recorded version keeps its bindings, so a replacement is skipped while any
+    /// In a recorded version, a replacement is skipped when the user deleted or emptied every retired default it
+    /// replaces that Miri had written. A file with no recorded version keeps its bindings, so a replacement is skipped while any
     /// binding it replaces remains, because the two would split the same chords between old and new actions.
     private static func replacementsToSkip(in document: TOMLDocument, offered: Int) -> Set<String> {
         let bound = Set(boundCommands(in: document.value(at: ["bindings"])))
@@ -302,7 +302,8 @@ public struct DefaultBinding: Sendable {
             pending.filter { _, olds in
                 if offered == 0 { return olds.contains { bound.contains(EngineCommand.canonical($0.command)!) } }
                 let written = olds.filter { $0.offered <= offered }
-                return !written.isEmpty && written.allSatisfy { document.value(at: ["bindings", $0.command]) == nil }
+                return !written.isEmpty
+                    && written.allSatisfy { [nil, .array([])].contains(document.value(at: ["bindings", $0.command])) }
             }.keys)
     }
 

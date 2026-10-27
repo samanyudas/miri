@@ -199,7 +199,7 @@ The four edge-or-monitor actions take over their chords.
 On upgrade from a recorded version 1, 2, or 3, Miri removes each retired default only while it still has the exact value Miri wrote.
 It adds the new chords to a directional binding only while that binding still has the exact value Miri wrote and every new chord is free.
 It then adds each edge-or-monitor action with its free chords.
-When the user deleted every retired default that an edge-or-monitor action replaces, that action stays unbound.
+When the user deleted or emptied every retired default that an edge-or-monitor action replaces, that action stays unbound.
 A binding the user changed stays as it is.
 When another binding holds a chord that version 4 would add, that binding keeps the chord, and the Shortcuts settings page reports which action lacks it and which action holds it.
 An unversioned file keeps its bindings, gains no new chords on existing actions, and gains no edge-or-monitor action while it binds an action that one replaces.

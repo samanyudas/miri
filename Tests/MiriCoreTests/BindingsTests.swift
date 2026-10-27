@@ -1005,6 +1005,16 @@ struct DefaultBindingsTests {
                 == .array([.string("ctrl+alt+cmd-rightarrow"), .string("ctrl+alt+cmd-l"), .string("ctrl+alt+cmd-d")]))
     }
 
+    @Test func emptiedFirstColumnAndMonitorBindingsLeaveTheEdgeActionUnbound() throws {
+        let (store, document) = try load(
+            version3File(replacing: ["window_focus_first": "[]", "window_focusdisplay_west": "[]"]))
+        #expect(store.issue == nil)
+        let bindings = document.value(at: ["bindings"])
+        #expect(bindings?["window_focusedge_west"] == nil)
+        #expect(bindings?["window_focus_first"] == .array([]))
+        #expect(bindings?["window_focusdisplay_west"] == .array([]))
+    }
+
     @Test func oneDeletedPredecessorStillGivesTheEdgeActionItsChords() throws {
         let (store, document) = try load(version3File(replacing: ["window_swap_first": nil]))
         #expect(store.issue == nil)
