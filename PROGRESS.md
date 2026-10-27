@@ -25,8 +25,11 @@ A clean exit then saved the empty startup layout over the session, so the engine
 A probe launched the real engine with temporary XDG folders and its own Mach service name, then sent SIGINT 25 to 100 ms after launch.
 Before the fix, 10 of 10 runs panicked.
 With the fix, 12 of 12 runs exited with code 0 and kept a seeded 11-column session.
-An exit later in startup, while window discovery still runs, can still save a partial session, which [#134](https://github.com/samanyudas/miri/issues/134) tracks.
-When #121 closes, remove its row from [Known limitations](docs/limitations.md).
+The real app on Sam's desktop, quit with AppleScript, exited without a panic in 8 of 8 runs.
+A quit that reached the engine before session restore saved an empty session (13 columns to 0) in 4 of 4 runs.
+That interval runs from about 0.1 s to 0.7 s after the engine starts, and [#134](https://github.com/samanyudas/miri/issues/134) tracks it.
+A quit after session restore kept all 13 columns in 5 of 5 runs, and the next start restored 15 windows with none missing.
+When #121 closes, narrow its row in [Known limitations](docs/limitations.md) to the #134 gap.
 
 ## Known limitations inventory
 
