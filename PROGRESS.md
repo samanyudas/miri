@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `feat/drag-window-centre`, based on `main` at `3b0badf`
+Updated: 2026-10-27 on branch `fix/68-hidden-space-scan`, based on `main` at `6882f8a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,23 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Windows of busy apps on a hidden Space
+
+[#68](https://github.com/samanyudas/miri/issues/68) is implemented on this branch.
+The fix is [engine PR #68](https://github.com/samanyudas/paneru/pull/68), pinned here at its branch commit `bd5a50f`.
+Re-pin to the engine merge commit after Sam merges engine PR #68.
+The pin also brings engine `7b180e6` and `0d627e7`, which [#118](https://github.com/samanyudas/miri/pull/118) and [#119](https://github.com/samanyudas/miri/pull/119) pin.
+
+The startup brute-force scan stopped after 250 ms and at element 0x7fff.
+An app numbers its elements in creation order, so a busy app's newest window sits past both limits.
+On 27 October a new Helium window got element 32890, and the scan gave up at element 15616.
+The scan now runs until every window resolves or 0x4000 ids in a row own no window element, with a 2 s ceiling.
+
+On 27 October, `/tmp/miri68/repro.sh` placed Helium windows 55561 and 62288 on a hidden Space and relaunched Miri Developer.
+Engine `3fee523` left both unmanaged with restore `missing=2`.
+This branch managed both on 4 of 4 relaunches, and restore reported `missing=0`.
+Engine start to initialization went from 0.75 s to about 1.2 s on Sam's Mac.
 
 ## Engine left running after Miri dies
 
@@ -281,7 +298,7 @@ The size check now lowers the window and grows it back once, and only a height t
 On 26 October, Font Book was resized through Accessibility to end at the screen's bottom edge, and Miri was restarted.
 The previous engine logged that Font Book and T3 Code kept 1410 and 1418 points when asked for 1402, and recorded those heights as minimums.
 The candidate engine brought both to the asked height with no refusal logged.
-A window on another macOS Space, which Accessibility does not list, still keeps its height, which is close to [#68](https://github.com/samanyudas/miri/issues/68).
+A window on another macOS Space, which Accessibility does not list, still keeps its height.
 
 ## Bracket directions for stack shortcuts
 
@@ -376,8 +393,8 @@ Each defect has a regression test that fails without its fix.
 The live rerun on Miri Developer passed every case on the built-in display with Helium, T3 Code and Ghostty, and three Restart Engine runs restored all windows that the scan reached.
 Evidence is in `/tmp/miri-e2e-20261025/` on Sam's Mac and is not published.
 
-Two gaps remain open.
-[#68](https://github.com/samanyudas/miri/issues/68): the startup brute-force scan has a 250 ms budget per app, so a Helium window with many tabs on a hidden Space can still go unmanaged until its Space is shown.
+Two gaps remained open.
+[#68](https://github.com/samanyudas/miri/issues/68) is now fixed on `fix/68-hidden-space-scan`.
 [#69](https://github.com/samanyudas/miri/issues/69): restore does not keep a strip's scroll offset, so a strip whose focus moved starts at its first column after a restart.
 
 ## Stack sizing and order fixes
@@ -736,6 +753,7 @@ Verify #40 and #42 against their full acceptance criteria on the merged build, a
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
 Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
 Sam runs the real-mouse drag check in #72 on the merged build, then #72 can close.
+After Sam merges engine PR #68, re-pin this branch to its merge commit, then verify #68 on the merged build and close it if its criteria hold.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
