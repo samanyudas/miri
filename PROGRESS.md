@@ -17,12 +17,15 @@ The public release path and the complete acceptance runs follow.
 ## Engine panic when stopped during startup
 
 [#121](https://github.com/samanyudas/miri/issues/121) is implemented on this branch.
-The fix is engine `1779988` on branch `fix/exit-before-initial-config`, in [engine PR #71](https://github.com/samanyudas/paneru/pull/71).
+The fix is engine `bec09af` on branch `fix/exit-before-initial-config`, in [engine PR #71](https://github.com/samanyudas/paneru/pull/71).
 The ECS used to get `Config` from an `Event::InitialConfig` copy in the event channel, and a stop during startup queued `Event::Exit` ahead of it.
 The first frame then ran without `Config` and panicked with "Resource does not exist".
 The engine now inserts the config at build time, and `Event::InitialConfig` is gone.
-A probe launched the real engine with temporary XDG folders and its own Mach service name, then sent SIGINT after 25 or 50 ms.
-It panicked in 10 of 10 runs before the fix and exited with code 0 in 10 of 10 runs after it.
+A clean exit then saved the empty startup layout over the session, so the engine now drops `StateFile` when an exit arrives while startup gathers processes.
+A probe launched the real engine with temporary XDG folders and its own Mach service name, then sent SIGINT 25 to 100 ms after launch.
+Before the fix, 10 of 10 runs panicked.
+With the fix, 12 of 12 runs exited with code 0 and kept a seeded 11-column session.
+An exit later in startup, while window discovery still runs, can still save a partial session, which [#134](https://github.com/samanyudas/miri/issues/134) tracks.
 The pin also brings engine PRs #67 to #69, so this PR lands after #119, #127, and #129.
 After engine PR #71 merges, repin to its merge commit.
 When #121 closes, remove its row from [Known limitations](docs/limitations.md).
