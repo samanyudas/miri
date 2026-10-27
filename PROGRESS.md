@@ -18,7 +18,8 @@ The public release path and the complete acceptance runs follow.
 
 [#68](https://github.com/samanyudas/miri/issues/68) is implemented on this branch.
 The fix is [engine PR #68](https://github.com/samanyudas/paneru/pull/68), merged as `23bcf1b`, which this branch pins.
-The pin also brings engine `7b180e6` and `0d627e7`, which [#118](https://github.com/samanyudas/miri/pull/118) and [#119](https://github.com/samanyudas/miri/pull/119) pin.
+The pin also brings engine `0d627e7`, which [#119](https://github.com/samanyudas/miri/pull/119) pins.
+`main` already pins `7b180e6` through [#118](https://github.com/samanyudas/miri/pull/118).
 
 The startup brute-force scan stopped after 250 ms and at element 0x7fff.
 An app numbers its elements in creation order, so a busy app's newest window sits past both limits.
