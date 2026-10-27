@@ -54,7 +54,7 @@ That run also showed that an engine interrupted during its startup can panic wit
 
 [#106](https://github.com/samanyudas/miri/issues/106) keeps a maximized window in its row, so focus moves and swipes scroll past it.
 [Maximizing a window](decisions/release-scope.md#maximizing-a-window) records the rules Sam chose on 26 October.
-This branch pins engine `3fee523`, which includes engine PRs [#57](https://github.com/samanyudas/paneru/pull/57), [#58](https://github.com/samanyudas/paneru/pull/58), [#60](https://github.com/samanyudas/paneru/pull/60), [#63](https://github.com/samanyudas/paneru/pull/63), and [#64](https://github.com/samanyudas/paneru/pull/64).
+Engine `3fee523` and every later pin include engine PRs [#57](https://github.com/samanyudas/paneru/pull/57), [#58](https://github.com/samanyudas/paneru/pull/58), [#60](https://github.com/samanyudas/paneru/pull/60), [#63](https://github.com/samanyudas/paneru/pull/63), and [#64](https://github.com/samanyudas/paneru/pull/64).
 They make a maximized tiled window a display-wide column, make `maximize` the one toggle with `fullwidth` as its older name, and add `[options].maximized_window_side`.
 They also restore a maximized window before width, stack, float, and drop actions, and keep maximize in the saved session across an engine restart.
 The pin also brings the Picture-in-Picture level fixes from engine PRs [#56](https://github.com/samanyudas/paneru/pull/56) and [#59](https://github.com/samanyudas/paneru/pull/59), and engine PRs #53, #55, #61, and #62.
