@@ -10,10 +10,11 @@ Unless an entry says otherwise, it applies to Miri Developer built from `main` a
 Miri has no release, so no entry describes a released version.
 The audit for [#91](https://github.com/samanyudas/miri/issues/91) checked each entry against the source and the evidence on 27 October 2026.
 
-Each entry has one of four kinds:
+Each entry has one of five kinds:
 
 - **Platform constraint.** macOS, the hardware, or the bundled engine sets the limit, and Miri works within it.
 - **Scope exclusion.** Sam decided that v1 does not do this.
+- **Not built yet.** Accepted v1 work that is not finished. Its issue tracks the work.
 - **Confirmed defect.** Someone observed the wrong behavior on the real app.
 - **Unverified.** Someone reported or suspects the behavior, or a scenario has not run on hardware. An unverified entry is not an established limitation.
 
@@ -24,8 +25,8 @@ Working notes in PROGRESS.md and issue comments do not count as documentation.
 
 | Limitation | Kind | Trigger and impact | Workaround | Evidence and tracking |
 | --- | --- | --- | --- | --- |
-| Miri has no release. You can only build it from source as Miri Developer. The build is not Developer ID signed and not notarized, and no disk image or Homebrew cask exists. | Scope exclusion | Any use. | Build from source as the [README](../README.md#build-and-run) describes. | [Signing, distribution, and updates](../decisions/release-scope.md#signing-distribution-and-updates), [`scripts/build-app.sh`](../scripts/build-app.sh), [#82](https://github.com/samanyudas/miri/issues/82). |
-| Miri does not update itself. The accepted Sparkle updater is not built yet. | Scope exclusion | Any use. You must rebuild to get changes. | Pull `main` and run `make build`. | No Sparkle code exists in `Sources/`. [Design tree status](../decisions/design-tree-status.md), [#82](https://github.com/samanyudas/miri/issues/82). |
+| Miri has no release. You can only build it from source as Miri Developer. No Developer ID signed and notarized release disk image exists, and no Homebrew cask exists. `make package` builds a development disk image only. | Not built yet | Any use. | Build from source as the [README](../README.md#build-and-run) describes. | [Signing, distribution, and updates](../decisions/release-scope.md#signing-distribution-and-updates), [`scripts/build-app.sh`](../scripts/build-app.sh), [#82](https://github.com/samanyudas/miri/issues/82). |
+| Miri does not update itself. The accepted Sparkle updater is not built yet. | Not built yet | Any use. You must rebuild to get changes. | Pull `main` and run `make build`. | No Sparkle code exists in `Sources/`. [Design tree status](../decisions/design-tree-status.md), [#82](https://github.com/samanyudas/miri/issues/82). |
 | No v1 acceptance check has passed. No release candidate is frozen, and 0 of 3 full runs have passed. | Unverified | Every behavior on this page and in the release scope still needs its recorded check. | None. | [Acceptance ledger](acceptance-ledger.md#release-candidate), [#83](https://github.com/samanyudas/miri/issues/83). |
 | Many recent fixes were checked with synthetic keyboard and mouse input only. A physical check is still open for the window-centre drop target, drag into another stack, stack overflow, and the stack limit. | Unverified | Real input can differ from synthetic events. | None. | [#72](https://github.com/samanyudas/miri/issues/72), [#43](https://github.com/samanyudas/miri/issues/43), checks S-5 to S-7 in the [acceptance ledger](acceptance-ledger.md). |
 
@@ -57,7 +58,7 @@ Working notes in PROGRESS.md and issue comments do not count as documentation.
 | Moving a maximized window to another display is checked only with the displays above and below each other. | Unverified | Side-by-side displays. Waits for [#103](https://github.com/samanyudas/miri/issues/103). | None. | [#87](https://github.com/samanyudas/miri/issues/87). |
 | Mixed arrangements, which need three displays, have not run. Grid arrangements and a maximum display count are deferred to v2. | Unverified for mixed, scope exclusion for grids | Three or more displays. | None. | [Multiple monitors](../decisions/release-scope.md#multiple-monitors). |
 | Display disconnect, reconnect, and sleep and wake follow macOS and the engine, and no hardware result is recorded yet. | Unverified | Unplugging a display, closing the lid, or sleep. | If a strip cannot re-attach, its windows float and stay reachable. | [Display changes](../decisions/release-scope.md#display-changes), checks HD-1 to HD-5 in the [acceptance ledger](acceptance-ledger.md). |
-| Focus and move commands stop at the end of a strip. They do not cross to the next display. | Scope exclusion for now | The focused column is the last one on its display. | Use the monitor commands, Control-Option-Command with W, A, S, or D. | [#104](https://github.com/samanyudas/miri/issues/104). |
+| Focus and move commands stop at the end of a strip. They do not cross to the next display. | Not built yet | The focused column is the last one on its display. | To move focus to another display, press Control-Option-Command with W, A, S, or D. To move the window, add Shift. | [#104](https://github.com/samanyudas/miri/issues/104). |
 
 ## Finding and restoring windows
 
@@ -68,7 +69,7 @@ Working notes in PROGRESS.md and issue comments do not count as documentation.
 | After an engine restart, each strip starts at its first column. The window that was in view can sit off-screen, and a maximized window can come back partly in view. | Confirmed defect, previously undocumented | Restart Engine, a crash restart, or relaunching Miri. | Focus the window. | [#69](https://github.com/samanyudas/miri/issues/69). |
 | Session restore drops windows that no longer exist and closes the gaps they leave. It keeps no state for a display that is not connected. | Platform constraint, previously undocumented | Restart after windows close or a display disconnects. | None. | The engine's [session restore](https://github.com/samanyudas/paneru/blob/3fee523670ebf929ad936ba98beb999b0319930b/CONFIGURATION.md) documentation. |
 | A window that matches a floating rule floats after a restart, even if it was tiled when the layout was saved. A window you tiled with the float toggle stays tiled. | Scope exclusion | Restart with a floating rule that matches a tiled window. | Tile it again with Control-Option-T. | [Startup and crash recovery](../decisions/release-scope.md#startup-and-crash-recovery), [#15](https://github.com/samanyudas/miri/issues/15), [#93](https://github.com/samanyudas/miri/issues/93). |
-| The engine ignores dialogs and other windows that are not standard windows. It also ignores apps that run without a Dock icon. | Platform constraint, previously undocumented | Those windows stay where the app puts them. | None in Settings. Advanced window rules are deferred to v2. | The engine's [window rules](https://github.com/samanyudas/paneru/blob/3fee523670ebf929ad936ba98beb999b0319930b/CONFIGURATION.md) documentation. |
+| By default, the engine ignores windows that are neither standard nor floating windows, such as dialogs. It also ignores background apps that run without a Dock icon. | Platform constraint, previously undocumented | Those windows stay where the app puts them. | The engine documents a window rule with `manage = true` in `config.toml` that manages them. Settings has no control for it, and this rule has not run with Miri. | The engine's [window rules](https://github.com/samanyudas/paneru/blob/3fee523670ebf929ad936ba98beb999b0319930b/CONFIGURATION.md) documentation. |
 | An engine stopped during its startup can panic with "Resource does not exist". | Confirmed defect, previously undocumented | Stop or quit Miri while the engine starts. Whether windows stay reachable after the panic is not checked. | Wait for the engine to finish starting before you stop it. | [#121](https://github.com/samanyudas/miri/issues/121). |
 
 ## Stacks and window sizes
@@ -76,8 +77,8 @@ Working notes in PROGRESS.md and issue comments do not count as documentation.
 | Limitation | Kind | Trigger and impact | Workaround | Evidence and tracking |
 | --- | --- | --- | --- | --- |
 | When Finder is frontmost with no window, the previously focused stack window can stay above its overlapped place. | Scope exclusion | Click the desktop or close Finder's last window. The order returns when focus reaches a managed window. | Focus any managed window. | [Stacks](../decisions/release-scope.md#stacks), [#42](https://github.com/samanyudas/miri/issues/42). |
-| Stacks overlap below each top bar when their windows cannot shrink further. The engine treats every stacked window as at least 200 points tall, so a stack can overlap when the real minimum heights would fit. | Confirmed defect, previously undocumented | Tall minimum heights in one column. Every top bar stays visible. | Focus a window to bring it to the front, or move a window to its own column. | [Stacks](../decisions/release-scope.md#stacks), [#93](https://github.com/samanyudas/miri/issues/93), [#124](https://github.com/samanyudas/miri/issues/124). |
-| An app that applies a new size more than 500 ms late can have its old height recorded as a minimum. | Unverified, previously undocumented | Slow apps, such as some Chromium browsers. Inferred from the engine design and not observed. | None known. | [#40](https://github.com/samanyudas/miri/issues/40). |
+| Stacks overlap below each top bar when their windows cannot shrink further. The engine gives each resizable stacked window a layout slot of at least 200 points, so a stack can overlap when the real minimum heights would fit. A window that cannot be resized needs only its own height. | Confirmed defect, previously undocumented | Tall minimum heights in one column. Every top bar stays visible. | Focus a window to bring it to the front, or move a window to its own column. | [Stacks](../decisions/release-scope.md#stacks), [#93](https://github.com/samanyudas/miri/issues/93), [#124](https://github.com/samanyudas/miri/issues/124). |
+| An app that applies a new size more than 500 ms late can have its old height recorded as a minimum. | Unverified, previously undocumented | Slow apps, such as some Chromium browsers. Inferred from the engine design and not observed. | None known. | [#40](https://github.com/samanyudas/miri/issues/40), closed. Next step: stack a fixture window that applies each new size 1 second late, then check whether the engine records a false minimum height. |
 | Fixed-size windows float automatically. A fixed-size window that you tile keeps its own size, so empty space shows beside or below it. | Scope exclusion | Tile a fixed-size window with Control-Option-T. | None. | [V1 interactions](../decisions/release-scope.md#v1-interactions), [Stacks](../decisions/release-scope.md#stacks), [#93](https://github.com/samanyudas/miri/issues/93). |
 | A window with a maximum size maximizes only to that size, at the top-left of the usable area. | Platform constraint | Maximize such a window. | None. | [Maximizing a window](../decisions/release-scope.md#maximizing-a-window). |
 
@@ -91,7 +92,8 @@ Working notes in PROGRESS.md and issue comments do not count as documentation.
 | Swipe lag builds up over time. | Confirmed defect, previously undocumented | Long sessions. The cause is unknown. | Quit and reopen Miri. | [#66](https://github.com/samanyudas/miri/issues/66). |
 | The macOS system Picture-in-Picture window, which Safari, QuickTime Player, and IINA use, cannot take keyboard focus. | Platform constraint | Picture-in-Picture in those apps. macOS keeps the window above other windows. | Use the window's controls with the pointer. | [V1 interactions](../decisions/release-scope.md#v1-interactions), [#77](https://github.com/samanyudas/miri/issues/77). Firefox and Zen Picture-in-Picture have not run. |
 | In Chromium-based browsers, a double-click on a tab also maximizes the window. | Platform constraint | The browser hides its tabs from Accessibility. | Double-click the title bar away from the tabs. | [Maximizing a window](../decisions/release-scope.md#maximizing-a-window). |
-| Arrow, HJKL, and WASD shortcuts are not yet interchangeable. | Scope exclusion for now | Only the default keys work for each action. A v1 release blocker. | Change the binding in **Shortcuts**. | [#79](https://github.com/samanyudas/miri/issues/79). |
+| A Picture-in-Picture window stays on the display where it opened. It does not follow focus to another display. | Scope exclusion | Move focus to another display while Picture-in-Picture plays. | Move the window by dragging it. | [V1 interactions](../decisions/release-scope.md#v1-interactions), [#77](https://github.com/samanyudas/miri/issues/77). |
+| Arrow, HJKL, and WASD shortcuts are not yet interchangeable. | Not built yet | Only the default keys work for each action. A v1 release blocker. | Change the binding in **Shortcuts**. | [#79](https://github.com/samanyudas/miri/issues/79). |
 
 ## Reports not yet reproduced
 
@@ -104,5 +106,7 @@ Each one has an open issue with the next investigation step.
 
 ## Deferred to v2
 
-V1 leaves out tabbed columns, the minimap, inactive-window dimming, advanced window rules, focus borders, display exclusions, five-finger gestures, and the guided shortcut tutorial.
+V1 leaves out the optional Miri dock, portable display layouts, tabbed columns, the minimap, inactive-window dimming, advanced window rules, and virtual workspaces.
+It also leaves out focus borders, pointer-following controls, display exclusions, fixed-pixel presets, animation tuning, Hyper-key recording, five-finger gestures, and the guided shortcut tutorial.
+A deferral does not commit Miri to building the feature in v2.
 [Release scope](../decisions/release-scope.md) owns that list, and the [v2 roadmap](../decisions/v2-roadmap.md) records the candidates.
