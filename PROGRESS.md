@@ -313,7 +313,16 @@ Live on Miri Developer on 26 October, a stacked Finder window grabbed at the rig
 Closing three Finder windows that filled the primary display, with focus on the built-in display, left Grok Bot and Ghostty in view and focus unchanged.
 On 27 October, [engine PR #66](https://github.com/samanyudas/paneru/pull/66) added the missing #72 tests: a stack member grabbed near its left edge, and an edge hold that follows the pointer when the window is grabbed off-centre.
 Each new test fails when its rule is broken.
-Sam's real-mouse check for #72 is still open.
+On 27 October, Sam's real-mouse check passed the left-edge grab.
+Sam's right-edge grab dragged straight down moved the window to the built-in display, because that display sits directly below the primary display and the pointer crossed onto it.
+The same day, an agent ran synthetic drags with two Finder windows on Miri Developer built from engine `3fee523`, with the primary display above the built-in display:
+
+- A right-edge grab and a left-edge grab, each released over the lower window of its own stack on the primary display, showed the bottom insertion line and reordered the stack.
+- A right-edge grab dragged past the primary display's bottom edge became a new column on the built-in display.
+- A drag from the built-in display into a primary-display column showed one insertion line, on the primary display only, and joined that column.
+
+Synthetic drags do not replace Sam's real-mouse check (#71).
+Sam's real-mouse right-edge grab released above the primary display's bottom edge is still open.
 [#74](https://github.com/samanyudas/miri/issues/74) tracks engine `window_writes` tests that fail under heavy machine load.
 
 ## Unknown-key configuration warnings
