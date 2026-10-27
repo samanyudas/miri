@@ -53,6 +53,11 @@ Engine `3fee523` left both unmanaged with restore `missing=2`.
 This branch managed both on 4 of 4 relaunches, and restore reported `missing=0`.
 Engine start to initialization went from 0.75 s to about 1.2 s on Sam's Mac.
 
+On 27 October, a build of `main` at `b8887ef` with engine `0d023e2` passed the same check on 3 of 3 relaunches.
+Helium windows 64426 (element 33795), 55561, and 63045 on a hidden Space were managed, and restore reported `missing=0`.
+A Helium window minimized before the relaunch joined its strip when it was restored, without focus.
+#68 is closed, and this branch removes its entry from [Known limitations](docs/limitations.md).
+
 ## Engine left running after Miri dies
 
 [#33](https://github.com/samanyudas/miri/issues/33) is implemented on this branch.
@@ -775,7 +780,6 @@ Verify #40 and #42 against their full acceptance criteria on the merged build, a
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
 Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
 Triage #121 to #125 from the limitations audit.
-After this branch merges, verify #68 on the merged build and close it if its criteria hold.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
