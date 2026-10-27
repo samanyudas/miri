@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `fix/engine-startup-stop-panic`, based on `main` at `7dde110`
+Updated: 2026-10-27 on branch `docs/narrow-121-limitation`, based on `main` at `7499990`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,7 +16,7 @@ The public release path and the complete acceptance runs follow.
 
 ## Engine panic when stopped during startup
 
-[#121](https://github.com/samanyudas/miri/issues/121) is implemented on this branch.
+[#121](https://github.com/samanyudas/miri/issues/121) is verified on `main` at `7499990` and closed.
 The fix is engine `1fd95b1`, the merge of [engine PR #71](https://github.com/samanyudas/paneru/pull/71).
 The ECS used to get `Config` from an `Event::InitialConfig` copy in the event channel, and a stop during startup queued `Event::Exit` ahead of it.
 The first frame then ran without `Config` and panicked with "Resource does not exist".
@@ -29,7 +29,7 @@ The real app on Sam's desktop, quit with AppleScript, exited without a panic in 
 A quit that reached the engine before session restore saved an empty session (13 columns to 0) in 4 of 4 runs.
 That interval runs from about 0.1 s to 0.7 s after the engine starts, and [#134](https://github.com/samanyudas/miri/issues/134) tracks it.
 A quit after session restore kept all 13 columns in 5 of 5 runs, and the next start restored 15 windows with none missing.
-When #121 closes, narrow its row in [Known limitations](docs/limitations.md) to the #134 gap.
+Its row in [Known limitations](docs/limitations.md) now describes only the #134 gap.
 
 ## Known limitations inventory
 
@@ -801,7 +801,7 @@ The `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70), is me
 Verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
 Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
-Triage #121 to #125 from the limitations audit.
+Triage #122 to #125 and #134 from the limitations audit. Check whether #129 already fixed #125.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
