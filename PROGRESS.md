@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `fix/retile-slot`, based on `main` at `9e8c450`
+Updated: 2026-10-27 on branch `fix/89-one-strip-per-space`, based on `main` at `fd16a22`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,25 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## One strip per native Space
+
+[#89](https://github.com/samanyudas/miri/issues/89) is fixed on this branch and on engine branch `fix/89-migrate-into-existing-row`.
+Mission Control can drag a window to an inactive Space, and the engine learns of it only when that Space activates or a display topology read runs.
+On a topology read, `place_extracted_strip` in `src/ecs/display.rs` reused the Space's first row only when that row was empty.
+Otherwise it opened a new virtual row parked at the display corner, and v1 has no UI for that row.
+Windows from a removed display took the same path.
+The engine now appends the moved windows, with their columns, to the end of the Space's selected strip, and opens a strip only when the Space has none.
+The engine's workspace popup flashed the row number on every native Space switch, which read as Miri making extra desktops.
+The engine now defaults `workspace_popup_status` to `false`, as it does for `focus_follows_mouse`.
+Miri cannot write that key into existing configurations, because they define only `[decorations.menu]`, and Miri refuses to add keys to the implicit `[decorations]` table.
+
+On 27 October on Miri Developer, a Finder window dragged in Mission Control to the other Space, followed by a 1-point app-only display origin change, landed alone in a new row 3 on engine `1fd95b1`.
+Focusing it hid the Space's other windows and flashed "3".
+The same steps on engine `fca146c` appended the window to the end of the destination Space's visible strip, and focusing it changed no row.
+On engine `4e26369`, four native Space switches showed no number, and Settings showed no configuration error.
+Rows that older builds saved stay in the session until their windows move.
+On Sam's Mac, `virtualmovenum` moved Spotify and one Helium window back into their Spaces' visible rows.
 
 ## Re-tiled window slot
 
