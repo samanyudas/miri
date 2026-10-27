@@ -16,7 +16,7 @@ The public release path and the complete acceptance runs follow.
 
 ## One strip per native Space
 
-[#89](https://github.com/samanyudas/miri/issues/89) is fixed on this branch and on engine branch `fix/89-migrate-into-existing-row`.
+[#89](https://github.com/samanyudas/miri/issues/89) is fixed on this branch, which pins engine `ba198d9`, the merge of [engine PR #73](https://github.com/samanyudas/paneru/pull/73). Its tree matches the tested head `ade3f05`.
 Mission Control can drag a window to an inactive Space, and the engine learns of it only when that Space activates or a display topology read runs.
 On a topology read, `place_extracted_strip` in `src/ecs/display.rs` reused the Space's first row only when that row was empty.
 Otherwise it opened a new virtual row parked at the display corner, and v1 has no UI for that row.
@@ -32,6 +32,9 @@ The same steps on engine `fca146c` appended the window to the end of the destina
 On engine `4e26369`, four native Space switches showed no number, and Settings showed no configuration error.
 Rows that older builds saved stay in the session until their windows move.
 On Sam's Mac, `virtualmovenum` moved Spotify and one Helium window back into their Spaces' visible rows.
+On 28 October Sam passed the original Mission Control drag by hand, and the same drag followed by sleep and wake.
+Unplugging and replugging the external display left the built-in display's windows on the external display, as on `main`.
+[#142](https://github.com/samanyudas/miri/issues/142) restores them, which Sam decided, and [#143](https://github.com/samanyudas/miri/issues/143) and [#144](https://github.com/samanyudas/miri/issues/144) track the cross-display drag and broken stacks.
 
 ## Re-tiled window slot
 
