@@ -801,7 +801,8 @@ The `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70), is me
 Verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
 Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
-Triage #122 to #125 and #134 from the limitations audit. Check whether #129 already fixed #125.
+Triage #122 to #125 and #134 from the limitations audit.
+Check whether #129 already fixed #125.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
