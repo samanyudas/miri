@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `fix/engine-exits-with-app`, based on `main` at `7bbecc5`
+Updated: 2026-10-27 on branch `docs/limitations-inventory`, based on `main` at `3b0badf`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,13 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Known limitations inventory
+
+[#91](https://github.com/samanyudas/miri/issues/91) is implemented on this branch as [Known limitations](docs/limitations.md).
+The README and SUPPORT.md link to it.
+The audit filed [#120](https://github.com/samanyudas/miri/issues/120) to [#125](https://github.com/samanyudas/miri/issues/125) for confirmed defects that had no issue, and Sam chooses each fix.
+Add each newly confirmed limitation to that page, and remove an entry when its fix is verified.
 
 ## Engine left running after Miri dies
 
@@ -722,6 +729,7 @@ Verify #40 and #42 against their full acceptance criteria on the merged build, a
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
 Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
 Sam runs the real-mouse drag check in #72 on the merged build, then #72 can close.
+Triage #120 to #125 from the limitations audit.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
