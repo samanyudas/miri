@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `fix/retile-slot`, based on `main` at `6882f8a`
+Updated: 2026-10-27 on branch `fix/retile-slot`, based on `main` at `9e8c450`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -20,13 +20,73 @@ The public release path and the complete acceptance runs follow.
 Floating a tiled window now records its slot, and tiling it again returns it there while its row is on screen.
 For a floated window, that slot wins over a rule's `index`.
 Minimized windows keep their old behaviour.
-This branch pins `d829a65`, whose tree matches the tested PR head `10ea677`.
-The pin also includes engine #67, so the compatibility check fails until [#119](https://github.com/samanyudas/miri/pull/119) updates the Swift mirror.
+Its tree matches the tested PR head `10ea677`, and `main`'s engine pin `1fd95b1` includes it.
 
 On 27 October, a live check with three Finder windows ran on Miri Developer.
 On the `maximize-app` build, a floated window that popped right re-tiled after its neighbour.
 On this branch's build, the same geometry returned the window to its slot.
 Sol approved the engine change in round 2 of sol-loop, after round 1 found the rule `index` case.
+
+## Engine panic when stopped during startup
+
+[#121](https://github.com/samanyudas/miri/issues/121) is verified on `main` at `7499990` and closed.
+The fix is engine `1fd95b1`, the merge of [engine PR #71](https://github.com/samanyudas/paneru/pull/71).
+The ECS used to get `Config` from an `Event::InitialConfig` copy in the event channel, and a stop during startup queued `Event::Exit` ahead of it.
+The first frame then ran without `Config` and panicked with "Resource does not exist".
+The engine now inserts the config at build time, and `Event::InitialConfig` is gone.
+A clean exit then saved the empty startup layout over the session, so the engine now drops `StateFile` when an exit arrives while startup gathers processes.
+A probe launched the real engine with temporary XDG folders and its own Mach service name, then sent SIGINT 25 to 100 ms after launch.
+Before the fix, 10 of 10 runs panicked.
+With the fix, 12 of 12 runs exited with code 0 and kept a seeded 11-column session.
+The real app on Sam's desktop, quit with AppleScript, exited without a panic in 8 of 8 runs.
+A quit that reached the engine before session restore saved an empty session (13 columns to 0) in 4 of 4 runs.
+That interval runs from about 0.1 s to 0.7 s after the engine starts, and [#134](https://github.com/samanyudas/miri/issues/134) tracks it.
+A quit after session restore kept all 13 columns in 5 of 5 runs, and the next start restored 15 windows with none missing.
+Its row in [Known limitations](docs/limitations.md) now describes only the #134 gap.
+
+## Known limitations inventory
+
+[#91](https://github.com/samanyudas/miri/issues/91) is implemented on this branch as [Known limitations](docs/limitations.md).
+The README and SUPPORT.md link to it.
+The audit filed [#120](https://github.com/samanyudas/miri/issues/120) to [#125](https://github.com/samanyudas/miri/issues/125) for confirmed defects that had no issue, and Sam chooses each fix.
+#120 is fixed and closed, so the page no longer lists it.
+Add each newly confirmed limitation to that page, and remove an entry when its fix is verified.
+
+## Menu-bar apps that open windows later
+
+`main` pins engine `0d023e2`, the merge of [engine PR #70](https://github.com/samanyudas/paneru/pull/70).
+Docker Desktop runs as a menu-bar app until its dashboard opens, and then it becomes a regular app.
+The engine dropped such an app when it was not regular at engine start, or 5 seconds after its launch, so the dashboard was never tiled.
+The engine now keeps the process, and its activation-policy observer starts a new launch watch when the app becomes regular.
+Sol approved engine PR #70 in round 1 of sol-loop.
+The pin also brings engine PRs #67, #68, and #69, which open PRs #127 and #129 pin on their own.
+Engine PR #67 added the `focusedge` and `moveedge` verbs, so `EngineCommand.swift` now mirrors them and `check-compat.py` records the new parser hashes.
+
+The test `a_menu_bar_app_that_becomes_regular_later_is_tiled` fails before the fix and passes after it.
+On 27 October, a live check on Miri Developer closed the Docker dashboard, restarted Miri, and opened the dashboard from Docker's menu.
+The `main` build at `7bbecc5` never tracked the dashboard.
+The fixed build tiled it as a full-height column and focused it.
+[#133](https://github.com/samanyudas/miri/issues/133) is verified on `main` at `b8887ef` and closed.
+
+## Windows of busy apps on a hidden Space
+
+[#68](https://github.com/samanyudas/miri/issues/68) is fixed on `main`.
+The fix is [engine PR #68](https://github.com/samanyudas/paneru/pull/68), merged as `23bcf1b`, which `main`'s engine pin `0d023e2` includes.
+
+The startup brute-force scan stopped after 250 ms and at element 0x7fff.
+An app numbers its elements in creation order, so a busy app's newest window sits past both limits.
+On 27 October a new Helium window got element 32890, and the scan gave up at element 15616.
+The scan now runs until every window resolves or 0x4000 ids in a row own no window element, with a 2 s ceiling.
+
+On 27 October, `/tmp/miri68/repro.sh` placed Helium windows 55561 and 62288 on a hidden Space and relaunched Miri Developer.
+Engine `3fee523` left both unmanaged with restore `missing=2`.
+This branch managed both on 4 of 4 relaunches, and restore reported `missing=0`.
+Engine start to initialization went from 0.75 s to about 1.2 s on Sam's Mac.
+
+On 27 October, a build of `main` at `b8887ef` with engine `0d023e2` passed the same check on 3 of 3 relaunches.
+Helium windows 64426 (element 33795), 55561, and 63045 on a hidden Space were managed, and restore reported `missing=0`.
+A Helium window minimized before the relaunch joined its strip when it was restored, without focus.
+#68 is closed, and this branch removes its entry from [Known limitations](docs/limitations.md).
 
 ## Engine left running after Miri dies
 
@@ -46,13 +106,13 @@ The fixed build stopped that orphan at launch.
 SIGTERM on the fixed app ended the app within 400 ms, together with its engine.
 SIGKILL on the fixed app ended its engine within 600 ms.
 The first run found that the SIGTERM handler deadlocked, because it called terminate inside a main-queue callout, and the fix is on this branch.
-That run also showed that an engine interrupted during its startup can panic with "Resource does not exist". No issue tracks this yet.
+That run also showed that an engine interrupted during its startup can panic with "Resource does not exist", which [#121](https://github.com/samanyudas/miri/issues/121) tracks.
 
 ## Maximized column
 
 [#106](https://github.com/samanyudas/miri/issues/106) keeps a maximized window in its row, so focus moves and swipes scroll past it.
 [Maximizing a window](decisions/release-scope.md#maximizing-a-window) records the rules Sam chose on 26 October.
-This branch pins engine `3fee523`, which includes engine PRs [#57](https://github.com/samanyudas/paneru/pull/57), [#58](https://github.com/samanyudas/paneru/pull/58), [#60](https://github.com/samanyudas/paneru/pull/60), [#63](https://github.com/samanyudas/paneru/pull/63), and [#64](https://github.com/samanyudas/paneru/pull/64).
+Engine `3fee523` and every later pin include engine PRs [#57](https://github.com/samanyudas/paneru/pull/57), [#58](https://github.com/samanyudas/paneru/pull/58), [#60](https://github.com/samanyudas/paneru/pull/60), [#63](https://github.com/samanyudas/paneru/pull/63), and [#64](https://github.com/samanyudas/paneru/pull/64).
 They make a maximized tiled window a display-wide column, make `maximize` the one toggle with `fullwidth` as its older name, and add `[options].maximized_window_side`.
 They also restore a maximized window before width, stack, float, and drop actions, and keep maximize in the saved session across an engine restart.
 The pin also brings the Picture-in-Picture level fixes from engine PRs [#56](https://github.com/samanyudas/paneru/pull/56) and [#59](https://github.com/samanyudas/paneru/pull/59), and engine PRs #53, #55, #61, and #62.
@@ -107,6 +167,11 @@ The [release scope](decisions/release-scope.md#maximizing-a-window) records the 
 A double-click on a window's top bar fills the usable area of its display, and the next one restores it.
 The window keeps its place in the layout while maximized, so its neighbors never move.
 [#106](https://github.com/samanyudas/miri/issues/106) replaces this model with a maximized column that stays in its row.
+
+#88 stays open until an agent verifies its criteria on the merged code, as #106 revised them, and records the result on the issue.
+All of #88's code is on `main` through #97, #99, and #116, and ⌃⌥F and the double-click send the same `ToggleMaximize` trigger.
+[Engine PR #65](https://github.com/samanyudas/paneru/pull/65) adds a test that a maximized window on an unplugged display stays maximized and restorable, which no test covered.
+It passes on engine `3fee523` without a code change, so `main` needs no new pin for it.
 
 On 26 October, current `main` with engine `6325638` reproduced the defect on the primary display.
 A double-click on a Finder title bar let macOS zoom Finder to 868 points wide, and the engine took that as the column's width, which moved T3 Code 156 points left.
@@ -295,7 +360,7 @@ The size check now lowers the window and grows it back once, and only a height t
 On 26 October, Font Book was resized through Accessibility to end at the screen's bottom edge, and Miri was restarted.
 The previous engine logged that Font Book and T3 Code kept 1410 and 1418 points when asked for 1402, and recorded those heights as minimums.
 The candidate engine brought both to the asked height with no refusal logged.
-A window on another macOS Space, which Accessibility does not list, still keeps its height, which is close to [#68](https://github.com/samanyudas/miri/issues/68).
+A window on another macOS Space, which Accessibility does not list, still keeps its height.
 
 ## Bracket directions for stack shortcuts
 
@@ -390,8 +455,8 @@ Each defect has a regression test that fails without its fix.
 The live rerun on Miri Developer passed every case on the built-in display with Helium, T3 Code and Ghostty, and three Restart Engine runs restored all windows that the scan reached.
 Evidence is in `/tmp/miri-e2e-20261025/` on Sam's Mac and is not published.
 
-Two gaps remain open.
-[#68](https://github.com/samanyudas/miri/issues/68): the startup brute-force scan has a 250 ms budget per app, so a Helium window with many tabs on a hidden Space can still go unmanaged until its Space is shown.
+Two gaps remained open.
+[#68](https://github.com/samanyudas/miri/issues/68) is now fixed on `main` through engine `23bcf1b`.
 [#69](https://github.com/samanyudas/miri/issues/69): restore does not keep a strip's scroll offset, so a strip whose focus moved starts at its first column after a restart.
 
 ## Stack sizing and order fixes
@@ -749,7 +814,8 @@ The `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70), is me
 Verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
 Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
-Sam runs the real-mouse drag check in #72 on the merged build, then #72 can close.
+Triage #122 to #125 and #134 from the limitations audit.
+Check whether #129 already fixed #125.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).

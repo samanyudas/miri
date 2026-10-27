@@ -96,6 +96,9 @@ GitHub Actions does not manage issue completion, and silence is never evidence o
 4. Post a concise issue comment with the verified artifact, applicable revisions, commands, observed results, evidence links, and remaining limits.
    If any criterion is incomplete, partial, or unverified, record the gaps and leave the issue open.
 5. When evidence proves every criterion, close the issue with `gh issue close <number> --reason completed`.
+6. Search [Known limitations](docs/limitations.md) for the issue number.
+   Remove or narrow each entry that the verified fix clears, in a pull request.
+   Keep the entry if the limitation remains, and add the gap that the issue comment records.
 
 Close a verified issue without waiting for a release or reporter silence.
 Release distribution acceptance, including installation and updates, remains separate from individual issue completion.
