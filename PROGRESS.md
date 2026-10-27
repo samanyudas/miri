@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `docs/maximize-spec-88`, based on `main` at `b8887ef`
+Updated: 2026-10-27 on branch `fix/68-hidden-space-scan`, based on `main` at `0f1e0ec`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -38,6 +38,26 @@ The `main` build at `7bbecc5` never tracked the dashboard.
 The fixed build tiled it as a full-height column and focused it.
 [#133](https://github.com/samanyudas/miri/issues/133) is verified on `main` at `b8887ef` and closed.
 
+## Windows of busy apps on a hidden Space
+
+[#68](https://github.com/samanyudas/miri/issues/68) is fixed on `main`.
+The fix is [engine PR #68](https://github.com/samanyudas/paneru/pull/68), merged as `23bcf1b`, which `main`'s engine pin `0d023e2` includes.
+
+The startup brute-force scan stopped after 250 ms and at element 0x7fff.
+An app numbers its elements in creation order, so a busy app's newest window sits past both limits.
+On 27 October a new Helium window got element 32890, and the scan gave up at element 15616.
+The scan now runs until every window resolves or 0x4000 ids in a row own no window element, with a 2 s ceiling.
+
+On 27 October, `/tmp/miri68/repro.sh` placed Helium windows 55561 and 62288 on a hidden Space and relaunched Miri Developer.
+Engine `3fee523` left both unmanaged with restore `missing=2`.
+This branch managed both on 4 of 4 relaunches, and restore reported `missing=0`.
+Engine start to initialization went from 0.75 s to about 1.2 s on Sam's Mac.
+
+On 27 October, a build of `main` at `b8887ef` with engine `0d023e2` passed the same check on 3 of 3 relaunches.
+Helium windows 64426 (element 33795), 55561, and 63045 on a hidden Space were managed, and restore reported `missing=0`.
+A Helium window minimized before the relaunch joined its strip when it was restored, without focus.
+#68 is closed, and this branch removes its entry from [Known limitations](docs/limitations.md).
+
 ## Engine left running after Miri dies
 
 [#33](https://github.com/samanyudas/miri/issues/33) is implemented on this branch.
@@ -62,7 +82,7 @@ That run also showed that an engine interrupted during its startup can panic wit
 
 [#106](https://github.com/samanyudas/miri/issues/106) keeps a maximized window in its row, so focus moves and swipes scroll past it.
 [Maximizing a window](decisions/release-scope.md#maximizing-a-window) records the rules Sam chose on 26 October.
-This branch pins engine `3fee523`, which includes engine PRs [#57](https://github.com/samanyudas/paneru/pull/57), [#58](https://github.com/samanyudas/paneru/pull/58), [#60](https://github.com/samanyudas/paneru/pull/60), [#63](https://github.com/samanyudas/paneru/pull/63), and [#64](https://github.com/samanyudas/paneru/pull/64).
+Engine `3fee523` and every later pin include engine PRs [#57](https://github.com/samanyudas/paneru/pull/57), [#58](https://github.com/samanyudas/paneru/pull/58), [#60](https://github.com/samanyudas/paneru/pull/60), [#63](https://github.com/samanyudas/paneru/pull/63), and [#64](https://github.com/samanyudas/paneru/pull/64).
 They make a maximized tiled window a display-wide column, make `maximize` the one toggle with `fullwidth` as its older name, and add `[options].maximized_window_side`.
 They also restore a maximized window before width, stack, float, and drop actions, and keep maximize in the saved session across an engine restart.
 The pin also brings the Picture-in-Picture level fixes from engine PRs [#56](https://github.com/samanyudas/paneru/pull/56) and [#59](https://github.com/samanyudas/paneru/pull/59), and engine PRs #53, #55, #61, and #62.
@@ -310,7 +330,7 @@ The size check now lowers the window and grows it back once, and only a height t
 On 26 October, Font Book was resized through Accessibility to end at the screen's bottom edge, and Miri was restarted.
 The previous engine logged that Font Book and T3 Code kept 1410 and 1418 points when asked for 1402, and recorded those heights as minimums.
 The candidate engine brought both to the asked height with no refusal logged.
-A window on another macOS Space, which Accessibility does not list, still keeps its height, which is close to [#68](https://github.com/samanyudas/miri/issues/68).
+A window on another macOS Space, which Accessibility does not list, still keeps its height.
 
 ## Bracket directions for stack shortcuts
 
@@ -405,8 +425,8 @@ Each defect has a regression test that fails without its fix.
 The live rerun on Miri Developer passed every case on the built-in display with Helium, T3 Code and Ghostty, and three Restart Engine runs restored all windows that the scan reached.
 Evidence is in `/tmp/miri-e2e-20261025/` on Sam's Mac and is not published.
 
-Two gaps remain open.
-[#68](https://github.com/samanyudas/miri/issues/68): the startup brute-force scan has a 250 ms budget per app, so a Helium window with many tabs on a hidden Space can still go unmanaged until its Space is shown.
+Two gaps remained open.
+[#68](https://github.com/samanyudas/miri/issues/68) is now fixed on `main` through engine `23bcf1b`.
 [#69](https://github.com/samanyudas/miri/issues/69): restore does not keep a strip's scroll offset, so a strip whose focus moved starts at its first column after a restart.
 
 ## Stack sizing and order fixes
