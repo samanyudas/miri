@@ -21,6 +21,7 @@ Floating a tiled window now records its slot, and tiling it again returns it the
 For a floated window, that slot wins over a rule's `index`.
 Minimized windows keep their old behaviour.
 Its tree matches the tested PR head `10ea677`, and `main`'s engine pin `1fd95b1` includes it.
+This branch removes its entry from [Known limitations](docs/limitations.md).
 
 On 27 October, a live check with three Finder windows ran on Miri Developer.
 On the `maximize-app` build, a floated window that popped right re-tiled after its neighbour.
