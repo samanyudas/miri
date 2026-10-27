@@ -24,6 +24,9 @@ The engine half is [engine PR #67](https://github.com/samanyudas/paneru/pull/67)
 This branch now uses `main`'s engine pin `0d023e2`, which includes it.
 The #67 code in `0d627e7` matches the tested head `e58657f`.
 Sol approved the merged engine change in one sol-loop round, with no findings.
+Sol approved the Miri change in round 2 of sol-loop on 27 October.
+Round 1 found that an emptied predecessor binding, such as `window_focus_first = []`, still gave the edge action its chords, and the fix treats it like a deleted one.
+A declined nit remains: when several bindings hold an upgraded default's new chords, the Settings notice names only the first.
 [The keybinding reference](decisions/keybinding%20reference.md) records the table and the version 4 upgrade rules.
 
 On 27 October, real key events through every key set on the built-in display below a 2560 by 1440 display gave the same focus, order, stack membership, and native frames.
