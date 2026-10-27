@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `docs/limitations-inventory`, based on `main` at `6882f8a`
+Updated: 2026-10-27 on branch `fix/apps-turn-regular`, based on `main` at `ace274c`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -21,6 +21,22 @@ The README and SUPPORT.md link to it.
 The audit filed [#120](https://github.com/samanyudas/miri/issues/120) to [#125](https://github.com/samanyudas/miri/issues/125) for confirmed defects that had no issue, and Sam chooses each fix.
 #120 is fixed and closed, so the page no longer lists it.
 Add each newly confirmed limitation to that page, and remove an entry when its fix is verified.
+
+## Menu-bar apps that open windows later
+
+This branch pins engine `0d023e2`, the merge of [engine PR #70](https://github.com/samanyudas/paneru/pull/70).
+Docker Desktop runs as a menu-bar app until its dashboard opens, and then it becomes a regular app.
+The engine dropped such an app when it was not regular at engine start, or 5 seconds after its launch, so the dashboard was never tiled.
+The engine now keeps the process, and its activation-policy observer starts a new launch watch when the app becomes regular.
+Sol approved engine PR #70 in round 1 of sol-loop.
+The pin also brings engine PRs #67, #68, and #69, which open PRs #127 and #129 pin on their own.
+Engine PR #67 added the `focusedge` and `moveedge` verbs, so `EngineCommand.swift` now mirrors them and `check-compat.py` records the new parser hashes.
+
+The test `a_menu_bar_app_that_becomes_regular_later_is_tiled` fails before the fix and passes after it.
+On 27 October, a live check on Miri Developer closed the Docker dashboard, restarted Miri, and opened the dashboard from Docker's menu.
+The `main` build at `7bbecc5` never tracked the dashboard.
+The fixed build tiled it as a full-height column and focused it.
+[#133](https://github.com/samanyudas/miri/issues/133) tracks this defect and stays open until it is verified on `main`.
 
 ## Engine left running after Miri dies
 
