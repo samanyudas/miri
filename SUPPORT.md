@@ -2,6 +2,7 @@
 
 Miri has no release yet, so there is no supported build.
 
+- Read [Known limitations](docs/limitations.md) before you report a bug.
 - Ask questions and report bugs through [GitHub Issues](https://github.com/samanyudas/miri/issues/new/choose).
 - Report security problems privately through [SECURITY.md](SECURITY.md).
 

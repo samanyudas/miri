@@ -820,6 +820,7 @@ struct DefaultBindingsTests {
         "window_stack_north", "window_virtual_0", "window", "Window_center", "window__center", "mouse", "",
         "window_step_up", "window_vertical_step_up", "window_focusdisplay_first", "window_focusdisplay",
         "window_movedisplay_2", "window_focusedge", "window_focusedge_north", "window_moveedge_first",
+        "window_moveedge_2",
         "showmenu_extra", "hidemenu_extra", "showmenu_", "hidemenu_",
     ])
     func rejectsBindingsKeysTheEngineRejects(key: String) {

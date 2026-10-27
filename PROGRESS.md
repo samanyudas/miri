@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `feat/79-directional-aliases`, based on `main` at `3b0badf`
+Updated: 2026-10-27 on branch `feat/79-directional-aliases`, based on `main` at `7dde110`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -20,8 +20,9 @@ The public release path and the complete acceptance runs follow.
 Version 4 of the default set gives every directional action the same modifiers on the arrow keys, HJKL, and WASD.
 Four edge-or-monitor actions take the ⌃⌥⌘ and ⌃⌥⌘⇧ left and right chords: the first press reaches the strip's end, and a press at the end crosses to the display on that side.
 Every display move now takes the whole column and inserts it after the destination's active column.
-The engine half is [engine PR #67](https://github.com/samanyudas/paneru/pull/67), merged as `0d627e7`, which this branch pins.
-Its #67 code matches the tested head `e58657f`, and the only other change in the range is the drag tests from engine PR #66.
+The engine half is [engine PR #67](https://github.com/samanyudas/paneru/pull/67), merged as `0d627e7`.
+This branch now uses `main`'s engine pin `0d023e2`, which includes it.
+The #67 code in `0d627e7` matches the tested head `e58657f`.
 Sol approved the merged engine change in one sol-loop round, with no findings.
 [The keybinding reference](decisions/keybinding%20reference.md) records the table and the version 4 upgrade rules.
 
@@ -33,6 +34,50 @@ Settings > Shortcuts showed every alternative, the actions without a default, an
 A live check showed that the engine runs every auto-repeat key-down as a new press, so holding an edge shortcut would cross displays after it reaches the end.
 [#104](https://github.com/samanyudas/miri/issues/104) forbids that for its own shortcuts, and Sam has not decided it for #79.
 Empty-destination arrival and the refusal for a stack toward a display without a strip are also not verified natively.
+
+## Known limitations inventory
+
+[#91](https://github.com/samanyudas/miri/issues/91) is implemented on this branch as [Known limitations](docs/limitations.md).
+The README and SUPPORT.md link to it.
+The audit filed [#120](https://github.com/samanyudas/miri/issues/120) to [#125](https://github.com/samanyudas/miri/issues/125) for confirmed defects that had no issue, and Sam chooses each fix.
+#120 is fixed and closed, so the page no longer lists it.
+Add each newly confirmed limitation to that page, and remove an entry when its fix is verified.
+
+## Menu-bar apps that open windows later
+
+`main` pins engine `0d023e2`, the merge of [engine PR #70](https://github.com/samanyudas/paneru/pull/70).
+Docker Desktop runs as a menu-bar app until its dashboard opens, and then it becomes a regular app.
+The engine dropped such an app when it was not regular at engine start, or 5 seconds after its launch, so the dashboard was never tiled.
+The engine now keeps the process, and its activation-policy observer starts a new launch watch when the app becomes regular.
+Sol approved engine PR #70 in round 1 of sol-loop.
+The pin also brings engine PRs #67, #68, and #69, which open PRs #127 and #129 pin on their own.
+Engine PR #67 added the `focusedge` and `moveedge` verbs, so `EngineCommand.swift` now mirrors them and `check-compat.py` records the new parser hashes.
+
+The test `a_menu_bar_app_that_becomes_regular_later_is_tiled` fails before the fix and passes after it.
+On 27 October, a live check on Miri Developer closed the Docker dashboard, restarted Miri, and opened the dashboard from Docker's menu.
+The `main` build at `7bbecc5` never tracked the dashboard.
+The fixed build tiled it as a full-height column and focused it.
+[#133](https://github.com/samanyudas/miri/issues/133) is verified on `main` at `b8887ef` and closed.
+
+## Windows of busy apps on a hidden Space
+
+[#68](https://github.com/samanyudas/miri/issues/68) is fixed on `main`.
+The fix is [engine PR #68](https://github.com/samanyudas/paneru/pull/68), merged as `23bcf1b`, which `main`'s engine pin `0d023e2` includes.
+
+The startup brute-force scan stopped after 250 ms and at element 0x7fff.
+An app numbers its elements in creation order, so a busy app's newest window sits past both limits.
+On 27 October a new Helium window got element 32890, and the scan gave up at element 15616.
+The scan now runs until every window resolves or 0x4000 ids in a row own no window element, with a 2 s ceiling.
+
+On 27 October, `/tmp/miri68/repro.sh` placed Helium windows 55561 and 62288 on a hidden Space and relaunched Miri Developer.
+Engine `3fee523` left both unmanaged with restore `missing=2`.
+This branch managed both on 4 of 4 relaunches, and restore reported `missing=0`.
+Engine start to initialization went from 0.75 s to about 1.2 s on Sam's Mac.
+
+On 27 October, a build of `main` at `b8887ef` with engine `0d023e2` passed the same check on 3 of 3 relaunches.
+Helium windows 64426 (element 33795), 55561, and 63045 on a hidden Space were managed, and restore reported `missing=0`.
+A Helium window minimized before the relaunch joined its strip when it was restored, without focus.
+#68 is closed, and this branch removes its entry from [Known limitations](docs/limitations.md).
 
 ## Engine left running after Miri dies
 
@@ -58,7 +103,7 @@ That run also showed that an engine interrupted during its startup can panic wit
 
 [#106](https://github.com/samanyudas/miri/issues/106) keeps a maximized window in its row, so focus moves and swipes scroll past it.
 [Maximizing a window](decisions/release-scope.md#maximizing-a-window) records the rules Sam chose on 26 October.
-This branch pins engine `3fee523`, which includes engine PRs [#57](https://github.com/samanyudas/paneru/pull/57), [#58](https://github.com/samanyudas/paneru/pull/58), [#60](https://github.com/samanyudas/paneru/pull/60), [#63](https://github.com/samanyudas/paneru/pull/63), and [#64](https://github.com/samanyudas/paneru/pull/64).
+Engine `3fee523` and every later pin include engine PRs [#57](https://github.com/samanyudas/paneru/pull/57), [#58](https://github.com/samanyudas/paneru/pull/58), [#60](https://github.com/samanyudas/paneru/pull/60), [#63](https://github.com/samanyudas/paneru/pull/63), and [#64](https://github.com/samanyudas/paneru/pull/64).
 They make a maximized tiled window a display-wide column, make `maximize` the one toggle with `fullwidth` as its older name, and add `[options].maximized_window_side`.
 They also restore a maximized window before width, stack, float, and drop actions, and keep maximize in the saved session across an engine restart.
 The pin also brings the Picture-in-Picture level fixes from engine PRs [#56](https://github.com/samanyudas/paneru/pull/56) and [#59](https://github.com/samanyudas/paneru/pull/59), and engine PRs #53, #55, #61, and #62.
@@ -113,6 +158,11 @@ The [release scope](decisions/release-scope.md#maximizing-a-window) records the 
 A double-click on a window's top bar fills the usable area of its display, and the next one restores it.
 The window keeps its place in the layout while maximized, so its neighbors never move.
 [#106](https://github.com/samanyudas/miri/issues/106) replaces this model with a maximized column that stays in its row.
+
+#88 stays open until an agent verifies its criteria on the merged code, as #106 revised them, and records the result on the issue.
+All of #88's code is on `main` through #97, #99, and #116, and ⌃⌥F and the double-click send the same `ToggleMaximize` trigger.
+[Engine PR #65](https://github.com/samanyudas/paneru/pull/65) adds a test that a maximized window on an unplugged display stays maximized and restorable, which no test covered.
+It passes on engine `3fee523` without a code change, so `main` needs no new pin for it.
 
 On 26 October, current `main` with engine `6325638` reproduced the defect on the primary display.
 A double-click on a Finder title bar let macOS zoom Finder to 868 points wide, and the engine took that as the column's width, which moved T3 Code 156 points left.
@@ -301,7 +351,7 @@ The size check now lowers the window and grows it back once, and only a height t
 On 26 October, Font Book was resized through Accessibility to end at the screen's bottom edge, and Miri was restarted.
 The previous engine logged that Font Book and T3 Code kept 1410 and 1418 points when asked for 1402, and recorded those heights as minimums.
 The candidate engine brought both to the asked height with no refusal logged.
-A window on another macOS Space, which Accessibility does not list, still keeps its height, which is close to [#68](https://github.com/samanyudas/miri/issues/68).
+A window on another macOS Space, which Accessibility does not list, still keeps its height.
 
 ## Bracket directions for stack shortcuts
 
@@ -331,7 +381,21 @@ Engine PR #40 implements the expected result in #73, which keeps focus where it 
 Each change has tests that fail without it, and Sol approved both.
 Live on Miri Developer on 26 October, a stacked Finder window grabbed at the right end of its top bar and dragged straight down showed the bottom insertion line and reordered the stack.
 Closing three Finder windows that filled the primary display, with focus on the built-in display, left Grok Bot and Ghostty in view and focus unchanged.
-Sam's real-mouse check for #72 is still open.
+On 27 October, [engine PR #66](https://github.com/samanyudas/paneru/pull/66) added the missing #72 tests: a stack member grabbed near its left edge, and an edge hold that follows the pointer when the window is grabbed off-centre.
+Each new test fails when its rule is broken.
+On 27 October, Sam's real-mouse check passed the left-edge grab.
+Sam's right-edge grab dragged straight down moved the window to the built-in display, because that display sits directly below the primary display and the pointer crossed onto it.
+The same day, an agent ran synthetic drags with two Finder windows on Miri Developer built from engine `3fee523`, with the primary display above the built-in display:
+
+- A right-edge grab and a left-edge grab, each released over the lower window of its own stack on the primary display, showed the bottom insertion line and reordered the stack.
+- A right-edge grab dragged past the primary display's bottom edge became a new column on the built-in display.
+- A drag from the built-in display into a primary-display column showed one insertion line, on the primary display only, and joined that column.
+
+Synthetic drags do not replace Sam's real-mouse check (#71).
+Later on 27 October, Sam's real-mouse right-edge grab, released over the lower window of its own stack on the primary display, reordered the stack.
+Sam ran every real-mouse check on Miri Developer built from `main` at `7bbecc5` with engine `3fee523`.
+The faint white insertion line over white windows belongs to [#86](https://github.com/samanyudas/miri/issues/86).
+#72 can close after this PR merges, because the engine tests for the left-edge grab and the edge hold land with it.
 [#74](https://github.com/samanyudas/miri/issues/74) tracks engine `window_writes` tests that fail under heavy machine load.
 
 ## Unknown-key configuration warnings
@@ -382,8 +446,8 @@ Each defect has a regression test that fails without its fix.
 The live rerun on Miri Developer passed every case on the built-in display with Helium, T3 Code and Ghostty, and three Restart Engine runs restored all windows that the scan reached.
 Evidence is in `/tmp/miri-e2e-20261025/` on Sam's Mac and is not published.
 
-Two gaps remain open.
-[#68](https://github.com/samanyudas/miri/issues/68): the startup brute-force scan has a 250 ms budget per app, so a Helium window with many tabs on a hidden Space can still go unmanaged until its Space is shown.
+Two gaps remained open.
+[#68](https://github.com/samanyudas/miri/issues/68) is now fixed on `main` through engine `23bcf1b`.
 [#69](https://github.com/samanyudas/miri/issues/69): restore does not keep a strip's scroll offset, so a strip whose focus moved starts at its first column after a restart.
 
 ## Stack sizing and order fixes
@@ -741,7 +805,7 @@ The `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70), is me
 Verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
 Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
-Sam runs the real-mouse drag check in #72 on the merged build, then #72 can close.
+Triage #121 to #125 from the limitations audit.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
