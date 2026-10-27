@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `fix/68-hidden-space-scan`, based on `main` at `6882f8a`
+Updated: 2026-10-27 on branch `fix/68-hidden-space-scan`, based on `main` at `bcfa1be`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,14 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Known limitations inventory
+
+[#91](https://github.com/samanyudas/miri/issues/91) is implemented on this branch as [Known limitations](docs/limitations.md).
+The README and SUPPORT.md link to it.
+The audit filed [#120](https://github.com/samanyudas/miri/issues/120) to [#125](https://github.com/samanyudas/miri/issues/125) for confirmed defects that had no issue, and Sam chooses each fix.
+#120 is fixed and closed, so the page no longer lists it.
+Add each newly confirmed limitation to that page, and remove an entry when its fix is verified.
 
 ## Windows of busy apps on a hidden Space
 
@@ -752,7 +760,7 @@ The `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70), is me
 Verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
 Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
-Sam runs the real-mouse drag check in #72 on the merged build, then #72 can close.
+Triage #121 to #125 from the limitations audit.
 After this branch merges, verify #68 on the merged build and close it if its criteria hold.
 
 Each phase lands as its own PR or PRs.
