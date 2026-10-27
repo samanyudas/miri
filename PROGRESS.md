@@ -36,7 +36,11 @@ Those runs also hit the side-by-side parking defect in [#103](https://github.com
 Settings > Shortcuts showed every alternative, the actions without a default, and a seeded conflict notice.
 A live check showed that the engine runs every auto-repeat key-down as a new press, so holding an edge shortcut would cross displays after it reaches the end.
 [#104](https://github.com/samanyudas/miri/issues/104) forbids that for its own shortcuts, and Sam has not decided it for #79.
-Empty-destination arrival and the refusal for a stack toward a display without a strip are also not verified natively.
+A later run on the PR build at `739633f` covered the rest on every key set.
+With the built-in display emptied, ⌃⌥⌘ down focused it with no focused window, moved no window, and left the pointer still, and ⌃⌥⌘⇧ down moved a column there as its only column.
+With the built-in display left of the external display and the external strip scrolled to its start, ⌃⌥⌘ left focused the first column, a second press focused the left display, and ⌃⌥⌘ right crossed back, with no window moved.
+No #103 relocation happened in that run, because no column was parked past the shared edge.
+The refusal for a stack toward a display without a strip is not verified natively.
 
 ## Known limitations inventory
 
