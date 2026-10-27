@@ -322,7 +322,10 @@ The same day, an agent ran synthetic drags with two Finder windows on Miri Devel
 - A drag from the built-in display into a primary-display column showed one insertion line, on the primary display only, and joined that column.
 
 Synthetic drags do not replace Sam's real-mouse check (#71).
-Sam's real-mouse right-edge grab released above the primary display's bottom edge is still open.
+Later on 27 October, Sam's real-mouse right-edge grab, released over the lower window of its own stack on the primary display, reordered the stack.
+Sam ran every real-mouse check on Miri Developer built from `main` at `7bbecc5` with engine `3fee523`.
+The faint white insertion line over white windows belongs to [#86](https://github.com/samanyudas/miri/issues/86).
+#72 can close after this PR merges, because the engine tests for the left-edge grab and the edge hold land with it.
 [#74](https://github.com/samanyudas/miri/issues/74) tracks engine `window_writes` tests that fail under heavy machine load.
 
 ## Unknown-key configuration warnings
