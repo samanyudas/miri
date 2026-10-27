@@ -27,6 +27,7 @@ On 27 October, a live check with three Finder windows ran on Miri Developer.
 On the `maximize-app` build, a floated window that popped right re-tiled after its neighbour.
 On this branch's build, the same geometry returned the window to its slot.
 Sol approved the engine change in round 2 of sol-loop, after round 1 found the rule `index` case.
+Later on 27 October, a build of `main` with engine `1fd95b1` passed the same check: B popped from x=490 to x=522, right of its neighbour A, and re-tiled between C and A.
 
 ## Engine panic when stopped during startup
 
