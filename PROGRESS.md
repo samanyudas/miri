@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `fix/exit-before-startup-finishes`, based on `main` at `5d4c1bf`
+Updated: 2026-10-28 on branch `fix/exit-before-startup-finishes`, based on `main` at `69f5ba4`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -196,7 +196,13 @@ The window stayed maximized while its display switched to another native Space a
 System Settings filled the height at its 740 point width limit, a throwaway Helium window passed 2 cycles on its tab strip, and `AXFullScreen` stayed false.
 A double-click on Finder's view switcher left the window alone, a title-bar drag reordered the row, and the close button closed the window.
 These are automated observations on real windows, driven by synthetic mouse events and engine commands, not physical input.
-Not checked on this build: physical input, a drag of a maximized window, a real display unplug, and side-by-side displays, which wait for [#103](https://github.com/samanyudas/miri/issues/103).
+A follow-up run on the same build covered the rest.
+A window maximized out of a 3-window stack rejoined at the clamped slot after a mate closed, and a stacked window moved to the built-in display restored as a column there.
+A maximized floating window dragged to the built-in display filled it and restored at its earlier size and offset.
+A maximized tiled window dragged to empty space on the large display filled it and joined its layout.
+Sam unplugged and replugged the large display by hand, and the maximized window on it stayed maximized and restored at its earlier width.
+Not checked on this build: physical mouse input, and side-by-side displays, which wait for [#103](https://github.com/samanyudas/miri/issues/103).
+[#88](https://github.com/samanyudas/miri/issues/88) is verified and closed, and the [issue comment](https://github.com/samanyudas/miri/issues/88#issuecomment-6443382323) records each criterion.
 
 On 26 October, current `main` with engine `6325638` reproduced the defect on the primary display.
 A double-click on a Finder title bar let macOS zoom Finder to 868 points wide, and the engine took that as the column's width, which moved T3 Code 156 points left.
