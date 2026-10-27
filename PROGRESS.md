@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `fix/68-hidden-space-scan`, based on `main` at `0f1e0ec`
+Updated: 2026-10-27 on branch `fix/engine-startup-stop-panic`, based on `main` at `7dde110`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,23 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Engine panic when stopped during startup
+
+[#121](https://github.com/samanyudas/miri/issues/121) is implemented on this branch.
+The fix is engine `1fd95b1`, the merge of [engine PR #71](https://github.com/samanyudas/paneru/pull/71).
+The ECS used to get `Config` from an `Event::InitialConfig` copy in the event channel, and a stop during startup queued `Event::Exit` ahead of it.
+The first frame then ran without `Config` and panicked with "Resource does not exist".
+The engine now inserts the config at build time, and `Event::InitialConfig` is gone.
+A clean exit then saved the empty startup layout over the session, so the engine now drops `StateFile` when an exit arrives while startup gathers processes.
+A probe launched the real engine with temporary XDG folders and its own Mach service name, then sent SIGINT 25 to 100 ms after launch.
+Before the fix, 10 of 10 runs panicked.
+With the fix, 12 of 12 runs exited with code 0 and kept a seeded 11-column session.
+The real app on Sam's desktop, quit with AppleScript, exited without a panic in 8 of 8 runs.
+A quit that reached the engine before session restore saved an empty session (13 columns to 0) in 4 of 4 runs.
+That interval runs from about 0.1 s to 0.7 s after the engine starts, and [#134](https://github.com/samanyudas/miri/issues/134) tracks it.
+A quit after session restore kept all 13 columns in 5 of 5 runs, and the next start restored 15 windows with none missing.
+When #121 closes, narrow its row in [Known limitations](docs/limitations.md) to the #134 gap.
 
 ## Known limitations inventory
 
@@ -76,7 +93,7 @@ The fixed build stopped that orphan at launch.
 SIGTERM on the fixed app ended the app within 400 ms, together with its engine.
 SIGKILL on the fixed app ended its engine within 600 ms.
 The first run found that the SIGTERM handler deadlocked, because it called terminate inside a main-queue callout, and the fix is on this branch.
-That run also showed that an engine interrupted during its startup can panic with "Resource does not exist". No issue tracks this yet.
+That run also showed that an engine interrupted during its startup can panic with "Resource does not exist", which [#121](https://github.com/samanyudas/miri/issues/121) tracks.
 
 ## Maximized column
 
