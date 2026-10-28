@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-28 on branch `feat/150-free-corner-hiding`, based on `main` at `b05b2a0`
+Updated: 2026-10-28 on branch `feat/150-edge-slice-geometry`, stacked on `feat/150-free-corner-hiding`, based on `main` at `b05b2a0`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -49,14 +49,24 @@ Sam chose the bottom corner on 28 October.
 
 Engine PR #76 hung the window past the bottom corner on the side it hangs past, and sat it flush inside that side when a display was beyond the corner.
 Flush, the whole width of the window showed along the bottom edge, and Sam rejected that bar.
-Step 1 of [#150](https://github.com/samanyudas/miri/issues/150) changes the tuck on engine branch `miri/150-free-corner-hiding`, which this branch pins.
+Step 1 of [#150](https://github.com/samanyudas/miri/issues/150) changes the tuck on engine branch `miri/150-free-corner-hiding`, at `6fda494`.
 The window now hangs past a free bottom corner of its own display with 1 point of its width showing.
 A free corner has no display beyond it.
 The engine tries the corner on the side the window hangs past first, then the other bottom corner.
 Only when neither corner is free does the window sit flush, as before.
 Harness tests in `src/tests/side_by_side.rs` cover each case, and the two corner tests fail on `5075a4a`.
 Sam ran the same change as prototype engine `fa76e14` on 28 October with the displays side by side: no bar showed at the bottom, and every window stayed in its Space.
-This branch's build is not yet checked live.
+Step 1's build is not yet checked live.
+
+Step 2 of #150 is on engine branch `miri/150-edge-slice-geometry`, which this branch pins.
+When a column tucks, the engine now records an `EdgeSlice` on each of its windows in `src/ecs/shared_edge.rs`.
+An `EdgeSlice` holds the sliver the window would show with the other display moved away, in screen points and in the window's own points.
+For each display and side, `showing` keeps every front window of the hidden column nearest the edge in strip order.
+The engine logs that set at debug level as `showing edge slices: [...]` each time it changes.
+Harness tests in `src/tests/shared_edge.rs` compare each slice with the sliver of the same layout with the other display below.
+They also cover a hidden stack, the nearest column only, both sides of a middle display, free edges, stacked displays, an inactive strip, and scrolling the column back.
+The logged rectangles are not yet compared with real slivers on Sam's displays.
+Step 3 adds the Settings switch and the Screen Recording prompt.
 
 On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
 On engine `8b450d6`, Grok moved from the 27-inch strip into the built-in strip, which parked it back over the 27-inch display.
