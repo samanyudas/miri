@@ -102,6 +102,10 @@ The tap now stamps each event with its time, the event timestamp for the user's 
 A drag or release that the user made before the posted press went through now reaches the app moved as far as the press.
 A Sol review found that a second press during the slide reached the window under the pointer once the panel had closed, and the first press was then dropped.
 While a press waits for its window, the tap now drops further presses with their drags and their release, so a fast double click during the slide acts as one click.
+A second review found that this check went by the order in which the tap saw events, not by when the user made them.
+A second press made before the posted press went through, but seen after it, still reached the window under the pointer.
+The tap now notes when the posted press went through, and also drops a press the user made before that time.
+The tap now also keeps each dropped button on its own, so a held left press that expires no longer lets through the drags and release of a dropped right press.
 After 1.5 seconds without arrival, by event time in the tap and by frame time in the engine, the tap and the engine drop the press, and focus and the scroll stay.
 Hover over a panel reaches only the panel, and the tap drops scroll over a panel.
 The engine's window lookups treat a point under a panel as having no window, so focus-follows-mouse and click handling ignore the window beneath.
