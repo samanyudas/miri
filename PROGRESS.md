@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-28 on branch `fix/exit-before-startup-finishes`, based on `main` at `b4f3efe`
+Updated: 2026-10-28 on branch `docs/close-134`, based on `main` at `f8cffa0`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -83,19 +83,15 @@ The real app on Sam's desktop, quit with AppleScript, exited without a panic in 
 A quit that reached the engine before session restore saved an empty session (13 columns to 0) in 4 of 4 runs.
 That interval runs from about 0.1 s to 0.7 s after the engine starts, and [#134](https://github.com/samanyudas/miri/issues/134) tracks it.
 A quit after session restore kept all 13 columns in 5 of 5 runs, and the next start restored 15 windows with none missing.
-Its row in [Known limitations](docs/limitations.md) now describes only the #134 gap.
+#134 is now fixed, so that row is gone from [Known limitations](docs/limitations.md).
 
 ## Session kept when the engine exits before startup finishes
 
-[#134](https://github.com/samanyudas/miri/issues/134) is implemented on this branch with engine `2559c47` from [engine PR #72](https://github.com/samanyudas/paneru/pull/72).
+[#134](https://github.com/samanyudas/miri/issues/134) is fixed by [#136](https://github.com/samanyudas/miri/pull/136), merged as `f8cffa0` with engine `8b450d6` from [engine PR #72](https://github.com/samanyudas/paneru/pull/72).
 The exit save wrote the half-built startup layout, which has strips but none of the windows startup is still discovering.
 The engine now skips the exit save while `Initializing` exists.
-On Sam's desktop, an AppleScript quit 0 to 450 ms after the engine started kept the 10-column session byte-identical in 6 of 6 runs.
-Quits at 0.8 s and 2 s restored the session and then saved all 10 columns.
-Engine PR #72 merged as `8b450d6`, on top of engine PRs #73 and #74 that `main` already pins as `c1f2b5e`.
-This branch pins `8b450d6`, which adds the same #72 patch to `c1f2b5e` as `2559c47` adds to `1fd95b1`.
-On 28 October, a retest of this build with engine `8b450d6` kept a 7-column session byte-identical for quits 0 to 450 ms after the engine started, in 4 of 4 runs, and saved all 7 columns on a quit at 2 s.
-When #134 closes, remove its row from [Known limitations](docs/limitations.md).
+On 28 October, Miri Developer built from `main` at `f8cffa0` kept a 9-column session byte-identical for AppleScript quits 0 to 300 ms after the engine started, and saved all 9 columns on a quit at 2 s.
+#134 is verified and closed, and this branch removes its row from [Known limitations](docs/limitations.md).
 
 ## Known limitations inventory
 
