@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-28 on branch `feat/79-directional-aliases`, based on `main` at `b4f3efe`
+Updated: 2026-10-28 on branch `feat/79-directional-aliases`, based on `main` at `f8cffa0`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -21,7 +21,7 @@ Version 4 of the default set gives every directional action the same modifiers o
 Four edge-or-monitor actions take the ⌃⌥⌘ and ⌃⌥⌘⇧ left and right chords: the first press reaches the strip's end, and a press at the end crosses to the display on that side.
 Every display move now takes the whole column and inserts it after the destination's active column.
 The engine half is [engine PR #67](https://github.com/samanyudas/paneru/pull/67), merged as `0d627e7`.
-This branch now uses `main`'s engine pin `c1f2b5e`, which includes it.
+This branch now uses `main`'s engine pin `8b450d6`, which includes it.
 The #67 code in `0d627e7` matches the tested head `e58657f`.
 Sol approved the merged engine change in one sol-loop round, with no findings.
 Sol approved the Miri change in round 2 of sol-loop on 27 October.
@@ -112,6 +112,18 @@ A quit that reached the engine before session restore saved an empty session (13
 That interval runs from about 0.1 s to 0.7 s after the engine starts, and [#134](https://github.com/samanyudas/miri/issues/134) tracks it.
 A quit after session restore kept all 13 columns in 5 of 5 runs, and the next start restored 15 windows with none missing.
 Its row in [Known limitations](docs/limitations.md) now describes only the #134 gap.
+
+## Session kept when the engine exits before startup finishes
+
+[#134](https://github.com/samanyudas/miri/issues/134) is implemented on this branch with engine `2559c47` from [engine PR #72](https://github.com/samanyudas/paneru/pull/72).
+The exit save wrote the half-built startup layout, which has strips but none of the windows startup is still discovering.
+The engine now skips the exit save while `Initializing` exists.
+On Sam's desktop, an AppleScript quit 0 to 450 ms after the engine started kept the 10-column session byte-identical in 6 of 6 runs.
+Quits at 0.8 s and 2 s restored the session and then saved all 10 columns.
+Engine PR #72 merged as `8b450d6`, on top of engine PRs #73 and #74 that `main` already pins as `c1f2b5e`.
+This branch pins `8b450d6`, which adds the same #72 patch to `c1f2b5e` as `2559c47` adds to `1fd95b1`.
+On 28 October, a retest of this build with engine `8b450d6` kept a 7-column session byte-identical for quits 0 to 450 ms after the engine started, in 4 of 4 runs, and saved all 7 columns on a quit at 2 s.
+When #134 closes, remove its row from [Known limitations](docs/limitations.md).
 
 ## Known limitations inventory
 
@@ -902,7 +914,7 @@ The `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70), is me
 Verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
 Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
-Triage #122 to #125 and #134 from the limitations audit.
+Triage #122 to #125 from the limitations audit.
 Check whether #129 already fixed #125.
 
 Each phase lands as its own PR or PRs.
