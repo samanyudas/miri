@@ -64,12 +64,12 @@ Working notes in PROGRESS.md and issue comments do not count as documentation.
 
 | Limitation | Kind | Trigger and impact | Workaround | Evidence and tracking |
 | --- | --- | --- | --- | --- |
-| Windows of an app whose main thread stays busy at launch can wait unmanaged. | Confirmed defect with test apps only, previously undocumented | A busy app launches. In 4 of 32 rounds, one test app's windows stayed unmanaged. | None known. | [#63](https://github.com/samanyudas/miri/issues/63). |
+| One window of an app whose main thread stays busy at launch can stay unmanaged. | Confirmed defect with test apps only | Six busy test apps launch together. The engine lists each app's windows once, and a window whose details time out is skipped and not listed again. In 1 of 576 windows, one window stayed unmanaged for the 8 s check. | None known. | [#63](https://github.com/samanyudas/miri/issues/63). |
 | After an engine restart, each strip starts at its first column. The window that was in view can sit off-screen, and a maximized window can come back partly in view. | Confirmed defect, previously undocumented | Restart Engine, a crash restart, or relaunching Miri. | Focus the window. | [#69](https://github.com/samanyudas/miri/issues/69). |
 | Session restore drops windows that no longer exist and closes the gaps they leave. It keeps no state for a display that is not connected. | Platform constraint, previously undocumented | Restart after windows close or a display disconnects. | None. | The engine's [session restore](https://github.com/samanyudas/paneru/blob/3fee523670ebf929ad936ba98beb999b0319930b/CONFIGURATION.md) documentation. |
 | A window that matches a floating rule floats after a restart, even if it was tiled when the layout was saved. A window you tiled with the float toggle stays tiled. | Scope exclusion | Restart with a floating rule that matches a tiled window. | Tile it again with Control-Option-T. | [Startup and crash recovery](../decisions/release-scope.md#startup-and-crash-recovery), [#15](https://github.com/samanyudas/miri/issues/15), [#93](https://github.com/samanyudas/miri/issues/93). |
 | By default, the engine ignores windows that are neither standard nor floating windows, such as dialogs. It also ignores background apps that run without a Dock icon. | Platform constraint, previously undocumented | Those windows stay where the app puts them. | The engine documents a window rule with `manage = true` in `config.toml` that manages them. Settings has no control for it, and this rule has not run with Miri. | The engine's [window rules](https://github.com/samanyudas/paneru/blob/3fee523670ebf929ad936ba98beb999b0319930b/CONFIGURATION.md) documentation. |
-| An engine stopped during its startup can panic with "Resource does not exist". | Confirmed defect, previously undocumented | Stop or quit Miri while the engine starts. Whether windows stay reachable after the panic is not checked. | Wait for the engine to finish starting before you stop it. | [#121](https://github.com/samanyudas/miri/issues/121). |
+| An engine stopped before it restores the saved session replaces that session with an empty one. | Confirmed defect | Quit Miri or stop its engine within about 0.7 s of an engine start. The engine exits without a panic, and its log shows windows moved back to their original frames. The next start has no layout to restore. | Wait about a second after the engine starts before you stop it. | [#134](https://github.com/samanyudas/miri/issues/134). The startup panic is fixed in [#121](https://github.com/samanyudas/miri/issues/121). |
 
 ## Stacks and window sizes
 
@@ -87,7 +87,6 @@ Working notes in PROGRESS.md and issue comments do not count as documentation.
 | --- | --- | --- | --- | --- |
 | A drop onto another display that macOS then tiles is not undone. The window leaves its layout place. | Confirmed defect, previously undocumented | A macOS tiling option is on during a drag to another display. | Turn off the macOS tiling options. | [#123](https://github.com/samanyudas/miri/issues/123). |
 | A dragged window that macOS does not fill can end 8 points up against the menu bar. | Confirmed defect, previously undocumented | Some title-bar drags. Frequency is not recorded. | None known. | [#122](https://github.com/samanyudas/miri/issues/122). |
-| A window that you float and tile again can return beside its neighbour instead of in its old slot. | Confirmed defect, previously undocumented | Control-Option-T twice. Seen once. | Move the column back with the move commands. | [#125](https://github.com/samanyudas/miri/issues/125), [#59](https://github.com/samanyudas/miri/issues/59). |
 | Swipe lag builds up over time. | Confirmed defect, previously undocumented | Long sessions. The cause is unknown. | Quit and reopen Miri. | [#66](https://github.com/samanyudas/miri/issues/66). |
 | The macOS system Picture-in-Picture window, which Safari, QuickTime Player, and IINA use, cannot take keyboard focus. | Platform constraint | Picture-in-Picture in those apps. macOS keeps the window above other windows. | Use the window's controls with the pointer. | [V1 interactions](../decisions/release-scope.md#v1-interactions), [#77](https://github.com/samanyudas/miri/issues/77). Firefox and Zen Picture-in-Picture have not run. |
 | In Chromium-based browsers, a double-click on a tab also maximizes the window. | Platform constraint | The browser hides its tabs from Accessibility. | Double-click the title bar away from the tabs. | [Maximizing a window](../decisions/release-scope.md#maximizing-a-window). |
@@ -100,7 +99,6 @@ These reports are not established limitations.
 Each one has an open issue with the next investigation step.
 
 - Windows show in Mission Control or a window switcher but are not on the expected desktop: [#85](https://github.com/samanyudas/miri/issues/85).
-- Black numbered indicators appear, and one native desktop seems to show twice on each display: [#89](https://github.com/samanyudas/miri/issues/89).
 - Window interactions feel delayed: [#78](https://github.com/samanyudas/miri/issues/78).
 
 ## Deferred to v2

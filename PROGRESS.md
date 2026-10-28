@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-27 on branch `feat/79-directional-aliases`, based on `main` at `7dde110`
+Updated: 2026-10-28 on branch `feat/79-directional-aliases`, based on `main` at `b4f3efe`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -21,7 +21,7 @@ Version 4 of the default set gives every directional action the same modifiers o
 Four edge-or-monitor actions take the ⌃⌥⌘ and ⌃⌥⌘⇧ left and right chords: the first press reaches the strip's end, and a press at the end crosses to the display on that side.
 Every display move now takes the whole column and inserts it after the destination's active column.
 The engine half is [engine PR #67](https://github.com/samanyudas/paneru/pull/67), merged as `0d627e7`.
-This branch now uses `main`'s engine pin `0d023e2`, which includes it.
+This branch now uses `main`'s engine pin `c1f2b5e`, which includes it.
 The #67 code in `0d627e7` matches the tested head `e58657f`.
 Sol approved the merged engine change in one sol-loop round, with no findings.
 Sol approved the Miri change in round 2 of sol-loop on 27 October.
@@ -41,6 +41,77 @@ With the built-in display emptied, ⌃⌥⌘ down focused it with no focused win
 With the built-in display left of the external display and the external strip scrolled to its start, ⌃⌥⌘ left focused the first column, a second press focused the left display, and ⌃⌥⌘ right crossed back, with no window moved.
 No #103 relocation happened in that run, because no column was parked past the shared edge.
 The refusal for a stack toward a display without a strip is not verified natively.
+
+## One strip per native Space
+
+[#89](https://github.com/samanyudas/miri/issues/89) is fixed by [engine PR #73](https://github.com/samanyudas/paneru/pull/73), merged as `ba198d9`. Its tree matches the tested head `ade3f05`.
+This branch pins `c1f2b5e` from `main`, which includes `ba198d9`.
+Mission Control can drag a window to an inactive Space, and the engine learns of it only when that Space activates or a display topology read runs.
+On a topology read, `place_extracted_strip` in `src/ecs/display.rs` reused the Space's first row only when that row was empty.
+Otherwise it opened a new virtual row parked at the display corner, and v1 has no UI for that row.
+Windows from a removed display took the same path.
+The engine now appends the moved windows, with their columns, to the end of the Space's selected strip, and opens a strip only when the Space has none.
+The engine's workspace popup flashed the row number on every native Space switch, which read as Miri making extra desktops.
+The engine now defaults `workspace_popup_status` to `false`, as it does for `focus_follows_mouse`.
+Miri cannot write that key into existing configurations, because they define only `[decorations.menu]`, and Miri refuses to add keys to the implicit `[decorations]` table.
+
+On 27 October on Miri Developer, a Finder window dragged in Mission Control to the other Space, followed by a 1-point app-only display origin change, landed alone in a new row 3 on engine `1fd95b1`.
+Focusing it hid the Space's other windows and flashed "3".
+The same steps on engine `fca146c` appended the window to the end of the destination Space's visible strip, and focusing it changed no row.
+On engine `4e26369`, four native Space switches showed no number, and Settings showed no configuration error.
+Rows that older builds saved stay in the session until their windows move.
+On Sam's Mac, `virtualmovenum` moved Spotify and one Helium window back into their Spaces' visible rows.
+On 28 October Sam passed the original Mission Control drag by hand, and the same drag followed by sleep and wake.
+Unplugging and replugging the external display left the built-in display's windows on the external display, as on `main`.
+[#142](https://github.com/samanyudas/miri/issues/142) tracks the planned restoration that Sam decided, and [#143](https://github.com/samanyudas/miri/issues/143) and [#144](https://github.com/samanyudas/miri/issues/144) track the cross-display drag and broken stacks.
+
+## Apps busy at launch
+
+[#63](https://github.com/samanyudas/miri/issues/63) is partly fixed in [engine PR #74](https://github.com/samanyudas/paneru/pull/74).
+This branch pins its merge commit `c1f2b5e`, which also carries [engine PR #73](https://github.com/samanyudas/paneru/pull/73) for [#89](https://github.com/samanyudas/miri/issues/89).
+An app that blocked its main thread for more than 5 s right after launch never got its windows managed, even after the user switched to it.
+The engine now parks such an app, asks it for its AX role off the main thread every 500 ms, and admits it once it answers.
+An app that answers but is busy again by the next registration waits 1, 2, 4, 8, 16, then 30 s between tries.
+
+On 27 October, live fixture checks on Miri Developer gave these results.
+A 10 s block stayed unmanaged on `1fd95b1` and was managed at 10.9 s on `ea9732d`.
+An app blocked 1000 of every 1050 ms made 7 main-loop attempts in 45 s and was managed within 3 s of calming down.
+The `--busy 300,350` probe managed 575 of 576 windows.
+The one miss is the remaining part of #63: the launch scan lists an app's windows once and skips a window whose details time out.
+The original 4-in-32 misses did not reproduce on `1fd95b1` in 29 rounds.
+On 28 October, the 10 s block was managed at 10.9 s in 2 of 2 runs on `c1f2b5e`.
+
+## Re-tiled window slot
+
+[#125](https://github.com/samanyudas/miri/issues/125) is implemented in [engine PR #69](https://github.com/samanyudas/paneru/pull/69), merged as `d829a65`.
+Floating a tiled window now records its slot, and tiling it again returns it there while its row is on screen.
+For a floated window, that slot wins over a rule's `index`.
+Minimized windows keep their old behaviour.
+Its tree matches the tested PR head `10ea677`, and `main`'s engine pin `1fd95b1` includes it.
+This branch removes its entry from [Known limitations](docs/limitations.md).
+
+On 27 October, a live check with three Finder windows ran on Miri Developer.
+On the `maximize-app` build, a floated window that popped right re-tiled after its neighbour.
+On this branch's build, the same geometry returned the window to its slot.
+Sol approved the engine change in round 2 of sol-loop, after round 1 found the rule `index` case.
+Later on 27 October, a build of `main` with engine `1fd95b1` passed the same check: B popped from x=490 to x=522, right of its neighbour A, and re-tiled between C and A.
+
+## Engine panic when stopped during startup
+
+[#121](https://github.com/samanyudas/miri/issues/121) is verified on `main` at `7499990` and closed.
+The fix is engine `1fd95b1`, the merge of [engine PR #71](https://github.com/samanyudas/paneru/pull/71).
+The ECS used to get `Config` from an `Event::InitialConfig` copy in the event channel, and a stop during startup queued `Event::Exit` ahead of it.
+The first frame then ran without `Config` and panicked with "Resource does not exist".
+The engine now inserts the config at build time, and `Event::InitialConfig` is gone.
+A clean exit then saved the empty startup layout over the session, so the engine now drops `StateFile` when an exit arrives while startup gathers processes.
+A probe launched the real engine with temporary XDG folders and its own Mach service name, then sent SIGINT 25 to 100 ms after launch.
+Before the fix, 10 of 10 runs panicked.
+With the fix, 12 of 12 runs exited with code 0 and kept a seeded 11-column session.
+The real app on Sam's desktop, quit with AppleScript, exited without a panic in 8 of 8 runs.
+A quit that reached the engine before session restore saved an empty session (13 columns to 0) in 4 of 4 runs.
+That interval runs from about 0.1 s to 0.7 s after the engine starts, and [#134](https://github.com/samanyudas/miri/issues/134) tracks it.
+A quit after session restore kept all 13 columns in 5 of 5 runs, and the next start restored 15 windows with none missing.
+Its row in [Known limitations](docs/limitations.md) now describes only the #134 gap.
 
 ## Known limitations inventory
 
@@ -104,7 +175,7 @@ The fixed build stopped that orphan at launch.
 SIGTERM on the fixed app ended the app within 400 ms, together with its engine.
 SIGKILL on the fixed app ended its engine within 600 ms.
 The first run found that the SIGTERM handler deadlocked, because it called terminate inside a main-queue callout, and the fix is on this branch.
-That run also showed that an engine interrupted during its startup can panic with "Resource does not exist". No issue tracks this yet.
+That run also showed that an engine interrupted during its startup can panic with "Resource does not exist", which [#121](https://github.com/samanyudas/miri/issues/121) tracks.
 
 ## Maximized column
 
@@ -166,10 +237,29 @@ A double-click on a window's top bar fills the usable area of its display, and t
 The window keeps its place in the layout while maximized, so its neighbors never move.
 [#106](https://github.com/samanyudas/miri/issues/106) replaces this model with a maximized column that stays in its row.
 
-#88 stays open until an agent verifies its criteria on the merged code, as #106 revised them, and records the result on the issue.
 All of #88's code is on `main` through #97, #99, and #116, and ⌃⌥F and the double-click send the same `ToggleMaximize` trigger.
 [Engine PR #65](https://github.com/samanyudas/paneru/pull/65) adds a test that a maximized window on an unplugged display stays maximized and restorable, which no test covered.
-It passes on engine `3fee523` without a code change, so `main` needs no new pin for it.
+
+On 27 October, the build of `main` at `fd16a22`, with engine `1fd95b1`, passed the #88 criteria as #106 revised them, except the gaps below.
+Since the earlier check on `3fee523`, that engine adds display moves from engine PR #67, the re-tile slot from #69, and the hidden-Space scan from #68.
+A tiled Finder window filled `0,30 2560x1410` and restored its exact frame.
+Its neighbors kept their sizes, scrolled aside while it was maximized, and returned to their exact frames on restore.
+Four cycles that mixed the double-click and `window maximize` returned the same frames, and focus moves scrolled past the maximized window.
+A stacked window returned to its stack slot, and with its stack mate closed it became a full-height column at its old width.
+With `stack_limit = "fit"`, a window maximized out of a full 7-window stack returned as a column right after the stack once the stack was full again.
+A floating window filled the usable area and returned to its floating frame by both triggers.
+`movedisplay south` filled the built-in display at `302,1486 2048x1286`, the restore there kept the width share, and a move back north restored on the large display.
+The window stayed maximized while its display switched to another native Space and back.
+System Settings filled the height at its 740 point width limit, a throwaway Helium window passed 2 cycles on its tab strip, and `AXFullScreen` stayed false.
+A double-click on Finder's view switcher left the window alone, a title-bar drag reordered the row, and the close button closed the window.
+These are automated observations on real windows, driven by synthetic mouse events and engine commands, not physical input.
+A follow-up run on the same build covered the rest.
+A window maximized out of a 3-window stack rejoined at the clamped slot after a mate closed, and a stacked window moved to the built-in display restored as a column there.
+A maximized floating window dragged to the built-in display filled it and restored at its earlier size and offset.
+A maximized tiled window dragged to empty space on the large display filled it and joined its layout.
+Sam unplugged and replugged the large display by hand, and the maximized window on it stayed maximized and restored at its earlier width.
+Not checked on this build: physical mouse input, and side-by-side displays, which wait for [#103](https://github.com/samanyudas/miri/issues/103).
+[#88](https://github.com/samanyudas/miri/issues/88) is verified and closed, and the [issue comment](https://github.com/samanyudas/miri/issues/88#issuecomment-6443382323) records each criterion.
 
 On 26 October, current `main` with engine `6325638` reproduced the defect on the primary display.
 A double-click on a Finder title bar let macOS zoom Finder to 868 points wide, and the engine took that as the column's width, which moved T3 Code 156 points left.
@@ -812,7 +902,8 @@ The `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70), is me
 Verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
 Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
 Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
-Triage #121 to #125 from the limitations audit.
+Triage #122 to #125 and #134 from the limitations audit.
+Check whether #129 already fixed #125.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
