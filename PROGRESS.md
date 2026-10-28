@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-28 on branch `feat/142-restore-display-layout`, based on `main` at `e1f7475`
+Updated: 2026-10-28 on branch `feat/142-restore-display-layout`, based on `main` at `aa0a8eb`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,7 +16,8 @@ The public release path and the complete acceptance runs follow.
 
 ## Windows return to their display
 
-[#142](https://github.com/samanyudas/miri/issues/142) is implemented in [engine PR #75](https://github.com/samanyudas/paneru/pull/75), merged as `f20b00e`, which this branch pins. Its tree matches the tested head `e1705af`.
+[#142](https://github.com/samanyudas/miri/issues/142) is implemented in [engine PR #75](https://github.com/samanyudas/paneru/pull/75), merged as `f20b00e`. Its tree matches the tested head `e1705af`.
+This branch pins `5075a4a`, which also carries engine PR #76 for #103 and engine PR #77, a test deadline.
 macOS moves Spaces between displays when a display disconnects, and on replug it hands the main display every Space that existed before, the built-in display's own Space included.
 The engine followed the Spaces, so the built-in display's windows stayed on the external display.
 The engine now records each display's columns and stacks on the first event of a display change, before macOS destroys any Space, in `src/ecs/display_homes.rs`.
@@ -33,6 +34,26 @@ Later on 28 October Sam ran a cable unplug, a lid close, and a sleep on engine `
 The cable unplug returned every window to its display, order, and stack.
 After the lid and the sleep, the windows the engine still managed came back correctly, but #147 dropped others: their AX elements died and the engine gave up after 1 s.
 #142 stays open until #147 is fixed and the lid and sleep checks pass.
+
+## Side-by-side displays
+
+[#103](https://github.com/samanyudas/miri/issues/103) is fixed by [engine PR #76](https://github.com/samanyudas/paneru/pull/76).
+The engine hid an off-screen column by leaving a sliver at mid-height and hanging the rest of the window past the display edge.
+With another display beside that edge, the window lay mostly on it, so macOS moved it into that display's Space and drew it there.
+On a display arrangement change, macOS first pulled such a window back onto its own display, the engine slid it back across the other display, and the engine's topology read then adopted it into that display's strip.
+`position_layout_windows` in `src/ecs/layout.rs` now checks the frame a window shows.
+If its center, or more of it, lies on another display, the window tucks below its own display's bottom edge, against the side it hangs past.
+It hangs past the corner when no display is there, and sits flush inside the side otherwise.
+A frame that no tuck improves, such as one above a display directly below, stays as before.
+Free sides keep the mid-height sliver, so arrangements with the displays above and below each other keep their behavior.
+Sam chose the bottom corner on 28 October.
+
+On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
+On engine `8b450d6`, Grok moved from the 27-inch strip into the built-in strip, which parked it back over the 27-inch display.
+Moving the display back put Grok at the end of the 27-inch strip.
+On engine `cc9955a`, the same move tucked Grok into the 27-inch display's bottom-left corner, in its own strip and Space.
+Scrolling the 27-inch strip to its last and first columns kept every window in Space 515, and moving the display back left every strip and order unchanged.
+macOS keeps about 32 points of a tucked window above the bottom edge, so the visible corner is about 5 by 32 points.
 
 ## One strip per native Space
 
