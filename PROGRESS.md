@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-28 on branch `docs/refresh-next`, based on `main` at `78f97ee`
+Updated: 2026-10-28 on branch `fix/103-side-by-side-parking`, based on `main` at `e1f7475`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,26 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Side-by-side displays
+
+[#103](https://github.com/samanyudas/miri/issues/103) is fixed by [engine PR #76](https://github.com/samanyudas/paneru/pull/76).
+The engine hid an off-screen column by leaving a sliver at mid-height and hanging the rest of the window past the display edge.
+With another display beside that edge, the window lay mostly on it, so macOS moved it into that display's Space and drew it there.
+On a display arrangement change, macOS first pulled such a window back onto its own display, the engine slid it back across the other display, and the engine's topology read then adopted it into that display's strip.
+`position_layout_windows` in `src/ecs/layout.rs` now checks the frame a window shows.
+If its center, or more of it, lies on another display, the window tucks below its own display's bottom edge, against the side it hangs past.
+It hangs past the corner when no display is there, and sits flush inside the side otherwise.
+A frame that no tuck improves, such as one above a display directly below, stays as before.
+Free sides keep the mid-height sliver, so arrangements with the displays above and below each other keep their behavior.
+Sam chose the bottom corner on 28 October.
+
+On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
+On engine `8b450d6`, Grok moved from the 27-inch strip into the built-in strip, which parked it back over the 27-inch display.
+Moving the display back put Grok at the end of the 27-inch strip.
+On engine `cc9955a`, the same move tucked Grok into the 27-inch display's bottom-left corner, in its own strip and Space.
+Scrolling the 27-inch strip to its last and first columns kept every window in Space 515, and moving the display back left every strip and order unchanged.
+macOS keeps about 32 points of a tucked window above the bottom edge, so the visible corner is about 5 by 32 points.
 
 ## One strip per native Space
 
