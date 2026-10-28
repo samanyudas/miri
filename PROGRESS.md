@@ -58,7 +58,7 @@ Harness tests in `src/tests/side_by_side.rs` cover each case, and the two corner
 Sam ran the same change as prototype engine `fa76e14` on 28 October with the displays side by side: no bar showed at the bottom, and every window stayed in its Space.
 Step 1's build is not yet checked live.
 
-Step 2 of #150 is on engine branch `miri/150-edge-slice-geometry`, at `8da91ff`.
+Step 2 of #150 is on engine branch `miri/150-edge-slice-geometry`, at `ed67edd`.
 When a column tucks, the engine now records an `EdgeSlice` on each of its windows in `src/ecs/shared_edge.rs`.
 An `EdgeSlice` holds the sliver the window would show with the other display moved away, in screen points and in the window's own points.
 For each display and side, `showing` keeps every front window of the hidden column nearest the edge in strip order.
