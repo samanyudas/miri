@@ -83,7 +83,11 @@ Photos stopped with the switch off, under fullscreen, during display sleep, and 
 The initial CPU diagnosis found repeated window enumeration, so engine `14a08e4` reuses each slice's capture filter.
 That engine also cancels unwanted pending photos and defers photos of moved panels while unseen.
 Sol approved those fixes in round two.
-Release CPU verification and click and drag forwarding remain pending.
+On 29 October, with a release engine built from `14a08e4` and one slice showing, the engine used a median 1.77% of one core with the switch on (1.67% to 1.87%, 5 runs of 30 seconds) and 0.80% with it off (0.67% to 1.03%, 5 runs, alternated).
+A slice whose window changed every second measured the same, 1.77% to 1.87% over 3 runs.
+Each run took 15 photos, and the engine looked windows up 4 times for 83 photos.
+What limits the remaining 1 point of a core is not yet known.
+Click and drag forwarding remains pending, for step 5.
 
 On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
 On engine `8b450d6`, Grok moved from the 27-inch strip into the built-in strip, which parked it back over the 27-inch display.
