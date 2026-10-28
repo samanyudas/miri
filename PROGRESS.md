@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-29 on branch `feat/150-slice-input`, stacked on `feat/150-edge-slice-photos`, `feat/150-edge-slice-geometry`, and `feat/150-free-corner-hiding`, based on `main` at `b05b2a0`
+Updated: 2026-10-29 on branch `feat/150-shared-edge-switch`, stacked on `feat/150-slice-input`, `feat/150-edge-slice-photos`, `feat/150-edge-slice-geometry`, and `feat/150-free-corner-hiding`, based on `main` at `b05b2a0`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -119,6 +119,16 @@ Moving the display back put Grok at the end of the 27-inch strip.
 On engine `cc9955a`, the same move tucked Grok into the 27-inch display's bottom-left corner, in its own strip and Space.
 Scrolling the 27-inch strip to its last and first columns kept every window in Space 515, and moving the display back left every strip and order unchanged.
 macOS keeps about 32 points of a tucked window above the bottom edge, so the visible corner is about 5 by 32 points.
+
+### Window contents on shared edges
+
+[#150](https://github.com/samanyudas/miri/issues/150) step 3 adds the **Show window contents on edges next to another display** switch to Settings > Layout, off by default.
+It writes `[options].shared_edge_slices`.
+Turning it on calls `CGRequestScreenCaptureAccess`, and without the permission the switch stays off with a note and an **Open Screen Recording Settings** button.
+Each setup recheck calls `CGPreflightScreenCaptureAccess` and turns a saved switch off with the same note when the permission is gone.
+ADR 0002 now allows this one Screen Recording use.
+The pinned engine ignores the key, which a scratch engine test confirmed, so the switch changes nothing on screen until step 4 draws the slices.
+Not checked yet: the prompt, the denied note, and a revoked grant on Sam's Mac, and which permission entry macOS shows.
 
 ## One strip per native Space
 

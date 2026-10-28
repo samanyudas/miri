@@ -65,7 +65,7 @@ This representation preserves column positions while distinguishing windows that
 Sam selected On by default for the Miri dock.
 Dock placement, click behavior for single-window entries, and exact dimming appearance remain open.
 Window selection must remain distinguishable when titles are identical or unavailable.
-The picker design must respect Miri's existing no-screen-capture boundary.
+The picker design must respect Miri's screen-capture boundary in [ADR 0002](../docs/adr/0002-limit-system-access.md), which allows only the opt-in edge slices.
 
 ## Candidate quality-of-life improvements
 

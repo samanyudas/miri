@@ -118,11 +118,13 @@ Settings visibility, Stop, Quit, and window recovery follow [App controls and wi
 
 Sign the distributed app with a Developer ID and notarize it with Apple.
 Require only Accessibility permission for window management.
+Ask for Screen Recording permission only when the user turns on window contents on edges next to another display.
 Avoid kernel extensions, system modifications, and SIP changes.
 
 Keep window management local to the Mac.
 Require no account and collect no app telemetry.
-Do not capture or read screen contents, or transmit window-management data.
+Do not capture or read screen contents, except the opt-in edge slices that [ADR 0002](../docs/adr/0002-limit-system-access.md) allows.
+Do not transmit window-management data.
 Sparkle provides the app's update mechanism as recorded in [Release scope](release-scope.md).
 
 Preserve Paneru's required copyright and MIT license notices alongside Miri's GPL-3.0-or-later license.
