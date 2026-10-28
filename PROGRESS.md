@@ -41,6 +41,13 @@ With the built-in display emptied, ⌃⌥⌘ down focused it with no focused win
 With the built-in display left of the external display and the external strip scrolled to its start, ⌃⌥⌘ left focused the first column, a second press focused the left display, and ⌃⌥⌘ right crossed back, with no window moved.
 No #103 relocation happened in that run, because no column was parked past the shared edge.
 The refusal for a stack toward a display without a strip is not verified natively.
+On 28 October, a full rerun on the PR build at `3ddca8d` with engine `8b450d6` passed on every key set.
+It covered focus and moves within a strip, both edge stages, display focus and moves with two- and three-window stacks, insertion after the active column, ⌃⌥N, and an empty destination.
+With the built-in display right of the external display, focus and moves crossed both ways, and a two-window stack crossed whole.
+Sam's version 3 configuration upgraded to the same version 4 bindings as before, and the engine log listed 71 distinct chords, none with Fn.
+A held ⌃⌥⌘⇧ left, one press plus one auto-repeat, moved a column to the first position and then onto the neighboring display.
+From a focused Finder window, focusing an empty display does nothing, and the engine command `window focusdisplay south` does the same, so this predates #79.
+The first side-by-side attempt hit #103 when the built-in strip scrolled, and the test then restored every window's display, order, and width.
 
 ## One strip per native Space
 
