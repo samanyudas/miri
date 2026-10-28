@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-28 on branch `feat/150-edge-slice-geometry`, stacked on `feat/150-free-corner-hiding`, based on `main` at `b05b2a0`
+Updated: 2026-10-28 on branch `feat/150-edge-slice-photos`, stacked on `feat/150-edge-slice-geometry` and `feat/150-free-corner-hiding`, based on `main` at `b05b2a0`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -58,7 +58,7 @@ Harness tests in `src/tests/side_by_side.rs` cover each case, and the two corner
 Sam ran the same change as prototype engine `fa76e14` on 28 October with the displays side by side: no bar showed at the bottom, and every window stayed in its Space.
 Step 1's build is not yet checked live.
 
-Step 2 of #150 is on engine branch `miri/150-edge-slice-geometry`, which this branch pins.
+Step 2 of #150 is on engine branch `miri/150-edge-slice-geometry`, at `8da91ff`.
 When a column tucks, the engine now records an `EdgeSlice` on each of its windows in `src/ecs/shared_edge.rs`.
 An `EdgeSlice` holds the sliver the window would show with the other display moved away, in screen points and in the window's own points.
 For each display and side, `showing` keeps every front window of the hidden column nearest the edge in strip order.
@@ -66,7 +66,19 @@ The engine logs that set at debug level as `showing edge slices: [...]` each tim
 Harness tests in `src/tests/shared_edge.rs` compare each slice with the sliver of the same layout with the other display below.
 They also cover a hidden stack, the nearest column only, both sides of a middle display, free edges, stacked displays, an inactive strip, and scrolling the column back.
 The logged rectangles are not yet compared with real slivers on Sam's displays.
-Step 3 adds the Settings switch and the Screen Recording prompt.
+Step 3 adds the Settings switch and the Screen Recording prompt, in [#152](https://github.com/samanyudas/miri/pull/152).
+
+Step 4 of #150 is on engine branch `miri/150-edge-slice-photos`, which this branch pins.
+The engine reads `[options] shared_edge_slices`, which is off when absent.
+With the switch on and `CGPreflightScreenCaptureAccess` true, each showing slice gets a borderless, non-activating panel at its place, one level below the dim overlay.
+`src/ecs/slice_photos.rs` holds the photo state of each slice, and `src/slice_screen.rs` draws the panels and takes the photos with ScreenCaptureKit.
+The first photo is taken when the slice shows, and the panel stays out of sight until it arrives.
+After that, a photo is taken every 2 seconds while the panel's occlusion state is visible, and the panel repaints only when the photo's pixels changed.
+A window gone or a failed photo closes its panel, and a refused photo closes every panel until the config or the permission changes.
+The engine logs each step at debug level, with lines that start `edge slice`.
+Harness tests in `src/tests/slice_photos.rs` cover the first photo, the refresh, repaint, stale photos, the occlusion cut, the switch and permission gates, and the closing cases.
+Clicks on a panel do nothing yet, and step 5 adds them.
+Step 4 is not yet checked live.
 
 On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
 On engine `8b450d6`, Grok moved from the 27-inch strip into the built-in strip, which parked it back over the 27-inch display.
