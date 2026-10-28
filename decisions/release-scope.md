@@ -167,12 +167,15 @@ Reusing Paneru does not establish that this blocker is resolved.
 
 ### Display changes
 
-Display connection changes follow the default behavior of macOS and Paneru.
 Each strip stays on its display while that display is connected.
 When a display disconnects, its strips follow their macOS Space to the display that macOS selects and keep their window order.
-When the display reconnects, its strips return if macOS returns their Space.
 If Paneru cannot re-attach a strip, its windows become floating and remain reachable.
-Miri keeps no separate display layout state and offers no reconnection settings in v1.
+When the display reconnects, each window returns to the display it was on before the disconnect, in its old column order and stack.
+This applies to unplugging and replugging a display, closing and opening the lid, and sleep and wake.
+Windows that never left their display keep their place, including reordering done while the other display was gone.
+A window opened while a display was gone stays on the display it was opened on, and a window closed meanwhile is forgotten.
+Windows from several Spaces of one display return together to the Space that display shows.
+Miri keeps this record in memory and offers no reconnection settings in v1.
 This behavior requires verification on hardware, including sleep and wake cycles.
 The decision is recorded in [ADR 0008](../docs/adr/0008-follow-macos-space-migration-for-display-changes.md).
 
