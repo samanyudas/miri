@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-28 on branch `feat/150-edge-slice-photos`, stacked on `feat/150-edge-slice-geometry` and `feat/150-free-corner-hiding`, based on `main` at `b05b2a0`
+Updated: 2026-10-29 on branch `feat/150-slice-input`, stacked on `feat/150-edge-slice-photos`, `feat/150-edge-slice-geometry`, and `feat/150-free-corner-hiding`, based on `main` at `b05b2a0`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -68,7 +68,7 @@ They also cover a hidden stack, the nearest column only, both sides of a middle 
 On 28 October, the logged rectangle `(0,38)-(5,1432)` matched the same window's real sliver with the displays stacked.
 Step 3 adds the Settings switch and the Screen Recording prompt, in [#152](https://github.com/samanyudas/miri/pull/152).
 
-Step 4 of #150 is on engine branch `miri/150-edge-slice-photos`, which this branch pins.
+Step 4 of #150 is on engine branch `miri/150-edge-slice-photos`.
 The engine reads `[options] shared_edge_slices`, which is off when absent.
 With the switch on and `CGPreflightScreenCaptureAccess` true, each showing slice gets a borderless, non-activating panel at its place, one level below the dim overlay.
 `src/ecs/slice_photos.rs` holds the photo state of each slice, and `src/slice_screen.rs` draws the panels and takes the photos with ScreenCaptureKit.
@@ -77,7 +77,6 @@ After that, a photo is taken every 2 seconds while the panel's occlusion state i
 A window gone or a failed photo closes its panel, and a refused photo closes every panel until the config or the permission changes.
 The engine logs each step at debug level, with lines that start `edge slice`.
 Harness tests in `src/tests/slice_photos.rs` cover the first photo, the refresh, repaint, stale photos, the occlusion cut, the switch and permission gates, and the closing cases.
-Clicks on a panel do nothing yet, and step 5 adds them.
 The prior live session on 28 October verified the granted switch, successful engine captures under Miri Developer's Screen Recording grant, a panel at the logged rectangle, matching edge pixels, and updates about every 2 seconds.
 Photos stopped with the switch off, under fullscreen, during display sleep, and while locked.
 The initial CPU diagnosis found repeated window enumeration, so engine `14a08e4` reuses each slice's capture filter.
@@ -87,7 +86,19 @@ On 29 October, with a release engine built from `14a08e4` and one slice showing,
 A slice whose window changed every second measured the same, 1.77% to 1.87% over 3 runs.
 Each run took 15 photos, and the engine looked windows up 4 times for 83 photos.
 What limits the remaining 1 point of a core is not yet known.
-Click and drag forwarding remains pending, for step 5.
+
+Step 5 of #150 is on engine branch `miri/150-slice-input`, which this branch pins.
+The event tap holds back a press on a painted panel, in `src/platform/slice_tap.rs`, so the window beneath the panel never gets it.
+The engine then focuses the panel's window and scrolls it into view the way a focus command does, in `src/ecs/slice_input.rs`.
+Once the window rests on a display and the window server's hit test at the pressed point returns it, the engine posts the press again at the HID level, tagged with its press id.
+The tap lets that press through, then the user's drags and release, so a drag goes on in the app.
+A release during the slide is held back, and the tap posts it right after the press.
+After 1.5 seconds without arrival the engine drops the press, and focus and the scroll stay.
+Hover over a panel reaches only the panel, and the tap drops scroll over a panel.
+The engine's window lookups treat a point under a panel as having no window, so focus-follows-mouse and click handling ignore the window beneath.
+The engine logs each step at debug level: `edge slice press swallowed`, `revealing`, `arrived`, `delivered`, `gave up`, `dropped`, and `edge slice gesture passed through`.
+Harness tests in `src/tests/slice_input.rs` drive the engine through the tap's own state machine, with the window server mocked, and fail when the hold, the arrival check, the release, the give-up, or the hover and scroll cuts break.
+Not yet checked on hardware: the HID post reaching the app, the pointer jump, and the drag going on in the app.
 
 On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
 On engine `8b450d6`, Grok moved from the 27-inch strip into the built-in strip, which parked it back over the 27-inch display.
