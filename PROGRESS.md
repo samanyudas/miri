@@ -96,12 +96,18 @@ Once the window rests on a display and the window server's hit test at that poin
 The tap lets that press through, then the user's drags and release, so a drag goes on in the app.
 A release during the slide is held back, and the tap posts it right after the press.
 A press that the user dragged and released during the slide is dropped when it arrives, and the window stays focused and revealed.
-After 1.5 seconds without arrival the engine drops the press, and focus and the scroll stay.
+In a live test of a quick click, the tap saw the posted press before the user's earlier release.
+The release then reached Helium and an AppKit view at the panel, about 1190 points from the press, so a button would see a cancelled click.
+The tap now stamps each event with its time, the event timestamp for the user's events and the tap's own reading of the same clock for a posted press.
+A drag or release that the user made before the posted press went through now reaches the app moved as far as the press.
+A Sol review found that a second press during the slide reached the window under the pointer once the panel had closed, and the first press was then dropped.
+While a press waits for its window, the tap now drops further presses with their drags and their release, so a fast double click during the slide acts as one click.
+After 1.5 seconds without arrival, by event time in the tap and by frame time in the engine, the tap and the engine drop the press, and focus and the scroll stay.
 Hover over a panel reaches only the panel, and the tap drops scroll over a panel.
 The engine's window lookups treat a point under a panel as having no window, so focus-follows-mouse and click handling ignore the window beneath.
-The engine logs each step at debug level: `edge slice press swallowed`, `revealing`, `arrived`, `delivered`, `gave up`, `dropped`, and `edge slice gesture passed through`.
-Harness tests in `src/tests/slice_input.rs` drive the engine through the tap's own state machine, with the window server mocked, and fail when the hold, the arrival check, the release, the give-up, or the hover and scroll cuts break.
-Not yet checked on hardware: the HID post reaching the app, the pointer jump, and the drag going on in the app.
+The engine logs each step at debug level: `edge slice press swallowed`, `revealing`, `arrived`, `delivered`, `gave up`, `expired`, `dropped`, `edge slice release moved with its press`, and `edge slice gesture passed through`.
+Harness tests in `src/tests/slice_input.rs` drive the engine through the tap's own state machine, with the window server mocked, and fail when the hold, the arrival check, the release, the late release, the second press, the give-up, or the hover and scroll cuts break.
+Not yet checked on hardware: the HID post reaching the app, the pointer jump, the drag going on in the app, the moved late release, and the dropped second press.
 
 On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
 On engine `8b450d6`, Grok moved from the 27-inch strip into the built-in strip, which parked it back over the 27-inch display.
