@@ -263,6 +263,51 @@ struct MaximizedWindowSideConfigurationTests {
     }
 }
 
+struct SharedEdgeSlicesConfigurationTests {
+    private let directory = FileManager.default.temporaryDirectory.appending(
+        path: "miri-shared-edge-\(UUID().uuidString)")
+    private var url: URL { directory.appending(path: "config.toml") }
+
+    private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
+
+    private func store(_ text: String) throws -> ConfigurationStore {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try text.write(to: url, atomically: true, encoding: .utf8)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
+        store.load(reduceMotion: false)
+        return store
+    }
+
+    @Test func isOffWhenTheKeyIsAbsent() throws {
+        let store = try store("")
+        #expect(store.settings.sharedEdgeSlices == false)
+        #expect(try TOMLDocument(contents()).value(at: ["options", "shared_edge_slices"]) == .boolean(false))
+    }
+
+    @Test func readsTheEngineKey() throws {
+        #expect(try store("[options]\nshared_edge_slices = true\n").settings.sharedEdgeSlices)
+        #expect(try store("[options]\nshared_edge_slices = false\n").settings.sharedEdgeSlices == false)
+    }
+
+    @Test func writesTheSwitchAsTheEngineKey() throws {
+        let store = try store("")
+        try store.update(reduceMotion: false) { $0.sharedEdgeSlices = true }
+        #expect(try TOMLDocument(contents()).value(at: ["options", "shared_edge_slices"]) == .boolean(true))
+        try store.update(reduceMotion: false) { $0.sharedEdgeSlices = false }
+        #expect(try TOMLDocument(contents()).value(at: ["options", "shared_edge_slices"]) == .boolean(false))
+    }
+
+    @Test func rejectsAValueThatIsNotTrueOrFalse() throws {
+        let text = "[options]\nshared_edge_slices = \"yes\"\n"
+        let store = try store(text)
+        #expect(
+            store.issue
+                == .invalidValue(
+                    key: "options.shared_edge_slices", message: "options.shared_edge_slices must be true or false."))
+        #expect(try contents() == text)
+    }
+}
+
 struct GestureConfigurationTests {
     private let directory = FileManager.default.temporaryDirectory.appending(path: "miri-gesture-\(UUID().uuidString)")
     private var url: URL { directory.appending(path: "config.toml") }

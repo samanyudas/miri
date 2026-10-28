@@ -198,6 +198,23 @@ struct LayoutSettings: View {
                 )
                 .foregroundStyle(.secondary)
             }
+            Section {
+                Toggle(
+                    "Show window contents on edges next to another display",
+                    isOn: Binding(
+                        get: { model.settings.sharedEdgeSlices }, set: { model.setSharedEdgeSlices($0) }))
+                if model.sharedEdgeSlicesNeedPermission {
+                    Text(
+                        "Miri does not have Screen Recording permission, so this is off. Turn on Miri in System Settings > Privacy & Security > Screen & System Audio Recording, then turn this on again."
+                    )
+                    .foregroundStyle(.secondary)
+                    if let url = SystemScreenRecording.settingsURL {
+                        Button("Open Screen Recording Settings") { NSWorkspace.shared.open(url) }
+                    }
+                }
+            } footer: {
+                Text("Needs Screen Recording permission.").foregroundStyle(.secondary)
+            }
         }
         .formStyle(.grouped)
         .onAppear(perform: showPresets)

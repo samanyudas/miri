@@ -19,6 +19,9 @@ public struct MiriSettings: Equatable, Sendable {
     public var stripGesture = StripGesture.off
     /// Reverses the strip swipe. Off means the strip follows the fingers.
     public var reverseSwipe = false
+    /// Lets the engine show the contents of a hidden window on an edge next to another display. It needs Screen
+    /// Recording permission.
+    public var sharedEdgeSlices = false
 
     public init() {}
 
@@ -66,6 +69,9 @@ public struct MiriSettings: Equatable, Sendable {
                     message: "options.maximized_window_side must be \"left\" or \"right\".")
             }
             maximizedWindowSide = side
+        }
+        if let value = document.value(at: ["options", "shared_edge_slices"]) {
+            sharedEdgeSlices = try Self.boolean(value, key: "options.shared_edge_slices")
         }
         try validate()
     }
@@ -130,6 +136,7 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.array(widthPresets.map(TOMLValue.float)), ["options"], "preset_column_widths")
         try set(stackLimit.tomlValue, ["options"], "stack_limit")
         try set(.string(maximizedWindowSide.rawValue), ["options"], "maximized_window_side")
+        try set(.boolean(sharedEdgeSlices), ["options"], "shared_edge_slices")
         if animations && !reduceMotion {
             if result.value(at: ["options", "animation_speed"]) == nil {
                 try set(.float(Self.animationSpeed), ["options"], "animation_speed")
