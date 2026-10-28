@@ -71,6 +71,7 @@ On Sam's desktop, an AppleScript quit 0 to 450 ms after the engine started kept 
 Quits at 0.8 s and 2 s restored the session and then saved all 10 columns.
 Engine PR #72 merged as `8b450d6`, on top of engine PRs #73 and #74 that `main` already pins as `c1f2b5e`.
 This branch pins `8b450d6`, which adds the same #72 patch to `c1f2b5e` as `2559c47` adds to `1fd95b1`.
+On 28 October, a retest of this build with engine `8b450d6` kept a 7-column session byte-identical for quits 0 to 450 ms after the engine started, in 4 of 4 runs, and saved all 7 columns on a quit at 2 s.
 When #134 closes, remove its row from [Known limitations](docs/limitations.md).
 
 ## Known limitations inventory
