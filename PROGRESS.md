@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-28 on branch `fix/89-one-strip-per-space`, based on `main` at `bc7d783`
+Updated: 2026-10-28 on branch `feat/142-restore-display-layout`, based on `main` at `b4f3efe`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -14,10 +14,30 @@ The current milestone is the remaining v1 features: pointer-versus-focus gesture
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
 
+## Windows return to their display
+
+[#142](https://github.com/samanyudas/miri/issues/142) is implemented on engine branch `feat/142-restore-display-layout`, which this branch pins.
+macOS moves Spaces between displays when a display disconnects, and on replug it hands the main display every Space that existed before, the built-in display's own Space included.
+The engine followed the Spaces, so the built-in display's windows stayed on the external display.
+The engine now records each display's columns and stacks on the first event of a display change, before macOS destroys any Space, in `src/ecs/display_homes.rs`.
+After each reconcile pass it moves back every window whose Space macOS moved to another display or destroyed, in its old order and stack.
+Windows that never left keep their place, a window opened meanwhile stays where it was opened, and a window moved to another Space on purpose stays there.
+ADR 0008 and the display section of the release scope now describe this behavior.
+
+On 28 October on Miri Developer, a software unplug of the external display (`SLSConfigureDisplayEnabled`, app-only) reproduced the bug on engine `c1f2b5e`: the built-in display's windows ended up in a hidden Space of the external display.
+On engine `fa1f098`, three unplug cycles with stacks on both displays returned every window to its display, order, and stack, and a window opened while unplugged stayed on the built-in display.
+One cycle also hit the hardware variant: macOS destroyed the built-in display's only Space while it held windows, and they still came back with their stack.
+Turning the built-in display off in software could not be undone in software, and only a sleep and wake brought it back.
+After that wake, the engine dropped six windows whose AX elements died, which is [#147](https://github.com/samanyudas/miri/issues/147).
+Later on 28 October Sam ran a cable unplug, a lid close, and a sleep on engine `e1705af`, with the layout recorded every 4 s.
+The cable unplug returned every window to its display, order, and stack.
+After the lid and the sleep, the windows the engine still managed came back correctly, but #147 dropped others: their AX elements died and the engine gave up after 1 s.
+#142 stays open until #147 is fixed and the lid and sleep checks pass.
+
 ## One strip per native Space
 
 [#89](https://github.com/samanyudas/miri/issues/89) is fixed by [engine PR #73](https://github.com/samanyudas/paneru/pull/73), merged as `ba198d9`. Its tree matches the tested head `ade3f05`.
-This branch pins `c1f2b5e` from `main`, which includes `ba198d9`.
+`main` pinned `c1f2b5e`, which includes `ba198d9`.
 Mission Control can drag a window to an inactive Space, and the engine learns of it only when that Space activates or a display topology read runs.
 On a topology read, `place_extracted_strip` in `src/ecs/display.rs` reused the Space's first row only when that row was empty.
 Otherwise it opened a new virtual row parked at the display corner, and v1 has no UI for that row.
@@ -40,7 +60,7 @@ Unplugging and replugging the external display left the built-in display's windo
 ## Apps busy at launch
 
 [#63](https://github.com/samanyudas/miri/issues/63) is partly fixed in [engine PR #74](https://github.com/samanyudas/paneru/pull/74).
-This branch pins its merge commit `c1f2b5e`, which also carries [engine PR #73](https://github.com/samanyudas/paneru/pull/73) for [#89](https://github.com/samanyudas/miri/issues/89).
+`main` pinned its merge commit `c1f2b5e`, which also carries [engine PR #73](https://github.com/samanyudas/paneru/pull/73) for [#89](https://github.com/samanyudas/miri/issues/89).
 An app that blocked its main thread for more than 5 s right after launch never got its windows managed, even after the user switched to it.
 The engine now parks such an app, asks it for its AX role off the main thread every 500 ms, and admits it once it answers.
 An app that answers but is busy again by the next registration waits 1, 2, 4, 8, 16, then 30 s between tries.
