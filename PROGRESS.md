@@ -53,7 +53,8 @@ The exit save wrote the half-built startup layout, which has strips but none of 
 The engine now skips the exit save while `Initializing` exists.
 On Sam's desktop, an AppleScript quit 0 to 450 ms after the engine started kept the 10-column session byte-identical in 6 of 6 runs.
 Quits at 0.8 s and 2 s restored the session and then saved all 10 columns.
-After engine PR #72 merges, repin to its merge commit.
+Engine PR #72 merged as `8b450d6`, which also carries engine PRs #73 and #74 for #89 and #63.
+This branch keeps the tested head `2559c47`, which is now published on `miri/v0.5.2` and holds only this fix on top of `main`'s `1fd95b1`.
 When #134 closes, remove its row from [Known limitations](docs/limitations.md).
 
 ## Known limitations inventory
