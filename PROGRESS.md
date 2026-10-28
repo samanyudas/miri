@@ -90,9 +90,12 @@ What limits the remaining 1 point of a core is not yet known.
 Step 5 of #150 is on engine branch `miri/150-slice-input`, which this branch pins.
 The event tap holds back a press on a painted panel, in `src/platform/slice_tap.rs`, so the window beneath the panel never gets it.
 The engine then focuses the panel's window and scrolls it into view the way a focus command does, in `src/ecs/slice_input.rs`.
-Once the window rests on a display and the window server's hit test at the pressed point returns it, the engine posts the press again at the HID level, tagged with its press id.
+The press lands on the pressed row, at least 12 points inside the window edge that faces the slice, because the outer 3 points are the resize border.
+In a live test, a press on the outer points reached no view in Helium or an AppKit window, and two quick clicks widened the window through the macOS double click on a window edge.
+Once the window rests on a display and the window server's hit test at that point returns it, the engine posts the press again at the HID level, tagged with its press id.
 The tap lets that press through, then the user's drags and release, so a drag goes on in the app.
 A release during the slide is held back, and the tap posts it right after the press.
+A press that the user dragged and released during the slide is dropped when it arrives, and the window stays focused and revealed.
 After 1.5 seconds without arrival the engine drops the press, and focus and the scroll stay.
 Hover over a panel reaches only the panel, and the tap drops scroll over a panel.
 The engine's window lookups treat a point under a panel as having no window, so focus-follows-mouse and click handling ignore the window beneath.
