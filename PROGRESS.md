@@ -885,7 +885,8 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 1. Finish the remaining v1 features.
    - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
-   - Complete drag and restoration acceptance for #43. The #58 height defect is fixed and closed.
+   - Complete drag and restoration acceptance for #43.
+     The #58 height defect is fixed and closed.
    - Complete stack overflow acceptance (S-5) and repeat the verified stack-limit behavior on the frozen release candidate (S-7).
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
