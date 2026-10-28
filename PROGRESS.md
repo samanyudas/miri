@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-28 on branch `docs/close-134`, based on `main` at `f8cffa0`
+Updated: 2026-10-28 on branch `docs/refresh-next`, based on `main` at `78f97ee`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -878,19 +878,15 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 
 ## Next
 
-The `03a7420` repin PR, [#70](https://github.com/samanyudas/miri/pull/70), is merged.
-Verify #40 and #42 against their full acceptance criteria on the merged build, and close each one whose criteria hold.
-Finish review and checks for the #26 character-binding warning repair, then verify its landed revision before closure.
-Verify the #92 bracket directions on the landed revision, then close the issue if its criteria hold.
-Triage #122 to #125 from the limitations audit.
-Check whether #129 already fixed #125.
+Triage #122, #123, and #124 from the limitations audit.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
 
 1. Finish the remaining v1 features.
    - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
-   - Complete drag and restoration acceptance for #43, including the height defect in #58.
+   - Complete drag and restoration acceptance for #43.
+     The #58 height defect is fixed and closed.
    - Complete stack overflow acceptance (S-5) and repeat the verified stack-limit behavior on the frozen release candidate (S-7).
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
@@ -898,7 +894,9 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
    Verify install, upgrade, and Accessibility attribution on the released bundle.
 3. Freeze one release candidate, then run the complete app and multi-monitor acceptance checklists on that bundle with Accessibility granted.
 4. Define the engine memory-stability rule, complete the endurance period, and have Sam decide Q6 at the final check before publishing v1.
-5. Move to Rust 1.99 when the product is ready. samanyudas/paneru#6 fixes the two `assert_is_empty` Clippy errors in `src/lua/runtime.rs`. Branch `chore/rust-1.99-engine` holds the earlier attempt.
+5. Move to Rust 1.99 when the product is ready.
+   [Engine PR #3](https://github.com/samanyudas/paneru/pull/3) fixed Rust 1.99's `assert_is_empty` Clippy errors on 14 October, and the engine pin includes it.
+   Later engine code adds new `assert!(x.is_empty())` calls, so run Clippy on 1.99 again before the move.
 
 ## Blockers
 
