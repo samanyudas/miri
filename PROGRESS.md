@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-28 on branch `docs/close-88`, based on `main` at `5d4c1bf`
+Updated: 2026-10-28 on branch `fix/63-busy-launch-admission`, based on `main` at `69f5ba4`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,22 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Apps busy at launch
+
+[#63](https://github.com/samanyudas/miri/issues/63) is partly fixed in [engine PR #74](https://github.com/samanyudas/paneru/pull/74).
+This branch pins its merge commit `c1f2b5e`, which also carries [engine PR #73](https://github.com/samanyudas/paneru/pull/73) for [#89](https://github.com/samanyudas/miri/issues/89).
+An app that blocked its main thread for more than 5 s right after launch never got its windows managed, even after the user switched to it.
+The engine now parks such an app, asks it for its AX role off the main thread every 500 ms, and admits it once it answers.
+An app that answers but is busy again by the next registration waits 1, 2, 4, 8, 16, then 30 s between tries.
+
+On 27 October, live fixture checks on Miri Developer gave these results.
+A 10 s block stayed unmanaged on `1fd95b1` and was managed at 10.9 s on `ea9732d`.
+An app blocked 1000 of every 1050 ms made 7 main-loop attempts in 45 s and was managed within 3 s of calming down.
+The `--busy 300,350` probe managed 575 of 576 windows.
+The one miss is the remaining part of #63: the launch scan lists an app's windows once and skips a window whose details time out.
+The original 4-in-32 misses did not reproduce on `1fd95b1` in 29 rounds.
+On 28 October, the 10 s block was managed at 10.9 s in 2 of 2 runs on `c1f2b5e`.
 
 ## Re-tiled window slot
 
