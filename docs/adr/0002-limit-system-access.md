@@ -21,7 +21,9 @@ It is off by default, and it writes `[options].shared_edge_slices`.
 Turning it on asks macOS for Screen Recording permission.
 Without the permission, the switch stays off.
 
-The engine photographs only the slice of a hidden window on an edge next to another display.
+The engine photographs the whole of each window that is hidden behind or crossing an edge next to another display, so the photo can stand in for the window while it slides across that edge.
+It shows a photo only where the real window cannot show.
 It photographs no other window or part of the screen, keeps the photos in memory only, and sends nothing off the Mac.
+It keeps a window's last photo until the window closes or the switch turns off.
 With the switch off, Miri does not capture the screen.
 Whether macOS attributes the engine's captures to the permission of `Miri.app` must be checked on the signed bundle, as the [permission prototype](../prototypes/helper-permission.md) did for Accessibility under [ADR 0009](0009-run-the-engine-as-a-helper-process.md).
