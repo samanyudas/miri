@@ -63,7 +63,7 @@ Settings writes it as **Maximized stacked window opens**, and [Maximizing a wind
 The switch **Show window contents on edges next to another display** writes `[options].shared_edge_slices`, as Sam decided in [#150](https://github.com/samanyudas/miri/issues/150).
 Turning it on asks for Screen Recording permission, and the switch stays off without it.
 If Miri finds the permission gone when it rechecks its setup, it turns the switch off and says why.
-The pinned engine ignores the key until the engine change that draws the slices lands.
+With it on, the engine shows a photo of each hidden window's slice on an edge next to another display, and a click or drag on that photo reaches the window.
 Alternative centering modes, `never` and `always`, remain proposals rather than accepted v1 controls.
 The allowed gap range remains unresolved.
 Fixed-pixel width presets are deferred to v2.
