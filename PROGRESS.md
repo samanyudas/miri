@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-29 on branch `fix/slice-tap-clock`, based on `main` at `862c7e8`
+Updated: 2026-10-29 on branch `fix/slice-release`, based on `main` at `638cfe1`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -124,7 +124,9 @@ On Sam's M3, every real press after one delivered slice press was then dropped u
 Engine `a0c88bf`, from [paneru#83](https://github.com/samanyudas/paneru/pull/83), reads each user event's timestamp on the engine's clock, and this branch pins it.
 On 29 October, a build at `a0c88bf` delivered 10 of 10 real trackpad clicks on slices, and no press was dropped.
 The pin moves to the published merge once paneru#83 merges into `miri/v0.5.2`.
-The same log shows a known bug: a quick click's release can land as far again from the press, because the pointer had already moved to the posted press.
+The same log showed a quick click's release landing as far again from the press, because posting the press had already moved the pointer.
+Engine `9e20d4a`, from [paneru#84](https://github.com/samanyudas/paneru/pull/84), moves an early drag or release only while it is still on the panel.
+On 29 October, a press on a slice with its release at the moved pointer reached the window at (836, 700) for both, in 3 of 3 runs, where the previous engine released at (1670, 700).
 
 On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
 On engine `8b450d6`, Grok moved from the 27-inch strip into the built-in strip, which parked it back over the 27-inch display.
