@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-30 on branch `docs/slice-capture-scope`, based on `main` at `c1392c4`
+Updated: 2026-10-30 on branch `fix/162-focus-stall`, based on `main` at `39ea81a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -192,6 +192,22 @@ The `--busy 300,350` probe managed 575 of 576 windows.
 The one miss is the remaining part of #63: the launch scan lists an app's windows once and skips a window whose details time out.
 The original 4-in-32 misses did not reproduce on `1fd95b1` in 29 rounds.
 On 28 October, the 10 s block was managed at 10.9 s in 2 of 2 runs on `c1f2b5e`.
+
+## Freeze after a keyboard focus change
+
+[#162](https://github.com/samanyudas/miri/issues/162) is fixed on engine branch `miri/162-focus-stall`, at `98e43d8`.
+After many focus changes, Helium's focus notifications name the macOS caret indicator, a `CursorUIViewService` window that gets a new id on each text-field focus.
+The engine tracks no such window, so `auto_discover_unmanaged_focused_windows` in `src/ecs/systems.rs` asked every app for its focused window and its window list on the main loop.
+Each question waits up to the 250 ms Accessibility timeout, so one busy app froze the row for about 500 ms, and the animation then took one capped step.
+The engine now asks the window server which process owns the window, and asks only that app, or no app when the engine tracks none.
+Harness tests in `src/tests/interaction.rs` fail on `ec7fc7c`.
+
+On 30 October on Miri Developer with a debug engine, a test app that blocks its main thread 950 ms of every second reproduced the freeze on `ec7fc7c`.
+In 16 Control-Option-Left and Right presses on the 27-inch row, a discovery scan took up to 714 ms, and 4 frames took 250 ms or more, the longest 733 ms.
+On the fix, the same presses gave no frame of 150 ms or more, the longest 118 ms, and each discovery took 0 to 5 ms without asking any app.
+On `ec7fc7c`, scans that met no busy app still took 35 to 124 ms after each focus change into Helium.
+Frames of 40 to 120 ms still follow most presses on the debug engine, from other per-press work.
+Sam's 29 October freeze is the same mechanism by inference: two 250 ms timeouts made the 490 ms gap, and the resolver timed out on a busy app during it.
 
 ## Re-tiled window slot
 
