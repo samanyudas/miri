@@ -388,7 +388,7 @@ The [v2 roadmap](v2-roadmap.md) records deferred work and candidate improvements
 
 Miri requires Accessibility permission and keeps SIP enabled.
 Screen Recording permission is needed only for the opt-in **Show window contents on edges next to another display** switch in Settings > Layout, which is off by default.
-With that switch on, the engine photographs the slice of a hidden window on each edge next to another display.
+With that switch on, the engine photographs the whole of each window that is hidden behind or crossing an edge next to another display, and shows the photo only where the real window cannot show.
 With it off, Miri does not capture the screen.
 Undocumented APIs require individual compatibility assessments and defined fallback behavior.
 The accepted boundary is recorded in [ADR 0002](../docs/adr/0002-limit-system-access.md).

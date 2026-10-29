@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-30 on branch `feat/slice-slide`, based on `main` at `93d6cb0`
+Updated: 2026-10-30 on branch `docs/slice-capture-scope`, based on `main` at `c1392c4`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -121,9 +121,8 @@ The give-up after 1.5 seconds is checked only by harness tests.
 Those checks used software clicks only, which carry nanosecond timestamps.
 At the HID tap, real trackpad and mouse events carry mach ticks, and the tap read them as nanoseconds.
 On Sam's M3, every real press after one delivered slice press was then dropped until Miri quit.
-Engine `a0c88bf`, from [paneru#83](https://github.com/samanyudas/paneru/pull/83), reads each user event's timestamp on the engine's clock, and this branch pins it.
+Engine `a0c88bf`, merged as `863558c` from [paneru#83](https://github.com/samanyudas/paneru/pull/83), reads each user event's timestamp on the engine's clock.
 On 29 October, a build at `a0c88bf` delivered 10 of 10 real trackpad clicks on slices, and no press was dropped.
-The pin moves to the published merge once paneru#83 merges into `miri/v0.5.2`.
 The same log showed a quick click's release landing as far again from the press, because posting the press had already moved the pointer.
 Engine `9e20d4a`, from [paneru#84](https://github.com/samanyudas/paneru/pull/84), moves an early drag or release only while it is still on the panel.
 On 29 October, a press on a slice with its release at the moved pointer reached the window at (836, 700) for both, in 3 of 3 runs, where the previous engine released at (1670, 700).
