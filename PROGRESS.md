@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-30 on branch `docs/slice-capture-scope`, based on `main` at `c1392c4`
+Updated: 2026-10-30 on branch `fix/169-repeat-edge`, based on `main` at `39ea81a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,17 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Held edge shortcuts
+
+[#169](https://github.com/samanyudas/miri/issues/169) is implemented in [engine PR #88](https://github.com/samanyudas/paneru/pull/88), and this branch pins its head `5177054`.
+Sam decided on 30 October that a held edge shortcut stops at the strip's end and only a fresh press crosses to another display.
+The engine's event tap ran every key auto-repeat as a new press, so holding ⌃⌥⌘⇧← for one repeat moved the column to the first position and then onto the next display.
+The tap now reads the auto-repeat flag, and a repeated edge command reaches the strip's end but never crosses.
+On 30 October, with the built-in display left of the external display, the release build carried focus onto the built-in display after one fresh ⌃⌥⌘← press and 3 synthetic auto-repeats.
+The build from this branch stopped at the first column, a fresh press then crossed, and 8 more repeats stayed put.
+No window moved.
+The edge shortcuts become defaults with [#119](https://github.com/samanyudas/miri/pull/119), whose keybinding reference should say that only a fresh press crosses.
 
 ## Windows return to their display
 
