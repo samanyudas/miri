@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-28 on branch `feat/142-restore-display-layout`, based on `main` at `aa0a8eb`
+Updated: 2026-10-28 on branch `feat/150-free-corner-hiding`, based on `main` at `b05b2a0`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -17,7 +17,7 @@ The public release path and the complete acceptance runs follow.
 ## Windows return to their display
 
 [#142](https://github.com/samanyudas/miri/issues/142) is implemented in [engine PR #75](https://github.com/samanyudas/paneru/pull/75), merged as `f20b00e`. Its tree matches the tested head `e1705af`.
-This branch pins `5075a4a`, which also carries engine PR #76 for #103 and engine PR #77, a test deadline.
+`main` pins `5075a4a`, which also carries engine PR #76 for #103 and engine PR #77, a test deadline.
 macOS moves Spaces between displays when a display disconnects, and on replug it hands the main display every Space that existed before, the built-in display's own Space included.
 The engine followed the Spaces, so the built-in display's windows stayed on the external display.
 The engine now records each display's columns and stacks on the first event of a display change, before macOS destroys any Space, in `src/ecs/display_homes.rs`.
@@ -42,11 +42,21 @@ The engine hid an off-screen column by leaving a sliver at mid-height and hangin
 With another display beside that edge, the window lay mostly on it, so macOS moved it into that display's Space and drew it there.
 On a display arrangement change, macOS first pulled such a window back onto its own display, the engine slid it back across the other display, and the engine's topology read then adopted it into that display's strip.
 `position_layout_windows` in `src/ecs/layout.rs` now checks the frame a window shows.
-If its center, or more of it, lies on another display, the window tucks below its own display's bottom edge, against the side it hangs past.
-It hangs past the corner when no display is there, and sits flush inside the side otherwise.
+If its center, or more of it, lies on another display, the window tucks below its own display's bottom edge.
 A frame that no tuck improves, such as one above a display directly below, stays as before.
 Free sides keep the mid-height sliver, so arrangements with the displays above and below each other keep their behavior.
 Sam chose the bottom corner on 28 October.
+
+Engine PR #76 hung the window past the bottom corner on the side it hangs past, and sat it flush inside that side when a display was beyond the corner.
+Flush, the whole width of the window showed along the bottom edge, and Sam rejected that bar.
+Step 1 of [#150](https://github.com/samanyudas/miri/issues/150) changes the tuck on engine branch `miri/150-free-corner-hiding`, which this branch pins.
+The window now hangs past a free bottom corner of its own display with 1 point of its width showing.
+A free corner has no display beyond it.
+The engine tries the corner on the side the window hangs past first, then the other bottom corner.
+Only when neither corner is free does the window sit flush, as before.
+Harness tests in `src/tests/side_by_side.rs` cover each case, and the two corner tests fail on `5075a4a`.
+Sam ran the same change as prototype engine `fa76e14` on 28 October with the displays side by side: no bar showed at the bottom, and every window stayed in its Space.
+This branch's build is not yet checked live.
 
 On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
 On engine `8b450d6`, Grok moved from the 27-inch strip into the built-in strip, which parked it back over the 27-inch display.
