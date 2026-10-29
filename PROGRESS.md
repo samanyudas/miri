@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-30 on branch `docs/slice-capture-scope`, based on `main` at `c1392c4`
+Updated: 2026-10-30 on branch `fix/168-finder-empty-display`, based on `main` at `39ea81a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,15 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Empty display focus from Finder
+
+[#168](https://github.com/samanyudas/miri/issues/168) is implemented in [engine PR #89](https://github.com/samanyudas/paneru/pull/89), and this branch pins its head `2c83c97`.
+Display focus on a display with no window brings Finder to the front with that display's desktop as key window.
+When Finder was already in front, macOS ignored that request, so ⌃⌥⌘ toward an empty display did nothing from a Finder window.
+The engine now fronts its own window-less process first in that case, which makes the desktop request a real switch without a pointer move.
+On 28 and 30 October, live probes with the same macOS calls confirmed the cause and the fix: fronting any window-less process first, the running engine included, moved the menu bar to the target display in both directions, and the old calls never did.
+The end-to-end key press with this build and a display without windows has not run yet, because both of Sam's displays held windows.
 
 ## Windows return to their display
 
