@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-29 on branch `feat/150-shared-edge-switch`, stacked on `feat/150-slice-input`, `feat/150-edge-slice-photos`, `feat/150-edge-slice-geometry`, and `feat/150-free-corner-hiding`, based on `main` at `b05b2a0`
+Updated: 2026-10-29 on branch `fix/slice-tap-clock`, based on `main` at `862c7e8`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -118,6 +118,13 @@ Quick clicks of 30, 80, and 150 ms, a double click, and a 20-move drag on that s
 A second press 20 or 30 ms after the first was dropped in 3 of 3 runs, once when the tap saw it after the window arrived but before the delivery, and the first press still reached the window as one click.
 Turning the switch off closed both panels.
 The give-up after 1.5 seconds is checked only by harness tests.
+Those checks used software clicks only, which carry nanosecond timestamps.
+At the HID tap, real trackpad and mouse events carry mach ticks, and the tap read them as nanoseconds.
+On Sam's M3, every real press after one delivered slice press was then dropped until Miri quit.
+Engine `a0c88bf`, from [paneru#83](https://github.com/samanyudas/paneru/pull/83), reads each user event's timestamp on the engine's clock, and this branch pins it.
+On 29 October, a build at `a0c88bf` delivered 10 of 10 real trackpad clicks on slices, and no press was dropped.
+The pin moves to the published merge once paneru#83 merges into `miri/v0.5.2`.
+The same log shows a known bug: a quick click's release can land as far again from the press, because the pointer had already moved to the posted press.
 
 On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
 On engine `8b450d6`, Grok moved from the 27-inch strip into the built-in strip, which parked it back over the 27-inch display.
