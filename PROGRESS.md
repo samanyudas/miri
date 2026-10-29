@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-29 on branch `feat/150-slice-input`, stacked on `feat/150-edge-slice-photos`, `feat/150-edge-slice-geometry`, and `feat/150-free-corner-hiding`, based on `main` at `b05b2a0`
+Updated: 2026-10-29 on branch `feat/150-shared-edge-switch`, stacked on `feat/150-slice-input`, `feat/150-edge-slice-photos`, `feat/150-edge-slice-geometry`, and `feat/150-free-corner-hiding`, based on `main` at `b05b2a0`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -111,7 +111,13 @@ Hover over a panel reaches only the panel, and the tap drops scroll over a panel
 The engine's window lookups treat a point under a panel as having no window, so focus-follows-mouse and click handling ignore the window beneath.
 The engine logs each step at debug level: `edge slice press swallowed`, `revealing`, `arrived`, `delivered`, `gave up`, `expired`, `dropped`, `edge slice release moved with its press`, and `edge slice gesture passed through`.
 Harness tests in `src/tests/slice_input.rs` drive the engine through the tap's own state machine, with the window server mocked, and fail when the hold, the arrival check, the release, the late release, the second press, the give-up, or the hover and scroll cuts break.
-Not yet checked on hardware: the HID post reaching the app, the pointer jump, the drag going on in the app, the moved late release, and the dropped second press.
+On 28 October, a build at engine `c99fbe8` delivered quick clicks with releases 30 to 150 ms after the press, double clicks, and 20-move drags to an AppKit test window and to Helium, and nothing reached the window beside the slice.
+On 29 October, Miri Developer built from this whole stack at engine `e30ba61` ran with the displays side by side.
+Turning the switch on drew two slices on the shared edge, one per display, with the test window's playing video in its slice.
+Quick clicks of 30, 80, and 150 ms, a double click, and a 20-move drag on that slice reached the test window 12 points inside its edge, as one press and release at one point.
+A second press 20 or 30 ms after the first was dropped in 3 of 3 runs, once when the tap saw it after the window arrived but before the delivery, and the first press still reached the window as one click.
+Turning the switch off closed both panels.
+The give-up after 1.5 seconds is checked only by harness tests.
 
 On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
 On engine `8b450d6`, Grok moved from the 27-inch strip into the built-in strip, which parked it back over the 27-inch display.
@@ -119,6 +125,19 @@ Moving the display back put Grok at the end of the 27-inch strip.
 On engine `cc9955a`, the same move tucked Grok into the 27-inch display's bottom-left corner, in its own strip and Space.
 Scrolling the 27-inch strip to its last and first columns kept every window in Space 515, and moving the display back left every strip and order unchanged.
 macOS keeps about 32 points of a tucked window above the bottom edge, so the visible corner is about 5 by 32 points.
+
+### Window contents on shared edges
+
+[#150](https://github.com/samanyudas/miri/issues/150) step 3 adds the **Show window contents on edges next to another display** switch to Settings > Layout, off by default.
+It writes `[options].shared_edge_slices`.
+Turning it on calls `CGRequestScreenCaptureAccess`, and without the permission the switch stays off with a note and an **Open Screen Recording Settings** button.
+Each setup recheck calls `CGPreflightScreenCaptureAccess` and turns a saved switch off with the same note when the permission is gone.
+ADR 0002 now allows this one Screen Recording use.
+This branch sits on top of steps 1, 2, 4, and 5, so the switch turns on photos and input that already work.
+On 28 October, the step 3 build showed the macOS prompt naming Miri Developer.app, kept the switch off with the note after Deny, and showed no second prompt on retry.
+Its button opened the Screen & System Audio Recording pane, which listed one Miri Developer.app entry.
+After Sam granted that entry, the switch stayed on and wrote the key, with no prompt.
+Not checked yet: a grant revoked while the switch is on.
 
 ## One strip per native Space
 

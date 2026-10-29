@@ -13,9 +13,11 @@ Intel support is deferred unless Sam needs it.
 Multi-finger strip gestures require a built-in trackpad or Magic Trackpad.
 Users without a trackpad use keyboard commands.
 
-Miri requires Accessibility permission only.
-It keeps System Integrity Protection (SIP) enabled and does not capture the screen.
-It does not require Screen Recording permission, Input Monitoring permission, kernel extensions, or system modifications.
+Miri requires Accessibility permission.
+It keeps System Integrity Protection (SIP) enabled.
+It does not require Input Monitoring permission, kernel extensions, or system modifications.
+Screen Recording permission is needed only for the opt-in **Show window contents on edges next to another display** switch in Settings > Layout.
+With that switch off, Miri does not capture the screen, as [ADR 0002](../docs/adr/0002-limit-system-access.md) records.
 
 Public releases use Developer ID signing and Apple notarization.
 Development builds use ad-hoc signing on Sam's Mac.
