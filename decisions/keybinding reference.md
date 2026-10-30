@@ -72,6 +72,7 @@ These focus commands move no windows, switch no native desktops, and leave the p
 Move column to first position or monitor left moves the focused column to the current display's first position.
 When the column is already first, the same shortcut moves it to the display to the left.
 Move column to last position or monitor right does the same toward the last position and the display to the right.
+Holding an edge-or-monitor shortcut never crosses on a key repeat, and a hold whose first press crosses to a display does nothing more, so a held key moves to at most one other display.
 Move column to monitor above, Move column to monitor below, and Send column to next display move the column at once.
 Every display move takes the whole column, so each stack member moves with it in the same order, and the focused member keeps focus.
 To move one member alone, pop it out into its own column first.

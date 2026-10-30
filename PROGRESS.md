@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-31 on branch `fix/168-finder-empty-display`, based on `main` at `45d73f0`
+Updated: 2026-10-31 on branch `fix/169-repeat-edge`, based on `main` at `df0ff26`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,21 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Held edge shortcuts
+
+[#169](https://github.com/samanyudas/miri/issues/169) is implemented in [engine PR #88](https://github.com/samanyudas/paneru/pull/88), merged with no change from the tested head `cd5fdb5`.
+This branch pins `378093f`, the merge of #88 and [engine PR #89](https://github.com/samanyudas/paneru/pull/89), whose files match the combined build tested live below.
+Sam decided on 30 October that a held edge shortcut stops at the strip's end and only a fresh press crosses to another display.
+The engine's event tap ran every key auto-repeat as a new press, so holding ⌃⌥⌘⇧← for one repeat moved the column to the first position and then onto the next display.
+The tap now reads the auto-repeat flag, and a repeated edge command reaches the strip's end but never crosses.
+Sam then decided that a held key whose fresh press crosses does nothing more, because its repeats carried focus or the column on to the far end of the new display's strip.
+The fresh press now records whether it crossed, and the repeats of that hold do nothing after a cross.
+Live on 30 October, a held ⌃⌥⌘← or ⌃⌥⌘→ from a strip's end crossed once and stayed on the window a single press lands on, and a held ⌃⌥⌘⇧← took a Finder window across once and left it where it arrived.
+On 30 October, with the built-in display left of the external display, the release build carried focus onto the built-in display after one fresh ⌃⌥⌘← press and 3 synthetic auto-repeats.
+The build from this branch stopped at the first column, a fresh press then crossed, and 8 more repeats stayed put.
+No window moved.
+[The keybinding reference](decisions/keybinding%20reference.md) now records the rule, and this settles the held-key question in the #79 section below.
 
 ## Empty display focus from Finder
 
