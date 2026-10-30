@@ -22,14 +22,51 @@ struct DefaultBindingsTests {
     @Test func aNewInstallGetsTheAcceptedDefaultSet() throws {
         let (store, document) = try load()
         #expect(store.issue == nil)
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(4))
         let expected: [String: TOMLValue] = [
-            "window_focus_west": .array([.string("ctrl+alt-leftarrow"), .string("ctrl+alt-h")]),
-            "window_focus_east": .array([.string("ctrl+alt-rightarrow"), .string("ctrl+alt-l")]),
-            "window_focus_north": .array([.string("ctrl+alt-uparrow"), .string("ctrl+alt-k")]),
-            "window_focus_south": .array([.string("ctrl+alt-downarrow"), .string("ctrl+alt-j")]),
-            "window_focus_first": .string("ctrl+alt+cmd-leftarrow"),
-            "window_focus_last": .string("ctrl+alt+cmd-rightarrow"),
+            "window_focus_west": .array([.string("ctrl+alt-leftarrow"), .string("ctrl+alt-h"), .string("ctrl+alt-a")]),
+            "window_focus_east": .array([.string("ctrl+alt-rightarrow"), .string("ctrl+alt-l"), .string("ctrl+alt-d")]),
+            "window_focus_north": .array([.string("ctrl+alt-uparrow"), .string("ctrl+alt-k"), .string("ctrl+alt-w")]),
+            "window_focus_south": .array([.string("ctrl+alt-downarrow"), .string("ctrl+alt-j"), .string("ctrl+alt-s")]),
+            "window_swap_west": .array([
+                .string("ctrl+alt+shift-leftarrow"), .string("ctrl+alt+shift-h"), .string("ctrl+alt+shift-a"),
+            ]),
+            "window_swap_east": .array([
+                .string("ctrl+alt+shift-rightarrow"), .string("ctrl+alt+shift-l"), .string("ctrl+alt+shift-d"),
+            ]),
+            "window_swap_north": .array([
+                .string("ctrl+alt+shift-uparrow"), .string("ctrl+alt+shift-k"), .string("ctrl+alt+shift-w"),
+            ]),
+            "window_swap_south": .array([
+                .string("ctrl+alt+shift-downarrow"), .string("ctrl+alt+shift-j"), .string("ctrl+alt+shift-s"),
+            ]),
+            "window_focusedge_west": .array([
+                .string("ctrl+alt+cmd-leftarrow"), .string("ctrl+alt+cmd-h"), .string("ctrl+alt+cmd-a"),
+            ]),
+            "window_focusedge_east": .array([
+                .string("ctrl+alt+cmd-rightarrow"), .string("ctrl+alt+cmd-l"), .string("ctrl+alt+cmd-d"),
+            ]),
+            "window_moveedge_west": .array([
+                .string("ctrl+alt+cmd+shift-leftarrow"), .string("ctrl+alt+cmd+shift-h"),
+                .string("ctrl+alt+cmd+shift-a"),
+            ]),
+            "window_moveedge_east": .array([
+                .string("ctrl+alt+cmd+shift-rightarrow"), .string("ctrl+alt+cmd+shift-l"),
+                .string("ctrl+alt+cmd+shift-d"),
+            ]),
+            "window_focusdisplay_north": .array([
+                .string("ctrl+alt+cmd-uparrow"), .string("ctrl+alt+cmd-k"), .string("ctrl+alt+cmd-w"),
+            ]),
+            "window_focusdisplay_south": .array([
+                .string("ctrl+alt+cmd-downarrow"), .string("ctrl+alt+cmd-j"), .string("ctrl+alt+cmd-s"),
+            ]),
+            "window_movedisplay_north": .array([
+                .string("ctrl+alt+cmd+shift-uparrow"), .string("ctrl+alt+cmd+shift-k"), .string("ctrl+alt+cmd+shift-w"),
+            ]),
+            "window_movedisplay_south": .array([
+                .string("ctrl+alt+cmd+shift-downarrow"), .string("ctrl+alt+cmd+shift-j"),
+                .string("ctrl+alt+cmd+shift-s"),
+            ]),
             "window_focus_1": .string("ctrl+alt-1"),
             "window_focus_2": .string("ctrl+alt-2"),
             "window_focus_3": .string("ctrl+alt-3"),
@@ -39,21 +76,7 @@ struct DefaultBindingsTests {
             "window_focus_7": .string("ctrl+alt-7"),
             "window_focus_8": .string("ctrl+alt-8"),
             "window_focus_9": .string("ctrl+alt-9"),
-            "window_swap_west": .array([.string("ctrl+alt+shift-leftarrow"), .string("ctrl+alt+shift-h")]),
-            "window_swap_east": .array([.string("ctrl+alt+shift-rightarrow"), .string("ctrl+alt+shift-l")]),
-            "window_swap_north": .array([.string("ctrl+alt+shift-uparrow"), .string("ctrl+alt+shift-k")]),
-            "window_swap_south": .array([.string("ctrl+alt+shift-downarrow"), .string("ctrl+alt+shift-j")]),
-            "window_swap_first": .string("ctrl+alt+cmd+shift-leftarrow"),
-            "window_swap_last": .string("ctrl+alt+cmd+shift-rightarrow"),
             "window_nextdisplay": .string("ctrl+alt-n"),
-            "window_focusdisplay_north": .string("ctrl+alt+cmd-w"),
-            "window_focusdisplay_west": .string("ctrl+alt+cmd-a"),
-            "window_focusdisplay_south": .string("ctrl+alt+cmd-s"),
-            "window_focusdisplay_east": .string("ctrl+alt+cmd-d"),
-            "window_movedisplay_north": .string("ctrl+alt+cmd+shift-w"),
-            "window_movedisplay_west": .string("ctrl+alt+cmd+shift-a"),
-            "window_movedisplay_south": .string("ctrl+alt+cmd+shift-s"),
-            "window_movedisplay_east": .string("ctrl+alt+cmd+shift-d"),
             "window_resize": .string("ctrl+alt-r"),
             "window_maximize": .string("ctrl+alt-f"),
             "window_center": .string("ctrl+alt-c"),
@@ -84,11 +107,13 @@ struct DefaultBindingsTests {
         let bindings = document.value(at: ["bindings"])
         #expect(bindings?["window_focus_west"] == .string("alt - h"))
         #expect(bindings?["window_center"] == .string("ctrl + lalt - l"))
-        // ctrl+alt-l is taken by the user's window_center, so only the arrow default is added.
-        #expect(bindings?["window_focus_east"] == .string("ctrl+alt-rightarrow"))
+        // ctrl+alt-l is taken by the user's window_center, so only the arrow and WASD defaults are added.
+        #expect(bindings?["window_focus_east"] == .array([.string("ctrl+alt-rightarrow"), .string("ctrl+alt-d")]))
         // The only default chord for wider is taken, so the action stays unbound.
         #expect(bindings?["window_step_grow"] == nil)
-        #expect(bindings?["window_focus_north"] == .array([.string("ctrl+alt-uparrow"), .string("ctrl+alt-k")]))
+        #expect(
+            bindings?["window_focus_north"]
+                == .array([.string("ctrl+alt-uparrow"), .string("ctrl+alt-k"), .string("ctrl+alt-w")]))
     }
 
     @Test func anOlderFullWidthBindingStaysAndCountsAsTheMaximizeToggle() throws {
@@ -124,7 +149,7 @@ struct DefaultBindingsTests {
         let (_, document) = try load(original)
         #expect(document.text.hasPrefix("[miri]\ninner_gap = 8\n"))
         #expect(document.value(at: ["bindings", "window_manage"]) == .string("ctrl+alt-t"))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(4))
     }
 
     @Test func rejectsAnInvalidVersionWithoutWriting() throws {
@@ -227,9 +252,20 @@ struct DefaultBindingsTests {
         #expect(bindings?["window_vertical_grow"] == .array([.string("ctrl+alt+shift-equal"), .string("fn-f1")]))
         #expect(bindings?["window_vertical_step_grow"] == nil)
         #expect(bindings?["window_focus_east"] == nil)
-        #expect(bindings?["window_focusdisplay_west"] == .string("ctrl+alt+cmd-a"))
-        #expect(bindings?["window_movedisplay_east"] == .string("ctrl+alt+cmd+shift-d"))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
+        // This file deleted every first and last column default, so their edge-or-monitor replacements stay unbound.
+        for command in [
+            "window_focusedge_west", "window_focusedge_east", "window_moveedge_west", "window_moveedge_east",
+        ] {
+            #expect(bindings?[command] == nil)
+        }
+        #expect(bindings?["window_focusdisplay_west"] == nil)
+        #expect(
+            bindings?["window_movedisplay_south"]
+                == .array([
+                    .string("ctrl+alt+cmd+shift-downarrow"), .string("ctrl+alt+cmd+shift-j"),
+                    .string("ctrl+alt+cmd+shift-s"),
+                ]))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(4))
     }
 
     @Test func deletedVersionOneResizeShortcutsStayDeletedAfterUpgrade() throws {
@@ -240,8 +276,11 @@ struct DefaultBindingsTests {
         ] {
             #expect(document.value(at: ["bindings", command]) == nil)
         }
-        #expect(document.value(at: ["bindings", "window_focusdisplay_west"]) == .string("ctrl+alt+cmd-a"))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
+        #expect(document.value(at: ["bindings", "window_focusedge_west"]) == nil)
+        #expect(
+            document.value(at: ["bindings", "window_focusdisplay_north"])
+                == .array([.string("ctrl+alt+cmd-uparrow"), .string("ctrl+alt+cmd-k"), .string("ctrl+alt+cmd-w")]))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(4))
     }
 
     @Test func keepsUnversionedUserBindingsThatMatchRetiredDefaults() throws {
@@ -261,7 +300,7 @@ struct DefaultBindingsTests {
         #expect(document.value(at: ["bindings", "window_vertical_shrink"]) == .string("ctrl+alt+shift-minus"))
         #expect(document.value(at: ["bindings", "window_step_grow"]) == nil)
         #expect(document.value(at: ["bindings", "window_vertical_step_grow"]) == nil)
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(4))
     }
 
     @Test(arguments: [1, 2])
@@ -283,7 +322,7 @@ struct DefaultBindingsTests {
         #expect(bindings?["window_stack_east"] == .string("ctrl+alt-rightbracket"))
         #expect(bindings?["window_unstack_east"] == .string("ctrl+alt+shift-rightbracket"))
         #expect(bindings?["window_unstack_west"] == .string("ctrl+alt+shift-leftbracket"))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(4))
         #expect(store.keptDefaults.isEmpty)
     }
 
@@ -314,11 +353,11 @@ struct DefaultBindingsTests {
             """
         let (store, document) = try load(original)
         #expect(store.issue == nil)
-        #expect(document.text.hasPrefix(original.replacingOccurrences(of: "= 2", with: "= 3")))
+        #expect(document.text.hasPrefix(original.replacingOccurrences(of: "= 2", with: "= 4")))
         #expect(
             store.keptDefaults == [
                 KeptDefault(
-                    action: .engine(command: "window_stack_west"), kept: Chord([.control, .option], "rightbracket"),
+                    action: .engine(command: "window_stack_west"), kept: [Chord([.control, .option], "rightbracket")],
                     wanted: Chord([.control, .option], "leftbracket"), owner: "Stack focused window into right column")
             ])
         store.load(reduceMotion: false)
@@ -367,7 +406,7 @@ struct DefaultBindingsTests {
             default_bindings_version = 2
             """)
         let (restarted, document) = try load()
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(4))
         #expect(restarted.keptDefaults.count == 1)
         #expect(restarted.keptDefaults == first.keptDefaults)
     }
@@ -705,15 +744,16 @@ struct DefaultBindingsTests {
     }
 
     @Test func aRowWhoseChordsAreAllTakenStaysUnbound() throws {
-        let (store, document) = try load("[bindings]\nquit = [\"ctrl+alt-leftarrow\", \"ctrl+alt-h\"]\n")
+        let (store, document) = try load(
+            "[bindings]\nquit = [\"ctrl+alt-leftarrow\", \"ctrl+alt-h\", \"ctrl+alt-a\"]\n")
         #expect(store.issue == nil)
         #expect(document.value(at: ["bindings", "window_focus_west"]) == nil)
         #expect(
             document.value(at: ["bindings", "window_focus_east"])
                 == .array([
-                    .string("ctrl+alt-rightarrow"), .string("ctrl+alt-l"),
+                    .string("ctrl+alt-rightarrow"), .string("ctrl+alt-l"), .string("ctrl+alt-d"),
                 ]))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(3))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(4))
     }
 
     @Test func anUpgradeLeavesAStopChordToStop() throws {
@@ -822,4 +862,223 @@ struct DefaultBindingsTests {
     func ignoresTextThatNamesNoChord(text: String) {
         #expect(Chord(engineText: text) == nil)
     }
+
+    /// The `[bindings]` table that version 3 of the default set wrote.
+    private static let version3Defaults = """
+        [bindings]
+        window_focus_west = ["ctrl+alt-leftarrow", "ctrl+alt-h"]
+        window_focus_east = ["ctrl+alt-rightarrow", "ctrl+alt-l"]
+        window_focus_north = ["ctrl+alt-uparrow", "ctrl+alt-k"]
+        window_focus_south = ["ctrl+alt-downarrow", "ctrl+alt-j"]
+        window_focus_first = "ctrl+alt+cmd-leftarrow"
+        window_focus_last = "ctrl+alt+cmd-rightarrow"
+        window_focus_1 = "ctrl+alt-1"
+        window_focus_2 = "ctrl+alt-2"
+        window_focus_3 = "ctrl+alt-3"
+        window_focus_4 = "ctrl+alt-4"
+        window_focus_5 = "ctrl+alt-5"
+        window_focus_6 = "ctrl+alt-6"
+        window_focus_7 = "ctrl+alt-7"
+        window_focus_8 = "ctrl+alt-8"
+        window_focus_9 = "ctrl+alt-9"
+        window_swap_west = ["ctrl+alt+shift-leftarrow", "ctrl+alt+shift-h"]
+        window_swap_east = ["ctrl+alt+shift-rightarrow", "ctrl+alt+shift-l"]
+        window_swap_north = ["ctrl+alt+shift-uparrow", "ctrl+alt+shift-k"]
+        window_swap_south = ["ctrl+alt+shift-downarrow", "ctrl+alt+shift-j"]
+        window_swap_first = "ctrl+alt+cmd+shift-leftarrow"
+        window_swap_last = "ctrl+alt+cmd+shift-rightarrow"
+        window_nextdisplay = "ctrl+alt-n"
+        window_focusdisplay_north = "ctrl+alt+cmd-w"
+        window_focusdisplay_west = "ctrl+alt+cmd-a"
+        window_focusdisplay_south = "ctrl+alt+cmd-s"
+        window_focusdisplay_east = "ctrl+alt+cmd-d"
+        window_movedisplay_north = "ctrl+alt+cmd+shift-w"
+        window_movedisplay_west = "ctrl+alt+cmd+shift-a"
+        window_movedisplay_south = "ctrl+alt+cmd+shift-s"
+        window_movedisplay_east = "ctrl+alt+cmd+shift-d"
+        window_resize = "ctrl+alt-r"
+        window_maximize = "ctrl+alt-f"
+        window_center = "ctrl+alt-c"
+        window_step_grow = "ctrl+alt-equal"
+        window_step_shrink = "ctrl+alt-minus"
+        window_vertical_step_grow = "ctrl+alt+shift-equal"
+        window_vertical_step_shrink = "ctrl+alt+shift-minus"
+        window_equalize = "ctrl+alt-0"
+        window_stack_west = "ctrl+alt-leftbracket"
+        window_stack_east = "ctrl+alt-rightbracket"
+        window_unstack_east = "ctrl+alt+shift-rightbracket"
+        window_unstack_west = "ctrl+alt+shift-leftbracket"
+        window_manage = "ctrl+alt-t"
+
+        """
+
+    private func version3File(replacing changes: [String: String?] = [:], version: Int? = 3) -> String {
+        var lines = Self.version3Defaults.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+        for (key, value) in changes {
+            let index = lines.firstIndex { $0.hasPrefix("\(key) = ") }
+            switch (index, value) {
+            case (let index?, let value?): lines[index] = "\(key) = \(value)"
+            case (let index?, nil): lines.remove(at: index)
+            case (nil, let value?): lines.insert("\(key) = \(value)", at: 1)
+            case (nil, nil): break
+            }
+        }
+        let bindings = lines.joined(separator: "\n")
+        return version.map { bindings + "[miri]\ndefault_bindings_version = \($0)\n" } ?? bindings
+    }
+
+    private func chords(in bindings: TOMLValue?) -> [String] {
+        guard case .table(let entries) = bindings else { return [] }
+        return entries.values.flatMap { value -> [String] in
+            switch value {
+            case .string(let text): [text]
+            case .array(let items): items.compactMap { if case .string(let text) = $0 { text } else { nil } }
+            default: []
+            }
+        }
+    }
+
+    @Test func anUnchangedVersion3FileUpgradesToTheNewInstallSet() throws {
+        let (fresh, freshDocument) = try load()
+        #expect(fresh.issue == nil)
+        try FileManager.default.removeItem(at: url)
+        let (store, document) = try load(version3File())
+        #expect(store.issue == nil)
+        #expect(store.keptDefaults.isEmpty)
+        #expect(document.value(at: ["bindings"]) == freshDocument.value(at: ["bindings"]))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(4))
+        let all = chords(in: document.value(at: ["bindings"]))
+        #expect(Set(all).count == all.count)
+    }
+
+    @Test func aCustomizedFirstColumnBindingStaysAndTheEdgeActionGetsItsChords() throws {
+        let (store, document) = try load(
+            version3File(replacing: ["window_focus_first": "\"ctrl+alt+cmd-f\""]))
+        #expect(store.issue == nil)
+        #expect(store.keptDefaults.isEmpty)
+        let bindings = document.value(at: ["bindings"])
+        #expect(bindings?["window_focus_first"] == .string("ctrl+alt+cmd-f"))
+        #expect(bindings?["window_focusdisplay_west"] == nil)
+        #expect(
+            bindings?["window_focusedge_west"]
+                == .array([.string("ctrl+alt+cmd-leftarrow"), .string("ctrl+alt+cmd-h"), .string("ctrl+alt+cmd-a")]))
+    }
+
+    @Test func aChordAnotherBindingHoldsStaysWithItAndIsReported() throws {
+        let (store, document) = try load(
+            version3File(replacing: ["window_center": "\"ctrl+alt+cmd-h\"", "window_resize": "\"ctrl+alt-a\""]))
+        #expect(store.issue == nil)
+        let bindings = document.value(at: ["bindings"])
+        #expect(bindings?["window_center"] == .string("ctrl+alt+cmd-h"))
+        #expect(
+            bindings?["window_focusedge_west"]
+                == .array([.string("ctrl+alt+cmd-leftarrow"), .string("ctrl+alt+cmd-a")]))
+        #expect(bindings?["window_focus_west"] == .array([.string("ctrl+alt-leftarrow"), .string("ctrl+alt-h")]))
+        #expect(
+            Set(store.keptDefaults) == [
+                KeptDefault(
+                    action: .engine(command: "window_focus_west"),
+                    kept: [Chord([.control, .option], "leftarrow"), Chord([.control, .option], "h")],
+                    wanted: Chord([.control, .option], "a"), owner: "Cycle preset widths forward"),
+                KeptDefault(
+                    action: .engine(command: "window_focusedge_west"),
+                    kept: [
+                        Chord([.control, .option, .command], "leftarrow"), Chord([.control, .option, .command], "a"),
+                    ],
+                    wanted: Chord([.control, .option, .command], "h"), owner: "Centre column"),
+            ])
+        let all = chords(in: bindings)
+        #expect(Set(all).count == all.count)
+    }
+
+    @Test func deletedFirstColumnAndMonitorBindingsLeaveTheEdgeActionUnbound() throws {
+        let (store, document) = try load(
+            version3File(replacing: ["window_focus_first": nil, "window_focusdisplay_west": nil]))
+        #expect(store.issue == nil)
+        #expect(store.keptDefaults.isEmpty)
+        let bindings = document.value(at: ["bindings"])
+        #expect(bindings?["window_focusedge_west"] == nil)
+        #expect(bindings?["window_focus_first"] == nil)
+        #expect(bindings?["window_focusdisplay_west"] == nil)
+        #expect(
+            bindings?["window_focusedge_east"]
+                == .array([.string("ctrl+alt+cmd-rightarrow"), .string("ctrl+alt+cmd-l"), .string("ctrl+alt+cmd-d")]))
+    }
+
+    @Test func emptiedFirstColumnAndMonitorBindingsLeaveTheEdgeActionUnbound() throws {
+        let (store, document) = try load(
+            version3File(replacing: ["window_focus_first": "[]", "window_focusdisplay_west": "[]"]))
+        #expect(store.issue == nil)
+        let bindings = document.value(at: ["bindings"])
+        #expect(bindings?["window_focusedge_west"] == nil)
+        #expect(bindings?["window_focus_first"] == .array([]))
+        #expect(bindings?["window_focusdisplay_west"] == .array([]))
+    }
+
+    @Test func oneDeletedPredecessorStillGivesTheEdgeActionItsChords() throws {
+        let (store, document) = try load(version3File(replacing: ["window_swap_first": nil]))
+        #expect(store.issue == nil)
+        #expect(
+            document.value(at: ["bindings", "window_moveedge_west"])
+                == .array([
+                    .string("ctrl+alt+cmd+shift-leftarrow"), .string("ctrl+alt+cmd+shift-h"),
+                    .string("ctrl+alt+cmd+shift-a"),
+                ]))
+        #expect(document.value(at: ["bindings", "window_movedisplay_west"]) == nil)
+    }
+
+    @Test func anUnversionedFileWithTheOldDefaultsKeepsThemUntilAReset() throws {
+        let original = version3File(version: nil)
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        #expect(document.text.hasPrefix(original))
+        let bindings = document.value(at: ["bindings"])
+        for command in [
+            "window_focusedge_west", "window_focusedge_east", "window_moveedge_west", "window_moveedge_east",
+        ] {
+            #expect(bindings?[command] == nil)
+        }
+        #expect(bindings?["window_focus_west"] == .array([.string("ctrl+alt-leftarrow"), .string("ctrl+alt-h")]))
+        #expect(bindings?["window_focusdisplay_west"] == .string("ctrl+alt+cmd-a"))
+        let all = chords(in: bindings)
+        #expect(Set(all).count == all.count)
+        try store.apply(.resetToDefaults)
+        #expect(
+            store.shortcuts?.chords(for: .engine(command: "window_focusedge_west")).count == 3)
+        #expect(store.shortcuts?.chords(for: .engine(command: "window_focusdisplay_west")) == [])
+    }
+
+    @Test func retiredActionsStayListedForCustomBindings() throws {
+        let (store, _) = try load()
+        for command in [
+            "window_focus_first", "window_focus_last", "window_swap_first", "window_swap_last",
+            "window_focusdisplay_west", "window_focusdisplay_east", "window_movedisplay_west",
+            "window_movedisplay_east",
+        ] {
+            let action = ShortcutAction.engine(command: command)
+            #expect(ShortcutAction.editable.contains(action))
+            #expect(store.shortcuts?.chords(for: action) == [])
+        }
+        try store.apply(.add(Chord([.control, .option, .command], "f"), to: .engine(command: "window_focus_first")))
+        #expect(
+            store.shortcuts?.chords(for: .engine(command: "window_focus_first")) == [
+                Chord([.control, .option, .command], "f")
+            ])
+    }
+
+    @Test func everyDirectionalActionUsesTheSameModifiersOnArrowsHJKLAndWASD() {
+        let keys = [
+            "west": ["leftarrow", "h", "a"], "east": ["rightarrow", "l", "d"], "north": ["uparrow", "k", "w"],
+            "south": ["downarrow", "j", "s"],
+        ]
+        let directional = DefaultBinding.table.filter { row in row.chords.contains { $0.key.hasSuffix("arrow") } }
+        #expect(directional.count == 16)
+        for row in directional {
+            let direction = String(row.command.split(separator: "_").last!)
+            #expect(row.chords.map(\.key) == keys[direction], "\(row.command)")
+            #expect(Set(row.chords.map(\.modifiers)).count == 1, "\(row.command)")
+            #expect(row.chords.allSatisfy { !$0.modifiers.contains(.function) }, "\(row.command)")
+        }
+    }
+
 }

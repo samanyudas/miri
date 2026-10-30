@@ -25,10 +25,11 @@ public enum ShortcutRejection: Error, Equatable, Sendable {
     case alreadyAssigned
 }
 
-/// A default shortcut that an upgrade left on its old chord, because another binding holds its new chord.
+/// A default shortcut that an action lacks after an upgrade, because another binding holds it.
 public struct KeptDefault: Hashable, Sendable {
     public let action: ShortcutAction
-    public let kept: Chord
+    /// The chords the action kept, which can be none.
+    public let kept: [Chord]
     public let wanted: Chord
     /// The title of the action that holds `wanted`, or its `[bindings]` key when Miri does not list the command.
     public let owner: String
@@ -153,9 +154,8 @@ public struct Shortcuts: Sendable {
         } else if document.value(at: ["bindings"]) != nil {
             throw TOMLEditError.notEditable(path: "bindings")
         }
-        for row in DefaultBinding.table {
-            result = try result.setting(
-                Self.value(row.chords.map(\.description)), table: ["bindings"], key: row.command)
+        for row in DefaultBinding.table where !row.chords.isEmpty {
+            result = try result.setting(DefaultBinding.encoded(row.chords), table: ["bindings"], key: row.command)
         }
         result = try result.removing(table: ["miri"], key: "stop_shortcut")
         return try result.setting(
