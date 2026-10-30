@@ -16,10 +16,13 @@ The public release path and the complete acceptance runs follow.
 
 ## Held edge shortcuts
 
-[#169](https://github.com/samanyudas/miri/issues/169) is implemented in [engine PR #88](https://github.com/samanyudas/paneru/pull/88), and this branch pins its head `5177054`.
+[#169](https://github.com/samanyudas/miri/issues/169) is implemented in [engine PR #88](https://github.com/samanyudas/paneru/pull/88), and this branch pins its head `cd5fdb5`.
 Sam decided on 30 October that a held edge shortcut stops at the strip's end and only a fresh press crosses to another display.
 The engine's event tap ran every key auto-repeat as a new press, so holding ⌃⌥⌘⇧← for one repeat moved the column to the first position and then onto the next display.
 The tap now reads the auto-repeat flag, and a repeated edge command reaches the strip's end but never crosses.
+Sam then decided that a held key whose fresh press crosses does nothing more, because its repeats carried focus or the column on to the far end of the new display's strip.
+The fresh press now records whether it crossed, and the repeats of that hold do nothing after a cross.
+Live on 30 October, a held ⌃⌥⌘← or ⌃⌥⌘→ from a strip's end crossed once and stayed on the window a single press lands on, and a held ⌃⌥⌘⇧← took a Finder window across once and left it where it arrived.
 On 30 October, with the built-in display left of the external display, the release build carried focus onto the built-in display after one fresh ⌃⌥⌘← press and 3 synthetic auto-repeats.
 The build from this branch stopped at the first column, a fresh press then crossed, and 8 more repeats stayed put.
 No window moved.
