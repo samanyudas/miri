@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-31 on branch `fix/169-repeat-edge`, based on `main` at `45d73f0`
+Updated: 2026-10-31 on branch `fix/169-repeat-edge`, based on `main` at `df0ff26`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -28,6 +28,21 @@ On 30 October, with the built-in display left of the external display, the relea
 The build from this branch stopped at the first column, a fresh press then crossed, and 8 more repeats stayed put.
 No window moved.
 [The keybinding reference](decisions/keybinding%20reference.md) now records the rule, and this settles the held-key question in the #79 section below.
+
+## Empty display focus from Finder
+
+[#168](https://github.com/samanyudas/miri/issues/168) is implemented in [engine PR #89](https://github.com/samanyudas/paneru/pull/89), merged with no change from the tested head `2c83c97`.
+This branch pins `378093f`, the merge of #89 and [engine PR #88](https://github.com/samanyudas/paneru/pull/88), whose files match the combined build tested live below.
+It therefore carries #88's parser hashes in `scripts/check-compat.py`, the same as [#172](https://github.com/samanyudas/miri/pull/172).
+Display focus on a display with no window brings Finder to the front with that display's desktop as key window.
+When Finder was already in front, macOS ignored that request, so ⌃⌥⌘ toward an empty display did nothing from a Finder window.
+The engine now fronts its own window-less process first in that case, which makes the desktop request a real switch without a pointer move.
+On 28 and 30 October, live probes with the same macOS calls confirmed the cause and the fix: fronting any window-less process first, the running engine included, moved the menu bar to the target display in both directions, and the old calls never did.
+On 30 October, the combined build passed the end-to-end key press with the built-in display below the external display and emptied through a second virtual workspace.
+From a Finder window, ⌃⌥⌘↓ moved the menu bar and focus to the empty display, pressed once or held, and ⌃⌥⌘↑ came back.
+With the built-in display left of the external display and emptied, a held ⌃⌥⌘← from a Finder window in the first column crossed once to it.
+The build without the fix did nothing in both cases, and ⌃⌥⌘↓ from another app still worked.
+This settles the Finder note in the #79 section below.
 
 ## Arrow, HJKL, and WASD shortcuts
 
