@@ -167,12 +167,15 @@ Reusing Paneru does not establish that this blocker is resolved.
 
 ### Display changes
 
-Display connection changes follow the default behavior of macOS and Paneru.
 Each strip stays on its display while that display is connected.
 When a display disconnects, its strips follow their macOS Space to the display that macOS selects and keep their window order.
-When the display reconnects, its strips return if macOS returns their Space.
 If Paneru cannot re-attach a strip, its windows become floating and remain reachable.
-Miri keeps no separate display layout state and offers no reconnection settings in v1.
+When the display reconnects, each window returns to the display it was on before the disconnect, in its old column order and stack.
+This applies to unplugging and replugging a display, closing and opening the lid, and sleep and wake.
+Windows that never left their display keep their place, including reordering done while the other display was gone.
+A window opened while a display was gone stays on the display it was opened on, and a window closed meanwhile is forgotten.
+Windows from several Spaces of one display return together to the Space that display shows.
+Miri keeps this record in memory and offers no reconnection settings in v1.
 This behavior requires verification on hardware, including sleep and wake cycles.
 The decision is recorded in [ADR 0008](../docs/adr/0008-follow-macos-space-migration-for-display-changes.md).
 
@@ -383,7 +386,9 @@ The [v2 roadmap](v2-roadmap.md) records deferred work and candidate improvements
 
 ## System access
 
-Miri requires Accessibility permission only.
-It keeps SIP enabled and does not capture the screen.
+Miri requires Accessibility permission and keeps SIP enabled.
+Screen Recording permission is needed only for the opt-in **Show window contents on edges next to another display** switch in Settings > Layout, which is off by default.
+With that switch on, the engine photographs the whole of each window that is hidden behind or crossing an edge next to another display, and shows the photo only where the real window cannot show.
+With it off, Miri does not capture the screen.
 Undocumented APIs require individual compatibility assessments and defined fallback behavior.
 The accepted boundary is recorded in [ADR 0002](../docs/adr/0002-limit-system-access.md).

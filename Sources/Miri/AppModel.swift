@@ -34,6 +34,8 @@ import ServiceManagement
     private(set) var gestureEnvironment: GestureEnvironment
     /// The finger count a running gesture test turned on.
     private(set) var gestureTestFingers: GestureFingers?
+    /// Miri turned the shared-edge switch off, or kept it off, because Screen Recording permission was missing.
+    private var screenRecordingRefused = false
 
     @ObservationIgnored private let store: ConfigurationStore
     @ObservationIgnored private var supervisor: EngineSupervisor!
@@ -42,6 +44,7 @@ import ServiceManagement
     @ObservationIgnored private var gesturePoll: Task<Void, Never>?
     @ObservationIgnored private var stopShortcut: StopShortcut?
     @ObservationIgnored private let defaults = UserDefaults.standard
+    @ObservationIgnored private let screenRecording: any ScreenRecordingAccess = SystemScreenRecording()
 
     init(bundle: Bundle = .main) {
         let identifier = bundle.bundleIdentifier ?? "io.github.samanyudas.miri"
@@ -188,7 +191,20 @@ import ServiceManagement
         syncLoginItem()
     }
 
+    /// Whether Layout explains that the shared-edge switch is off for lack of Screen Recording permission.
+    var sharedEdgeSlicesNeedPermission: Bool { screenRecordingRefused && !settings.sharedEdgeSlices }
+
+    func setSharedEdgeSlices(_ wanted: Bool) {
+        let on = screenRecording.sharedEdgeSlices(wanting: wanted)
+        screenRecordingRefused = wanted && !on
+        update { $0.sharedEdgeSlices = on }
+    }
+
     func refreshSetup() {
+        if screenRecording.revokes(sharedEdgeSlices: settings.sharedEdgeSlices) {
+            screenRecordingRefused = true
+            update { $0.sharedEdgeSlices = false }
+        }
         let observation = SetupProbe.observe()
         let checks = SetupChecker.evaluate(observation)
         if checks != setupChecks { setupChecks = checks }

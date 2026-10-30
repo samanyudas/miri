@@ -12,7 +12,8 @@ The native app is implemented, but no complete acceptance run has passed.
 
 - The product is a native macOS scrolling window manager for daily use and public FOSS release.
 - The app uses SwiftUI and AppKit, with a pinned Paneru-based helper process.
-- Miri requires Accessibility permission only and keeps SIP enabled.
+- Miri requires Accessibility permission and keeps SIP enabled.
+  Screen Recording permission is needed only for an opt-in switch that shows hidden windows on edges next to another display, as Sam decided in [#150](https://github.com/samanyudas/miri/issues/150).
 - Each physical monitor and native Space has an independent scrolling strip.
 - Display changes follow macOS Space migration, with reachable floating windows if strip re-attachment fails.
 - Settings use isolated TOML configuration, apply immediately, and retain the last valid settings after errors.

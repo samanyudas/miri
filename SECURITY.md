@@ -15,9 +15,11 @@ Include the affected version or commit, the steps to reproduce, and the impact y
 ## Scope
 
 Miri holds the macOS Accessibility permission, which lets it read and move other apps' windows.
+If the user turns on window contents on edges next to another display, Miri also holds Screen Recording permission.
 These areas are in scope:
 
-- Any path that lets another process use Miri's Accessibility permission.
+- Any path that lets another process use Miri's Accessibility or Screen Recording permission.
+- Any capture beyond the edge slices that [ADR 0002](docs/adr/0002-limit-system-access.md) allows.
 - The bundled engine helper, its signature, and how the app launches it.
 - Configuration parsing and migration.
 - Update delivery, once Sparkle updates exist.

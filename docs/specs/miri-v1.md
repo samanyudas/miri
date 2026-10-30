@@ -60,7 +60,7 @@ Broader feature proposals are not promoted into accepted requirements.
 6. As a Miri recipient, I want GPL-3.0-or-later source and preserved Paneru MIT notices, so that I can exercise the supplied software freedoms.
 7. As a Miri recipient, I want public source available when binaries are distributed, so that I can inspect the distributed software.
 8. As a Miri user, I want window management to require only Accessibility permission, so that additional permission grants are unnecessary.
-9. As a Miri user, I want SIP to remain enabled and screen capture to remain unused, so that Miri respects its system-access boundary.
+9. As a Miri user, I want SIP to remain enabled and screen capture to remain unused unless I turn on window contents on edges next to another display, so that Miri respects its system-access boundary.
 10. As a Miri user, I want window management and logs to stay local without telemetry, so that Miri does not transmit my window-management data.
 
 ### Permission guidance and setup checking
@@ -301,6 +301,7 @@ They do not establish completed modules or verified engine capabilities.
 - Limit engine changes to app integration, isolation, and verified compatibility fixes.
   Contribute compatibility fixes upstream where possible instead of establishing a permanent fork.
 - Require only Accessibility permission, keep SIP enabled, and avoid screen capture, kernel extensions, and system modifications.
+  The one exception is the opt-in edge slices in [ADR 0002](../adr/0002-limit-system-access.md), which need Screen Recording permission.
   Undocumented APIs need individual compatibility assessments and defined fallback behavior before adoption.
 
 ### Lifecycle and failure handling
@@ -659,7 +660,7 @@ An accepted deferral does not commit every candidate to a future implementation.
 - A public Miri CLI, URL scheme, and Raycast automation commands.
   The engine's internal command-line integration remains part of the accepted helper design.
 - Guaranteed Intel support or support for older macOS versions before the recorded need and testing conditions are met.
-- Features requiring Screen Recording, Input Monitoring, disabled SIP, kernel extensions, screen capture, or other system modifications.
+- Features requiring Screen Recording, Input Monitoring, disabled SIP, kernel extensions, screen capture, or other system modifications, apart from the opt-in edge slices in [ADR 0002](../adr/0002-limit-system-access.md).
 - A replacement window engine or a permanent Paneru fork.
 - Publishing this draft as a GitHub issue during this task.
 

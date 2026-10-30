@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-28 on branch `feat/79-directional-aliases`, based on `main` at `e1f7475`
+Updated: 2026-10-30 on branch `feat/79-directional-aliases`, based on `main` at `39ea81a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -21,7 +21,8 @@ Version 4 of the default set gives every directional action the same modifiers o
 Four edge-or-monitor actions take the ⌃⌥⌘ and ⌃⌥⌘⇧ left and right chords: the first press reaches the strip's end, and a press at the end crosses to the display on that side.
 Every display move now takes the whole column and inserts it after the destination's active column.
 The engine half is [engine PR #67](https://github.com/samanyudas/paneru/pull/67), merged as `0d627e7`.
-This branch now uses `main`'s engine pin `8b450d6`, which includes it.
+This branch now uses `main`'s engine pin `ec7fc7c`, which includes it.
+The 28 October rerun below used engine `8b450d6`.
 The #67 code in `0d627e7` matches the tested head `e58657f`.
 Sol approved the merged engine change in one sol-loop round, with no findings.
 Sol approved the Miri change in round 2 of sol-loop on 27 October.
@@ -49,10 +50,150 @@ A held ⌃⌥⌘⇧ left, one press plus one auto-repeat, moved a column to the 
 From a focused Finder window, focusing an empty display does nothing, and the engine command `window focusdisplay south` does the same, so this predates #79.
 The first side-by-side attempt hit #103 when the built-in strip scrolled, and the test then restored every window's display, order, and width.
 
+## Windows return to their display
+
+[#142](https://github.com/samanyudas/miri/issues/142) is implemented in [engine PR #75](https://github.com/samanyudas/paneru/pull/75), merged as `f20b00e`. Its tree matches the tested head `e1705af`.
+`main` pins `5075a4a`, which also carries engine PR #76 for #103 and engine PR #77, a test deadline.
+macOS moves Spaces between displays when a display disconnects, and on replug it hands the main display every Space that existed before, the built-in display's own Space included.
+The engine followed the Spaces, so the built-in display's windows stayed on the external display.
+The engine now records each display's columns and stacks on the first event of a display change, before macOS destroys any Space, in `src/ecs/display_homes.rs`.
+After each reconcile pass it moves back every window whose Space macOS moved to another display or destroyed, in its old order and stack.
+Windows that never left keep their place, a window opened meanwhile stays where it was opened, and a window moved to another Space on purpose stays there.
+ADR 0008 and the display section of the release scope now describe this behavior.
+
+On 28 October on Miri Developer, a software unplug of the external display (`SLSConfigureDisplayEnabled`, app-only) reproduced the bug on engine `c1f2b5e`: the built-in display's windows ended up in a hidden Space of the external display.
+On engine `fa1f098`, three unplug cycles with stacks on both displays returned every window to its display, order, and stack, and a window opened while unplugged stayed on the built-in display.
+One cycle also hit the hardware variant: macOS destroyed the built-in display's only Space while it held windows, and they still came back with their stack.
+Turning the built-in display off in software could not be undone in software, and only a sleep and wake brought it back.
+After that wake, the engine dropped six windows whose AX elements died, which is [#147](https://github.com/samanyudas/miri/issues/147).
+Later on 28 October Sam ran a cable unplug, a lid close, and a sleep on engine `e1705af`, with the layout recorded every 4 s.
+The cable unplug returned every window to its display, order, and stack.
+After the lid and the sleep, the windows the engine still managed came back correctly, but #147 dropped others: their AX elements died and the engine gave up after 1 s.
+#142 stays open until #147 is fixed and the lid and sleep checks pass.
+
+## Side-by-side displays
+
+[#103](https://github.com/samanyudas/miri/issues/103) is fixed by [engine PR #76](https://github.com/samanyudas/paneru/pull/76).
+The engine hid an off-screen column by leaving a sliver at mid-height and hanging the rest of the window past the display edge.
+With another display beside that edge, the window lay mostly on it, so macOS moved it into that display's Space and drew it there.
+On a display arrangement change, macOS first pulled such a window back onto its own display, the engine slid it back across the other display, and the engine's topology read then adopted it into that display's strip.
+`position_layout_windows` in `src/ecs/layout.rs` now checks the frame a window shows.
+If its center, or more of it, lies on another display, the window tucks below its own display's bottom edge.
+A frame that no tuck improves, such as one above a display directly below, stays as before.
+Free sides keep the mid-height sliver, so arrangements with the displays above and below each other keep their behavior.
+Sam chose the bottom corner on 28 October.
+
+Engine PR #76 hung the window past the bottom corner on the side it hangs past, and sat it flush inside that side when a display was beyond the corner.
+Flush, the whole width of the window showed along the bottom edge, and Sam rejected that bar.
+Step 1 of [#150](https://github.com/samanyudas/miri/issues/150) changes the tuck on engine branch `miri/150-free-corner-hiding`, at `6fda494`.
+The window now hangs past a free bottom corner of its own display with 1 point of its width showing.
+A free corner has no display beyond it.
+The engine tries the corner on the side the window hangs past first, then the other bottom corner.
+Only when neither corner is free does the window sit flush, as before.
+Harness tests in `src/tests/side_by_side.rs` cover each case, and the two corner tests fail on `5075a4a`.
+Sam ran the same change as prototype engine `fa76e14` on 28 October with the displays side by side: no bar showed at the bottom, and every window stayed in its Space.
+The step 1 build passed the side-by-side live check on 28 October, including scrolling to both ends without moving windows between Spaces.
+
+Step 2 of #150 is on engine branch `miri/150-edge-slice-geometry`, at `ed67edd`.
+When a column tucks, the engine now records an `EdgeSlice` on each of its windows in `src/ecs/shared_edge.rs`.
+An `EdgeSlice` holds the sliver the window would show with the other display moved away, in screen points and in the window's own points.
+For each display and side, `showing` keeps every front window of the hidden column nearest the edge in strip order.
+The engine logs that set at debug level as `showing edge slices: [...]` each time it changes.
+Harness tests in `src/tests/shared_edge.rs` compare each slice with the sliver of the same layout with the other display below.
+They also cover a hidden stack, the nearest column only, both sides of a middle display, free edges, stacked displays, an inactive strip, and scrolling the column back.
+On 28 October, the logged rectangle `(0,38)-(5,1432)` matched the same window's real sliver with the displays stacked.
+Step 3 adds the Settings switch and the Screen Recording prompt, in [#152](https://github.com/samanyudas/miri/pull/152).
+
+Step 4 of #150 is on engine branch `miri/150-edge-slice-photos`.
+The engine reads `[options] shared_edge_slices`, which is off when absent.
+With the switch on and `CGPreflightScreenCaptureAccess` true, each showing slice gets a borderless, non-activating panel at its place, one level below the dim overlay.
+`src/ecs/slice_photos.rs` holds the photo state of each slice, and `src/slice_screen.rs` draws the panels and takes the photos with ScreenCaptureKit.
+The first photo is taken when the slice shows, and the panel stays out of sight until it arrives.
+After that, a photo is taken every 2 seconds while the panel's occlusion state is visible, and the panel repaints only when the photo's pixels changed.
+A window gone or a failed photo closes its panel, and a refused photo closes every panel until the config or the permission changes.
+The engine logs each step at debug level, with lines that start `edge slice`.
+Harness tests in `src/tests/slice_photos.rs` cover the first photo, the refresh, repaint, stale photos, the occlusion cut, the switch and permission gates, and the closing cases.
+The prior live session on 28 October verified the granted switch, successful engine captures under Miri Developer's Screen Recording grant, a panel at the logged rectangle, matching edge pixels, and updates about every 2 seconds.
+Photos stopped with the switch off, under fullscreen, during display sleep, and while locked.
+The initial CPU diagnosis found repeated window enumeration, so engine `14a08e4` reuses each slice's capture filter.
+That engine also cancels unwanted pending photos and defers photos of moved panels while unseen.
+Sol approved those fixes in round two.
+On 29 October, with a release engine built from `14a08e4` and one slice showing, the engine used a median 1.77% of one core with the switch on (1.67% to 1.87%, 5 runs of 30 seconds) and 0.80% with it off (0.67% to 1.03%, 5 runs, alternated).
+A slice whose window changed every second measured the same, 1.77% to 1.87% over 3 runs.
+Each run took 15 photos, and the engine looked windows up 4 times for 83 photos.
+What limits the remaining 1 point of a core is not yet known.
+
+Step 5 of #150 is on engine branch `miri/150-slice-input`, which this branch pins.
+The event tap holds back a press on a painted panel, in `src/platform/slice_tap.rs`, so the window beneath the panel never gets it.
+The engine then focuses the panel's window and scrolls it into view the way a focus command does, in `src/ecs/slice_input.rs`.
+The press lands on the pressed row, at least 12 points inside the window edge that faces the slice, because the outer 3 points are the resize border.
+In a live test, a press on the outer points reached no view in Helium or an AppKit window, and two quick clicks widened the window through the macOS double click on a window edge.
+Once the window rests on a display and the window server's hit test at that point returns it, the engine posts the press again at the HID level, tagged with its press id.
+The tap lets that press through, then the user's drags and release, so a drag goes on in the app.
+A release during the slide is held back, and the tap posts it right after the press.
+A press that the user dragged and released during the slide is dropped when it arrives, and the window stays focused and revealed.
+In a live test of a quick click, the tap saw the posted press before the user's earlier release.
+The release then reached Helium and an AppKit view at the panel, about 1190 points from the press, so a button would see a cancelled click.
+The tap now stamps each event with its time, the event timestamp for the user's events and the tap's own reading of the same clock for a posted press.
+A drag or release that the user made before the posted press went through now reaches the app moved as far as the press.
+A Sol review found that a second press during the slide reached the window under the pointer once the panel had closed, and the first press was then dropped.
+While a press waits for its window, the tap now drops further presses with their drags and their release, so a fast double click during the slide acts as one click.
+A second review found that this check went by the order in which the tap saw events, not by when the user made them.
+A second press made before the posted press went through, but seen after it, still reached the window under the pointer.
+The tap now notes when the posted press went through, and also drops a press the user made before that time.
+The tap now also keeps each dropped button on its own, so a held left press that expires no longer lets through the drags and release of a dropped right press.
+After 1.5 seconds without arrival, by event time in the tap and by frame time in the engine, the tap and the engine drop the press, and focus and the scroll stay.
+Hover over a panel reaches only the panel, and the tap drops scroll over a panel.
+The engine's window lookups treat a point under a panel as having no window, so focus-follows-mouse and click handling ignore the window beneath.
+The engine logs each step at debug level: `edge slice press swallowed`, `revealing`, `arrived`, `delivered`, `gave up`, `expired`, `dropped`, `edge slice release moved with its press`, and `edge slice gesture passed through`.
+Harness tests in `src/tests/slice_input.rs` drive the engine through the tap's own state machine, with the window server mocked, and fail when the hold, the arrival check, the release, the late release, the second press, the give-up, or the hover and scroll cuts break.
+On 28 October, a build at engine `c99fbe8` delivered quick clicks with releases 30 to 150 ms after the press, double clicks, and 20-move drags to an AppKit test window and to Helium, and nothing reached the window beside the slice.
+On 29 October, Miri Developer built from this whole stack at engine `e30ba61` ran with the displays side by side.
+Turning the switch on drew two slices on the shared edge, one per display, with the test window's playing video in its slice.
+Quick clicks of 30, 80, and 150 ms, a double click, and a 20-move drag on that slice reached the test window 12 points inside its edge, as one press and release at one point.
+A second press 20 or 30 ms after the first was dropped in 3 of 3 runs, once when the tap saw it after the window arrived but before the delivery, and the first press still reached the window as one click.
+Turning the switch off closed both panels.
+The give-up after 1.5 seconds is checked only by harness tests.
+Those checks used software clicks only, which carry nanosecond timestamps.
+At the HID tap, real trackpad and mouse events carry mach ticks, and the tap read them as nanoseconds.
+On Sam's M3, every real press after one delivered slice press was then dropped until Miri quit.
+Engine `a0c88bf`, merged as `863558c` from [paneru#83](https://github.com/samanyudas/paneru/pull/83), reads each user event's timestamp on the engine's clock.
+On 29 October, a build at `a0c88bf` delivered 10 of 10 real trackpad clicks on slices, and no press was dropped.
+The same log showed a quick click's release landing as far again from the press, because posting the press had already moved the pointer.
+Engine `9e20d4a`, from [paneru#84](https://github.com/samanyudas/paneru/pull/84), moves an early drag or release only while it is still on the panel.
+On 29 October, a press on a slice with its release at the moved pointer reached the window at (836, 700) for both, in 3 of 3 runs, where the previous engine released at (1670, 700).
+Revealing a tucked column used to pop it into place, and pushing a column off a shared edge made it vanish until a new photo arrived.
+Engine `ec7fc7c`, from [paneru#85](https://github.com/samanyudas/paneru/pull/85), lets photos stand in for windows wherever the real window cannot show at a shared edge.
+A revealed window's photo slides in with the row and the real window takes over under it, and a column pushed off the edge slides out under its photo.
+Each window keeps its last photo, so a later crossing paints at once, and every hidden column's photo follows its place in the row.
+On 29 and 30 October, Sam confirmed a slice click slides smoothly, and burst captures of rapid keyboard presses on Sam's M3 showed no bare edge.
+The first crossing after the engine starts still moves at once, because no photo is kept yet.
+Half-second stalls after some focus changes are [#162](https://github.com/samanyudas/miri/issues/162), and short gaps between ordinary columns are [#163](https://github.com/samanyudas/miri/issues/163).
+
+On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
+On engine `8b450d6`, Grok moved from the 27-inch strip into the built-in strip, which parked it back over the 27-inch display.
+Moving the display back put Grok at the end of the 27-inch strip.
+On engine `cc9955a`, the same move tucked Grok into the 27-inch display's bottom-left corner, in its own strip and Space.
+Scrolling the 27-inch strip to its last and first columns kept every window in Space 515, and moving the display back left every strip and order unchanged.
+macOS keeps about 32 points of a tucked window above the bottom edge, so the visible corner is about 5 by 32 points.
+
+### Window contents on shared edges
+
+[#150](https://github.com/samanyudas/miri/issues/150) step 3 adds the **Show window contents on edges next to another display** switch to Settings > Layout, off by default.
+It writes `[options].shared_edge_slices`.
+Turning it on calls `CGRequestScreenCaptureAccess`, and without the permission the switch stays off with a note and an **Open Screen Recording Settings** button.
+Each setup recheck calls `CGPreflightScreenCaptureAccess` and turns a saved switch off with the same note when the permission is gone.
+ADR 0002 now allows this one Screen Recording use.
+This branch sits on top of steps 1, 2, 4, and 5, so the switch turns on photos and input that already work.
+On 28 October, the step 3 build showed the macOS prompt naming Miri Developer.app, kept the switch off with the note after Deny, and showed no second prompt on retry.
+Its button opened the Screen & System Audio Recording pane, which listed one Miri Developer.app entry.
+After Sam granted that entry, the switch stayed on and wrote the key, with no prompt.
+Not checked yet: a grant revoked while the switch is on.
+
 ## One strip per native Space
 
 [#89](https://github.com/samanyudas/miri/issues/89) is fixed by [engine PR #73](https://github.com/samanyudas/paneru/pull/73), merged as `ba198d9`. Its tree matches the tested head `ade3f05`.
-This branch pins `c1f2b5e` from `main`, which includes `ba198d9`.
+`main` pinned `c1f2b5e`, which includes `ba198d9`.
 Mission Control can drag a window to an inactive Space, and the engine learns of it only when that Space activates or a display topology read runs.
 On a topology read, `place_extracted_strip` in `src/ecs/display.rs` reused the Space's first row only when that row was empty.
 Otherwise it opened a new virtual row parked at the display corner, and v1 has no UI for that row.
@@ -75,7 +216,7 @@ Unplugging and replugging the external display left the built-in display's windo
 ## Apps busy at launch
 
 [#63](https://github.com/samanyudas/miri/issues/63) is partly fixed in [engine PR #74](https://github.com/samanyudas/paneru/pull/74).
-This branch pins its merge commit `c1f2b5e`, which also carries [engine PR #73](https://github.com/samanyudas/paneru/pull/73) for [#89](https://github.com/samanyudas/miri/issues/89).
+`main` pinned its merge commit `c1f2b5e`, which also carries [engine PR #73](https://github.com/samanyudas/paneru/pull/73) for [#89](https://github.com/samanyudas/miri/issues/89).
 An app that blocked its main thread for more than 5 s right after launch never got its windows managed, even after the user switched to it.
 The engine now parks such an app, asks it for its AX role off the main thread every 500 ms, and admits it once it answers.
 An app that answers but is busy again by the next registration waits 1, 2, 4, 8, 16, then 30 s between tries.
