@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-31 on branch `fix/163-focus-and-slices`, stacked on `fix/163-pacing`, based on `main` at `845a13a`
+Updated: 2026-10-31 on branch `fix/163-front-switch-pacing`, stacked on `fix/163-focus-and-slices`, based on `main` at `845a13a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -244,6 +244,14 @@ The slice panels also take their places before the frame's window writes, so the
 Quick apps pause a little more often mid-motion: Spotify paused 4 times over 40 ms per burst instead of 2.
 A focus move between two windows of one app still resets nothing, and one burst of 4 showed 33 ms of desktop between two Helium windows.
 The recordings and frame captures were removed for privacy and stay local.
+[Engine PR #93](https://github.com/samanyudas/paneru/pull/93), pinned on this branch at `4676d9c` and not merged yet, fixes a case that #91 left.
+Focus on an empty display brings Finder to the front with only its desktop window, which the engine does not track, so the focused window keeps its focus marker.
+Focus back on that window then switches apps with no marker move, so pacing kept trusting the app although it can turn slow right after activation.
+Cmd-Tab to any app with no tracked window and back takes the same path.
+Pacing now also forgets the apps that come to the front and leave it whenever macOS reports a front switch.
+A focus move between windows of one app still resets nothing.
+A new engine test fails before the fix and passes after it.
+The live check on Sam's row has not run yet: the screen locked before the first measured try.
 
 ## One strip per native Space
 
