@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-30 on branch `fix/163-row-gaps`, based on `main` at `39ea81a`
+Updated: 2026-10-31 on branch `fix/163-row-gaps`, stacked on `fix/162-focus-stall`, based on `main` at `845a13a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,72 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Held edge shortcuts
+
+[#169](https://github.com/samanyudas/miri/issues/169) is implemented in [engine PR #88](https://github.com/samanyudas/paneru/pull/88), merged with no change from the tested head `cd5fdb5`.
+This branch pins `378093f`, the merge of #88 and [engine PR #89](https://github.com/samanyudas/paneru/pull/89), whose files match the combined build tested live below.
+Sam decided on 30 October that a held edge shortcut stops at the strip's end and only a fresh press crosses to another display.
+The engine's event tap ran every key auto-repeat as a new press, so holding ⌃⌥⌘⇧← for one repeat moved the column to the first position and then onto the next display.
+The tap now reads the auto-repeat flag, and a repeated edge command reaches the strip's end but never crosses.
+Sam then decided that a held key whose fresh press crosses does nothing more, because its repeats carried focus or the column on to the far end of the new display's strip.
+The fresh press now records whether it crossed, and the repeats of that hold do nothing after a cross.
+Live on 30 October, a held ⌃⌥⌘← or ⌃⌥⌘→ from a strip's end crossed once and stayed on the window a single press lands on, and a held ⌃⌥⌘⇧← took a Finder window across once and left it where it arrived.
+On 30 October, with the built-in display left of the external display, the release build carried focus onto the built-in display after one fresh ⌃⌥⌘← press and 3 synthetic auto-repeats.
+The build from this branch stopped at the first column, a fresh press then crossed, and 8 more repeats stayed put.
+No window moved.
+[The keybinding reference](decisions/keybinding%20reference.md) now records the rule, and this settles the held-key question in the #79 section below.
+
+## Empty display focus from Finder
+
+[#168](https://github.com/samanyudas/miri/issues/168) is implemented in [engine PR #89](https://github.com/samanyudas/paneru/pull/89), merged with no change from the tested head `2c83c97`.
+This branch pins `378093f`, the merge of #89 and [engine PR #88](https://github.com/samanyudas/paneru/pull/88), whose files match the combined build tested live below.
+It therefore carries #88's parser hashes in `scripts/check-compat.py`, the same as [#172](https://github.com/samanyudas/miri/pull/172).
+Display focus on a display with no window brings Finder to the front with that display's desktop as key window.
+When Finder was already in front, macOS ignored that request, so ⌃⌥⌘ toward an empty display did nothing from a Finder window.
+The engine now fronts its own window-less process first in that case, which makes the desktop request a real switch without a pointer move.
+On 28 and 30 October, live probes with the same macOS calls confirmed the cause and the fix: fronting any window-less process first, the running engine included, moved the menu bar to the target display in both directions, and the old calls never did.
+On 30 October, the combined build passed the end-to-end key press with the built-in display below the external display and emptied through a second virtual workspace.
+From a Finder window, ⌃⌥⌘↓ moved the menu bar and focus to the empty display, pressed once or held, and ⌃⌥⌘↑ came back.
+With the built-in display left of the external display and emptied, a held ⌃⌥⌘← from a Finder window in the first column crossed once to it.
+The build without the fix did nothing in both cases, and ⌃⌥⌘↓ from another app still worked.
+This settles the Finder note in the #79 section below.
+
+## Arrow, HJKL, and WASD shortcuts
+
+[#79](https://github.com/samanyudas/miri/issues/79) is implemented on this branch and awaits review.
+Version 4 of the default set gives every directional action the same modifiers on the arrow keys, HJKL, and WASD.
+Four edge-or-monitor actions take the ⌃⌥⌘ and ⌃⌥⌘⇧ left and right chords: the first press reaches the strip's end, and a press at the end crosses to the display on that side.
+Every display move now takes the whole column and inserts it after the destination's active column.
+The engine half is [engine PR #67](https://github.com/samanyudas/paneru/pull/67), merged as `0d627e7`.
+This branch now uses `main`'s engine pin `ec7fc7c`, which includes it.
+The 28 October rerun below used engine `8b450d6`.
+The #67 code in `0d627e7` matches the tested head `e58657f`.
+Sol approved the merged engine change in one sol-loop round, with no findings.
+Sol approved the Miri change in round 2 of sol-loop on 27 October.
+Round 1 found that an emptied predecessor binding, such as `window_focus_first = []`, still gave the edge action its chords, and the fix treats it like a deleted one.
+A declined nit remains: when several bindings hold an upgraded default's new chords, the Settings notice names only the first.
+[The keybinding reference](decisions/keybinding%20reference.md) records the table and the version 4 upgrade rules.
+
+On 27 October, real key events through every key set on the built-in display below a 2560 by 1440 display gave the same focus, order, stack membership, and native frames.
+Sam's own version 3 configuration upgraded to version 4 with only the expected binding changes, and the test then restored it.
+Later that day, with the built-in display moved left of the external display for the session, both edge stages and the crossing worked on every key set for ⌃⌥⌘⇧, and on the arrow keys for ⌃⌥⌘.
+Those runs also hit the side-by-side parking defect in [#103](https://github.com/samanyudas/miri/issues/103).
+Settings > Shortcuts showed every alternative, the actions without a default, and a seeded conflict notice.
+A live check showed that the engine runs every auto-repeat key-down as a new press, so holding an edge shortcut would cross displays after it reaches the end.
+[#104](https://github.com/samanyudas/miri/issues/104) forbids that for its own shortcuts, and Sam has not decided it for #79.
+A later run on the PR build at `739633f` covered the rest on every key set.
+With the built-in display emptied, ⌃⌥⌘ down focused it with no focused window, moved no window, and left the pointer still, and ⌃⌥⌘⇧ down moved a column there as its only column.
+With the built-in display left of the external display and the external strip scrolled to its start, ⌃⌥⌘ left focused the first column, a second press focused the left display, and ⌃⌥⌘ right crossed back, with no window moved.
+No #103 relocation happened in that run, because no column was parked past the shared edge.
+The refusal for a stack toward a display without a strip is not verified natively.
+On 28 October, a full rerun on the PR build at `3ddca8d` with engine `8b450d6` passed on every key set.
+It covered focus and moves within a strip, both edge stages, display focus and moves with two- and three-window stacks, insertion after the active column, ⌃⌥N, and an empty destination.
+With the built-in display right of the external display, focus and moves crossed both ways, and a two-window stack crossed whole.
+Sam's version 3 configuration upgraded to the same version 4 bindings as before, and the engine log listed 71 distinct chords, none with Fn.
+A held ⌃⌥⌘⇧ left, one press plus one auto-repeat, moved a column to the first position and then onto the neighboring display.
+From a focused Finder window, focusing an empty display does nothing, and the engine command `window focusdisplay south` does the same, so this predates #79.
+The first side-by-side attempt hit #103 when the built-in strip scrolled, and the test then restored every window's display, order, and width.
 
 ## Windows return to their display
 
@@ -156,7 +222,7 @@ Not checked yet: a grant revoked while the switch is on.
 
 ## Gaps between columns while the row scrolls
 
-[#163](https://github.com/samanyudas/miri/issues/163) is partly fixed by [engine PR #87](https://github.com/samanyudas/paneru/pull/87), at `9b0f80c`.
+[#163](https://github.com/samanyudas/miri/issues/163) is partly fixed by [engine PR #87](https://github.com/samanyudas/paneru/pull/87), merged into `miri/v0.5.2` at `5bee78b`.
 The engine's writer for one app moved that app's windows in hash map order.
 When the window ahead in the direction of motion moved first, the desktop showed between the two until the app took the next write, 15 to 40 ms or more for Helium.
 Each batch now goes from the back of the motion to the front.
@@ -207,6 +273,22 @@ The `--busy 300,350` probe managed 575 of 576 windows.
 The one miss is the remaining part of #63: the launch scan lists an app's windows once and skips a window whose details time out.
 The original 4-in-32 misses did not reproduce on `1fd95b1` in 29 rounds.
 On 28 October, the 10 s block was managed at 10.9 s in 2 of 2 runs on `c1f2b5e`.
+
+## Freeze after a keyboard focus change
+
+[#162](https://github.com/samanyudas/miri/issues/162) is fixed by [engine PR #86](https://github.com/samanyudas/paneru/pull/86), merged into `miri/v0.5.2` at `8b026d6`.
+After many focus changes, Helium's focus notifications name the macOS caret indicator, a `CursorUIViewService` window that gets a new id on each text-field focus.
+The engine tracks no such window, so `auto_discover_unmanaged_focused_windows` in `src/ecs/systems.rs` asked every app for its focused window and its window list on the main loop.
+Each question waits up to the 250 ms Accessibility timeout, so one busy app froze the row for about 500 ms, and the animation then took one capped step.
+The engine now asks the window server which process owns the window, and asks only that app, or no app when the engine tracks none.
+Harness tests in `src/tests/interaction.rs` fail on `ec7fc7c`.
+
+On 30 October on Miri Developer with a debug engine, a test app that blocks its main thread 950 ms of every second reproduced the freeze on `ec7fc7c`.
+In 16 Control-Option-Left and Right presses on the 27-inch row, a discovery scan took up to 714 ms, and 4 frames took 250 ms or more, the longest 733 ms.
+On the fix, the same presses gave no frame of 150 ms or more, the longest 118 ms, and each discovery took 0 to 5 ms without asking any app.
+On `ec7fc7c`, scans that met no busy app still took 35 to 124 ms after each focus change into Helium.
+Frames of 40 to 120 ms still follow most presses on the debug engine, from other per-press work.
+Sam's 29 October freeze is the same mechanism by inference: two 250 ms timeouts made the 490 ms gap, and the resolver timed out on a busy app during it.
 
 ## Re-tiled window slot
 

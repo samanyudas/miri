@@ -30,11 +30,8 @@ struct ShortcutsSettings: View {
                 Section {
                     ForEach(model.keptDefaults, id: \.self) { kept in
                         Label {
-                            Text(
-                                "\(kept.action.title) kept \(model.keyLayout.label(for: kept.kept)). Its new default, "
-                                    + "\(model.keyLayout.label(for: kept.wanted)), is used by \(kept.owner)."
-                            )
-                            .fixedSize(horizontal: false, vertical: true)
+                            Text(notice(for: kept))
+                                .fixedSize(horizontal: false, vertical: true)
                         } icon: {
                             Image(systemName: "info.circle.fill").foregroundStyle(.blue)
                         }
@@ -147,6 +144,14 @@ struct ShortcutsSettings: View {
         guard let pendingConflict else { return "" }
         return "\(model.keyLayout.label(for: pendingConflict.chord)) is used by macOS for "
             + "\(pendingConflict.shortcut.name)."
+    }
+
+    private func notice(for kept: KeptDefault) -> String {
+        let wanted = model.keyLayout.label(for: kept.wanted)
+        let held = "Its new default, \(wanted), is used by \(kept.owner)."
+        guard !kept.kept.isEmpty else { return "\(kept.action.title) has no shortcut. \(held)" }
+        return
+            "\(kept.action.title) kept \(kept.kept.map(model.keyLayout.label(for:)).joined(separator: ", ")). \(held)"
     }
 
     private func matches(_ action: ShortcutAction, _ shortcuts: Shortcuts) -> Bool {
