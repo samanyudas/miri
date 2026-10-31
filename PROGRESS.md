@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-31 on branch `fix/163-focus-and-slices`, stacked on `fix/163-pacing`, based on `main` at `845a13a`
+Updated: 2026-10-31 on branch `docs/79-verified`, based on `main` at `48b104e`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -27,7 +27,7 @@ Live on 30 October, a held ⌃⌥⌘← or ⌃⌥⌘→ from a strip's end cross
 On 30 October, with the built-in display left of the external display, the release build carried focus onto the built-in display after one fresh ⌃⌥⌘← press and 3 synthetic auto-repeats.
 The build from this branch stopped at the first column, a fresh press then crossed, and 8 more repeats stayed put.
 No window moved.
-[The keybinding reference](decisions/keybinding%20reference.md) now records the rule, and this settles the held-key question in the #79 section below.
+[The keybinding reference](decisions/keybinding%20reference.md) now records the rule, and this settles the held-key question for #79.
 
 ## Empty display focus from Finder
 
@@ -42,7 +42,7 @@ On 30 October, the combined build passed the end-to-end key press with the built
 From a Finder window, ⌃⌥⌘↓ moved the menu bar and focus to the empty display, pressed once or held, and ⌃⌥⌘↑ came back.
 With the built-in display left of the external display and emptied, a held ⌃⌥⌘← from a Finder window in the first column crossed once to it.
 The build without the fix did nothing in both cases, and ⌃⌥⌘↓ from another app still worked.
-This settles the Finder note in the #79 section below.
+This settles the Finder note from the #79 checks.
 On 31 October, merged `main` at `845a13a` passed the same key presses with ⌃⌥⌘↓, J, and S, and the issue's last criterion was built in [engine PR #94](https://github.com/samanyudas/paneru/pull/94).
 When macOS ignores the desktop focus, the engine now logs a warning and flashes "macOS did not switch to the other display" if the display is not active 500 ms after the request.
 A local build with #89's fix turned off showed the message and the log line from a Finder window, and the real build showed neither.
@@ -51,39 +51,20 @@ A local build with #89's fix turned off showed the message and the log line from
 
 ## Arrow, HJKL, and WASD shortcuts
 
-[#79](https://github.com/samanyudas/miri/issues/79) is implemented on this branch and awaits review.
-Version 4 of the default set gives every directional action the same modifiers on the arrow keys, HJKL, and WASD.
-Four edge-or-monitor actions take the ⌃⌥⌘ and ⌃⌥⌘⇧ left and right chords: the first press reaches the strip's end, and a press at the end crosses to the display on that side.
-Every display move now takes the whole column and inserts it after the destination's active column.
-The engine half is [engine PR #67](https://github.com/samanyudas/paneru/pull/67), merged as `0d627e7`.
-This branch now uses `main`'s engine pin `ec7fc7c`, which includes it.
-The 28 October rerun below used engine `8b450d6`.
-The #67 code in `0d627e7` matches the tested head `e58657f`.
-Sol approved the merged engine change in one sol-loop round, with no findings.
-Sol approved the Miri change in round 2 of sol-loop on 27 October.
-Round 1 found that an emptied predecessor binding, such as `window_focus_first = []`, still gave the edge action its chords, and the fix treats it like a deleted one.
-A declined nit remains: when several bindings hold an upgraded default's new chords, the Settings notice names only the first.
-[The keybinding reference](decisions/keybinding%20reference.md) records the table and the version 4 upgrade rules.
+[#79](https://github.com/samanyudas/miri/issues/79) is done and closed.
+[#119](https://github.com/samanyudas/miri/pull/119) merged it as `45d73f0`, with the engine half from [engine PR #67](https://github.com/samanyudas/paneru/pull/67).
+[The keybinding reference](decisions/keybinding%20reference.md) records the version 4 table and its upgrade rules.
+A declined review nit remains: when several bindings hold an upgraded default's new chords, the Settings notice names only the first.
 
-On 27 October, real key events through every key set on the built-in display below a 2560 by 1440 display gave the same focus, order, stack membership, and native frames.
-Sam's own version 3 configuration upgraded to version 4 with only the expected binding changes, and the test then restored it.
-Later that day, with the built-in display moved left of the external display for the session, both edge stages and the crossing worked on every key set for ⌃⌥⌘⇧, and on the arrow keys for ⌃⌥⌘.
-Those runs also hit the side-by-side parking defect in [#103](https://github.com/samanyudas/miri/issues/103).
-Settings > Shortcuts showed every alternative, the actions without a default, and a seeded conflict notice.
-A live check showed that the engine runs every auto-repeat key-down as a new press, so holding an edge shortcut would cross displays after it reaches the end.
-[#104](https://github.com/samanyudas/miri/issues/104) forbids that for its own shortcuts, and Sam has not decided it for #79.
-A later run on the PR build at `739633f` covered the rest on every key set.
-With the built-in display emptied, ⌃⌥⌘ down focused it with no focused window, moved no window, and left the pointer still, and ⌃⌥⌘⇧ down moved a column there as its only column.
-With the built-in display left of the external display and the external strip scrolled to its start, ⌃⌥⌘ left focused the first column, a second press focused the left display, and ⌃⌥⌘ right crossed back, with no window moved.
-No #103 relocation happened in that run, because no column was parked past the shared edge.
-The refusal for a stack toward a display without a strip is not verified natively.
-On 28 October, a full rerun on the PR build at `3ddca8d` with engine `8b450d6` passed on every key set.
-It covered focus and moves within a strip, both edge stages, display focus and moves with two- and three-window stacks, insertion after the active column, ⌃⌥N, and an empty destination.
-With the built-in display right of the external display, focus and moves crossed both ways, and a two-window stack crossed whole.
-Sam's version 3 configuration upgraded to the same version 4 bindings as before, and the engine log listed 71 distinct chords, none with Fn.
-A held ⌃⌥⌘⇧ left, one press plus one auto-repeat, moved a column to the first position and then onto the neighboring display.
-From a focused Finder window, focusing an empty display does nothing, and the engine command `window focusdisplay south` does the same, so this predates #79.
-The first side-by-side attempt hit #103 when the built-in strip scrolled, and the test then restored every window's display, order, and width.
+On 31 October, Miri Developer built from `main` at `48b104e` with engine `e7742b8` passed every #79 check live with real key events on all three key sets.
+A version 3 copy of Sam's configuration upgraded to the same version 4 bindings Sam has, and the engine bound 71 distinct chords, none with Fn.
+With the built-in display left of the external display, as Sam uses it, focus and moves crossed both ways, a single column and a two-window stack reached each strip end and crossed whole, and nothing crossed further left.
+A held edge shortcut stopped at the strip's end, and a fresh held press crossed once and stayed, as the held edge section above describes.
+With the displays stacked for the session and the built-in display emptied through a second virtual workspace, the within-strip actions, both edge stages, display focus and moves, insertion after the active column, ⌃⌥N, two- and three-window stacks, and an empty destination all passed.
+Focusing the empty display worked from a Finder window too.
+When the destination's last-focused window had closed, display focus went to its most visible window.
+Settings > Shortcuts listed all three chords for every directional action and the four replaced actions with no shortcut.
+No window outside the test changed display or order, and the pointer never moved.
 
 ## Windows return to their display
 
