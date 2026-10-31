@@ -1,0 +1,6 @@
+# Cargo reads this for every cargo command run from the repository root or below it, including vendor/paneru.
+# Each engine test runs hundreds of Bevy frames, and unoptimized Bevy made the 1123 tests take about 7 minutes.
+# Level 1 cut them to under 2 minutes for little compile time. Level 2 was faster to run but nearly 3 times slower to build.
+# The engine crate itself stays unoptimized, so its own code keeps full debugging.
+[profile.dev.package."*"]
+opt-level = 1

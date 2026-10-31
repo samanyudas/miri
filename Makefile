@@ -1,5 +1,5 @@
 # One entry point for setup and verification. CI runs `make lint` on Linux and `make native` on macOS.
-# Cargo runs from the repository root so rust-toolchain.toml selects the pinned Rust.
+# Cargo runs from the repository root so rust-toolchain.toml selects the pinned Rust and .cargo/config.toml applies.
 .DEFAULT_GOAL := check
 ENGINE := --manifest-path vendor/paneru/Cargo.toml --target-dir vendor/paneru/target --locked --no-default-features
 SHELL_SCRIPTS := $(shell git ls-files '*.sh' .githooks)

@@ -48,7 +48,7 @@ If your change contradicts an ADR, say so explicitly instead of overriding it.
 | `make build`, `make test`, `make e2e`, `make package` | One stage of `make native`. `make test` is `make swift-test` and `make engine-test`. |
 | `make format` | Formats Swift sources with `.swift-format`. |
 
-Run cargo from the repository root so `rust-toolchain.toml` applies.
+Run cargo from the repository root so `rust-toolchain.toml` and `.cargo/config.toml` apply.
 CI in `.github/workflows/ci.yml` runs the same make targets, with the macOS stages as parallel jobs.
 Fix what the pre-push hook reports instead of skipping it.
 
