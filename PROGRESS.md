@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-31 on branch `fix/196-edge-photo`, based on `main` at `bc093a1`
+Updated: 2026-11-01 on branch `fix/first-photo-wait`, based on `main` at `5ba92057`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -256,7 +256,11 @@ A frame that moved focus ran about 200 ms, and the 250 ms photo wait counted fro
 The engine also painted and kept any photo, so a blank refresh replaced a good one.
 The wait now starts in the frame after the ask, and a photo with at least 99% of its sampled pixels clear leaves the panel and the kept photo as they were.
 On 31 October, with Notion beside a 920 pt gap on Sam's built-in display, the base build showed 96.9% desktop in the gap on 2 of 2 crossings, and the fixed build showed 0% on 6 of 6, both 1 s and 6 s after Notion parked.
-Right after the engine starts, a parked Notion still shows nothing on the edge until it crosses once.
+[#199](https://github.com/samanyudas/miri/issues/199) fixes the same gap right after each Miri start.
+The first photo after the engine starts took 1.02 s while the engine restored 16 windows, so Notion tucked before it and the photo came out blank.
+A window heading for a tuck now waits up to 1.5 s for its photo, and a blank first photo of a window still in view asks for another.
+On 1 November, after each Miri restart with no crossing, `main` showed 96.9% desktop in the gap on 2 of 2 restarts, and the fix showed Notion on 6 of 6, at every sample from 1 s to 10 s.
+A first photo took 778 ms on one of those restarts.
 
 ## Gaps between columns while the row scrolls
 
