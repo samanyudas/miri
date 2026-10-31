@@ -64,6 +64,8 @@ def check_git(args: list[str], cwd: str) -> str | None:
     if sub == "push":
         if "f" in flags or "--force" in rest or any(a.startswith("+") for a in rest):
             return "force push rewrites shared history; use --force-with-lease on your own branch"
+        if "--no-verify" in rest:
+            return "git push --no-verify skips the pre-push checks; fix what they report instead"
         for option in ("--mirror", "--tags", "--delete", "--prune"):
             if option in rest or (option == "--delete" and "d" in flags):
                 return f"git push {option} changes remote refs beyond one branch"

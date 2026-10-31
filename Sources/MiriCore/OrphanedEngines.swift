@@ -45,6 +45,7 @@ public enum OrphanedEngines {
     private static func executableName(of pid: pid_t) -> String? {
         var buffer = [CChar](repeating: 0, count: 4 * Int(MAXPATHLEN))
         guard proc_pidpath(pid, &buffer, UInt32(buffer.count)) > 0 else { return nil }
-        return String(cString: buffer).split(separator: "/").last.map(String.init)
+        let path = buffer.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }
+        return String(decoding: path, as: UTF8.self).split(separator: "/").last.map(String.init)
     }
 }
