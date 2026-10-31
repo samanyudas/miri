@@ -106,3 +106,5 @@ V1 leaves out the optional Miri dock, portable display layouts, tabbed columns, 
 It also leaves out focus borders, pointer-following controls, display exclusions, fixed-pixel presets, animation tuning, Hyper-key recording, five-finger gestures, and the guided shortcut tutorial.
 A deferral does not commit Miri to building the feature in v2.
 [Release scope](../decisions/release-scope.md) owns that list, and the [v2 roadmap](../decisions/v2-roadmap.md) records the candidates.
+
+This line tests the docs-only CI skip and is never merged.
