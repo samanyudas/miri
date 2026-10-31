@@ -40,4 +40,10 @@ if [[ "$profile" != lint ]]; then
     check "rustc $pinned_rust from rust-toolchain.toml" "rustup toolchain install" \
         test "$(rustc --version 2>/dev/null | cut -d" " -f2)" = "$pinned_rust"
 fi
+
+# CI checkouts have no hooks, so only a full local setup checks this.
+if [[ "$profile" == all ]]; then
+    check "pre-push hook from .githooks" "git config core.hooksPath .githooks" \
+        test "$(git config core.hooksPath)" = .githooks
+fi
 exit $((failures > 0))

@@ -2,17 +2,21 @@
 # Cargo runs from the repository root so rust-toolchain.toml selects the pinned Rust and .cargo/config.toml applies.
 .DEFAULT_GOAL := check
 ENGINE := --manifest-path vendor/paneru/Cargo.toml --target-dir vendor/paneru/target --locked --no-default-features
-SHELL_SCRIPTS := $(shell git ls-files '*.sh')
+SHELL_SCRIPTS := $(shell git ls-files '*.sh' .githooks)
 
-.PHONY: setup check lint lint-doctor docs harness-tests shell actions compat native doctor swift-lint engine-lint build test e2e package format
+.PHONY: setup pre-push check lint lint-doctor docs harness-tests shell actions compat native doctor swift-lint engine-format engine-lint build test swift-test engine-test e2e package format
 
 setup:
 	git submodule update --init
+	git config core.hooksPath .githooks
 	rustup toolchain install
 	scripts/setup-signing.sh
 	scripts/doctor.sh all
 
 check: lint native
+
+# The checks that finish in seconds. The pre-push hook in .githooks runs them.
+pre-push: lint swift-lint engine-format
 
 lint: lint-doctor docs harness-tests shell actions compat
 
@@ -42,15 +46,21 @@ doctor:
 swift-lint:
 	swift format lint --strict --recursive Sources Tests Package.swift
 
-engine-lint:
+engine-format:
 	env -u CARGO_BUILD_TARGET cargo fmt --manifest-path vendor/paneru/Cargo.toml --check
+
+engine-lint: engine-format
 	env -u CARGO_BUILD_TARGET cargo clippy $(ENGINE) --all-targets -- -D warnings
 
 build:
 	scripts/build-app.sh
 
-test:
+test: swift-test engine-test
+
+swift-test:
 	swift test
+
+engine-test:
 	env -u CARGO_BUILD_TARGET cargo test $(ENGINE)
 
 e2e:
