@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-31 on branch `fix/163-pacing`, stacked on `fix/163-row-gaps`, based on `main` at `845a13a`
+Updated: 2026-10-31 on branch `fix/163-focus-and-slices`, stacked on `fix/163-pacing`, based on `main` at `845a13a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -235,6 +235,14 @@ The shown frames are read on a thread of their own, on a window server connectio
 On 30 October, 4 alternating rounds of 12 presses on Sam's 27-inch row, with fast-release engines on top of #162, measured desktop between different apps at 359 ms per burst without pacing and 0 ms with it.
 The row starts and finishes about as fast as before, and quick apps pause more often mid-motion: 12 pauses over 40 ms per burst instead of 7.
 The gaps left come from windows that park or un-park, which snap without an animation, so #163 stays open for them.
+[Engine PR #91](https://github.com/samanyudas/paneru/pull/91), merged into `miri/v0.5.2` at `e7742b8`, fixes two cases that #90 left.
+When focus moves from one app to another, pacing forgets what it saw of both apps' windows, because an app can turn slow right after a focus change.
+In 3 sessions of 10 tries that switch apps and reverse at once, desktop showed in 1 of 10 tries each time before this fix and in none after it.
+A photo sliding in at the shared edge now closes only once the window server shows its window at rest, or after 250 ms.
+Before, it closed as soon as the app took the move, and the bare desktop flashed where the photo had been.
+The slice panels also take their places before the frame's window writes, so the window ahead no longer moves a frame before the photo grows beside it.
+Quick apps pause a little more often mid-motion: Spotify paused 4 times over 40 ms per burst instead of 2.
+A focus move between two windows of one app still resets nothing, and one burst of 4 showed 33 ms of desktop between two Helium windows.
 The recordings and frame captures were removed for privacy and stay local.
 
 ## One strip per native Space
