@@ -4,7 +4,7 @@
 ENGINE := --manifest-path vendor/paneru/Cargo.toml --target-dir vendor/paneru/target --locked --no-default-features
 SHELL_SCRIPTS := $(shell git ls-files '*.sh' .githooks)
 
-.PHONY: setup pre-push check lint lint-doctor docs harness-tests shell actions compat native doctor swift-lint engine-format engine-lint build test e2e package format
+.PHONY: setup pre-push check lint lint-doctor docs harness-tests shell actions compat native doctor swift-lint engine-format engine-lint build test swift-test engine-test e2e package format
 
 setup:
 	git submodule update --init
@@ -55,8 +55,12 @@ engine-lint: engine-format
 build:
 	scripts/build-app.sh
 
-test:
+test: swift-test engine-test
+
+swift-test:
 	swift test
+
+engine-test:
 	env -u CARGO_BUILD_TARGET cargo test $(ENGINE)
 
 e2e:

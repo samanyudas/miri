@@ -45,11 +45,11 @@ If your change contradicts an ADR, say so explicitly instead of overriding it.
 | `make lint` | Docs links and style, harness tests, ShellCheck, actionlint, version compatibility. Works on Linux. |
 | `make native` | Swift and engine lint, build, Swift and engine unit tests, end-to-end selftests, DMG packaging. Needs macOS 27 arm64. |
 | `make check` | `make lint` and `make native`. This is the gate before a PR. |
-| `make build`, `make test`, `make e2e`, `make package` | One stage of `make native`. |
+| `make build`, `make test`, `make e2e`, `make package` | One stage of `make native`. `make test` is `make swift-test` and `make engine-test`. |
 | `make format` | Formats Swift sources with `.swift-format`. |
 
 Run cargo from the repository root so `rust-toolchain.toml` applies.
-CI in `.github/workflows/ci.yml` runs the same make targets.
+CI in `.github/workflows/ci.yml` runs the same make targets, with the macOS stages as parallel jobs.
 Fix what the pre-push hook reports instead of skipping it.
 
 ## Definition of done
