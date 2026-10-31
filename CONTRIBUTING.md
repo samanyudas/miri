@@ -26,6 +26,7 @@ Upgrade the engine one Paneru release tag at a time.
 
 Run `make check` before you open a pull request.
 CI runs the same targets, so a local pass predicts a CI pass.
+The pre-push hook that `make setup` installs runs `make pre-push`, the checks that finish in seconds, before every push.
 
 | Target | What it proves |
 | --- | --- |

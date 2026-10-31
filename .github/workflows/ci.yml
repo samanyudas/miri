@@ -38,9 +38,33 @@ jobs:
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
       - run: make lint
 
+  changes:
+    name: Decide whether the macOS jobs run
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      native: ${{ steps.decide.outputs.native }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # A pull request checks out its merge commit, whose first parent is the base branch.
+          fetch-depth: 2
+      - id: decide
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = pull_request ]; then
+            python3 scripts/ci-needs-native.py HEAD^1 >> "$GITHUB_OUTPUT"
+          else
+            echo native=true >> "$GITHUB_OUTPUT"
+          fi
+
   # The macOS stages of `make native` run as parallel jobs, so a pull request waits only for the slowest one.
   swift:
     name: Swift lint and tests on macOS 27
+    needs: changes
+    if: needs.changes.outputs.native == 'true'
     runs-on: xcode-27
     timeout-minutes: 15
     steps:
@@ -54,6 +78,8 @@ jobs:
 
   engine-lint:
     name: Engine lint on macOS 27
+    needs: changes
+    if: needs.changes.outputs.native == 'true'
     runs-on: xcode-27
     timeout-minutes: 20
     steps:
@@ -81,6 +107,8 @@ jobs:
 
   engine-test:
     name: Engine tests on macOS 27
+    needs: changes
+    if: needs.changes.outputs.native == 'true'
     runs-on: xcode-27
     timeout-minutes: 30
     steps:
@@ -108,6 +136,8 @@ jobs:
 
   app:
     name: Build, selftest, and package on macOS 27
+    needs: changes
+    if: needs.changes.outputs.native == 'true'
     runs-on: xcode-27
     timeout-minutes: 30
     steps:
