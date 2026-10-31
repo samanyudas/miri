@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-31 on branch `fix/137-upstream-sync`, based on `main` at `d1d8cd3`
+Updated: 2026-10-31 on branch `fix/183-focus-after-move`, based on `main` at `ea2c5b2`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -61,6 +61,14 @@ A local build with #89's fix turned off showed the message and the log line from
 [Engine PR #95](https://github.com/samanyudas/paneru/pull/95) keeps flash messages opaque until their last 300 ms, because the old linear fade left this message hard to read.
 It reached `main` with [#181](https://github.com/samanyudas/miri/pull/181), whose engine pin `3cb2fa0` contains it.
 #168 stays open for Sam's hardware check.
+
+## Focus after moving a window to another display
+
+[#183](https://github.com/samanyudas/miri/issues/183) is fixed in [engine PR #98](https://github.com/samanyudas/paneru/pull/98), merged as `51d3925` with the tested tree.
+A window that moves to another display keeps its focus, so macOS sends no focus event, and the display used to return to the window used there before.
+The engine now records the moved window for its new strip when focus follows the move, and a move that leaves focus behind changes neither display's memory.
+On 31 October, the live repro passed on the fixed build: a Finder window moved to the built-in display, and focus came back to it after a visit to the other display.
+Drags across displays and virtual-workspace moves were not checked.
 
 ## Arrow, HJKL, and WASD shortcuts
 
