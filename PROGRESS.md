@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-31 on branch `fix/162-focus-stall`, based on `main` at `845a13a`
+Updated: 2026-10-31 on branch `fix/163-row-gaps`, stacked on `fix/162-focus-stall`, based on `main` at `845a13a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -198,7 +198,7 @@ A revealed window's photo slides in with the row and the real window takes over 
 Each window keeps its last photo, so a later crossing paints at once, and every hidden column's photo follows its place in the row.
 On 29 and 30 October, Sam confirmed a slice click slides smoothly, and burst captures of rapid keyboard presses on Sam's M3 showed no bare edge.
 The first crossing after the engine starts still moves at once, because no photo is kept yet.
-Half-second stalls after some focus changes are [#162](https://github.com/samanyudas/miri/issues/162), and short gaps between ordinary columns are [#163](https://github.com/samanyudas/miri/issues/163).
+Half-second stalls after some focus changes are [#162](https://github.com/samanyudas/miri/issues/162), and short gaps between ordinary columns are [#163](https://github.com/samanyudas/miri/issues/163), described below.
 
 On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
 On engine `8b450d6`, Grok moved from the 27-inch strip into the built-in strip, which parked it back over the 27-inch display.
@@ -219,6 +219,21 @@ On 28 October, the step 3 build showed the macOS prompt naming Miri Developer.ap
 Its button opened the Screen & System Audio Recording pane, which listed one Miri Developer.app entry.
 After Sam granted that entry, the switch stayed on and wrote the key, with no prompt.
 Not checked yet: a grant revoked while the switch is on.
+
+## Gaps between columns while the row scrolls
+
+[#163](https://github.com/samanyudas/miri/issues/163) is partly fixed by [engine PR #87](https://github.com/samanyudas/paneru/pull/87), merged into `miri/v0.5.2` at `5bee78b`.
+The engine's writer for one app moved that app's windows in hash map order.
+When the window ahead in the direction of motion moved first, the desktop showed between the two until the app took the next write, 15 to 40 ms or more for Helium.
+Each batch now goes from the back of the motion to the front.
+The writer also turned Helium's `AXEnhancedUserInterface` off and on again every frame, and Chromium takes 10 to 360 ms to turn it back on.
+It now stays off for a whole motion and comes back 1 second after the last write, or at once when the engine exits.
+On 30 October, 4 alternating rounds of 12 rapid presses on Sam's 27-inch row, with fast-release engines on top of #162, measured the gap area per burst at 178 pt·s before and 109 pt·s after.
+The time with desktop between two Helium windows fell from 383 ms to 44 ms per burst.
+Gaps between windows of different apps stayed at about 600 to 660 ms per burst, because Helium applies a move much later than Finder or Spotify.
+Removing them needs a choice about pacing the row to its slowest window, so #163 stays open.
+A lockstep that held fast apps while another app was mid-write did not help.
+Recordings and measurements are on the `pr-media` branch under `163/`.
 
 ## One strip per native Space
 
