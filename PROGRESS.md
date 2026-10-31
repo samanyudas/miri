@@ -82,7 +82,7 @@ When macOS ignores the desktop focus, the engine now logs a warning and flashes 
 A local build with #89's fix turned off showed the message and the log line from a Finder window, and the real build showed neither.
 [Engine PR #95](https://github.com/samanyudas/paneru/pull/95) keeps flash messages opaque until their last 300 ms, because the old linear fade left this message hard to read.
 It reached `main` with [#181](https://github.com/samanyudas/miri/pull/181), whose engine pin `3cb2fa0` contains it.
-#168 stays open for Sam's hardware check.
+#168 was verified on `main` at `dd1cfd3` and closed on 31 October.
 
 ## Focus after moving a window to another display
 
