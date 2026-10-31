@@ -43,6 +43,11 @@ From a Finder window, ⌃⌥⌘↓ moved the menu bar and focus to the empty dis
 With the built-in display left of the external display and emptied, a held ⌃⌥⌘← from a Finder window in the first column crossed once to it.
 The build without the fix did nothing in both cases, and ⌃⌥⌘↓ from another app still worked.
 This settles the Finder note in the #79 section below.
+On 31 October, merged `main` at `845a13a` passed the same key presses with ⌃⌥⌘↓, J, and S, and the issue's last criterion was built in [engine PR #94](https://github.com/samanyudas/paneru/pull/94).
+When macOS ignores the desktop focus, the engine now logs a warning and flashes "macOS did not switch to the other display" if the display is not active 500 ms after the request.
+A local build with #89's fix turned off showed the message and the log line from a Finder window, and the real build showed neither.
+[Engine PR #95](https://github.com/samanyudas/paneru/pull/95), pinned by [#180](https://github.com/samanyudas/miri/pull/180), keeps flash messages opaque until their last 300 ms, because the old linear fade left this message hard to read.
+#168 stays open for Sam's hardware check.
 
 ## Arrow, HJKL, and WASD shortcuts
 
