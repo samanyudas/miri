@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-31 on branch `docs/79-verified`, based on `main` at `48b104e`
+Updated: 2026-10-31 on branch `fix/137-upstream-sync`, based on `main` at `d1d8cd3`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,18 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Upstream Paneru sync
+
+[#137](https://github.com/samanyudas/miri/issues/137) is implemented in [engine PR #96](https://github.com/samanyudas/paneru/pull/96), merged as `3cb2fa0` with no change from the tested tree.
+This branch pins `3cb2fa0`.
+It brings the 8 upstream `main` commits up to `425d37a` that `miri/v0.5.2` lacked, as a merge commit so later syncs keep upstream ancestry.
+Sam chose on 31 October to take all 8.
+With Miri's settings, the visible changes are lower idle CPU (`cc55f94`) and a stray-tab check that no longer queries every app each second (`425d37a`).
+The paging swipe, the virtual workspace fix and the overlay fix change nothing by default, because Miri never turns on paging, virtual workspaces or the focus border.
+Upstream `425d37a` could leave a Ghostty stray-tab column for good, so the engine keeps rechecking while an overlapping column exists.
+Live on 31 October, nobody touching the Mac, the engine used 6.92 s of CPU per idle minute at `e7742b8` and 2.83 to 3.48 s at the tested head.
+Not checked live: a Ghostty stray tab folding, and a slow app's focus retry, which can now fire about 125 ms late when nothing else wakes the engine.
 
 ## Held edge shortcuts
 
@@ -46,7 +58,8 @@ This settles the Finder note from the #79 checks.
 On 31 October, merged `main` at `845a13a` passed the same key presses with ⌃⌥⌘↓, J, and S, and the issue's last criterion was built in [engine PR #94](https://github.com/samanyudas/paneru/pull/94).
 When macOS ignores the desktop focus, the engine now logs a warning and flashes "macOS did not switch to the other display" if the display is not active 500 ms after the request.
 A local build with #89's fix turned off showed the message and the log line from a Finder window, and the real build showed neither.
-[Engine PR #95](https://github.com/samanyudas/paneru/pull/95), pinned by [#180](https://github.com/samanyudas/miri/pull/180), keeps flash messages opaque until their last 300 ms, because the old linear fade left this message hard to read.
+[Engine PR #95](https://github.com/samanyudas/paneru/pull/95) keeps flash messages opaque until their last 300 ms, because the old linear fade left this message hard to read.
+It reached `main` with [#181](https://github.com/samanyudas/miri/pull/181), whose engine pin `3cb2fa0` contains it.
 #168 stays open for Sam's hardware check.
 
 ## Arrow, HJKL, and WASD shortcuts
