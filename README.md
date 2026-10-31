@@ -24,7 +24,7 @@ The full v1 acceptance checklists have not run.
 - An Apple silicon Mac running macOS 27 or later.
 - Xcode 27, which provides Swift 6.2 or newer.
 - [rustup](https://rustup.rs).
-  The repository pins Rust 1.98.1 in `rust-toolchain.toml`, and `make setup` installs it.
+  The repository pins Rust 1.99.0 in `rust-toolchain.toml`, and `make setup` installs it.
 - Python 3.11 or newer, [ShellCheck](https://www.shellcheck.net), and [actionlint](https://github.com/rhysd/actionlint).
   Install the last two with `brew install shellcheck actionlint`.
 
