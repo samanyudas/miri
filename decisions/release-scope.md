@@ -307,6 +307,10 @@ While dragging, a horizontal insertion line shows a drop into a column, and a ve
 A drop into a stack at its limit, or past what the destination display fits, is refused.
 Miri shows a not-allowed indicator, and the window returns to its place.
 Holding the pointer near a display edge with no neighboring display for about half a second scrolls the strip.
+Holding the pointer for about half a second over the visible part of a column that a display edge cuts off also scrolls the strip, on any edge, including one shared with another display.
+That hold counts only within 200 points of the edge, and not over a column that holds the dragged window.
+Either hold keeps scrolling one column about every 350 milliseconds while the pointer stays where the hold started.
+Sam chose this on 1 November 2026, so a strip beside another display can still scroll during a drag ([#205](https://github.com/samanyudas/miri/issues/205)).
 After a drop, the dropped window keeps focus, and the strip moves only as far as needed to show it.
 If macOS tiles the window instead, the engine returns it to its place in the layout.
 

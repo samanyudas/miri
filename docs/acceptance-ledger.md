@@ -61,7 +61,7 @@ The checklists do not list them yet, so this ledger tracks them here.
 | S-3 | After a swipe or modifier scroll, the strip settles on a column, respects the ends, restores stack focus, and resists in a strip that fits. | | | | | Pending | |
 | S-4 | Stack heights stay equal after membership changes, and windows with minimum heights never overlap. | | | | | Pending | |
 | S-5 | An overflowing stack overlaps each window only below the top bar above it, and the focused window comes to the front and returns on focus change ([#42](https://github.com/samanyudas/miri/issues/42)). | | | | | Pending | |
-| S-6 | Dragging a tiled window inserts it into a column at the top, middle, or bottom, or opens a new column, on the same and another display, with insertion lines, refusal, and edge auto-scroll ([#43](https://github.com/samanyudas/miri/issues/43)). | | | | | Pending | |
+| S-6 | Dragging a tiled window inserts it into a column at the top, middle, or bottom, or opens a new column, on the same and another display, with insertion lines, refusal, edge auto-scroll, and auto-scroll over a column cut off at an edge shared with another display ([#43](https://github.com/samanyudas/miri/issues/43), [#205](https://github.com/samanyudas/miri/issues/205)). | | | | | Pending | |
 | S-7 | The stack limit defaults to 5, never exceeds what fits, a Stack command past it starts a new column, and lowering it leaves existing stacks unchanged ([#44](https://github.com/samanyudas/miri/issues/44)). | | | | | Pending | |
 
 ## App acceptance
