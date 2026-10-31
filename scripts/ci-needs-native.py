@@ -17,7 +17,9 @@ def main() -> int:
     if len(sys.argv) != 2:
         print("usage: ci-needs-native.py BASE_REVISION", file=sys.stderr)
         return 2
-    diff = subprocess.run(["git", "diff", "--name-only", sys.argv[1], "HEAD"], capture_output=True, text=True)
+    # Without --no-renames, a file moved into docs/ would hide the source path it removed.
+    diff = subprocess.run(["git", "diff", "--name-only", "--no-renames", sys.argv[1], "HEAD"],
+                          capture_output=True, text=True)
     if diff.returncode != 0:
         print(diff.stderr, end="", file=sys.stderr)
         return 1
