@@ -37,6 +37,7 @@ class GuardCommandTest(unittest.TestCase):
             "git push origin v1.0.0": "version tag",
             "git push --tags": "--tags",
             "git push -d origin feature": "--delete",
+            "git push --no-verify -u origin feature": "pre-push checks",
             "cd /tmp && git -C repo reset --hard HEAD~1": "reset --hard",
             "git clean -xfd": "git clean",
             "git branch -D old": "branch -D",

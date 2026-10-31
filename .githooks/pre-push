@@ -1,0 +1,15 @@
+#!/bin/bash
+# Runs the checks that finish in seconds before every push, so a red check costs seconds instead of a CI run.
+# `make setup` installs it by pointing core.hooksPath at .githooks. The checks read the working tree.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+# Git passes one line per pushed ref. A push that only deletes refs sends an all-zero local object.
+pushes_commits=false
+while read -r _ local_object _ _; do
+    [[ "$local_object" =~ ^0+$ ]] || pushes_commits=true
+done
+$pushes_commits || exit 0
+
+echo "pre-push: make pre-push (skip once with git push --no-verify)" >&2
+exec make --no-print-directory pre-push
