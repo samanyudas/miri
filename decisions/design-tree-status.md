@@ -172,7 +172,8 @@ The endurance requirement that engine memory stays stable has no measurable pass
 
 ## Deferred branches
 
-Tabbed columns, the minimap, inactive-window dimming, advanced rules, virtual workspaces, and portable display layouts remain outside v1.
+Tabbed columns, the minimap, inactive-window dimming, advanced rules, and portable display layouts remain outside v1.
+Virtual workspaces are dropped, not deferred, as the [v2 roadmap](v2-roadmap.md#dropped-ideas) records.
 Dragging windows into columns, to new columns, and between displays is v1 work.
 Focus borders, pointer-following controls, display exclusions, fixed-pixel presets, animation tuning, and Hyper-key recording are also excluded from v1.
 Five-finger strip gestures are also deferred.
