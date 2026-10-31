@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-31 on branch `fix/137-upstream-sync`, based on `main` at `d1d8cd3`
+Updated: 2026-10-31 on branch `fix/182-rust-199`, based on `main` at `ea2c5b2`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,14 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Rust 1.99
+
+[#182](https://github.com/samanyudas/miri/issues/182) moves `rust-toolchain.toml` and README.md to Rust 1.99.0.
+This branch pins `1612ae2`, the merge of [engine PR #97](https://github.com/samanyudas/paneru/pull/97), with no change from the tested tree.
+Clippy 1.99's `assert_is_empty` lint failed 16 engine test assertions written after the earlier fixes `9878143` and `c87ec14`, and #97 rewrites them as Clippy suggests.
+No production code changed.
+On 31 October, Miri Developer built with 1.99.0 restored all 14 windows, answered `query state`, and moved focus with `send-cmd`.
 
 ## Upstream Paneru sync
 
