@@ -40,7 +40,8 @@ If your change contradicts an ADR, say so explicitly instead of overriding it.
 
 | Command | Runs |
 | --- | --- |
-| `make setup` | Engine checkout, pinned Rust install, local signing identity, prerequisite report. |
+| `make setup` | Engine checkout, pre-push hook, pinned Rust install, local signing identity, prerequisite report. |
+| `make pre-push` | `make lint`, Swift formatting, and engine formatting in seconds. The pre-push hook runs it. |
 | `make lint` | Docs links and style, harness tests, ShellCheck, actionlint, version compatibility. Works on Linux. |
 | `make native` | Swift and engine lint, build, Swift and engine unit tests, end-to-end selftests, DMG packaging. Needs macOS 27 arm64. |
 | `make check` | `make lint` and `make native`. This is the gate before a PR. |
@@ -49,6 +50,7 @@ If your change contradicts an ADR, say so explicitly instead of overriding it.
 
 Run cargo from the repository root so `rust-toolchain.toml` applies.
 CI in `.github/workflows/ci.yml` runs the same make targets.
+Fix what the pre-push hook reports instead of skipping it.
 
 ## Definition of done
 
@@ -66,7 +68,7 @@ Never report one as another.
 
 `.claude/hooks/guard-command.py` blocks these commands for agents:
 
-- Pushing to `main`, force pushing, pushing tags, and deleting remote branches.
+- Pushing to `main`, force pushing, pushing with `--no-verify`, pushing tags, and deleting remote branches.
 - `gh pr merge`, release changes, and repository setting changes. Sam merges and releases.
 - `git reset --hard`, `git clean -f`, and `git branch -D`.
 - `tccutil reset` and `defaults write`. Miri never changes privacy permissions or macOS settings.

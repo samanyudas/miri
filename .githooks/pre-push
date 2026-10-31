@@ -3,6 +3,9 @@
 # `make setup` installs it by pointing core.hooksPath at .githooks. The checks read the working tree.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
+# Git exports GIT_DIR to hooks, which would point `git -C vendor/paneru` at this repository instead of the engine.
+# shellcheck disable=SC2046
+unset $(git rev-parse --local-env-vars)
 
 # Git passes one line per pushed ref. A push that only deletes refs sends an all-zero local object.
 pushes_commits=false
