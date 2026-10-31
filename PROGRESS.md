@@ -25,7 +25,8 @@ GitHub's macOS runner gives Bevy one compute thread, against four on Sam's Mac, 
 - [#186](https://github.com/samanyudas/miri/pull/186) skips the macOS job for documentation-only pull requests, verified in CI with throwaway #187.
 - [#188](https://github.com/samanyudas/miri/pull/188) adds a pre-push hook for the fast checks. After it merges, run `make setup` or `git config core.hooksPath .githooks` once.
 - [#191](https://github.com/samanyudas/miri/pull/191) treats Swift warnings as errors.
-- Optimizing engine dependencies in the dev profile cut the local engine tests from 415 s to 99 s. Its PR and the split of the macOS job into parallel jobs are next.
+- Optimizing engine dependencies in the dev profile cut the local engine tests from 415 s to 99 s. Its PR is next.
+- The macOS job is split into four parallel jobs: Swift, engine lint, engine tests, and the app build with selftests and packaging. The engine tests job is the slowest.
 
 ## Upstream Paneru sync
 
