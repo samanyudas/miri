@@ -61,7 +61,7 @@ jobs:
           RUSTUP_TOOLCHAIN: ${{ steps.rust.outputs.toolchain }}
         with:
           workspaces: vendor/paneru
-          save-if: ${{ github.ref == 'refs/heads/main' }}
+          save-if: true
       # These steps are the prerequisites of `make native`, run one by one for readable logs.
       - name: Check prerequisites
         run: make doctor
