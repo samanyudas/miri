@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-31 on branch `fix/163-row-gaps`, stacked on `fix/162-focus-stall`, based on `main` at `845a13a`
+Updated: 2026-10-31 on branch `fix/163-pacing`, stacked on `fix/163-row-gaps`, based on `main` at `845a13a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -222,18 +222,20 @@ Not checked yet: a grant revoked while the switch is on.
 
 ## Gaps between columns while the row scrolls
 
-[#163](https://github.com/samanyudas/miri/issues/163) is partly fixed by [engine PR #87](https://github.com/samanyudas/paneru/pull/87), merged into `miri/v0.5.2` at `5bee78b`.
-The engine's writer for one app moved that app's windows in hash map order.
-When the window ahead in the direction of motion moved first, the desktop showed between the two until the app took the next write, 15 to 40 ms or more for Helium.
-Each batch now goes from the back of the motion to the front.
-The writer also turned Helium's `AXEnhancedUserInterface` off and on again every frame, and Chromium takes 10 to 360 ms to turn it back on.
-It now stays off for a whole motion and comes back 1 second after the last write, or at once when the engine exits.
-On 30 October, 4 alternating rounds of 12 rapid presses on Sam's 27-inch row, with fast-release engines on top of #162, measured the gap area per burst at 178 pt·s before and 109 pt·s after.
-The time with desktop between two Helium windows fell from 383 ms to 44 ms per burst.
-Gaps between windows of different apps stayed at about 600 to 660 ms per burst, because Helium applies a move much later than Finder or Spotify.
-Removing them needs a choice about pacing the row to its slowest window, so #163 stays open.
-A lockstep that held fast apps while another app was mid-write did not help.
-Recordings and measurements are on the `pr-media` branch under `163/`.
+[#163](https://github.com/samanyudas/miri/issues/163) is partly fixed by [engine PR #87](https://github.com/samanyudas/paneru/pull/87) and [engine PR #90](https://github.com/samanyudas/paneru/pull/90), merged into `miri/v0.5.2` at `5bee78b` and `986c53c`.
+Engine PR #87 writes one app's windows from the back of the motion to the front, and keeps Helium's `AXEnhancedUserInterface` off for a whole motion.
+That removed most gaps between windows of the same app.
+Gaps between windows of different apps stayed, because each window eased to its target on its own while apps take a move at different speeds: Spotify at once, Helium 15 to 40 ms later, and up to a few hundred ms later right after a focus change.
+Engine PR #90 paces the row at its slowest window.
+While a row animates, no window gets closer to its target than the column behind it, as the window server shows that column.
+Sliding photos at the shared edge are held the same way.
+A window whose app took every move of a whole motion in time paces from where the engine puts it, so a row of quick apps moves together.
+A window that shows no progress for 250 ms stops pacing the row, so a hung app cannot stall it.
+The shown frames are read on a thread of their own, on a window server connection of their own: on the main connection the read waited for the engine's own drawing and froze the engine for 500 ms at a time.
+On 30 October, 4 alternating rounds of 12 presses on Sam's 27-inch row, with fast-release engines on top of #162, measured desktop between different apps at 359 ms per burst without pacing and 0 ms with it.
+The row starts and finishes about as fast as before, and quick apps pause more often mid-motion: 12 pauses over 40 ms per burst instead of 7.
+The gaps left come from windows that park or un-park, which snap without an animation, so #163 stays open for them.
+The recordings and frame captures were removed for privacy and stay local.
 
 ## One strip per native Space
 
