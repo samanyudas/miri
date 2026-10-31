@@ -168,7 +168,7 @@ struct LayoutSettings: View {
                 }
             } footer: {
                 Text(
-                    "Fractions of the display width, from narrowest to widest, separated by commas. Control-Option-R cycles through them."
+                    "Fractions of the display width, from narrowest to widest, separated by commas. \(cycleShortcutText)"
                 )
                 .foregroundStyle(.secondary)
             }
@@ -223,6 +223,16 @@ struct LayoutSettings: View {
             _ in
             mainDisplayHeight = Self.currentMainDisplayHeight()
         }
+    }
+
+    /// Names the shortcuts bound to cycling the presets, which the user can change in Shortcuts.
+    private var cycleShortcutText: String {
+        let action = ShortcutAction.cyclePresetWidths
+        guard let shortcuts = model.shortcuts else { return "" }
+        let labels = shortcuts.chords(for: action).map(model.keyLayout.label(for:))
+        return labels.isEmpty
+            ? "\(action.title) has no shortcut. Add one in Shortcuts."
+            : "\(labels.formatted(.list(type: .or))) cycles through them."
     }
 
     private var stackLimit: Binding<StackLimit> {
