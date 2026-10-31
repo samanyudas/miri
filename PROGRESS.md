@@ -1148,9 +1148,6 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
    Verify install, upgrade, and Accessibility attribution on the released bundle.
 3. Freeze one release candidate, then run the complete app and multi-monitor acceptance checklists on that bundle with Accessibility granted.
 4. Define the engine memory-stability rule, complete the endurance period, and have Sam decide Q6 at the final check before publishing v1.
-5. Move to Rust 1.99 when the product is ready.
-   [Engine PR #3](https://github.com/samanyudas/paneru/pull/3) fixed Rust 1.99's `assert_is_empty` Clippy errors on 14 October, and the engine pin includes it.
-   Later engine code adds new `assert!(x.is_empty())` calls, so run Clippy on 1.99 again before the move.
 
 ## Blockers
 
