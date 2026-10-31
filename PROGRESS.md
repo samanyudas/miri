@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-31 on branch `fix/183-focus-after-move`, based on `main` at `692e237`
+Updated: 2026-10-31 on branch `fix/196-edge-photo`, based on `main` at `bc093a1`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -248,6 +248,15 @@ On 28 October, the step 3 build showed the macOS prompt naming Miri Developer.ap
 Its button opened the Screen & System Audio Recording pane, which listed one Miri Developer.app entry.
 After Sam granted that entry, the switch stayed on and wrote the key, with no prompt.
 Not checked yet: a grant revoked while the switch is on.
+
+[#196](https://github.com/samanyudas/miri/issues/196) fixes a blank photo of Notion on the shared edge, which showed the desktop instead.
+Notion draws nothing while its window is parked, so a photo of the parked window is 99.95% clear.
+Two engine faults let such a photo through.
+A frame that moved focus ran about 200 ms, and the 250 ms photo wait counted from that frame's start, so Notion parked about 50 ms after the photo was asked for.
+The engine also painted and kept any photo, so a blank refresh replaced a good one.
+The wait now starts in the frame after the ask, and a photo with at least 99% of its sampled pixels clear leaves the panel and the kept photo as they were.
+On 31 October, with Notion beside a 920 pt gap on Sam's built-in display, the base build showed 96.9% desktop in the gap on 2 of 2 crossings, and the fixed build showed 0% on 6 of 6, both 1 s and 6 s after Notion parked.
+Right after the engine starts, a parked Notion still shows nothing on the edge until it crosses once.
 
 ## Gaps between columns while the row scrolls
 
