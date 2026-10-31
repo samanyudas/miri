@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-10-31 on branch `fix/137-upstream-sync`, based on `main` at `d1d8cd3`
+Updated: 2026-10-31 on branch `ci/rust-cache`, based on `main` at `ea2c5b2`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,19 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
 The stack limit and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## CI speed
+
+[#184](https://github.com/samanyudas/miri/issues/184) tracks making CI fast enough for agent iteration, one PR per change.
+On 30 and 31 October the macOS job took 8 to 15 minutes, and runners started within 4 s.
+The engine test binary alone took 403 to 620 s, and every run compiled the engine dependencies from nothing three times.
+GitHub's macOS runner gives Bevy one compute thread, against four on Sam's Mac, so the engine tests run far slower there.
+
+- [#185](https://github.com/samanyudas/miri/pull/185) caches engine build artifacts, saved only from `main`. A warm run took Clippy from 103 s to 28 s and the engine build from 176 s to 46 s.
+- [#186](https://github.com/samanyudas/miri/pull/186) skips the macOS job for documentation-only pull requests, verified in CI with throwaway #187.
+- [#188](https://github.com/samanyudas/miri/pull/188) adds a pre-push hook for the fast checks. After it merges, run `make setup` or `git config core.hooksPath .githooks` once.
+- [#191](https://github.com/samanyudas/miri/pull/191) treats Swift warnings as errors.
+- Optimizing engine dependencies in the dev profile cut the local engine tests from 415 s to 99 s. Its PR and the split of the macOS job into parallel jobs are next.
 
 ## Upstream Paneru sync
 
