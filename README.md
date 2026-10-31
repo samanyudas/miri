@@ -58,6 +58,7 @@ make check
 `make lint` checks documentation, harness tests, shell scripts, workflows, and declared version compatibility.
 `make native` lints Swift and the engine, builds the app, runs the Swift and engine unit tests, runs the end-to-end permission and window recovery selftests, and packages a DMG.
 CI runs the same targets on every pull request.
+A pull request that changes only documentation skips `make native` in CI, as `scripts/ci-needs-native.py` decides.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow.
 
 ## License
