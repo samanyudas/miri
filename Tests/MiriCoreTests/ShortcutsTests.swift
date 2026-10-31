@@ -88,7 +88,7 @@ import Testing
 @MainActor struct ShortcutsTests {
     private let us = KeyLayout(inputSourceID: "com.apple.keylayout.US")!
     private let focusWest = ShortcutAction.engine(command: "window_focus_west")
-    private let resize = ShortcutAction.engine(command: "window_resize_grow")
+    private let resize = ShortcutAction.cyclePresetWidths
 
     private func shortcuts(_ text: String) throws -> Shortcuts {
         Shortcuts(document: try TOMLDocument(text), layout: us)

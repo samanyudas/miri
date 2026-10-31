@@ -9,6 +9,9 @@ public enum ShortcutAction: Hashable, Sendable {
     public static let editable: [ShortcutAction] =
         DefaultBinding.table.map { .engine(command: EngineCommand.canonical($0.command)!) } + [.stop]
 
+    /// Cycle preset widths forward, which the Layout settings page names below the width presets.
+    public static let cyclePresetWidths = ShortcutAction.engine(command: EngineCommand.canonical("window_resize")!)
+
     public var title: String {
         switch self {
         case .engine(let command): DefaultBinding.row(for: command)?.action ?? command
