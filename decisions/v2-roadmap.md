@@ -32,12 +32,18 @@ Sam accepted the Miri dock for v2 and deferred the other work below during the i
 - Grid monitor arrangements and the maximum supported display count move from v1.
   The target is eight displays, the most that Apple documents for any current Mac.
   A 3x3 grid needs nine displays and therefore exceeds that limit.
-- Paneru's virtual workspaces, which add extra strips within one native Space, are turned off in v1 and planned for v2.
 - Five-finger strip gestures are deferred from v1.
   The pinned engine's acceptance of the finger count does not establish usable hardware behavior.
 - Focus borders, pointer-following controls, display exclusions, fixed-pixel presets, animation tuning, and Hyper-key recording are excluded from v1.
   Sam accepted these deferrals in the subsequent design-tree interview on 14 October 2026.
   Their deferral does not commit to implementing every proposal in v2.
+
+## Dropped ideas
+
+Sam dropped Paneru's virtual workspaces on 1 November 2026.
+A virtual workspace is an extra strip within one native macOS Space.
+macOS Spaces already give each display several strips, because Miri keeps a separate strip for each Space.
+Virtual workspaces stay turned off, with their commands and menu bar indicator hidden.
 
 ## Miri dock
 

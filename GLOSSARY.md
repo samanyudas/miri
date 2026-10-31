@@ -26,7 +26,8 @@ A macOS desktop on a physical monitor, created through Mission Control, with its
 _Avoid_: Workspace, virtual workspace
 
 **Virtual workspace**:
-An extra scrolling strip stacked within one native Space, planned for v2.
+An extra scrolling strip stacked within one native Space.
+It is a Paneru feature that Miri keeps turned off, because native Spaces serve the same purpose.
 _Avoid_: Space, vertical set
 
 **Scrolling strip**:

@@ -102,7 +102,9 @@ Each one has an open issue with the next investigation step.
 
 ## Deferred to v2
 
-V1 leaves out the optional Miri dock, portable display layouts, tabbed columns, the minimap, inactive-window dimming, advanced window rules, and virtual workspaces.
+V1 leaves out the optional Miri dock, portable display layouts, tabbed columns, the minimap, inactive-window dimming, and advanced window rules.
 It also leaves out focus borders, pointer-following controls, display exclusions, fixed-pixel presets, animation tuning, Hyper-key recording, five-finger gestures, and the guided shortcut tutorial.
 A deferral does not commit Miri to building the feature in v2.
+Miri does not offer virtual workspaces, which are extra strips within one macOS Space.
+Use macOS Spaces instead, because each Space has its own strip.
 [Release scope](../decisions/release-scope.md) owns that list, and the [v2 roadmap](../decisions/v2-roadmap.md) records the candidates.

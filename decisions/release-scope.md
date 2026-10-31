@@ -138,7 +138,8 @@ Trackpad scrolling moves the strip on the display under the pointer by default.
 A setting lets the user choose the focused window's strip instead.
 Keyboard commands always act on the focused strip.
 Paneru's current trackpad behavior needs checking, and the setting may need an engine patch.
-Paneru's experimental virtual workspaces are turned off in v1, with their commands and menu bar indicator hidden.
+Paneru's experimental virtual workspaces stay turned off, with their commands and menu bar indicator hidden.
+Sam dropped them on 1 November 2026, because macOS Spaces already give each display several strips.
 The earlier reference to "vertically arranged" sets was accidental and does not request additional virtual workspace rows.
 
 V1 supports horizontal, vertical, and mixed physical monitor arrangements that Sam can verify on real hardware.
