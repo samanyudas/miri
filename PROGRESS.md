@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `fix/228-live-status-labels`, based on `main` at `65b03031`
+Updated: 2026-11-01 on branch `chore/verify-engine-lifecycle`, based on `main` at `bbe31c28`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,16 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Engine lifecycle model check
+
+Branch `chore/verify-engine-lifecycle` adds a TLA+ model of engine start, stop, restart, and quit in `verification/engine-lifecycle/`.
+`make verify-engine-lifecycle` checks it in about 3 seconds, and the project skill `.claude/skills/verify-engine-lifecycle/SKILL.md` says when to run it and how to keep it in step with the code.
+The model found four lifecycle bugs on 2026-11-01, and none was reproduced in the running app yet.
+The skill lists them under Known findings.
+Three come from one cause: for up to 3 seconds after a stop begins, `engineState` stays `.running`, and a restart in that time queues a `start` that no later Stop or Quit removes.
+The fourth is the status after Restart from a failed engine while a setup check blocks start.
+Next: reproduce each finding in Miri Developer under the live-test lock, then file a bug for each one that reproduces.
 
 ## Initial setup
 

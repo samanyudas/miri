@@ -4,7 +4,7 @@
 ENGINE := --manifest-path vendor/paneru/Cargo.toml --target-dir vendor/paneru/target --locked --no-default-features
 SHELL_SCRIPTS := $(shell git ls-files '*.sh' .githooks)
 
-.PHONY: setup pre-push check lint lint-doctor docs harness-tests shell actions compat native doctor swift-lint engine-format engine-lint build test swift-test engine-test e2e package format
+.PHONY: setup pre-push check lint lint-doctor docs harness-tests shell actions compat native doctor swift-lint engine-format engine-lint build test swift-test engine-test e2e package format verify-engine-lifecycle
 
 setup:
 	git submodule update --init
@@ -76,3 +76,7 @@ package:
 
 format:
 	swift format format --in-place --recursive Sources Tests Package.swift
+
+# Model-checks the engine lifecycle. .claude/skills/verify-engine-lifecycle/SKILL.md says when and how to read it.
+verify-engine-lifecycle:
+	python3 scripts/verify-engine-lifecycle.py --mutants
