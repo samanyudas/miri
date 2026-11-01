@@ -62,6 +62,8 @@ public enum EngineState: Equatable, Sendable {
     private var policy = CrashPolicy()
     private var stopRequested = false
     private var stopCompletions: [() -> Void] = []
+    /// A restart waits for the engine to exit. A later `stop()` cancels it, so the latest command wins.
+    private var restartAfterStop = false
     private var pendingRestart: Task<Void, Never>?
     private let now: () -> Date
 
@@ -91,7 +93,8 @@ public enum EngineState: Equatable, Sendable {
     public func restartManually() {
         policy.reset()
         if process != nil {
-            stop { [weak self] in self?.start() }
+            stop()
+            restartAfterStop = true
         } else {
             start()
         }
@@ -101,6 +104,7 @@ public enum EngineState: Equatable, Sendable {
     public func stop(completion: @escaping () -> Void = {}) {
         pendingRestart?.cancel()
         pendingRestart = nil
+        restartAfterStop = false
         guard let running = process else {
             state = .stopped
             completion()
@@ -122,9 +126,12 @@ public enum EngineState: Equatable, Sendable {
         if stopRequested {
             stopRequested = false
             state = .stopped
+            let restart = restartAfterStop
+            restartAfterStop = false
             let completions = stopCompletions
             stopCompletions.removeAll()
             for completion in completions { completion() }
+            if restart { start() }
             return
         }
         guard policy.recordCrash(at: now()) else {
