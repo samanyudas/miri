@@ -105,7 +105,6 @@ These reports are not established limitations.
 Each one has an open issue with the next investigation step.
 
 - Window interactions feel delayed: [#78](https://github.com/samanyudas/miri/issues/78).
-- Windows missing from the newly shown desktop once after a Control-Arrow switch, until repeated Command-Tab presses: [#85](https://github.com/samanyudas/miri/issues/85#issuecomment-6558556984).
 
 ## Deferred to v2
 

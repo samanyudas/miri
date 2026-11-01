@@ -56,8 +56,8 @@ Before the fix, the 5 restored windows and one throwaway Finder window per displ
 With the fix, all of them showed, and 3 rounds of Space switches on each display passed.
 
 On landed `main` at `bbe31c28` with engine `ffe0673`, the script passed twice, and Sam's hand checks with Control-Arrow passed 14 switches on both displays.
-In Sam's first hand check, though, the Finder windows were missing from the newly shown desktop until repeated Command-Tab presses, and two later attempts did not reproduce it.
-[#85](https://github.com/samanyudas/miri/issues/85) stays open with `needs-info` until that report is reproduced or explained.
+[#85](https://github.com/samanyudas/miri/issues/85) closed on 1 November.
+Sam chose not to pursue one unreproduced failure from their first hand check.
 Synthetic Control-Arrow presses do not switch Spaces on macOS 27, so that path and switching to a window on a hidden Space are not yet checked by hand.
 The scripts are in `/tmp/miri85` (may be gone).
 
