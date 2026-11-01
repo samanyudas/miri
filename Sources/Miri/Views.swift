@@ -28,6 +28,7 @@ extension AppModel {
     }
 
     func showLogsInFinder() {
+        NSApp.activate()
         NSWorkspace.shared.activateFileViewerSelecting([log.url])
     }
 }
