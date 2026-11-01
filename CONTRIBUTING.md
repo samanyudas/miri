@@ -13,27 +13,28 @@ It reports each missing prerequisite with the command that fixes it.
 
 ## File an issue
 
-Every issue needs acceptance criteria under an `## Acceptance criteria` heading.
-Each criterion states an observable result and how to check it.
-Name the automated test, the `make` target, or the manual or hardware check from the [v1 acceptance checklist](decisions/v1-acceptance-checklist.md).
-A decision or investigation issue states the answer it needs and where that answer will be recorded.
-If you cannot write the criteria yet, do not file the issue.
-Discuss the problem with Sam first, or record it as an open question in `decisions/`.
+File an issue only for a real need that you have evidence for.
+Write the title as one plain sentence about what changes for the person using Miri.
+Give every issue exactly one type label: `bug`, `enhancement`, `task`, or `decision`.
+The [issue templates](.github/ISSUE_TEMPLATE) set the type label and list the required sections for each type.
+When you file with `gh issue create`, write each required field label from the template as a `###` heading, such as `### Acceptance criteria`.
 
-A bug also needs the `bug` label and a `## Steps to reproduce` heading with the observed and expected results.
-Name the build or commit where the steps fail.
+Each acceptance criterion states an observable result and how to check it.
+Name the automated test, the `make` target, or the manual or hardware check from the [v1 acceptance checklist](decisions/v1-acceptance-checklist.md).
+If you cannot write acceptance criteria yet, file a `decision` issue for the open question, or ask Sam.
+
 An agent files a bug only after it reproduces the bug on the surface a user sees.
 If the agent cannot reproduce the bug, it reports to Sam what it saw and what it tried, and it does not file the issue.
+A feature names who asked for it, or the decision or issue it comes from.
 
-The issue templates require these fields.
-In Claude Code sessions, `.claude/hooks/guard-command.py` blocks `gh issue create` when the body lacks these headings.
+In Claude Code sessions, `.claude/hooks/guard-command.py` reads the templates and blocks `gh issue create` without exactly one type label and every required section.
 
 ## Take up an issue
 
 Check the issue before you change code for it.
 
 1. Read the issue and its comments with `gh issue view <number> --comments`.
-2. Confirm that it has acceptance criteria and that you can check each one.
+2. Confirm that it meets [File an issue](#file-an-issue) and that you can check each acceptance criterion.
    If a criterion is missing or vague, comment with the gap and proposed criteria, add `needs-info`, and stop.
 3. For a bug, reproduce it on the current `main` build, on the surface a user sees, before you change code.
    Comment with the build, the steps, and the observed result, and keep the failing output for the pull request.

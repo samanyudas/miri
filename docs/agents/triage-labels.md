@@ -14,5 +14,6 @@ When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the 
 
 Apply `ready-for-agent` only when the issue meets [File an issue](../../CONTRIBUTING.md#file-an-issue).
 Use `needs-info` when it does not.
+The type labels `bug`, `enhancement`, `task`, and `decision` come from the [issue templates](../../.github/ISSUE_TEMPLATE), and each issue has exactly one.
 
 Edit the right-hand column to match whatever vocabulary you actually use.
