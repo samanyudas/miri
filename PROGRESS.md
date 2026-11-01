@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `feat/222-app-icons`, based on `main` at `10b91127`
+Updated: 2026-11-02 on branch `docs/lifecycle-fixes-landed`, based on `main` at `f37f425b`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,18 +16,13 @@ The public release path and the complete acceptance runs follow.
 
 ## Engine lifecycle model check
 
-Branch `chore/verify-engine-lifecycle` adds a TLA+ model of engine start, stop, restart, and quit in `verification/engine-lifecycle/`.
-`make verify-engine-lifecycle` checks it in about 3 seconds, and the project skill `.claude/skills/verify-engine-lifecycle/SKILL.md` says when to run it and how to keep it in step with the code.
-The model found four lifecycle bugs on 2026-11-01, and a live run on a `main` build checked each one the same day.
-Three reproduced and are filed as [#234](https://github.com/samanyudas/miri/issues/234), [#235](https://github.com/samanyudas/miri/issues/235), and [#236](https://github.com/samanyudas/miri/issues/236).
-The fourth, an engine launched during Quit, reproduced in part and shares the cause of #234.
-The skill lists all four under Known findings.
-Three come from one cause: for up to 3 seconds after a stop begins, `engineState` stays `.running`, and a restart in that time queues a `start` that no later Stop or Quit removes.
-The fourth is the status after Restart from a failed engine while a setup check blocks start.
-Branch `fix/235-restart-clears-saved-stop` fixes #235: Restart now clears the saved Stop, `SavedStopMatches` holds, and a live run on its build passed every acceptance criterion.
-Next: Sam picks the fixes for #234, #235, and #236.
-Branch `fix/234-stop-cancels-queued-restart` fixes #234 and the Quit finding with a `restartAfterStop` flag that a later Stop clears, so `StopStands` and `QuitLeavesNoEngine` now hold, and its PR waits for review.
-[#241](https://github.com/samanyudas/miri/pull/241) fixes #236: Restart from a failed engine while a check blocks start now shows `Waiting: <check>` with Stop, and `WaitingIsShown` holds.
+`verification/engine-lifecycle/` holds a TLA+ model of engine start, stop, restart, and quit.
+`make verify-engine-lifecycle` checks it in about 3 seconds, and `.claude/skills/verify-engine-lifecycle/SKILL.md` says when to run it and how to keep it in step with the code.
+The model found four lifecycle bugs on 2026-11-01.
+[#242](https://github.com/samanyudas/miri/pull/242), [#240](https://github.com/samanyudas/miri/pull/240), and [#241](https://github.com/samanyudas/miri/pull/241) fixed them, and all seven rules now hold on `main`.
+A live run on Miri Developer built from `main` at f37f425b passed every acceptance criterion on 2 November 2026, and #234, #235, and #236 are closed.
+[#243](https://github.com/samanyudas/miri/pull/243) makes `verify-miri end` and `renew` refuse a run that another thread owns, after one agent's `end` closed another agent's live run.
+Nothing is in flight here.
 
 ## App and menu bar icons
 
