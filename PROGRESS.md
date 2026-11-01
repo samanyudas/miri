@@ -10,8 +10,8 @@ Update it at the end of every session and in any PR that changes what is done or
 
 Reach a working v1 app that manages windows through the bundled engine, as defined in [release scope](decisions/release-scope.md).
 The app foundation, engine integration, configuration, default shortcuts, shortcut customization, and gesture controls are merged.
-The current milestone is the unbuilt v1 work, which is pointer-versus-focus gesture targeting and crossing displays at a strip's end ([#104](https://github.com/samanyudas/miri/issues/104)).
-Drag insertion, the stack limit, and stack overflow are built and await their hardware checks.
+The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
+Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
 
 ## Pointer drop target
@@ -150,7 +150,7 @@ The engine now waits for the unlock before it starts the 1 s wait for a window's
 On 1 November on Sam's Mac, a sleep and wake on Sam's daily build dropped the 3 windows on the built-in display, and a screen lock with no sleep made every AX read fail until the unlock.
 On the fix build, a sleep and wake kept all 16 windows, and the 2 windows on the built-in display kept their order on its new Space.
 A lid close with the external display connected, which does not sleep, kept all 14 windows on the daily build.
-Stacks across a lid close or a sleep are not checked yet, so #142 stays open for that check.
+Stacks across a lid close or a sleep were not checked in these runs. Later on 1 November, a lid close and a sleep and wake with stacks on both displays kept every stack, and #142 closed.
 Off-screen windows during a lock may still drop through two other engine paths, which [#210](https://github.com/samanyudas/miri/issues/210) tracks.
 
 ## Side-by-side displays
@@ -1197,10 +1197,9 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 1. Finish the remaining v1 features.
    - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings (#212).
-   - Cross to the next display at a strip's end with Focus column and Move column left or right (#104).
-   - Complete drag and restoration acceptance for #43, and Sam's real-trackpad check of the pointer drop target (#203).
+   - Run Sam's real-trackpad check of the pointer drop target (#203).
      The #58 height defect is fixed and closed.
-   - Run the stack overflow (S-5) and stack limit (S-7) hardware checks.
+   - Run the stack overflow (S-5) and stack limit (S-7) hardware checks, and record them against the frozen release candidate.
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
    Integrate Sparkle updates, then production signing, notarization, the release DMG, and the Homebrew cask.

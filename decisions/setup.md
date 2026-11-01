@@ -55,8 +55,8 @@ Explain why Miri needs permission to move windows.
 Direct users to **System Settings > Privacy & Security > Device Control and Data Access**.
 On macOS 27, this pane holds the Accessibility permission.
 
-The [permission prototype](../docs/prototypes/helper-permission.md) showed that turning on Miri alone grants both the app and its engine helper in the development bundle.
-Recheck this on the Developer ID signed, notarized bundle before finalizing the permission instructions.
+On 14 October 2026, the [permission prototype](../docs/prototypes/helper-permission.md) used an ad-hoc development bundle with the release identifiers and showed that turning on Miri alone grants both the app and its engine helper.
+Miri Developer and the Developer ID signed, notarized bundle need the same check before the permission instructions are final.
 See [ADR 0009](../docs/adr/0009-run-the-engine-as-a-helper-process.md).
 
 1. Enable the verified Miri Accessibility entry.
@@ -138,7 +138,7 @@ The engine keeps a sliver of each hidden column at a free display edge, and tuck
 Reliable horizontal multi-monitor scrolling blocks the v1 release until it passes the [acceptance checklist](v1-acceptance-checklist.md).
 
 Display changes follow macOS Space migration as recorded in [ADR 0008](../docs/adr/0008-follow-macos-space-migration-for-display-changes.md).
-Miri keeps no separate display layout state and offers no reconnection settings in v1.
+Miri keeps the display record in memory only and offers no reconnection settings in v1.
 Excluding individual displays from management is deferred to v2.
 
 ## Find settings and diagnostics

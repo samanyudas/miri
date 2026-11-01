@@ -232,7 +232,9 @@ Offer an explicit action to switch to the current default set.
 ## Actions without selected bindings
 
 This default set does not assign bindings for cycling presets backward, expanding to available width, centering all visible columns, or pulling a neighboring window into the focused column.
-Paneru's default configuration binds no keys, so these actions have no shortcut until the user adds one.
+Paneru's default configuration binds no keys.
+Cycling presets backward is the engine's `window_resize_shrink`, which a user can bind in `config.toml`.
+The pinned engine has no command for the other three actions.
 
 V1 has no dedicated binding to switch focus between floating and tiled windows.
 Users can click a window or use macOS app and window switching.

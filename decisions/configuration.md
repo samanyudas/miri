@@ -190,7 +190,7 @@ A short excerpt of the written table follows.
 
 ```toml
 [bindings]
-window_focus_west = ["ctrl+alt-leftarrow", "ctrl+alt-h"]
+window_focus_west = ["ctrl+alt-leftarrow", "ctrl+alt-h", "ctrl+alt-a"]
 window_focus_3 = "ctrl+alt-3"
 window_step_grow = "ctrl+alt-equal"
 window_stack_west = "ctrl+alt-leftbracket"

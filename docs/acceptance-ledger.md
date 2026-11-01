@@ -51,8 +51,8 @@ S-6 remains pending on a frozen candidate.
 
 ## Scope accepted after the checklists
 
-[Release scope](../decisions/release-scope.md) added these behaviors from 19 October to 1 November 2026.
-The checklists list only parts of them, so this ledger tracks all of them here.
+These checks cover behaviors that the checklists do not state on their own.
+S-1 refines the checklist's trackpad item, and S-2 to S-7 come from release scope changes between 19 October and 1 November 2026.
 
 | ID | Check | App revision | Engine pin | macOS | Hardware | Result | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- |

@@ -177,7 +177,7 @@ Windows that never left their display keep their place, including reordering don
 A window opened while a display was gone stays on the display it was opened on, and a window closed meanwhile is forgotten.
 Windows from several Spaces of one display return together to the Space that display shows.
 Miri keeps this record in memory and offers no reconnection settings in v1.
-A cable unplug, a lid close, and a sleep and wake kept every window on hardware, and stacks across a lid close or a sleep are not checked yet ([#142](https://github.com/samanyudas/miri/issues/142)).
+On 1 November 2026, a cable unplug, a lid close, and a sleep and wake each returned every window and stack on hardware ([#142](https://github.com/samanyudas/miri/issues/142)).
 The decision is recorded in [ADR 0008](../docs/adr/0008-follow-macos-space-migration-for-display-changes.md).
 
 ## Strip gestures

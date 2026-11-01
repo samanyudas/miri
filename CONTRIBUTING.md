@@ -36,7 +36,7 @@ The pre-push hook that `make setup` installs runs `make pre-push`, the checks th
 | `make compat` | Declared macOS minimums agree, the Rust pin satisfies the engine, and the engine pin is published on the fork branch. |
 | `make swift-lint`, `make engine-lint` | Swift formatting, rustfmt, and Clippy with warnings as errors. |
 | `make build`, `make test` | The signed app bundle builds, and the Swift and engine unit tests pass. |
-| `make e2e` | The packaged app and engine run a real Accessibility observation through Launch Services, and the app recovers a stranded fixture window. |
+| `make e2e` | The packaged app and engine run a real Accessibility observation through Launch Services, and with the Accessibility grant, the app recovers a stranded fixture window. |
 | `make package` | Miri Developer packs into a DMG that mounts with valid signatures. |
 
 `make e2e` reports `observed-ungranted` on a Mac without the Accessibility grant, which is a pass.

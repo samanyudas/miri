@@ -7,7 +7,7 @@ This checklist adds no new product choices and does not alter the [multi-monitor
 
 ## Prerequisites and evidence
 
-The Accessibility attribution prototype required by [ADR 0009](../docs/adr/0009-run-the-engine-as-a-helper-process.md) is complete for the development bundle.
+The Accessibility attribution prototype required by [ADR 0009](../docs/adr/0009-run-the-engine-as-a-helper-process.md) ran on 14 October 2026 with an ad-hoc bundle that used the release identifiers.
 Run permission and lifecycle checks on the actual Miri app bundle and helper identities.
 Use the development signing identity, or ad-hoc signing without it, for development checks, and the Developer ID signed, notarized bundle for public-release checks.
 Record the app build, pinned engine revision, macOS version, display setup, and observed result for each check.

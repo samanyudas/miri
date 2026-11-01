@@ -44,7 +44,7 @@ Advanced per-app rules for floating and strip placement are deferred to v2.
 ## Support keyboard, trackpad, and mouse input
 
 Use Control-Option as the default keyboard modifier.
-Support both arrow keys and Vim keys.
+Support the arrow keys, Vim keys, and W, A, S, and D for every directional action.
 Add Shift to directional bindings to move windows rather than change focus.
 
 Let users record new shortcuts and assign multiple bindings to an action.
