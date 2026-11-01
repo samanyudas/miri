@@ -30,7 +30,9 @@ Branch `fix/issue-220` adds `Show Logs in Finder` next to `Restart Engine` in th
 A `verify-miri` run on 2 November 2026 killed the test engine three times on `main` at e8d69276 and on the branch.
 On `main`, both views showed only `Restart Engine`.
 On the branch, both views showed the new button, and each press opened Finder with `engine.log` selected.
-Finder came to the front from Settings. System Events clicks in the menu let no app take the front, so that part of the menu path stays unobserved.
+Finder came to the front from Settings.
+From the menu, a mouse click posted at the HID event tap showed that Finder stayed behind the current app, because Miri was not active.
+`showLogsInFinder()` now calls `NSApp.activate()` first, as `WindowPresenter.show` does, and a rerun showed Finder in front from the menu twice and from Settings.
 
 ## Configuration error in the menu
 
