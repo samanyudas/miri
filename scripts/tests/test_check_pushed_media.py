@@ -27,7 +27,7 @@ class PushedMediaTest(unittest.TestCase):
         return subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", *args], cwd=cwd or self.repo,
                               env=env, check=True, capture_output=True, text=True)
 
-    def commit(self, files: dict[str, str | None]) -> None:
+    def commit(self, files: dict[str, str | None], message: str = "change") -> None:
         for name, text in files.items():
             path = self.repo / name
             if text is None:
@@ -36,7 +36,7 @@ class PushedMediaTest(unittest.TestCase):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text)
         self.git("add", "-A")
-        self.git("commit", "-q", "-m", "change")
+        self.git("commit", "-q", "-m", message)
 
     def check(self) -> tuple[int, str]:
         result = subprocess.run([sys.executable, str(SCRIPT), "HEAD"], cwd=self.repo, capture_output=True, text=True)
@@ -62,6 +62,14 @@ class PushedMediaTest(unittest.TestCase):
         self.commit({"assets/icon.png": "x", "Sources/Miri/Resources/menubar.jpg": "x", "assets/icon.svg": "x",
                      "docs/notes.md": "x"})
         self.assertEqual(self.check(), (0, ""))
+
+    def test_media_that_sam_approved_is_allowed(self):
+        self.commit({"pr-media/224/drag.mov": "x", "pr-media/224/after.png": "x"},
+                    "docs: add drag recording\n\nMedia-approved-by: Sam")
+        self.assertEqual(self.check(), (0, ""))
+        self.commit({"pr-media/224/other.mov": "x"}, "docs: mention Media-approved-by: Sam in the body only")
+        output = self.assert_blocked("pr-media/224/other.mov")
+        self.assertNotIn("drag.mov", output)
 
     def test_media_already_on_a_remote_is_not_reported_again(self):
         self.commit({"docs/old.png": "x"})

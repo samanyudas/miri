@@ -27,7 +27,7 @@ Upgrade the engine one Paneru release tag at a time.
 Run `make check` before you open a pull request.
 CI runs the same targets, so a local pass predicts a CI pass.
 The pre-push hook that `make setup` installs runs `make pre-push`, the checks that finish in seconds, before every push.
-First it rejects new commits that add a screen recording, or an image outside `assets/` and `Sources/`.
+First it rejects new commits that add a screen recording, or an image outside `assets/` and `Sources/`, unless Sam approved them.
 
 | Target | What it proves |
 | --- | --- |

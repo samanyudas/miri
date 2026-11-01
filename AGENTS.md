@@ -77,6 +77,7 @@ If you need one of these, stop and ask Sam.
 Do not work around the guard with another command.
 
 The pre-push hook rejects new commits that add a screen recording anywhere, or an image outside `assets/` and `Sources/`.
+Only a commit with a `Media-approved-by: Sam` trailer passes, and only after Sam viewed and approved those exact files.
 Share window evidence as [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#capture-evidence) describes.
 
 ## Writing rules

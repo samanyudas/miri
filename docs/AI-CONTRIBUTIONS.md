@@ -40,17 +40,19 @@ Without `PANERU_MACH_SERVICE`, the query reports that the engine is not running.
 The output names every open window with its title, and titles can be private.
 Paste only the windows that the check uses, with fields such as `window_id`, `frame`, `focused`, and `visible`.
 
-When a picture is necessary, capture only one Miri window or the AXFixture test window.
-Use `screencapture -l <window_id>` with the `window_id` from `query state`, and never capture the full desktop.
-Keep captures out of git.
-Show Sam the exact files and get approval before you upload any image to GitHub.
-Upload an approved image as a PR or issue attachment, never as a commit.
+Screenshots and recordings can go on GitHub only after Sam views and approves them.
 
-Recordings stay local.
-Describe what a recording shows in text.
+1. Capture as little as the check needs.
+   Prefer one Miri window or the AXFixture test window, with `screencapture -l <window_id>` and the `window_id` from `query state`.
+2. Show Sam the exact files in the chat, and ask whether they can be published.
+3. If Sam approves, commit only those files on the `pr-media` branch, with a `Media-approved-by: Sam` trailer on the commit.
+   Link them from the PR.
+   Never put media on a PR branch, because a merge would keep it in `main` history.
+4. If Sam denies, or does not answer, delete the files and describe what they showed in text.
 
-The pre-push hook enforces part of this.
-`scripts/check-pushed-media.py` rejects a push whose new commits add a recording anywhere, or an image outside `assets/` and `Sources/`.
+Never add the trailer without Sam's approval of those exact files.
+The pre-push hook enforces the rest.
+`scripts/check-pushed-media.py` rejects a push whose new commits add a recording anywhere, or an image outside `assets/` and `Sources/`, unless the commit has the trailer.
 
 ## Boundaries
 
