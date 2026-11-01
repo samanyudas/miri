@@ -27,11 +27,12 @@ Upgrade the engine one Paneru release tag at a time.
 Run `make check` before you open a pull request.
 CI runs the same targets, so a local pass predicts a CI pass.
 The pre-push hook that `make setup` installs runs `make pre-push`, the checks that finish in seconds, before every push.
+First it rejects new commits that add a screen recording, or an image outside `assets/` and `Sources/`.
 
 | Target | What it proves |
 | --- | --- |
 | `make docs` | Relative links and heading anchors resolve, no em dash appears, and the agent map and handoff record are well formed. |
-| `make harness-tests` | The docs check, the command guard, the CI skip rule, and the workflow permissions behave as documented. |
+| `make harness-tests` | The docs check, the command guard, the CI skip rule, the pushed-media check, and the workflow permissions behave as documented. |
 | `make shell`, `make actions` | Shell scripts and workflows pass ShellCheck and actionlint. |
 | `make compat` | Declared macOS minimums agree, the Rust pin satisfies the engine, and the engine pin is published on the fork branch. |
 | `make swift-lint`, `make engine-lint` | Swift formatting, rustfmt, and Clippy with warnings as errors. |
