@@ -1,0 +1,740 @@
+#!/usr/bin/env python3
+"""Drive Miri Developer on the real desktop and keep the proof outside the repository.
+
+A run swaps the running Miri Developer for a test build, drives it, and puts everything back:
+
+  verify-miri doctor                         read-only health check, safe at any time
+  verify-miri begin --owner "<thread>"       take the live-test lock, back up the window session, launch the test build
+  verify-miri <drive commands>               fixture, key, snapshot, focused, ax, settings, standin, watch, query, send-cmd
+  verify-miri end                            quit the test build, restore the session, relaunch the previous build, release the lock
+
+.claude/skills/verify-miri/SKILL.md explains each step. Evidence stays in ~/.cache/miri/verify-miri/runs/<run id>/.
+"""
+import argparse
+import datetime
+import hashlib
+import json
+import os
+import plistlib
+import re
+import shutil
+import signal
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+SKILL = Path(__file__).resolve().parent.parent
+REPO = SKILL.parent.parent.parent
+HOME = Path(os.environ.get("MIRI_VERIFY_HOME", Path.home() / ".cache/miri/verify-miri"))
+TOOLS = HOME / "tools"
+RUNS = HOME / "runs"
+CURRENT = HOME / "current.json"
+SUPPORT = Path.home() / "Library/Application Support/Miri Developer"
+SESSION = SUPPORT / "Engine/state/paneru/state.json"
+CONFIG = SUPPORT / "config.toml"
+LOGS = SUPPORT / "Logs"
+BUNDLE_ID = "io.github.samanyudas.miri.dev"
+MACH_SERVICE = "io.github.samanyudas.miri.dev.engine"
+FIXTURE_TITLE = "Miri harmless Accessibility fixture"
+APP_PATTERN = re.compile(r"^(/.+?\.app)/Contents/MacOS/Miri(?:\s|$)")
+ENGINE_PATTERN = re.compile(r"^(/.+?\.app)/Contents/Helpers/miri-engine launch(?:\s|$)")
+
+# Virtual key codes by position on an ANSI keyboard. Miri reads chords by position on this Mac's Australian layout.
+KEYS = {
+    **dict(zip("asdfhgzxcv", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])), "b": 11, "q": 12, "w": 13, "e": 14, "r": 15,
+    "y": 16, "t": 17, "1": 18, "2": 19, "3": 20, "4": 21, "6": 22, "5": 23, "equal": 24, "9": 25, "7": 26,
+    "minus": 27, "8": 28, "0": 29, "rightbracket": 30, "o": 31, "u": 32, "leftbracket": 33, "i": 34, "p": 35,
+    "return": 36, "l": 37, "j": 38, "quote": 39, "k": 40, "semicolon": 41, "backslash": 42, "comma": 43,
+    "slash": 44, "n": 45, "m": 46, "period": 47, "tab": 48, "space": 49, "grave": 50, "delete": 51, "escape": 53,
+    "home": 115, "pageup": 116, "end": 119, "pagedown": 121,
+    "leftarrow": 123, "rightarrow": 124, "downarrow": 125, "uparrow": 126,
+}
+ARROWS = {"leftarrow", "rightarrow", "downarrow", "uparrow", "home", "end", "pageup", "pagedown"}
+# Group mask plus the left-side bit. The engine needs the side bit.
+MODIFIERS = {
+    "ctrl": 0x40000 | 0x1, "control": 0x40000 | 0x1,
+    "alt": 0x80000 | 0x20, "option": 0x80000 | 0x20, "opt": 0x80000 | 0x20,
+    "shift": 0x20000 | 0x2,
+    "cmd": 0x100000 | 0x8, "command": 0x100000 | 0x8,
+}
+# A real keyboard sets the numeric-pad and Fn flags on arrow and navigation keys.
+ARROW_FLAGS = 0x200000 | 0x800000
+
+
+class Failure(Exception):
+    pass
+
+
+# ---------- small helpers ----------
+
+def now() -> str:
+    return datetime.datetime.now().astimezone().isoformat(timespec="milliseconds")
+
+
+def normal(path: str) -> str:
+    """Apps launched from /tmp show /private/tmp in ps, and their engines show /tmp."""
+    return path[len("/private"):] if path.startswith(("/private/tmp/", "/private/var/")) else path
+
+
+def alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+
+
+def command_of(pid: int) -> str:
+    out = subprocess.run(["ps", "-ww", "-o", "command=", "-p", str(pid)], capture_output=True, text=True).stdout
+    return out.strip()
+
+
+def processes() -> list[dict]:
+    """Every Miri Developer app and engine process, from any build. Matches the executable path, not the arguments."""
+    out = subprocess.run(["ps", "-axww", "-o", "pid=,ppid=,command="], capture_output=True, text=True).stdout
+    found = []
+    for line in out.splitlines():
+        parts = line.strip().split(None, 2)
+        if len(parts) != 3:
+            continue
+        pid, ppid, command = int(parts[0]), int(parts[1]), parts[2]
+        for kind, pattern in (("app", APP_PATTERN), ("engine", ENGINE_PATTERN)):
+            match = pattern.match(command)
+            if match:
+                found.append({"kind": kind, "pid": pid, "ppid": ppid, "bundle": normal(match.group(1))})
+    return found
+
+
+def running_apps() -> list[dict]:
+    return [p for p in processes() if p["kind"] == "app"]
+
+
+def engine_of(app_pid: int) -> dict | None:
+    return next((p for p in processes() if p["kind"] == "engine" and p["ppid"] == app_pid), None)
+
+
+def wait(condition, seconds: float, step: float = 0.1):
+    end = time.monotonic() + seconds
+    while time.monotonic() < end:
+        value = condition()
+        if value:
+            return value
+        time.sleep(step)
+    return condition()
+
+
+def idle_seconds() -> int | None:
+    out = subprocess.run(["ioreg", "-c", "IOHIDSystem"], capture_output=True, text=True).stdout
+    match = re.search(r'"HIDIdleTime" = (\d+)', out)
+    return int(match.group(1)) // 1_000_000_000 if match else None
+
+
+def lock(*args: str) -> subprocess.CompletedProcess:
+    return subprocess.run([sys.executable, str(REPO / "scripts/live-lock.py"), *args], capture_output=True, text=True)
+
+
+# ---------- the current run ----------
+
+def load_run(required: bool = True) -> dict | None:
+    if not CURRENT.exists():
+        if required:
+            raise Failure("No run is in progress. Start one with `verify-miri begin --owner \"<thread>\"`.")
+        return None
+    return json.loads(CURRENT.read_text())
+
+
+def save_run(run: dict) -> None:
+    HOME.mkdir(parents=True, exist_ok=True)
+    temporary = CURRENT.with_suffix(".tmp")
+    temporary.write_text(json.dumps(run, indent=2) + "\n")
+    os.replace(temporary, CURRENT)
+
+
+def log(run: dict, message: str) -> None:
+    line = f"{now()} {message}"
+    print(line, flush=True)
+    with open(Path(run["dir"]) / "log.txt", "a", encoding="utf-8") as file:
+        file.write(line + "\n")
+
+
+def test_pid(run: dict) -> int:
+    pid = run.get("test_pid")
+    if not pid or not alive(pid) or not APP_PATTERN.match(command_of(pid)):
+        raise Failure("The test build is not running. Run `verify-miri doctor`, then `end` and `begin` again.")
+    return pid
+
+
+# ---------- tools ----------
+
+def build_tools(quiet: bool = False) -> None:
+    TOOLS.mkdir(parents=True, exist_ok=True)
+    sources = SKILL / "scripts/tools"
+    for name, source, compiler in (("axdo", "axdo.swift", ["swiftc", "-O"]), ("key", "key.swift", ["swiftc", "-O"]),
+                                   ("standin", "standin.c", ["cc", "-O"])):
+        digest = hashlib.sha256((sources / source).read_bytes()).hexdigest()
+        stamp = TOOLS / f"{name}.sha256"
+        if (TOOLS / name).exists() and stamp.exists() and stamp.read_text() == digest:
+            continue
+        result = subprocess.run([*compiler, str(sources / source), "-o", str(TOOLS / name)], capture_output=True, text=True)
+        if result.returncode:
+            raise Failure(f"Could not compile {source}:\n{result.stderr}")
+        stamp.write_text(digest)
+        if not quiet:
+            print(f"compiled {TOOLS / name}")
+
+
+def tool(name: str, *args: str, check: bool = True) -> str:
+    build_tools(quiet=True)
+    result = subprocess.run([str(TOOLS / name), *args], capture_output=True, text=True, timeout=30)
+    if check and result.returncode:
+        raise Failure(f"{name} {' '.join(args)} failed: {result.stdout}{result.stderr}")
+    return result.stdout
+
+
+# ---------- engine ----------
+
+def query(kind: str = "state", app_pid: int | None = None) -> dict:
+    apps = [p for p in running_apps() if app_pid is None or p["pid"] == app_pid]
+    if len(apps) != 1:
+        raise Failure(f"Expected one running Miri Developer, found {len(apps)}.")
+    engine = engine_of(apps[0]["pid"])
+    if engine is None:
+        raise Failure("Miri Developer runs without an engine. Management may be stopped.")
+    binary = f"{engine['bundle']}/Contents/Helpers/miri-engine"
+    env = {**os.environ, "PANERU_MACH_SERVICE": MACH_SERVICE}
+    result = subprocess.run([binary, "query", kind], capture_output=True, text=True, env=env, timeout=10)
+    if result.returncode:
+        raise Failure(f"query {kind} failed: {result.stderr.strip() or result.stdout.strip()}")
+    return json.loads(result.stdout)
+
+
+def fixture_windows(run: dict, state: dict) -> list[dict]:
+    """The engine's records for the fixture windows of this run, without other windows or their titles."""
+    ids = {f["window_id"] for f in run.get("fixtures", []) if f.get("window_id")}
+    rows = []
+    for workspace in state.get("virtual_workspaces", []):
+        for window in workspace.get("windows", []):
+            if window.get("window_id") in ids:
+                row = {k: window.get(k) for k in ("window_id", "display_id", "frame", "focused", "visible", "floating")}
+                row["virtual_workspace"] = workspace.get("number")
+                rows.append(row)
+    return rows
+
+
+def focus_record(run: dict) -> dict:
+    """Who has focus, as the engine and as macOS see it. Names only fixture windows, never other titles."""
+    state = query("state", run.get("test_pid"))
+    active = state.get("active", {})
+    fixtures = {f["window_id"]: f for f in run.get("fixtures", []) if f.get("window_id")}
+    pids = {f["pid"]: f for f in run.get("fixtures", [])}
+    focused_id = active.get("focused_window_id")
+    front = int(tool("axdo", "frontmost").strip() or -1)
+    return {
+        "time": now(),
+        "engine_focused_window_id": focused_id,
+        "engine_focused_fixture": fixtures[focused_id]["name"] if focused_id in fixtures else None,
+        "engine_active_display": active.get("display_id"),
+        "macos_frontmost_pid": front,
+        "macos_frontmost_fixture": pids[front]["name"] if front in pids else None,
+        "fixtures": fixture_windows(run, state),
+    }
+
+
+def engine_log_since_launch() -> str:
+    """The engine log text after the newest "Miri started the engine" line, across one rotation."""
+    text = ""
+    for name in ("engine.1.log", "engine.log"):
+        path = LOGS / name
+        if path.exists():
+            text += path.read_text(errors="replace")
+    marker = text.rfind("--- Miri started the engine at")
+    return text[marker:] if marker >= 0 else ""
+
+
+# ---------- launch and quit ----------
+
+def quit_app(pid: int, run: dict | None = None, label: str = "app") -> bool:
+    """SIGTERM takes Miri's normal quit path at once. osascript quit can arrive seconds late."""
+    engine = engine_of(pid)
+    if alive(pid):
+        os.kill(pid, signal.SIGTERM)
+    app_gone = wait(lambda: not alive(pid), 10)
+    engine_gone = engine is None or wait(lambda: not alive(engine["pid"]), 5)
+    if engine is not None and not engine_gone:
+        # The engine belongs to the build this run stopped. Stop that exact process, never one found by name.
+        os.kill(engine["pid"], signal.SIGTERM)
+        engine_gone = wait(lambda: not alive(engine["pid"]), 5)
+    message = f"quit {label} pid {pid} with SIGTERM: app {'exited' if app_gone else 'STILL RUNNING'}"
+    if engine is not None:
+        message += f", engine pid {engine['pid']} {'exited' if engine_gone else 'STILL RUNNING'}"
+    (log(run, message) if run else print(message))
+    return bool(app_gone and engine_gone)
+
+
+def launch_app(bundle: str, run: dict, label: str) -> int:
+    """Launch a Miri Developer bundle and wait until its engine answers and session restore has run."""
+    started = time.time()
+    subprocess.run(["open", bundle], check=True)
+    app = wait(lambda: next((p for p in running_apps() if p["bundle"] == normal(bundle)), None), 15)
+    if not app:
+        raise Failure(f"{bundle} did not start within 15 s.")
+    engine = wait(lambda: engine_of(app["pid"]), 15)
+    if not engine:
+        status = "unknown"
+        try:
+            status = tool("axdo", str(app["pid"]), "status", check=False).strip() or "no Settings window"
+        except Failure:
+            pass
+        raise Failure(f"{label} pid {app['pid']} started no engine within 15 s. Status: {status}. "
+                      "Management may be stopped (managementStopped = 1) or a setup check blocks start.")
+
+    def ready():
+        if "Session restore applied" not in engine_log_since_launch():
+            return False
+        try:
+            return query("active", app["pid"])
+        except Failure:
+            return False
+
+    answered = wait(ready, 20, 0.25)
+    restore = re.findall(r"Session restore applied: [^\n]*", engine_log_since_launch())
+    log(run, f"launched {label} pid {app['pid']}, engine pid {engine['pid']}, ready after {time.time() - started:.1f} s"
+             f"{': ' + restore[-1] if restore else ''}")
+    if not answered:
+        log(run, "WARNING: the engine did not log session restore and answer `query active` within 20 s")
+    return app["pid"]
+
+
+# ---------- commands ----------
+
+def cmd_tools(_args) -> int:
+    build_tools()
+    print(f"tools are ready in {TOOLS}")
+    return 0
+
+
+def cmd_doctor(args) -> int:
+    failures = 0
+
+    def report(ok: bool, label: str, fix: str = "") -> None:
+        nonlocal failures
+        print(f"{'ok   ' if ok else 'FAIL '} {label}")
+        if not ok:
+            failures += 1
+            if fix:
+                print(f"      {fix}")
+
+    run = load_run(required=False)
+    bundle = normal(str(Path(run["test_app"]) if run else Path(args.app).resolve()))
+    held = lock("status")
+    lock_text = (held.stdout + held.stderr).strip().replace("\n", " | ")
+    print(f"info  live-test lock: {lock_text}")
+    idle = idle_seconds()
+    print(f"info  keyboard and trackpad idle for {idle} s" + (" (Sam may be at the Mac)" if idle is not None and idle < 60 else ""))
+
+    apps = running_apps()
+    engines = [p for p in processes() if p["kind"] == "engine"]
+    for p in apps + engines:
+        print(f"info  running {p['kind']} pid {p['pid']} ppid {p['ppid']} from {p['bundle']}")
+    report(len(apps) <= 1, f"{len(apps)} Miri Developer app(s) running", "Two builds fight over the engine's Mach service.")
+    orphans = [e for e in engines if not any(a["pid"] == e["ppid"] for a in apps)]
+    report(not orphans, "no engine runs without its app", "Stop the orphan engine pid that this run started, if any.")
+    for engine in engines:
+        binary = Path(engine["bundle"]) / "Contents/Helpers/miri-engine"
+        listed = subprocess.run(["lsof", "-a", "-p", str(engine["pid"]), "-d", "txt", "-Fi"], capture_output=True, text=True).stdout
+        inode = str(binary.stat().st_ino) if binary.exists() else "missing"
+        report(f"i{inode}" in listed.split(), f"engine pid {engine['pid']} runs the binary now on disk",
+               "The bundle was rebuilt after launch. Quit and relaunch it.")
+
+    app_ok = Path(bundle, "Contents/MacOS/Miri").exists()
+    report(app_ok, f"test build exists: {bundle}", "Run `make build` in the checkout, or pass --app.")
+    if app_ok:
+        revision = Path(bundle, "Contents/Resources/engine-revision.txt").read_text().strip()
+        built = datetime.datetime.fromtimestamp(Path(bundle, "Contents/MacOS/Miri").stat().st_mtime)
+        print(f"info  test build engine {revision}, app built {built:%Y-%m-%d %H:%M}")
+        if not run:
+            head = subprocess.run(["git", "-C", str(REPO), "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
+            print(f"info  checkout HEAD {head}. Rebuild if the checkout changed since the build.")
+    fixture = REPO / ".build/debug/AXFixture"
+    report(fixture.exists(), f"AXFixture built: {fixture}", "Run `make build` or `swift build` in the checkout.")
+    report(SESSION.exists(), f"window session file exists: {SESSION}")
+    free = shutil.disk_usage("/System/Volumes/Data").free / 1e9
+    report(free > 2, f"{free:.1f} GB free on the data volume", "Builds and logs need space. Ask Sam before deleting caches.")
+    try:
+        build_tools(quiet=True)
+        report(True, f"helper tools compiled in {TOOLS}")
+    except Failure as error:
+        report(False, "helper tools compile", str(error))
+
+    if run:
+        print(f"info  run in progress: {run['dir']} (owner {run['owner']})")
+        pid = run.get("test_pid")
+        report(bool(pid) and any(a["pid"] == pid for a in apps), f"the running app is this run's test build (pid {pid})",
+               "Something replaced the test build. Run `verify-miri end`, then `begin` again.")
+        report(run["owner"] in lock_text, "this run holds the live-test lock", "Renew it with `verify-miri renew`.")
+    if apps and len(apps) == 1:
+        try:
+            active = query("active", apps[0]["pid"])
+            report(True, f"engine answers: active display {active.get('display_id')}, focused window {active.get('focused_window_id')}")
+        except Failure as error:
+            report(False, "engine answers `query active`", str(error))
+        status = tool("axdo", str(apps[0]["pid"]), "status", check=False).strip()
+        print(f"info  Settings status text: {status or 'no Settings window open'}")
+    stopped = subprocess.run(["defaults", "read", BUNDLE_ID, "managementStopped"], capture_output=True, text=True).stdout.strip()
+    report(stopped != "1", f"managementStopped = {stopped or 'unset'}", "Press Start Window Management in Settings > General.")
+    return 1 if failures else 0
+
+
+def cmd_begin(args) -> int:
+    if load_run(required=False):
+        raise Failure(f"A run is in progress ({load_run()['dir']}). Finish it with `verify-miri end` first.")
+    bundle = normal(str(Path(args.app).resolve()))
+    if not Path(bundle, "Contents/MacOS/Miri").exists():
+        raise Failure(f"No app at {bundle}. Run `make build` in the checkout, or pass --app.")
+    apps = running_apps()
+    if len(apps) > 1:
+        raise Failure("More than one Miri Developer runs. Find out which threads own them before you drive.")
+    build_tools()
+    taken = lock("take", "--owner", args.owner, "--minutes", str(args.minutes), "--task", args.task)
+    print((taken.stdout + taken.stderr).strip())
+    if taken.returncode:
+        return 1
+
+    run_id = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    folder = RUNS / run_id
+    folder.mkdir(parents=True)
+    run = {"id": run_id, "dir": str(folder), "owner": args.owner, "test_app": bundle, "started": now(),
+           "previous_app": apps[0]["bundle"] if apps else None, "test_pid": None, "fixtures": [], "standins": []}
+    save_run(run)
+    log(run, f"took the live-test lock as {args.owner!r}")
+    idle = idle_seconds()
+    log(run, f"keyboard and trackpad idle for {idle} s")
+
+    backup = folder / "backup"
+    backup.mkdir()
+    if SESSION.exists():
+        shutil.copy2(SESSION, backup / "state.json")
+        log(run, f"backed up the window session to {backup / 'state.json'}")
+    if CONFIG.exists():
+        shutil.copy2(CONFIG, backup / "config.toml")
+    exported = subprocess.run(["defaults", "export", BUNDLE_ID, "-"], capture_output=True)
+    if exported.returncode == 0:
+        (backup / "defaults.plist").write_bytes(exported.stdout)
+
+    if apps:
+        log(run, f"previous build: pid {apps[0]['pid']} from {apps[0]['bundle']}")
+        if not quit_app(apps[0]["pid"], run, "previous build"):
+            raise Failure("The previous build did not quit. Run `verify-miri end` to put it back.")
+    else:
+        log(run, "no Miri Developer was running before this run")
+    run["test_pid"] = launch_app(bundle, run, "test build")
+    save_run(run)
+    log(run, f"ready. Evidence goes to {folder}")
+    return 0
+
+
+def cmd_end(_args) -> int:
+    run = load_run()
+    problems = []
+    folder = Path(run["dir"])
+    for item in run.get("fixtures", []) + run.get("standins", []):
+        pid = item["pid"]
+        if alive(pid) and item["path"] in command_of(pid):
+            os.kill(pid, signal.SIGTERM)
+            if not wait(lambda: not alive(pid), 3):
+                os.kill(pid, signal.SIGKILL)
+            log(run, f"stopped {item['name']} pid {pid}")
+    pid = run.get("test_pid")
+    if pid and alive(pid) and APP_PATTERN.match(command_of(pid)):
+        if not quit_app(pid, run, "test build"):
+            problems.append("the test build did not quit")
+    backup = folder / "backup/state.json"
+    if backup.exists():
+        if any(a for a in running_apps()):
+            problems.append("a Miri Developer still runs, so the session was not restored")
+        else:
+            shutil.copy2(backup, SESSION)
+            log(run, "restored the window session backup")
+    previous = run.get("previous_app")
+    if previous and not any(a["bundle"] == previous for a in running_apps()):
+        try:
+            launch_app(previous, run, "previous build")
+        except Failure as error:
+            problems.append(str(error))
+    defaults_backup = folder / "backup/defaults.plist"
+    if defaults_backup.exists():
+        before = plistlib.loads(defaults_backup.read_bytes()).get("managementStopped")
+        after = subprocess.run(["defaults", "read", BUNDLE_ID, "managementStopped"], capture_output=True, text=True).stdout.strip()
+        if str(int(before or 0)) != (after or "0"):
+            problems.append(f"managementStopped was {before} before the run and is {after} now. "
+                            "Press Start or Stop Window Management in Settings > General to put it back.")
+    released = lock("release", "--owner", run["owner"])
+    log(run, (released.stdout + released.stderr).strip())
+    for problem in problems:
+        log(run, f"PROBLEM: {problem}")
+    log(run, f"run ended. Evidence kept in {folder}")
+    CURRENT.unlink(missing_ok=True)
+    return 1 if problems else 0
+
+
+def cmd_renew(args) -> int:
+    run = load_run()
+    result = lock("take", "--owner", run["owner"], "--minutes", str(args.minutes), "--task", "verify-miri run, renewed")
+    log(run, (result.stdout + result.stderr).strip())
+    return result.returncode
+
+
+def fixture_bundle(binary: Path, folder: Path, name: str) -> Path:
+    """Wrap AXFixture in a minimal app, so `open` launches it as a person opens an app and macOS brings it forward.
+    A process started from a background shell cannot take the front."""
+    bundle = folder / "fixtures" / f"{name}.app"
+    (bundle / "Contents/MacOS").mkdir(parents=True, exist_ok=True)
+    shutil.copy2(binary, bundle / "Contents/MacOS/AXFixture")
+    info = {"CFBundleIdentifier": f"io.github.samanyudas.miri.verify.{name}", "CFBundleName": f"AXFixture {name}",
+            "CFBundleExecutable": "AXFixture", "CFBundlePackageType": "APPL", "CFBundleVersion": "1"}
+    (bundle / "Contents/Info.plist").write_bytes(plistlib.dumps(info))
+    return bundle
+
+
+def cmd_fixture(args) -> int:
+    run = load_run()
+    test_pid(run)
+    binary = REPO / ".build/debug/AXFixture"
+    if not binary.exists():
+        raise Failure(f"No fixture at {binary}. Run `make build` or `swift build` first.")
+    folder = Path(run["dir"])
+    for _ in range(args.count):
+        name = f"fixture-{len(run['fixtures']) + 1}"
+        ready = folder / f"{name}.pid"
+        bundle = fixture_bundle(binary, folder, name)
+        options = ["--ready-file", str(ready), "--label", name, "--activate"] + ([] if args.fixed else ["--resizable"])
+        subprocess.run(["open", "-n", str(bundle), "--args", *options], check=True)
+        if not wait(ready.exists, 10, 0.05):
+            raise Failure(f"{name} did not start")
+        pid = int(ready.read_text())
+        item = {"name": name, "pid": pid, "path": str(bundle), "window_id": None}
+        run["fixtures"].append(item)
+        save_run(run)
+
+        def window_id():
+            rows = [line.split()[0] for line in tool("axdo", str(pid), "windows").splitlines()
+                    if f"title={FIXTURE_TITLE}" in line]
+            return int(rows[0]) if rows else None
+
+        item["window_id"] = wait(window_id, 5)
+
+        def managed():
+            return any(w["window_id"] == item["window_id"] for w in fixture_windows(run, query("state", run["test_pid"])))
+
+        seen = wait(managed, 5, 0.2)
+        save_run(run)
+        log(run, f"opened {name}: pid {pid}, window {item['window_id']}, "
+                 f"{'the engine manages it' if seen else 'NOT in the engine state after 5 s'}")
+        time.sleep(args.settle)
+    return 0
+
+
+def parse_chord(chord: str) -> tuple[int, int]:
+    """Parse Miri's chord format, such as "ctrl+alt-leftarrow" or "ctrl+alt+shift-h"."""
+    modifiers, _, key = chord.lower().rpartition("-")
+    if key not in KEYS:
+        raise Failure(f"Unknown key {key!r}. Known keys: {', '.join(sorted(KEYS))}.")
+    flags = 0
+    for name in filter(None, re.split(r"[+]", modifiers)):
+        if name not in MODIFIERS:
+            raise Failure(f"Unknown modifier {name!r}. Use ctrl, alt, shift, or cmd.")
+        flags |= MODIFIERS[name]
+    if key in ARROWS:
+        flags |= ARROW_FLAGS
+    return KEYS[key], flags
+
+
+def cmd_key(args) -> int:
+    run = load_run()
+    test_pid(run)
+    code, flags = parse_chord(args.chord)
+    output = tool("key", str(code), format(flags, "x")).strip()
+    log(run, f"pressed {args.chord}: {output}")
+    return 0
+
+
+def cmd_focused(args) -> int:
+    run = load_run()
+    record = focus_record(run)
+    if args.wait_for:
+        # The engine and macOS update focus a few hundred milliseconds after the key press.
+        def matches():
+            current = focus_record(run)
+            hit = current["engine_focused_fixture"] == args.wait_for and current["macos_frontmost_fixture"] == args.wait_for
+            return current if hit else None
+
+        record = wait(matches, args.timeout, 0.1) or focus_record(run)
+    print(json.dumps(record, indent=2))
+    if args.wait_for and not (record["engine_focused_fixture"] == args.wait_for == record["macos_frontmost_fixture"]):
+        log(run, f"focus did NOT reach {args.wait_for} within {args.timeout} s")
+        return 1
+    return 0
+
+
+def cmd_snapshot(args) -> int:
+    run = load_run()
+    folder = Path(run["dir"])
+    record = focus_record(run)
+    path = folder / f"{args.label}.json"
+    path.write_text(json.dumps(record, indent=2) + "\n")
+    shots = []
+    for item in run["fixtures"]:
+        if item.get("window_id") and alive(item["pid"]):
+            image = folder / f"{args.label}-{item['name']}.png"
+            subprocess.run(["screencapture", "-x", "-o", "-l", str(item["window_id"]), str(image)], check=False)
+            if image.exists():
+                shots.append(image.name)
+    log(run, f"snapshot {args.label}: engine focus {record['engine_focused_fixture'] or record['engine_focused_window_id']}, "
+             f"macOS frontmost {record['macos_frontmost_fixture'] or record['macos_frontmost_pid']}; "
+             f"wrote {path.name} {' '.join(shots)}")
+    return 0
+
+
+def cmd_ax(args) -> int:
+    run = load_run(required=False)
+    pid = str(test_pid(run)) if args.pid == "test" and run else args.pid
+    output = tool("axdo", pid, *args.rest, check=False)
+    print(output, end="")
+    if run and args.rest and args.rest[0] == "press":
+        log(run, output.strip())
+    return 0
+
+
+def cmd_settings(_args) -> int:
+    """Reopening the running app shows Settings, as a user does from Launchpad or the Dock."""
+    run = load_run()
+    pid = test_pid(run)
+    subprocess.run(["open", run["test_app"]], check=True)
+    shown = wait(lambda: tool("axdo", str(pid), "status", check=False).strip(), 5, 0.2)
+    log(run, f"opened Settings: status {shown or 'not shown'}")
+    return 0 if shown else 1
+
+
+def cmd_standin(args) -> int:
+    run = load_run()
+    build_tools(quiet=True)
+    folder = Path(run["dir"]) / "standins"
+    folder.mkdir(exist_ok=True)
+    binary = folder / args.name
+    shutil.copy2(TOOLS / "standin", binary)
+    process = subprocess.Popen([str(binary), str(args.seconds)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                               start_new_session=True)
+    time.sleep(0.5)
+    if process.poll() is not None:
+        raise Failure(f"The stand-in {args.name} exited with status {process.returncode}.")
+    run["standins"].append({"name": args.name, "pid": process.pid, "path": str(binary)})
+    save_run(run)
+    log(run, f"started stand-in {args.name} pid {process.pid} for up to {args.seconds} s")
+    return 0
+
+
+def cmd_watch(args) -> int:
+    run = load_run(required=False)
+    seen: dict[int, str] = {}
+    out = Path(run["dir"]) / f"watch-{int(time.time())}.log" if run else None
+    end = time.time() + args.seconds
+    lines = []
+    while time.time() < end:
+        current = {p["pid"]: f"{p['kind']} pid {p['pid']} ppid {p['ppid']}" for p in processes()}
+        for pid in current.keys() - seen.keys():
+            lines.append(f"{time.time():.3f} start {current[pid]}")
+            print(lines[-1], flush=True)
+        for pid in seen.keys() - current.keys():
+            lines.append(f"{time.time():.3f} exit  {seen[pid]}")
+            print(lines[-1], flush=True)
+        seen = current
+        time.sleep(0.05)
+    lines.append(f"{time.time():.3f} running at end: {sorted(seen.values()) or 'none'}")
+    print(lines[-1])
+    if out:
+        out.write_text("\n".join(lines) + "\n")
+    return 0
+
+
+def cmd_query(args) -> int:
+    print(json.dumps(query(args.kind), indent=2))
+    return 0
+
+
+def cmd_send(args) -> int:
+    run = load_run()
+    pid = test_pid(run)
+    engine = engine_of(pid)
+    binary = f"{engine['bundle']}/Contents/Helpers/miri-engine"
+    env = {**os.environ, "PANERU_MACH_SERVICE": MACH_SERVICE}
+    result = subprocess.run([binary, "send-cmd", *args.rest], capture_output=True, text=True, env=env, timeout=10)
+    log(run, f"send-cmd {' '.join(args.rest)} -> exit {result.returncode} {result.stdout.strip()} {result.stderr.strip()}")
+    return result.returncode
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = parser.add_subparsers(dest="command", required=True)
+    default_app = str(REPO / ".build/app/Miri Developer.app")
+
+    sub.add_parser("tools", help="compile the helper tools").set_defaults(func=cmd_tools)
+    p = sub.add_parser("doctor", help="read-only: is this Mac and this build worth driving?")
+    p.add_argument("--app", default=default_app, help="test bundle when no run is in progress")
+    p.set_defaults(func=cmd_doctor)
+    p = sub.add_parser("begin", help="lock, back up the session, swap in the test build")
+    p.add_argument("--owner", required=True, help="thread name and id, as the live-test lock wants")
+    p.add_argument("--minutes", type=int, default=30)
+    p.add_argument("--task", default="verify-miri: swap in a test build of Miri Developer, open AXFixture windows, send shortcuts")
+    p.add_argument("--app", default=default_app, help="the Miri Developer.app bundle to test")
+    p.set_defaults(func=cmd_begin)
+    sub.add_parser("end", help="quit the test build, restore the session, relaunch the previous build, unlock").set_defaults(func=cmd_end)
+    p = sub.add_parser("renew", help="extend the live-test lock")
+    p.add_argument("--minutes", type=int, default=30)
+    p.set_defaults(func=cmd_renew)
+    p = sub.add_parser("fixture", help="open AXFixture windows that the run owns")
+    p.add_argument("--count", type=int, default=1)
+    p.add_argument("--settle", type=float, default=1.0, help="seconds to wait after each window")
+    p.add_argument("--fixed", action="store_true", help="a window that cannot resize, which the engine floats")
+    p.set_defaults(func=cmd_fixture)
+    p = sub.add_parser("key", help='press a chord in Miri\'s format, such as "ctrl+alt-leftarrow"')
+    p.add_argument("chord")
+    p.set_defaults(func=cmd_key)
+    p = sub.add_parser("focused", help="print engine focus and macOS frontmost app, as fixture names")
+    p.add_argument("--wait-for", help="fixture name that must hold focus in both views; exit 1 if it does not")
+    p.add_argument("--timeout", type=float, default=3)
+    p.set_defaults(func=cmd_focused)
+    p = sub.add_parser("snapshot", help="save focus state and fixture window images to the run folder")
+    p.add_argument("label")
+    p.set_defaults(func=cmd_snapshot)
+    p = sub.add_parser("ax", help="axdo: dump, status, press <title>..., windows. PID 'test' means the test build")
+    p.add_argument("pid")
+    p.add_argument("rest", nargs=argparse.REMAINDER)
+    p.set_defaults(func=cmd_ax)
+    sub.add_parser("settings", help="open the test build's Settings window").set_defaults(func=cmd_settings)
+    p = sub.add_parser("standin", help="run a harmless process with another app's name, such as yabai")
+    p.add_argument("name")
+    p.add_argument("--seconds", type=int, default=900)
+    p.set_defaults(func=cmd_standin)
+    p = sub.add_parser("watch", help="log every Miri app and engine start and exit for N seconds")
+    p.add_argument("seconds", type=float)
+    p.set_defaults(func=cmd_watch)
+    p = sub.add_parser("query", help="print engine state. Window titles can be private: never paste them")
+    p.add_argument("kind", nargs="?", default="state", choices=["state", "active", "on-screen", "virtual-workspaces"])
+    p.set_defaults(func=cmd_query)
+    p = sub.add_parser("send-cmd", help="send an engine command to set up state. Never use it as the proof")
+    p.add_argument("rest", nargs=argparse.REMAINDER)
+    p.set_defaults(func=cmd_send)
+
+    args = parser.parse_args()
+    try:
+        return args.func(args)
+    except Failure as error:
+        print(f"verify-miri: {error}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
