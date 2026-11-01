@@ -455,8 +455,9 @@ def cmd_end(_args) -> int:
     if pid and alive(pid) and APP_PATTERN.match(command_of(pid)):
         quit_app(pid, run, "test build")
     previous = run.get("previous_app")
-    # Before the test build launched, the previous build may still run, and nothing needs restoring.
-    leftover = [p for p in processes() if run.get("test_pid") or p["bundle"] != previous]
+    # When `begin` failed before it stopped the previous build, that build still runs whole, and nothing needs restoring.
+    untouched = not run.get("test_pid") and any(p["kind"] == "app" and p["bundle"] == previous for p in processes())
+    leftover = [] if untouched else processes()
     if leftover:
         for p in leftover:
             log(run, f"STILL RUNNING: {p['kind']} pid {p['pid']} from {p['bundle']}")
