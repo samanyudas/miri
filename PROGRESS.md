@@ -18,11 +18,13 @@ The public release path and the complete acceptance runs follow.
 
 Branch `chore/verify-engine-lifecycle` adds a TLA+ model of engine start, stop, restart, and quit in `verification/engine-lifecycle/`.
 `make verify-engine-lifecycle` checks it in about 3 seconds, and the project skill `.claude/skills/verify-engine-lifecycle/SKILL.md` says when to run it and how to keep it in step with the code.
-The model found four lifecycle bugs on 2026-11-01, and none was reproduced in the running app yet.
-The skill lists them under Known findings.
+The model found four lifecycle bugs on 2026-11-01, and a live run on a `main` build checked each one the same day.
+Three reproduced and are filed as [#234](https://github.com/samanyudas/miri/issues/234), [#235](https://github.com/samanyudas/miri/issues/235), and [#236](https://github.com/samanyudas/miri/issues/236).
+The fourth, an engine launched during Quit, reproduced in part and shares the cause of #234.
+The skill lists all four under Known findings.
 Three come from one cause: for up to 3 seconds after a stop begins, `engineState` stays `.running`, and a restart in that time queues a `start` that no later Stop or Quit removes.
 The fourth is the status after Restart from a failed engine while a setup check blocks start.
-Next: reproduce each finding in Miri Developer under the live-test lock, then file a bug for each one that reproduces.
+Next: Sam picks the fixes for #234, #235, and #236.
 
 ## Initial setup
 
