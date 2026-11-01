@@ -25,6 +25,7 @@ The skill lists all four under Known findings.
 Three come from one cause: for up to 3 seconds after a stop begins, `engineState` stays `.running`, and a restart in that time queues a `start` that no later Stop or Quit removes.
 The fourth is the status after Restart from a failed engine while a setup check blocks start.
 Next: Sam picks the fixes for #234, #235, and #236.
+Branch `fix/234-stop-cancels-queued-restart` fixes #234 and the Quit finding with a `restartAfterStop` flag that a later Stop clears, so `StopStands` and `QuitLeavesNoEngine` now hold, and its PR waits for review.
 
 ## App and menu bar icons
 
