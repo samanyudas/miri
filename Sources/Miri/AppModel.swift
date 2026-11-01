@@ -351,6 +351,7 @@ import ServiceManagement
         refreshSetup()
         startBlockers = setupChecks.filter(\.isBlocking)
         guard startBlockers.isEmpty else {
+            if !engineState.isRunning { supervisor.stop() }
             pollSetupUntilReady()
             return
         }

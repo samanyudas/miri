@@ -17,7 +17,7 @@ make verify-engine-lifecycle
 ```
 
 It runs `scripts/verify-engine-lifecycle.py --mutants` and takes about 3 seconds after the first run, which downloads the tools.
-It checks 238 distinct states.
+It checks 196 distinct states.
 The first run downloads TLC 1.7.4 and a Temurin 21 Java runtime, both pinned by SHA-256, into `~/.cache/miri/verification`.
 Set `JAVA` and `TLA2TOOLS` to use your own Java 11 or later and `tla2tools.jar` instead.
 
@@ -48,8 +48,8 @@ Each rule is a TLA+ definition at the end of `verification/engine-lifecycle/Engi
 ### Known findings
 
 The model found four findings on 2026-11-01, and a live run on a `main` build at `bbe31c28` checked each one the same day.
-The current code still breaks the rules of the findings that are not marked fixed.
-`KNOWN_FINDINGS` in the script lists those rules, so they print as `finding` and do not fail the run.
+The fixes for #234, #235, and #236 make every rule hold, so `KNOWN_FINDINGS` in the script is empty.
+When a new finding appears, list its rule there, so it prints as `finding` and does not fail the run.
 
 1. `StopStands`: you press Restart and then Stop within 3 seconds, or you press Stop and the keyboard layout changes within 3 seconds. Either way a stop is in flight, `engineState` is still `.running`, and `restartManually()` queues `start` in `stopCompletions`. The engine exits, `exited(status:)` runs every queued completion, and the queued `start` launches an engine after your Stop.
    Reproduced live: [#234](https://github.com/samanyudas/miri/issues/234).
@@ -62,6 +62,7 @@ The current code still breaks the rules of the findings that are not marked fixe
    Fixed by the fix for #234: the quit's `stop(completion:)` clears `restartAfterStop`.
 4. `WaitingIsShown`: the engine is `.failed`, a setup check blocks start, and you press Restart. `AppModel.start()` begins the setup poll, but `engineState` stays `.failed`, so `statusText` says "Stopped after repeated engine failures" and the menu shows no Stop button to cancel the wait.
    Reproduced live: [#236](https://github.com/samanyudas/miri/issues/236).
+   Fixed in [#241](https://github.com/samanyudas/miri/pull/241): `start()` stops a supervisor that does not run before it polls, and Start becomes Stop while a check blocks start, so the rule holds.
 
 Findings 1 to 3 had one cause: for up to 3 seconds after a stop begins, `engineState` stays `.running`, and a restart in that time queued a `start` that no later Stop or Quit removed.
 When a fix lands, the rule it fixes prints `UNEXPECTED ... holds`.
@@ -100,7 +101,7 @@ A change that touches a covered file but no lifecycle step, such as a new label 
 ### Coverage
 
 ```text
-sync-commit: 2880ad17
+sync-commit: ea3926c8
 covers: Sources/MiriCore/Engine.swift
 covers: Sources/MiriCore/EngineProcess.swift
 covers: Sources/Miri/AppModel.swift
