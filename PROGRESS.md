@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `chore/pr-evidence`, based on `main` at `1e250b86`
+Updated: 2026-11-01 on branch `feat/219-initial-setup`, based on `main` at `97672bc7`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,17 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Initial setup
+
+[#219](https://github.com/samanyudas/miri/issues/219) is implemented on branch `feat/219-initial-setup`, with no PR yet.
+On first launch Miri opens a Set Up Miri window with the window management status, any start blockers, and the strip swipe controls from Settings > Gestures.
+Setup selects four fingers when no finger count is chosen.
+The swipe stays off until a confirmed gesture test, or turns on at once when a matching saved test exists.
+Closing the window saves `initialSetupDone` in user defaults, and quitting with the window open does not.
+Launch with `-initialSetupDone NO` to show setup again.
+`swift build`, `make swift-test`, `make lint`, `make swift-lint`, and `make build` passed.
+Nobody has opened the window in the running app yet, and a real four-finger swipe test on trackpad hardware is unverified.
 
 ## Dock changes while the engine runs
 
