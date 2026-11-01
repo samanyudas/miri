@@ -16,7 +16,7 @@ The public release path and the complete acceptance runs follow.
 
 ## Dock changes while the engine runs
 
-[#215](https://github.com/samanyudas/miri/issues/215) is fixed in [engine PR #106](https://github.com/samanyudas/paneru/pull/106), which this branch pins at `3854da2`.
+[#215](https://github.com/samanyudas/miri/issues/215) is fixed in [engine PR #106](https://github.com/samanyudas/paneru/pull/106), which this branch pins at its merge commit `036c73b`. That commit also carries [engine PR #105](https://github.com/samanyudas/paneru/pull/105), the #87 tests for a Dock and a too-wide maximized window.
 The engine read each display's Dock position only at startup or after a display change, so a Dock that showed, hid, or moved later left windows laid out for the old Dock.
 The engine now re-reads every display on `NSApplicationDidChangeScreenParametersNotification`.
 A changed Dock position moves that display's strips with its usable area, through the same layout step as an edge padding change, so a maximized column seen there fills the new area.
