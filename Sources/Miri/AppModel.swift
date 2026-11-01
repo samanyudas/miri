@@ -374,6 +374,8 @@ import ServiceManagement
     }
 
     func restart() {
+        stoppedByUser = false
+        defaults.set(false, forKey: Self.stoppedKey)
         if engineState.isRunning { supervisor.restartManually() } else { start() }
     }
 

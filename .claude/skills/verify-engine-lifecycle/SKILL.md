@@ -17,7 +17,7 @@ make verify-engine-lifecycle
 ```
 
 It runs `scripts/verify-engine-lifecycle.py --mutants` and takes about 3 seconds after the first run, which downloads the tools.
-It checks 910 distinct states.
+It checks 742 distinct states.
 The first run downloads TLC 1.7.4 and a Temurin 21 Java runtime, both pinned by SHA-256, into `~/.cache/miri/verification`.
 Set `JAVA` and `TLA2TOOLS` to use your own Java 11 or later and `tla2tools.jar` instead.
 
@@ -47,14 +47,15 @@ Each rule is a TLA+ definition at the end of `verification/engine-lifecycle/Engi
 
 ### Known findings
 
-The current code breaks four rules.
+The current code breaks three rules.
 `KNOWN_FINDINGS` in the script lists them, so they print as `finding` and do not fail the run.
 The model found each one on 2026-11-01, and a live run on a `main` build at `bbe31c28` checked each one the same day.
 
 1. `StopStands`: you press Restart and then Stop within 3 seconds, or you press Stop and the keyboard layout changes within 3 seconds. Either way a stop is in flight, `engineState` is still `.running`, and `restartManually()` queues `start` in `stopCompletions`. The engine exits, `exited(status:)` runs every queued completion, and the queued `start` launches an engine after your Stop.
    Reproduced live: [#234](https://github.com/samanyudas/miri/issues/234).
-2. `SavedStopMatches`: you press Stop, then Restart within 3 seconds. `AppModel.restart()` sees `engineState` still `.running` and calls `supervisor.restartManually()` directly, so `stoppedByUser` stays `true` while the engine runs again. `stopFromShortcut()` then ignores the Stop shortcut, and the next launch does not start management.
+2. `SavedStopMatches`, fixed: you press Stop, then Restart within 3 seconds. `AppModel.restart()` saw `engineState` still `.running` and called `supervisor.restartManually()` directly, so `stoppedByUser` stayed `true` while the engine ran again. `stopFromShortcut()` then ignored the Stop shortcut, and the next launch did not start management.
    Reproduced live, with both harms: [#235](https://github.com/samanyudas/miri/issues/235).
+   Fixed for #235: `restart()` now clears and saves `stoppedByUser` first, as `start()` does, and the rule holds.
 3. `QuitLeavesNoEngine`: you press Restart, then quit within 3 seconds. `stopCompletions` holds `start` and then the quit reply. The engine exits, the queued `start` launches a new engine, and then the app quits with that engine running.
    Reproduced in part: the engine log showed Miri launching an engine after SIGTERM, but that engine was gone within 50 ms of the app's exit. It has no issue of its own, because it has the same cause as #234.
 4. `WaitingIsShown`: the engine is `.failed`, a setup check blocks start, and you press Restart. `AppModel.start()` begins the setup poll, but `engineState` stays `.failed`, so `statusText` says "Stopped after repeated engine failures" and the menu shows no Stop button to cancel the wait.
