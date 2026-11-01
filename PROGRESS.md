@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `feat/drag-cursor-target`, based on `main` at `b451090a`
+Updated: 2026-11-01 on branch `fix/147-locked-screen-handles`, based on `main` at `a3001115`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -143,7 +143,15 @@ After that wake, the engine dropped six windows whose AX elements died, which is
 Later on 28 October Sam ran a cable unplug, a lid close, and a sleep on engine `e1705af`, with the layout recorded every 4 s.
 The cable unplug returned every window to its display, order, and stack.
 After the lid and the sleep, the windows the engine still managed came back correctly, but #147 dropped others: their AX elements died and the engine gave up after 1 s.
-#142 stays open until #147 is fixed and the lid and sleep checks pass.
+#147 is fixed in [engine PR #104](https://github.com/samanyudas/paneru/pull/104), merged as `589b44b`. Its tree matches the tested head `83c0b05`, and this branch pins it.
+While the screen is locked, every AX read from another process fails: each window element answers "invalid element" and each app's window list is empty.
+macOS moves windows between Spaces on wake while the lock screen is still up, and the engine closed each moved window 1 s later, still locked.
+The engine now waits for the unlock before it starts the 1 s wait for a window's AX element.
+On 1 November on Sam's Mac, a sleep and wake on Sam's daily build dropped the 3 windows on the built-in display, and a screen lock with no sleep made every AX read fail until the unlock.
+On the fix build, a sleep and wake kept all 16 windows, and the 2 windows on the built-in display kept their order on its new Space.
+A lid close with the external display connected, which does not sleep, kept all 14 windows on the daily build.
+Stacks across a lid close or a sleep are not checked yet, so #142 stays open for that check.
+Off-screen windows during a lock may still drop through two other engine paths, which [#210](https://github.com/samanyudas/miri/issues/210) tracks.
 
 ## Side-by-side displays
 
