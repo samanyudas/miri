@@ -102,13 +102,14 @@ def coverage() -> tuple[str, list[str]]:
 
 
 def stale_files(sync: str, files: list[str]) -> list[str]:
-    """Covered files that differ between the sync commit and the working tree."""
-    result = subprocess.run(
-        ["git", "diff", "--name-only", sync, "--", *files], cwd=ROOT, capture_output=True, text=True
-    )
-    if result.returncode != 0:
-        sys.exit(f"git diff against the sync commit failed: {result.stderr.strip()}")
-    return [line for line in result.stdout.splitlines() if line]
+    """Covered files that differ between the sync commit and the working tree, untracked ones included."""
+    stale = []
+    for command in (["git", "diff", "--name-only", sync], ["git", "ls-files", "--others", "--exclude-standard"]):
+        result = subprocess.run([*command, "--", *files], cwd=ROOT, capture_output=True, text=True)
+        if result.returncode != 0:
+            sys.exit(f"{' '.join(command[:2])} for the covered files failed: {result.stderr.strip()}")
+        stale += [line for line in result.stdout.splitlines() if line]
+    return stale
 
 
 def run_tlc(java: str, jar: str, rule: str, mutant: str) -> tuple[str, str, str]:
@@ -116,6 +117,8 @@ def run_tlc(java: str, jar: str, rule: str, mutant: str) -> tuple[str, str, str]
     kind = "PROPERTY" if rule in PROPERTIES else "INVARIANT"
     try:
         return _run_tlc(java, jar, rule, mutant, kind)
+    except OSError as error:
+        return rule, "error", f"Java could not start: {error}"
     except subprocess.TimeoutExpired:
         return rule, "error", (
             f"TLC ran longer than {TLC_TIMEOUT} seconds. The model's state space is probably unbounded. "
@@ -141,7 +144,7 @@ def _run_tlc(java: str, jar: str, rule: str, mutant: str, kind: str) -> tuple[st
     return rule, "error", output
 
 
-STATE = re.compile(r"^State (\d+): <(\w+)|^(\d+): Back to state|^(\d+): Stuttering")
+STATE = re.compile(r"^State (\d+): <(\w+)|^State \d+: Stuttering|^Back to state \d+")
 FIELDS = ["app", "engine", "proc", "alive", "exitQueued", "stoppedByUser", "polling", "completions"]
 
 
@@ -166,9 +169,12 @@ def trace(output: str) -> list[str]:
             record = ""
             if match.group(2):
                 step = f"{match.group(1)}. {match.group(2)}"
+            elif "Stuttering" in line:
+                step = None
+                lines.append("   then nothing more happens, forever")
             else:
                 step = None
-                lines.append(f"   then {line.split(': ', 1)[1]}")
+                lines.append(f"   then {line.split(':', 1)[0].lower()}, and the steps from there repeat forever")
             continue
         if step is not None:
             record += " " + line.strip()
