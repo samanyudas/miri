@@ -131,7 +131,7 @@ The gesture test result is app state outside the file, so a file edit cannot mar
 The effect of `vertical = false` on Mission Control and App Exposé swipes still needs hardware verification.
 
 The accepted strip target for trackpad scrolling and keyboard commands is in [Multiple monitors](release-scope.md#multiple-monitors).
-Neither target is built yet, and both need an engine change.
+The pinned engine moves the strip on the display whose menu bar is active, so the pointer target and the setting need an engine change that is not built yet ([#212](https://github.com/samanyudas/miri/issues/212)).
 The inspected swipe path selects the active workspace rather than a strip from pointer coordinates.
 Miri's accepted pointer-target and focused-target behavior remains required integration work.
 

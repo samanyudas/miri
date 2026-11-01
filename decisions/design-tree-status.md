@@ -151,7 +151,7 @@ On 1 November 2026, the finished drag ([#43](https://github.com/samanyudas/miri/
 Their acceptance checks stay in the [acceptance ledger](../docs/acceptance-ledger.md).
 [PROGRESS.md](../PROGRESS.md) records what is implemented and what is verified.
 
-- Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
+- Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings ([#212](https://github.com/samanyudas/miri/issues/212)).
 - Cross to the next display at a strip's end with Focus column and Move column left or right ([#104](https://github.com/samanyudas/miri/issues/104)).
 - Integrate Sparkle updates with the accepted update policy.
 - Configure Developer ID signing, notarization, signed update feeds, the release disk image, and the Homebrew cask.
