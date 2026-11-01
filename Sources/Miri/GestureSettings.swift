@@ -100,12 +100,12 @@ struct GestureStatusRow: View {
     var body: some View {
         LabeledContent("Status") {
             VStack(alignment: .trailing, spacing: 3) {
-                Text(summary)
+                LiveText(summary)
                 switch model.gestureState {
                 case .needsTest(_, detectionUnavailable: true):
                     Text("Unable to verify").foregroundStyle(.secondary)
                 case .conflict(let message):
-                    Text(message).foregroundStyle(.secondary).multilineTextAlignment(.trailing)
+                    LiveText(message).foregroundStyle(.secondary).multilineTextAlignment(.trailing)
                         .fixedSize(horizontal: false, vertical: true)
                     if let url = conflictCheck?.settingsURL {
                         Button("Open System Settings") { NSWorkspace.shared.open(url) }

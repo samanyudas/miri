@@ -28,6 +28,20 @@ extension AppModel {
     }
 }
 
+/// Text that keeps VoiceOver current inside a `LabeledContent`.
+/// On macOS 27, `LabeledContent` keeps the first accessibility value of its content, so this text restates its string as its value.
+struct LiveText: View {
+    let string: String
+
+    init(_ string: String) {
+        self.string = string
+    }
+
+    var body: some View {
+        Text(string).accessibilityValue(string)
+    }
+}
+
 struct MenuContent: View {
     let model: AppModel
     let presenter: WindowPresenter
@@ -107,7 +121,7 @@ struct GeneralSettings: View {
         Form {
             ConfigurationIssueBanner(model: model)
             Section {
-                LabeledContent("Status", value: model.statusText)
+                LabeledContent("Status") { LiveText(model.statusText) }
                 if case .failed(let reason) = model.engineState {
                     Text(reason).foregroundStyle(.secondary)
                 }
@@ -258,7 +272,7 @@ struct LayoutSettings: View {
     private func gapRow(_ title: String, _ key: WritableKeyPath<MiriSettings, Int>) -> some View {
         LabeledContent(title) {
             Stepper(value: gap(key), in: MiriSettings.gapRange) {
-                Text("\(model.settings[keyPath: key]) pt").monospacedDigit()
+                LiveText("\(model.settings[keyPath: key]) pt").monospacedDigit()
             }
         }
     }
