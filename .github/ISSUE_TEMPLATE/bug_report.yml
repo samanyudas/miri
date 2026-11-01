@@ -30,6 +30,15 @@ body:
       description: Include whether any window became unreachable or off-screen.
     validations:
       required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Observable results that show the bug is fixed, and how to check each one. One per line.
+      placeholder: |
+        - Following the steps above, every window stays reachable on the built-in display.
+    validations:
+      required: true
   - type: input
     id: version
     attributes:

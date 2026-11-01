@@ -27,6 +27,8 @@ body:
       description: Observable results that show the feature works. One per line.
       placeholder: |
         - With two displays, the strip on each display scrolls independently.
+    validations:
+      required: true
   - type: textarea
     id: alternatives
     attributes:

@@ -69,6 +69,39 @@ class GuardCommandTest(unittest.TestCase):
             with self.subTest(command=command):
                 self.assertEqual(self.decide(command), "allow")
 
+    def test_issue_create_needs_acceptance_criteria_and_reproduction(self):
+        criteria = "## Acceptance criteria\n- make test passes"
+        steps = "## Steps to reproduce\n1. Press Control-Option-Command-D."
+        blocked = {
+            "gh issue create --title Gap --body 'Windows overlap.'": "Acceptance criteria",
+            "gh issue create -t Gap -b '## Acceptance\n- works'": "Acceptance criteria",
+            f"gh issue create --title Gap --label bug --body '{criteria}'": "Steps to reproduce",
+            f"gh issue new -t Gap -l 'bug,needs-triage' -b \"{criteria}\"": "Steps to reproduce",
+            "gh issue create --title Gap --body-file - <<'EOF'\nSam's Mac shows a gap.\nEOF": "Acceptance criteria",
+            "bash -c 'gh issue create --title Gap --body nothing'": "Acceptance criteria",
+        }
+        for command, reason in blocked.items():
+            with self.subTest(command=command):
+                self.assertIn(reason, self.decide(command))
+
+        with tempfile.TemporaryDirectory() as directory:
+            Path(directory, "issue.md").write_text(f"{steps}\n\n{criteria}\n")
+            Path(directory, "vague.md").write_text(f"{steps}\n")
+            self.assertEqual(self.decide("gh issue create -t Gap -l bug -F issue.md", directory), "allow")
+            self.assertIn("Acceptance criteria", self.decide("gh issue create -t Gap -F vague.md", directory))
+
+        for command in [
+            f"gh issue create --title Gap --body '{criteria}'",
+            f"gh issue create --title Gap --label bug --body \"$(cat <<'EOF'\n{steps}\n\n{criteria}\nEOF\n)\"",
+            f"gh issue create -t Gap -l bug --body-file - <<'EOF'\nSam's Mac.\n{steps}\n{criteria}\nEOF",
+            f"gh issue create -t Gap --body=\"### Acceptance criteria\\n- works\"",
+            "gh issue create --web",
+            "gh issue view 7 --comments",
+            "gh issue comment 7 --body 'Reproduced on main.'",
+        ]:
+            with self.subTest(command=command):
+                self.assertEqual(self.decide(command), "allow")
+
 
 if __name__ == "__main__":
     unittest.main()

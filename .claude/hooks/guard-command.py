@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Claude Code PreToolUse hook that blocks irreversible or outward-facing shell commands.
 
+It also blocks `gh issue create` when the body lacks the sections that CONTRIBUTING.md requires.
 AGENTS.md explains the policy. Exit code 2 blocks the call and shows stderr to the agent.
 """
 import json
@@ -9,11 +10,17 @@ import re
 import shlex
 import subprocess
 import sys
+from pathlib import Path
 
 PROTECTED_BRANCHES = {"main"}
 WRAPPERS = {"sudo", "env", "command", "exec", "nohup", "time", "nice"}
 SEPARATORS = {";", "&&", "||", "|", "&", "(", ")", "|&", ";;"}
 GIT_OPTIONS_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace"}
+ISSUE_CREATE = re.compile(r"\bgh\s+issue\s+(create|new)\b")
+ACCEPTANCE = re.compile(r"(^|\\n)#{1,6} *Acceptance criteria\b", re.I | re.M)
+REPRODUCE = re.compile(r"(^|\\n)#{1,6} *Steps to reproduce\b", re.I | re.M)
+BUG_LABEL = re.compile(r"(-l|--label)[ =]['\"]?[^'\"\s]*\bbug\b")
+ISSUE_HELP = "see File an issue in CONTRIBUTING.md"
 
 
 def segments(command: str):
@@ -87,7 +94,43 @@ def check_git(args: list[str], cwd: str) -> str | None:
     return None
 
 
-def check(argv: list[str], cwd: str) -> str | None:
+def check_issue_body(body: str, bug: bool) -> str | None:
+    if not ACCEPTANCE.search(body):
+        return f"an issue needs an '## Acceptance criteria' section; {ISSUE_HELP}"
+    if bug and not REPRODUCE.search(body):
+        return f"a bug issue needs a '## Steps to reproduce' section with steps you ran; {ISSUE_HELP}"
+    return None
+
+
+def check_issue_create(args: list[str], cwd: str, command: str) -> str | None:
+    body, body_file, labels = None, None, []
+    i = 0
+    while i < len(args):
+        name, has_value, value = args[i].partition("=")
+        if name in {"-b", "--body", "-F", "--body-file", "-l", "--label"} and not has_value:
+            if i + 1 >= len(args):
+                break
+            i += 1
+            value = args[i]
+        if name in {"-w", "--web"}:
+            return None
+        if name in {"-b", "--body"}:
+            body = value
+        elif name in {"-F", "--body-file"}:
+            body_file = value
+        elif name in {"-l", "--label"}:
+            labels += [label.strip() for label in value.split(",")]
+        i += 1
+    if body is None and body_file:
+        try:
+            body = Path(cwd, body_file).read_text(encoding="utf-8") if body_file != "-" else command
+        except OSError:
+            # The file may be written earlier in the same command, or the body may come from stdin.
+            body = command
+    return check_issue_body(body or "", "bug" in labels)
+
+
+def check(argv: list[str], cwd: str, command: str) -> str | None:
     argv = strip_wrappers(argv)
     if not argv:
         return None
@@ -97,6 +140,8 @@ def check(argv: list[str], cwd: str) -> str | None:
     if program == "git":
         return check_git(list(args), cwd)
     if program == "gh" and len(args) >= 2:
+        if args[0] == "issue" and args[1] in {"create", "new"}:
+            return check_issue_create(args[2:], cwd, command)
         if args[:2] == ["pr", "merge"]:
             return "merging is Sam's decision; see Review and merge in CONTRIBUTING.md"
         if args[0] == "release" and args[1] in {"create", "delete", "edit", "upload"}:
@@ -114,9 +159,12 @@ def check_command(command: str, cwd: str) -> str | None:
     try:
         parsed = list(segments(command))
     except ValueError:
+        # An unquoted heredoc body with an apostrophe cannot be split, so check the issue text as written.
+        if ISSUE_CREATE.search(command):
+            return check_issue_body(command, bool(BUG_LABEL.search(command)))
         return None
     for argv in parsed:
-        reason = check(argv, cwd)
+        reason = check(argv, cwd, command)
         if reason:
             return reason
     return None

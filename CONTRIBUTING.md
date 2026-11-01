@@ -11,6 +11,38 @@ It also creates the **Miri Developer Local Signing** identity in its own keychai
 Development builds are named Miri Developer with bundle identifier `io.github.samanyudas.miri.dev`, so they never replace an installed Miri release.
 It reports each missing prerequisite with the command that fixes it.
 
+## File an issue
+
+Every issue needs acceptance criteria under an `## Acceptance criteria` heading.
+Each criterion states an observable result and how to check it.
+Name the automated test, the `make` target, or the manual or hardware check from the [v1 acceptance checklist](decisions/v1-acceptance-checklist.md).
+A decision or investigation issue states the answer it needs and where that answer will be recorded.
+If you cannot write the criteria yet, do not file the issue.
+Discuss the problem with Sam first, or record it as an open question in `decisions/`.
+
+A bug also needs the `bug` label and a `## Steps to reproduce` heading with the observed and expected results.
+Name the build or commit where the steps fail.
+An agent files a bug only after it reproduces the bug on the surface a user sees.
+If the agent cannot reproduce the bug, it reports to Sam what it saw and what it tried, and it does not file the issue.
+
+The issue templates require these fields.
+In Claude Code sessions, `.claude/hooks/guard-command.py` blocks `gh issue create` when the body lacks these headings.
+
+## Take up an issue
+
+Check the issue before you change code for it.
+
+1. Read the issue and its comments with `gh issue view <number> --comments`.
+2. Confirm that it has acceptance criteria and that you can check each one.
+   If a criterion is missing or vague, comment with the gap and proposed criteria, add `needs-info`, and stop.
+3. For a bug, reproduce it on the current `main` build, on the surface a user sees, before you change code.
+   Comment with the build, the steps, and the observed result, and keep the failing output for the pull request.
+   If the bug does not reproduce, comment with what you tried, add `needs-info`, and stop.
+4. Map each acceptance criterion to the check that proves it.
+   Add an automated test for each criterion that can have one, and name the manual or hardware check for each criterion that cannot.
+
+Sam removes `needs-info` after answering, and the work continues from step 2.
+
 ## Plan the change
 
 Discuss a substantial change in an issue first, using the task or feature template.
