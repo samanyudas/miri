@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `feat/222-app-icons`, based on `main` at `38b851c8`
+Updated: 2026-11-02 on branch `feat/222-app-icons`, based on `main` at `10b91127`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -38,6 +38,17 @@ macOS's built-in SVG renderer does not draw the drop shadows in `icon.svg`, so t
 On 2 November 2026 the built bundle showed the yellow icon in Finder and in System Settings > Accessibility, and the dark menu bar showed both menu bar images tinted white.
 A recording showed the menu bar image change from filled to outlined and back through Stop and Start in its own menu.
 A light menu bar was checked only with a forced-appearance status item outside Miri, because agents do not change the system appearance.
+
+## Live verification skill
+
+Branch `chore/verify-miri-skill` adds the project skill `.claude/skills/verify-miri/`.
+Its `verify-miri` command takes the live-test lock, backs up the window session, swaps in a test build, and puts back Sam's build and session afterwards.
+It drives shortcuts at the HID event tap, presses Settings controls through Accessibility, and opens AXFixture windows as tiled columns.
+Evidence stays in `~/.cache/miri/verify-miri/runs/`, outside the repository.
+AXFixture gained the opt-in options `--label`, `--resizable`, and `--activate`, and the selftests still use its default window.
+A run on 2026-11-02 at `main` 38b851c8 proved that ⌃⌥←, ⌃⌥→, ⌃⌥H, and ⌃⌥L move focus between two fixture columns, in both the engine and macOS, and `make e2e` passed in the same run.
+The feature map also lists recipes for the Start, Stop, and Restart controls, setup checks, and shortcut customization, which no `verify-miri` run has driven yet.
+Next: drive those recipes with `verify-miri` and record each result in `features/README.md`.
 
 ## Initial setup
 
