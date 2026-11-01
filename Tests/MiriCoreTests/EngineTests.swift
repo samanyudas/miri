@@ -131,6 +131,40 @@ import Testing
         #expect(launcher.engines.count == 1)
     }
 
+    @Test func manualRestartStartsAgainOnceTheEngineExits() {
+        let engine = supervisor()
+        engine.start()
+        launcher.engines[0].exitsOnInterrupt = false
+        engine.restartManually()
+        #expect(launcher.engines.count == 1)
+        launcher.engines[0].onExit(0)
+        #expect(engine.state == .running(pid: 101))
+    }
+
+    @Test func stopAfterAManualRestartKeepsTheEngineStopped() {
+        let engine = supervisor()
+        engine.start()
+        launcher.engines[0].exitsOnInterrupt = false
+        engine.restartManually()
+        engine.stop()
+        launcher.engines[0].onExit(0)
+        #expect(launcher.engines.count == 1)
+        #expect(engine.state == .stopped)
+    }
+
+    @Test func quitAfterAManualRestartLaunchesNoEngine() {
+        let engine = supervisor()
+        engine.start()
+        launcher.engines[0].exitsOnInterrupt = false
+        engine.restartManually()
+        var launchesWhenQuit: Int?
+        engine.stop { launchesWhenQuit = launcher.engines.count }
+        launcher.engines[0].onExit(0)
+        #expect(launchesWhenQuit == 1)
+        #expect(launcher.engines.count == 1)
+        #expect(engine.state == .stopped)
+    }
+
     @Test func reportsALaunchFailure() {
         launcher.failure = CocoaError(.fileNoSuchFile)
         let engine = supervisor()

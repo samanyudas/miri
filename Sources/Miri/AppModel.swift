@@ -123,7 +123,7 @@ import ServiceManagement
         store.layout = layout
         reloadConfiguration()
         // The engine reads the layout only when it starts, so it restarts to bind the same keys as Stop and the recorder.
-        if engineState.isRunning { supervisor.restartManually() }
+        if engineState.isRunning && !stoppedByUser { supervisor.restartManually() }
     }
 
     enum ShortcutAddOutcome {
@@ -375,6 +375,8 @@ import ServiceManagement
     }
 
     func restart() {
+        stoppedByUser = false
+        defaults.set(false, forKey: Self.stoppedKey)
         if engineState.isRunning { supervisor.restartManually() } else { start() }
     }
 

@@ -33,10 +33,11 @@ Init == s = [
     engine |-> "stopped",         \* EngineState without its payload: "stopped", "running", "restarting", "failed"
     proc |-> 0,                   \* process, or 0 for nil
     stopRequested |-> FALSE,
-    completions |-> <<>>,         \* stopCompletions: "start", "none", or "quitReply"
+    completions |-> <<>>,         \* stopCompletions: "none" or "quitReply"
     restartArmed |-> FALSE,       \* pendingRestart exists and is not cancelled
     killArmed |-> FALSE,          \* A kill timer from stop() waits for the current process.
     crashes |-> 0,                \* policy.crashes.count, capped at Limit
+    restartAfterStop |-> FALSE,
     \* The operating system.
     alive |-> {},                 \* Engine processes that run.
     exitQueued |-> {},            \* Processes that ended. Their onExit job waits for the main actor.
@@ -47,7 +48,7 @@ Init == s = [
     app |-> "launching", stoppedByUser |-> TRUE, polling |-> FALSE, blockersShown |-> FALSE,
     blocked |-> FALSE, engine |-> "stopped", proc |-> 0, stopRequested |-> FALSE,
     completions |-> <<>>, restartArmed |-> FALSE, killArmed |-> FALSE, crashes |-> 0,
-    alive |-> {}, exitQueued |-> {}, wantsStopped |-> TRUE, launchedWhileStopped |-> FALSE
+    restartAfterStop |-> FALSE, alive |-> {}, exitQueued |-> {}, wantsStopped |-> TRUE, launchedWhileStopped |-> FALSE
   ]
 
 Free(t) == CHOOSE i \in Ids : i \notin t.alive \cup t.exitQueued /\ i # t.proc
@@ -67,7 +68,7 @@ Launch(t, ok) ==
                  !.launchedWhileStopped = @ \/ u.wantsStopped]
   ELSE [u EXCEPT !.engine = "failed"]
 
-\* start(), Engine.swift:76. `guard process == nil else { return }`.
+\* start(), Engine.swift:78. `guard process == nil else { return }`.
 SupStart(t, ok) == IF t.proc # 0 THEN t ELSE Launch(t, ok)
 
 \* Runs stopCompletions in order. AppDelegate's completion replies to
@@ -76,31 +77,34 @@ RECURSIVE RunAll(_, _, _)
 RunAll(t, cs, ok) ==
   IF cs = <<>> THEN t
   ELSE IF Head(cs) = "quitReply" THEN [t EXCEPT !.app = "quit"]
-  ELSE RunAll(IF Head(cs) = "start" THEN SupStart(t, ok) ELSE t, Tail(cs), ok)
+  ELSE RunAll(t, Tail(cs), ok)
 
-\* stop(completion:), Engine.swift:101.
+\* stop(completion:), Engine.swift:104. A later stop cancels a restart that waits for the exit.
 SupStop(t, c, ok) ==
-  LET u == [t EXCEPT !.restartArmed = FALSE] IN
+  LET u == [t EXCEPT !.restartArmed = FALSE, !.restartAfterStop = FALSE] IN
   IF u.proc = 0
   THEN RunAll([u EXCEPT !.engine = "stopped"], <<c>>, ok)
   ELSE [u EXCEPT !.stopRequested = TRUE, !.completions = Append(@, c),
                  !.killArmed = (Mutant # "no_kill_timer"),
                  !.engine = IF Mutant = "stop_reports_stopped_early" THEN "stopped" ELSE @]
 
-\* restartManually(), Engine.swift:91.
+\* restartManually(), Engine.swift:93.
 RestartManually(t, ok) ==
   LET u == [t EXCEPT !.crashes = 0] IN
   IF Mutant = "restart_without_waiting" /\ u.proc # 0
   THEN Launch(SupStop(u, "none", ok), ok)
-  ELSE IF u.proc # 0 THEN SupStop(u, "start", ok) ELSE SupStart(u, ok)
+  ELSE IF u.proc # 0 THEN [SupStop(u, "none", ok) EXCEPT !.restartAfterStop = TRUE] ELSE SupStart(u, ok)
 
-\* exited(status:), Engine.swift:119. It clears process whichever process ended.
+\* exited(status:), Engine.swift:123. It clears process whichever process ended.
 \* recoverWindows() runs here and changes nothing in this model.
+\* After the stop completions it starts the engine if restartAfterStop was set,
+\* unless a completion replied to the quit and the app exited.
 Exited(t, ok) ==
   LET u == [t EXCEPT !.proc = 0, !.killArmed = FALSE] IN
   IF u.stopRequested
-  THEN RunAll([u EXCEPT !.stopRequested = FALSE, !.engine = "stopped", !.completions = <<>>],
-              u.completions, ok)
+  THEN LET w == RunAll([u EXCEPT !.stopRequested = FALSE, !.engine = "stopped", !.completions = <<>>,
+                                 !.restartAfterStop = FALSE], u.completions, ok)
+       IN IF u.restartAfterStop /\ w.app # "quit" THEN SupStart(w, ok) ELSE w
   ELSE IF u.crashes + 1 >= Limit
   THEN [u EXCEPT !.crashes = Limit, !.engine = "failed"]
   ELSE [u EXCEPT !.crashes = @ + 1, !.engine = "restarting", !.restartArmed = TRUE]
@@ -119,16 +123,17 @@ AppStart(t, ok) ==
   ELSE LET w == [u EXCEPT !.polling = FALSE] IN    \* setupPoll?.cancel(); setupPoll = nil
        IF w.engine = "running" THEN w ELSE RestartManually(w, ok)
 
-\* cancelSetupPoll(), AppModel.swift:433.
+\* cancelSetupPoll(), AppModel.swift:435.
 CancelPoll(t) == [t EXCEPT !.polling = FALSE, !.blockersShown = FALSE]
 
 \* stop(), AppModel.swift:365.
 AppStop(t, ok) == SupStop(CancelPoll([t EXCEPT !.stoppedByUser = TRUE]), "none", ok)
 
 \* restart(), AppModel.swift:377.
-AppRestart(t, ok) == IF t.engine = "running" THEN RestartManually(t, ok) ELSE AppStart(t, ok)
+AppRestart(t, ok) == LET u == [t EXCEPT !.stoppedByUser = FALSE] IN
+  IF u.engine = "running" THEN RestartManually(u, ok) ELSE AppStart(u, ok)
 
-\* prepareToQuit(completion:), AppModel.swift:382, with AppDelegate's reply as the completion.
+\* prepareToQuit(completion:), AppModel.swift:384, with AppDelegate's reply as the completion.
 PrepareToQuit(t, ok) == SupStop(CancelPoll(t), "quitReply", ok)
 
 (***************************************************************************)
@@ -163,7 +168,7 @@ YouPressStopShortcut == Open /\ ~s.stoppedByUser /\ \E ok \in BOOLEAN : Step(App
 
 \* keyboardLayoutChanged(), AppModel.swift:119. The model gives every change a new layout.
 LayoutChanges == Open /\ \E ok \in BOOLEAN :
-  Step(IF s.engine = "running" THEN RestartManually(s, ok) ELSE s)
+  Step(IF s.engine = "running" /\ ~s.stoppedByUser THEN RestartManually(s, ok) ELSE s)
 
 \* Quit Miri or SIGTERM -> applicationShouldTerminate, App.swift:46. A second quit does nothing.
 YouQuit == Open /\ \E ok \in BOOLEAN : Step(PrepareToQuit([s EXCEPT !.app = "quitting"], ok))
@@ -179,17 +184,17 @@ EngineEnds == s.app # "quit" /\ \E i \in s.alive :
 ExitDelivered == s.app # "quit" /\ \E i \in s.exitQueued : \E ok \in BOOLEAN :
   Step(Exited([s EXCEPT !.exitQueued = @ \ {i}], ok))
 
-\* stop()'s kill timer wakes after stopTimeout, Engine.swift:112. It kills only the same process.
+\* stop()'s kill timer wakes after stopTimeout, Engine.swift:116. It kills only the same process.
 KillTimerFires == s.app # "quit" /\ s.killArmed /\
   Step(IF s.proc \in s.alive
        THEN [s EXCEPT !.killArmed = FALSE, !.alive = @ \ {s.proc}, !.exitQueued = @ \cup {s.proc}]
        ELSE [s EXCEPT !.killArmed = FALSE])
 
-\* pendingRestart wakes after restartDelay, Engine.swift:137.
+\* pendingRestart wakes after restartDelay, Engine.swift:144.
 RestartTimerFires == s.app # "quit" /\ s.restartArmed /\ \E ok \in BOOLEAN :
   Step(SupStart([s EXCEPT !.restartArmed = FALSE], ok))
 
-\* pollSetupUntilReady() wakes after setupPollInterval, AppModel.swift:416.
+\* pollSetupUntilReady() wakes after setupPollInterval, AppModel.swift:418.
 PollTick == s.app # "quit" /\ s.polling /\ \E ok \in BOOLEAN :
   Step(IF s.blocked
        THEN [s EXCEPT !.blockersShown = TRUE]

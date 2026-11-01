@@ -24,7 +24,9 @@ The fourth, an engine launched during Quit, reproduced in part and shares the ca
 The skill lists all four under Known findings.
 Three come from one cause: for up to 3 seconds after a stop begins, `engineState` stays `.running`, and a restart in that time queues a `start` that no later Stop or Quit removes.
 The fourth is the status after Restart from a failed engine while a setup check blocks start.
+Branch `fix/235-restart-clears-saved-stop` fixes #235: Restart now clears the saved Stop, `SavedStopMatches` holds, and a live run on its build passed every acceptance criterion.
 Next: Sam picks the fixes for #234, #235, and #236.
+Branch `fix/234-stop-cancels-queued-restart` fixes #234 and the Quit finding with a `restartAfterStop` flag that a later Stop clears, so `StopStands` and `QuitLeavesNoEngine` now hold, and its PR waits for review.
 [#241](https://github.com/samanyudas/miri/pull/241) fixes #236: Restart from a failed engine while a check blocks start now shows `Waiting: <check>` with Stop, and `WaitingIsShown` holds.
 
 ## App and menu bar icons
