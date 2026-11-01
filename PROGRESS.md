@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `fix/215-dock-refresh`, based on `main` at `c0f79e29`
+Updated: 2026-11-01 on branch `ci/engine-test-executor`, based on `main` at `c0f79e29`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -55,6 +55,9 @@ GitHub's macOS runner gives Bevy one compute thread, against four on Sam's Mac, 
 - [#191](https://github.com/samanyudas/miri/pull/191) treats Swift warnings as errors.
 - Optimizing engine dependencies in the dev profile cut the local engine tests from 415 s to 99 s, in [#194](https://github.com/samanyudas/miri/pull/194).
 - The macOS job is split into four parallel jobs: Swift, engine lint, engine tests, and the app build with selftests and packaging. The engine tests job is the slowest.
+- Measured on 1 November over the GitHub Actions API: 89 green runs from 28 to 31 October took a median of 9.9 minutes, p90 14.3. The 19 green runs after #194 took a median of 5.2 minutes, p90 7.0. Documentation-only pull requests take 12 s.
+- The engine tests job was then the critical path, a median of 299 s, with 182 s spent in the 1146 tests. Bevy's multi-threaded executor woke its threads on every frame, so 39% of the suite's CPU time was kernel time.
+- [Engine PR #107](https://github.com/samanyudas/paneru/pull/107) gives the test apps the single-threaded executor, and `PANERU_TEST_EXECUTOR=multi` keeps the production one. On Sam's Mac with 3 test threads, the suite went from 68 to 90 s to 21 to 23 s. CI sets `multi` only on pushes to `main`. The branch `ci/engine-test-executor` pins it and waits for the engine PR to merge before its repin.
 
 ## Rust 1.99
 
