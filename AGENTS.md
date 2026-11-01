@@ -51,6 +51,7 @@ If your change contradicts an ADR, say so explicitly instead of overriding it.
 Run cargo from the repository root so `rust-toolchain.toml` and `.cargo/config.toml` apply.
 CI in `.github/workflows/ci.yml` runs the same make targets, with the macOS stages as parallel jobs.
 Fix what the pre-push hook reports instead of skipping it.
+Before any step that changes the real desktop, including `make e2e`, take the [live-test lock](docs/AI-CONTRIBUTIONS.md#take-the-live-test-lock).
 
 ## Issues
 

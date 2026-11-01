@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `feat/219-initial-setup`, based on `main` at `97672bc7`
+Updated: 2026-11-01 on branch `feat/219-initial-setup`, based on `main` at `433781b2`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -27,7 +27,8 @@ A live run of the app bundle on 1 November 2026 showed setup on a real first lau
 Quitting with setup open left it pending, Done finished it, and the next launch showed no setup.
 With three fingers, which have no conflict on that Mac, the test from setup passed and turned the swipe on after confirmation.
 Engine focus commands moved the strip in that run, not a trackpad, so it is not trackpad evidence.
-AG-2 and AG-3 still need a real swipe on trackpad hardware, and AG-3 needs a Mac with no four-finger macOS conflict.
+Sam then ran the test from setup with three fingers on the trackpad on 1 November 2026: the strip followed, and the status read "On, verified by user test".
+AG-3 with four fingers still needs a Mac with no four-finger macOS conflict.
 
 ## Dock changes while the engine runs
 
@@ -368,19 +369,29 @@ Unplugging and replugging the external display left the built-in display's windo
 
 ## Apps busy at launch
 
-[#63](https://github.com/samanyudas/miri/issues/63) is partly fixed in [engine PR #74](https://github.com/samanyudas/paneru/pull/74).
-`main` pinned its merge commit `c1f2b5e`, which also carries [engine PR #73](https://github.com/samanyudas/paneru/pull/73) for [#89](https://github.com/samanyudas/miri/issues/89).
-An app that blocked its main thread for more than 5 s right after launch never got its windows managed, even after the user switched to it.
-The engine now parks such an app, asks it for its AX role off the main thread every 500 ms, and admits it once it answers.
+[#63](https://github.com/samanyudas/miri/issues/63) was partly fixed in [engine PR #74](https://github.com/samanyudas/paneru/pull/74), merged as `c1f2b5e`.
+That fix admits an app that blocked its main thread for more than 5 s right after launch, once it answers.
 An app that answers but is busy again by the next registration waits 1, 2, 4, 8, 16, then 30 s between tries.
 
-On 27 October, live fixture checks on Miri Developer gave these results.
-A 10 s block stayed unmanaged on `1fd95b1` and was managed at 10.9 s on `ea9732d`.
-An app blocked 1000 of every 1050 ms made 7 main-loop attempts in 45 s and was managed within 3 s of calming down.
-The `--busy 300,350` probe managed 575 of 576 windows.
-The one miss is the remaining part of #63: the launch scan lists an app's windows once and skips a window whose details time out.
-The original 4-in-32 misses did not reproduce on `1fd95b1` in 29 rounds.
-On 28 October, the 10 s block was managed at 10.9 s in 2 of 2 runs on `c1f2b5e`.
+[Engine PR #109](https://github.com/samanyudas/paneru/pull/109), merged as `e8e62c5`, fixes the rest. This branch pins `e8e62c5`, whose tree matches the tested head `6956ac3`.
+Before it, a window whose subrole read or window-id read timed out was rejected as not a window, and the launch scan ended once the app's other windows answered.
+Focus discovery also cached a window it could not read while its app was busy, so later focuses of that window did nothing.
+Timed-out Accessibility calls now return `Error::CannotComplete`.
+The launch scan lists an app again on each tick, until its 10 s launch timeout, while any window did not answer.
+Focus discovery caches a window only when its app answered.
+
+On 1 November, live fixture checks on Miri Developer gave these results, with the scripts in `/tmp/miri63` (may be gone).
+
+| Check | `main` with engine `68365bc` | Fix |
+| --- | --- | --- |
+| One window's subrole read sleeps 350 ms for 2 s | 2 of 9 windows unmanaged at 8 s | 0 of 18 |
+| One window's title read sleeps 600 ms, so the next window-id read times out | 2 of 12 with only the subrole fix | 0 of 30 |
+| One window answers late for 14 s, then is focused at 12 s and 16 s | 4 of 12 unmanaged at 19 s | 0 of 12 |
+| Six apps block 300 of every 350 ms for 10 s | 1 of 360 still unmanaged at 16 s | 0 of 360 |
+
+The retry runs on the engine's main loop.
+While one window kept timing out for 14 s, the engine answered state queries in a median 109 ms for about 10 s, against 22 ms on `main`, which instead stalled once for 1.2 s.
+With six busy apps, query stalls over 100 ms totalled 3.6 to 5.6 s per launch, against 4.3 to 7.4 s on `main`.
 
 ## Freeze after a keyboard focus change
 
@@ -1013,6 +1024,9 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 
 ## Done
 
+- `chore/live-test-lock` moves the live-test lock from agent memory into the repository.
+  `scripts/live-lock.py` takes, renews, checks, and releases `/tmp/miri-live.lock`, and an expired lock no longer blocks other runs.
+  `make e2e` holds the lock while the selftests run, and [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#take-the-live-test-lock) says when a run needs it.
 - `chore/pr-evidence` adds an acceptance evidence table to the PR template, with one row per acceptance criterion.
   [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#capture-evidence) now says how to capture window evidence without showing the desktop.
   The pre-push hook runs `scripts/check-pushed-media.py`, which rejects new commits that add a recording, or an image outside `assets/` and `Sources/`.
