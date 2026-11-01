@@ -5,7 +5,7 @@
 //   axdo <pid> press <title>...      presses each button, tab, or radio button with that title, in order
 //   axdo <pid> windows               the CoreGraphics window number, layer, bounds, and title of each window
 //   axdo frontmost                   the process ID of the frontmost app
-// Exit status: 0 on success, 1 when a title has no element, 2 on a usage error.
+// Exit status: 0 on success, 1 when a title has no element or a press fails, 2 on a usage error.
 import AppKit
 import ApplicationServices
 
@@ -77,6 +77,7 @@ case "press":
         }
         let result = AXUIElementPerformAction(element, kAXPressAction as CFString)
         print("pressed \(title) at \(Date().timeIntervalSince1970) -> AXError \(result.rawValue)")
+        if result != .success { exit(1) }
     }
 case "windows":
     let list = CGWindowListCopyWindowInfo([.optionOnScreenOnly], kCGNullWindowID) as? [[String: Any]] ?? []

@@ -44,8 +44,9 @@ Every command below runs from the repository root of the checkout you test.
 `begin` does these steps and logs each one:
 
 - Takes the lock, or stops and prints the holder.
-- Copies `state.json` (the window session), `config.toml`, and the app's user defaults to `<run>/backup/`.
+- Copies `config.toml` and the app's user defaults to `<run>/backup/`.
 - Records the running build's bundle path, quits it with SIGTERM, and waits for its app and engine to exit.
+- Copies `state.json` (the window session) to `<run>/backup/`. The engine saves the session when it exits, so this copy comes after the quit.
 - Opens the test bundle and waits until it is usable: the engine runs, logs `Session restore applied`, and answers `query active`.
   A launch prints a line such as `ready after 2.3 s: Session restore applied: matched=12, strips=2, missing=0`.
 
@@ -111,6 +112,7 @@ Report that as a failure. Do not wait longer or retry until it passes.
 
 1. Stops the fixtures and stand-ins this run started, by recorded process ID.
 2. Quits the test build with SIGTERM and waits for its engine to exit.
+   If a Miri app or engine from the run still runs, `end` stops here, keeps the lock and the run record, and exits 1, because that engine can overwrite the session when it exits. Stop that process by its ID, then run `end` again.
 3. Copies the session backup back to `state.json`.
 4. Opens the build that ran before, and waits for its session restore line.
 5. Compares `managementStopped` with the backup, and reports a difference.

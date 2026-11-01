@@ -274,13 +274,17 @@ def quit_app(pid: int, run: dict | None = None, label: str = "app") -> bool:
     return bool(app_gone and engine_gone)
 
 
-def launch_app(bundle: str, run: dict, label: str) -> int:
-    """Launch a Miri Developer bundle and wait until its engine answers and session restore has run."""
+def launch_app(bundle: str, run: dict, label: str, record: bool = False) -> int:
+    """Launch a Miri Developer bundle and wait until its engine answers and session restore has run.
+    With `record`, saves the app's process ID in the run before waiting, so `end` can stop it after a failure."""
     started = time.time()
     subprocess.run(["open", bundle], check=True)
     app = wait(lambda: next((p for p in running_apps() if p["bundle"] == normal(bundle)), None), 15)
     if not app:
         raise Failure(f"{bundle} did not start within 15 s.")
+    if record:
+        run["test_pid"] = app["pid"]
+        save_run(run)
     engine = wait(lambda: engine_of(app["pid"]), 15)
     if not engine:
         status = "unknown"
@@ -415,9 +419,6 @@ def cmd_begin(args) -> int:
 
     backup = folder / "backup"
     backup.mkdir()
-    if SESSION.exists():
-        shutil.copy2(SESSION, backup / "state.json")
-        log(run, f"backed up the window session to {backup / 'state.json'}")
     if CONFIG.exists():
         shutil.copy2(CONFIG, backup / "config.toml")
     exported = subprocess.run(["defaults", "export", BUNDLE_ID, "-"], capture_output=True)
@@ -430,8 +431,11 @@ def cmd_begin(args) -> int:
             raise Failure("The previous build did not quit. Run `verify-miri end` to put it back.")
     else:
         log(run, "no Miri Developer was running before this run")
-    run["test_pid"] = launch_app(bundle, run, "test build")
-    save_run(run)
+    # The engine saves the session when it exits, so the backup comes after the quit.
+    if SESSION.exists():
+        shutil.copy2(SESSION, backup / "state.json")
+        log(run, f"backed up the window session to {backup / 'state.json'}")
+    launch_app(bundle, run, "test build", record=True)
     log(run, f"ready. Evidence goes to {folder}")
     return 0
 
@@ -449,16 +453,21 @@ def cmd_end(_args) -> int:
             log(run, f"stopped {item['name']} pid {pid}")
     pid = run.get("test_pid")
     if pid and alive(pid) and APP_PATTERN.match(command_of(pid)):
-        if not quit_app(pid, run, "test build"):
-            problems.append("the test build did not quit")
+        quit_app(pid, run, "test build")
+    previous = run.get("previous_app")
+    # Before the test build launched, the previous build may still run, and nothing needs restoring.
+    leftover = [p for p in processes() if run.get("test_pid") or p["bundle"] != previous]
+    if leftover:
+        for p in leftover:
+            log(run, f"STILL RUNNING: {p['kind']} pid {p['pid']} from {p['bundle']}")
+        log(run, "PROBLEM: a Miri process still runs, and it can overwrite the session when it exits. "
+                 "The session was not restored, the previous build was not relaunched, and the lock stays held. "
+                 "Stop the process that this run started, then run `verify-miri end` again.")
+        return 1
     backup = folder / "backup/state.json"
     if backup.exists():
-        if any(a for a in running_apps()):
-            problems.append("a Miri Developer still runs, so the session was not restored")
-        else:
-            shutil.copy2(backup, SESSION)
-            log(run, "restored the window session backup")
-    previous = run.get("previous_app")
+        shutil.copy2(backup, SESSION)
+        log(run, "restored the window session backup")
     if previous and not any(a["bundle"] == previous for a in running_apps()):
         try:
             launch_app(previous, run, "previous build")
@@ -601,11 +610,12 @@ def cmd_snapshot(args) -> int:
 def cmd_ax(args) -> int:
     run = load_run(required=False)
     pid = str(test_pid(run)) if args.pid == "test" and run else args.pid
-    output = tool("axdo", pid, *args.rest, check=False)
-    print(output, end="")
+    build_tools(quiet=True)
+    result = subprocess.run([str(TOOLS / "axdo"), pid, *args.rest], capture_output=True, text=True, timeout=30)
+    print(result.stdout + result.stderr, end="")
     if run and args.rest and args.rest[0] == "press":
-        log(run, output.strip())
-    return 0
+        log(run, (result.stdout + result.stderr).strip())
+    return result.returncode
 
 
 def cmd_settings(_args) -> int:
