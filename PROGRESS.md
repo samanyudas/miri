@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `feat/drag-cursor-target`, based on `main` at `b451090a`
+Updated: 2026-11-01 on branch `docs/stale-status-claims`, based on `main` at `a3001115`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -10,8 +10,8 @@ Update it at the end of every session and in any PR that changes what is done or
 
 Reach a working v1 app that manages windows through the bundled engine, as defined in [release scope](decisions/release-scope.md).
 The app foundation, engine integration, configuration, default shortcuts, shortcut customization, and gesture controls are merged.
-The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
-The stack limit and stack overflow are built and await their hardware checks.
+The current milestone is the last unbuilt v1 feature, pointer-versus-focus gesture targeting.
+Drag insertion, the stack limit, and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
 
 ## Pointer drop target

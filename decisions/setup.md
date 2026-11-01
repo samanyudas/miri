@@ -151,7 +151,7 @@ Settings provide gaps, width presets, shortcut editing, permission guidance, and
 Logs remain local.
 A **Copy diagnostics** control prepares information for GitHub issues.
 Diagnostics contents and redaction follow [Privacy and diagnostics](release-scope.md#privacy-and-diagnostics).
-The exact menu labels and placement remain to be designed.
+**Copy Diagnostics** is in the menu bar menu and on Settings > Diagnostics.
 
 Advanced users can edit `~/Library/Application Support/Miri/config.toml`.
 Miri keeps standalone Paneru's configuration files untouched.

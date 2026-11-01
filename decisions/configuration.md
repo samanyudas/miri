@@ -41,7 +41,9 @@ Paneru v0.5.2 has no `gap_inner` or `gap_outer` configuration keys.
 Its outer padding has separate top, right, bottom, and left fields.
 Its per-window padding contributes on both sides of adjacent windows.
 The accepted eight-point gap behavior remains unchanged.
-The app implements this mapping, but no one has checked the resulting coordinates on screen.
+The app implements this mapping.
+A live run on 15 October 2026 showed 8-point gaps on all sides and between windows on the built-in display.
+A native check for [#28](https://github.com/samanyudas/miri/issues/28) on 18 October 2026 measured 8-point gaps between four windows.
 The app provisionally accepts gaps from 0 to 32 points.
 The final Miri validation range is not yet selected.
 
@@ -141,7 +143,8 @@ The setup experience is recorded in [Setup](setup.md).
 Strip motion should follow the display refresh rate.
 Configurable spring duration and damping are deferred to v2.
 V1 follows the Reduce Motion and disable-animation behavior in [V1 interactions](release-scope.md#v1-interactions).
-The file key and engine mechanism for this behavior require verification.
+The **Animate window movement** switch in Settings > General writes `[miri].animations`.
+When the switch is off or Reduce Motion is on, Miri removes `[options].animation_speed`, and the engine then moves windows instantly.
 The following option names, values, and behavior require validation in Miri before adoption.
 
 | Proposed option | Proposed default | Behavior |

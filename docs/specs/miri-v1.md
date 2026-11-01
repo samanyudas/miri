@@ -121,7 +121,7 @@ They describe documented intent, not separately accepted product choices or comp
 55. As a Miri user, I want an eight-point inner gap by default, so that spacing between windows follows the accepted layout.
 56. As a Miri user, I want an eight-point outer gap by default, so that display-edge spacing follows the accepted layout.
 57. As a Miri user, I want separate inner and outer gap controls, so that I can adjust both kinds of spacing.
-58. As a Miri user, I want automatic column centering only when the strip overflows the display, so that a fitting strip does not recenter automatically.
+58. As a Miri user, I want focus to move the strip only as far as needed to show the focused column fully, so that the strip does not jump.
 59. As a Miri user, I want space reserved for the visible macOS Dock without another setting, so that the layout respects the Dock.
 60. As a Miri user, I want instant strip movement when Reduce Motion is enabled, so that Miri follows my macOS motion preference.
 61. As a Miri user, I want a disable-animation setting, so that I can make strip movement instant independently of Reduce Motion.
@@ -157,7 +157,6 @@ They describe documented intent, not separately accepted product choices or comp
 
 The accepted bindings provide stacking and pop-out actions in both directions.
 Stacking in either direction moves only the focused window, and the rest of its old stack stays in place.
-That decision remains open.
 
 86. As a Miri user, I want the assigned stack-left command, so that I can combine windows with the neighboring column on the left.
 87. As a Miri user, I want the assigned stack-right command, so that I can combine windows with the neighboring column on the right.
@@ -308,7 +307,7 @@ They do not establish completed modules or verified engine capabilities.
 
 - Start management when Miri opens after Accessibility permission is available, unless the explicit stopped state was saved.
 - Provide Start, Stop, restart, Quit Miri, and diagnostic controls through the app interface.
-  Exact labels and placement remain undesigned.
+  The menu bar menu and Settings > General hold these controls, and Settings > Diagnostics also opens Copy Diagnostics.
   Update controls remain planned setup behavior rather than separately accepted v1 controls.
 - Enable launch at login by default and expose a Settings control.
 - Restart an isolated engine crash automatically with startup session restore enabled.
@@ -344,12 +343,13 @@ They do not establish completed modules or verified engine capabilities.
   The fourth preset is `0.66`, not a rounded substitute.
 - Default inner and outer gaps are eight points each, with separate controls.
   Paneru has no `gap_inner` or `gap_outer` fields.
-  Mapping Miri's gaps to outer and per-window padding requires coordinate verification.
+  Miri maps its gaps to outer and per-window padding.
   Miri's allowed gap range remains unselected.
-- Automatically center the focused column only when the strip overflows the display.
+- When focus moves, move the strip only as far as needed to show the focused column fully.
   Reserve visible macOS Dock space without a separate v1 setting.
 - Make strip movement instant when either Reduce Motion or Miri's disable-animation setting is enabled.
-  The app setting key and engine mechanism remain unverified.
+  The setting is `[miri].animations`, and Miri removes `[options].animation_speed` to make the engine move windows instantly.
+- Drag a tiled window into a column, to a new column, or to another display, as [Dragging windows](../../decisions/release-scope.md#dragging-windows) describes.
 - Float fixed-size windows and Miri's Settings automatically.
   Reach floating windows through clicking and macOS app or window switching.
 - Leave native fullscreen windows unmanaged and require return to the original column when fullscreen ends.
@@ -525,7 +525,7 @@ The [app acceptance checklist](../../decisions/v1-app-acceptance-checklist.md) s
 7. Verify several bindings per action, AZERTY, QWERTZ, Dvorak, upgrade preservation, defaults only on free keys, and explicit reset.
 8. Exercise every v1 binding in the accepted reference, including numbered-column semantics, physical-direction monitor navigation, all stacking directions, and floating actions.
    Stacking assertions expect only the focused window to move.
-9. Verify new-window-only 50% width, preserved existing widths, fixed five-percentage-point increments, size constraints, overflow-only centering, and visible Dock reservation.
+9. Verify new-window-only 50% width, preserved existing widths, fixed five-percentage-point increments, size constraints, focus reveal, and visible Dock reservation.
    Verify fixed-size windows and Miri's Settings float automatically.
    Verify clicking and macOS window switching provide access to floating windows.
 10. Verify instant movement with Reduce Motion alone and with Miri's disable-animation setting alone.
@@ -647,7 +647,6 @@ An accepted deferral does not commit every candidate to a future implementation.
 - A dedicated shortcut to switch focus between floating and tiled windows.
   Clicking and macOS app or window switching provide access to floating windows in v1.
 - Advanced per-app window rules, title regular expressions, strip-placement rules, and an app-picker rules interface.
-- Drag-to-reorder and cross-display dragging.
 - Display exclusions and their proposed configuration controls.
 - Portable display layouts, saved reconnection policies, display profiles, monitor matching, and placement that overrides macOS Space migration.
 - Paneru's experimental virtual workspaces and additional virtual rows within a native Space.
@@ -705,7 +704,7 @@ An accepted deferral does not commit every candidate to a future implementation.
    This draft does not make those statements new v1 acceptance requirements.
 8. **Setup recipes are proposed guidance.**
    The three-finger and four-finger macOS setting recipes and disabling automatic Space rearrangement require supported-version verification.
-   Proposed macOS tiling-setting changes concern deferred drag-to-reorder behavior.
+   The setup checker reports each macOS tiling option that is on, and these reports never block window management.
    They do not add v1 startup blockers or authorize automatic settings changes.
 9. **The fallback shortcut set remains unaudited.**
    The accepted reference delegates unlisted bindings to Paneru defaults, adjusted only for macOS conflicts.

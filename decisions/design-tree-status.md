@@ -146,15 +146,12 @@ Those windows could leave the layout, which would conflict with the rule that wi
 
 ## Remaining engineering work
 
-This list holds only work that has no implementation on `main` at `e516edd`.
+This list held the work that had no implementation on `main` at `e516edd`.
+On 1 November 2026, the finished drag ([#43](https://github.com/samanyudas/miri/issues/43)), stack limit ([#44](https://github.com/samanyudas/miri/issues/44)), and maximize ([#106](https://github.com/samanyudas/miri/issues/106)) items left the list.
+Their acceptance checks stay in the [acceptance ledger](../docs/acceptance-ledger.md).
 [PROGRESS.md](../PROGRESS.md) records what is implemented and what is verified.
 
 - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
-- Implement dragging windows into columns and to new columns, on one display and across displays ([#43](https://github.com/samanyudas/miri/issues/43)).
-- Run the stack limit hardware check, S-7 in the [acceptance ledger](../docs/acceptance-ledger.md).
-  The engine option and its Settings control are built, pending that check ([#44](https://github.com/samanyudas/miri/issues/44)).
-- Finish [#106](https://github.com/samanyudas/miri/issues/106): width commands that restore a maximized window first, and maximize that survives an engine restart.
-  Then run AS-15 to AS-17 and HR-3 in the [acceptance ledger](../docs/acceptance-ledger.md).
 - Integrate Sparkle updates with the accepted update policy.
 - Configure Developer ID signing, notarization, signed update feeds, the release disk image, and the Homebrew cask.
 - Recheck app and helper Accessibility attribution on the Developer ID signed, notarized bundle.
