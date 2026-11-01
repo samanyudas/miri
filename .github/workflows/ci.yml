@@ -132,11 +132,7 @@ jobs:
         with:
           workspaces: vendor/paneru
           save-if: ${{ github.ref == 'refs/heads/main' }}
-      # Pull requests run the tests on Bevy's single-threaded executor, about 3 times faster.
-      # Pushes to main keep the multi-threaded executor that production uses.
       - run: make engine-test
-        env:
-          PANERU_TEST_EXECUTOR: ${{ github.ref == 'refs/heads/main' && 'multi' || 'single' }}
 
   app:
     name: Build, selftest, and package on macOS 27
