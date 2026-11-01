@@ -10,7 +10,7 @@ Update it at the end of every session and in any PR that changes what is done or
 
 Reach a working v1 app that manages windows through the bundled engine, as defined in [release scope](decisions/release-scope.md).
 The app foundation, engine integration, configuration, default shortcuts, shortcut customization, and gesture controls are merged.
-The current milestone is the last unbuilt v1 feature, pointer-versus-focus gesture targeting.
+The current milestone is the unbuilt v1 work, which is pointer-versus-focus gesture targeting and crossing displays at a strip's end ([#104](https://github.com/samanyudas/miri/issues/104)).
 Drag insertion, the stack limit, and stack overflow are built and await their hardware checks.
 The public release path and the complete acceptance runs follow.
 
@@ -31,16 +31,16 @@ Sam's real-trackpad check is still open.
 
 ## CI speed
 
-[#184](https://github.com/samanyudas/miri/issues/184) tracks making CI fast enough for agent iteration, one PR per change.
+[#184](https://github.com/samanyudas/miri/issues/184), now closed, tracked making CI fast enough for agent iteration, one PR per change.
 On 30 and 31 October the macOS job took 8 to 15 minutes, and runners started within 4 s.
 The engine test binary alone took 403 to 620 s, and every run compiled the engine dependencies from nothing three times.
 GitHub's macOS runner gives Bevy one compute thread, against four on Sam's Mac, so the engine tests run far slower there.
 
 - [#185](https://github.com/samanyudas/miri/pull/185) caches engine build artifacts, saved only from `main`. A warm run took Clippy from 103 s to 28 s and the engine build from 176 s to 46 s.
 - [#186](https://github.com/samanyudas/miri/pull/186) skips the macOS job for documentation-only pull requests, verified in CI with throwaway #187.
-- [#188](https://github.com/samanyudas/miri/pull/188) adds a pre-push hook for the fast checks. After it merges, run `make setup` or `git config core.hooksPath .githooks` once.
+- [#188](https://github.com/samanyudas/miri/pull/188) adds a pre-push hook for the fast checks. Run `make setup` or `git config core.hooksPath .githooks` once to turn it on.
 - [#191](https://github.com/samanyudas/miri/pull/191) treats Swift warnings as errors.
-- Optimizing engine dependencies in the dev profile cut the local engine tests from 415 s to 99 s. Its PR is next.
+- Optimizing engine dependencies in the dev profile cut the local engine tests from 415 s to 99 s, in [#194](https://github.com/samanyudas/miri/pull/194).
 - The macOS job is split into four parallel jobs: Swift, engine lint, engine tests, and the app build with selftests and packaging. The engine tests job is the slowest.
 
 ## Rust 1.99
@@ -1189,9 +1189,10 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 1. Finish the remaining v1 features.
    - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
-   - Complete drag and restoration acceptance for #43.
+   - Cross to the next display at a strip's end with Focus column and Move column left or right (#104).
+   - Complete drag and restoration acceptance for #43, and Sam's real-trackpad check of the pointer drop target (#203).
      The #58 height defect is fixed and closed.
-   - Complete stack overflow acceptance (S-5) and repeat the verified stack-limit behavior on the frozen release candidate (S-7).
+   - Run the stack overflow (S-5) and stack limit (S-7) hardware checks.
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
    Integrate Sparkle updates, then production signing, notarization, the release DMG, and the Homebrew cask.

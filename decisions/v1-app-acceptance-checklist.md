@@ -7,9 +7,9 @@ This checklist adds no new product choices and does not alter the [multi-monitor
 
 ## Prerequisites and evidence
 
-Complete the Accessibility attribution prototype required by [ADR 0009](../docs/adr/0009-run-the-engine-as-a-helper-process.md) before other implementation.
+The Accessibility attribution prototype required by [ADR 0009](../docs/adr/0009-run-the-engine-as-a-helper-process.md) is complete for the development bundle.
 Run permission and lifecycle checks on the actual Miri app bundle and helper identities.
-Use ad-hoc signing for development checks and the Developer ID signed, notarized bundle for public-release checks.
+Use the development signing identity, or ad-hoc signing without it, for development checks, and the Developer ID signed, notarized bundle for public-release checks.
 Record the app build, pinned engine revision, macOS version, display setup, and observed result for each check.
 An unavailable or unverified check remains pending rather than passing.
 
@@ -191,7 +191,7 @@ Never leave windows stranded off-screen.
 2. Enable automatic updates and start Miri with an update available.
    Miri installs the update in the background without an installation prompt.
    The app update carries its pinned engine upgrade.
-3. Open logs and use **Copy diagnostics**.
+3. Open logs and use **Copy Diagnostics**.
    Logs remain local, and Miri provides a preview before copying.
    Diagnostics include versions, monitor setup, permission status, engine status, and redacted logs.
    Window titles, document paths, usernames, and raw configuration are excluded by default.

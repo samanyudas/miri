@@ -7,7 +7,7 @@ Remaining decisions and engineering prerequisites appear in [Design tree status]
 ## Product purpose
 
 Miri provides an app interface for a scrolling window manager.
-Its native app interface is designed and will be built from the ground up for Miri.
+Its native app interface is designed and built from the ground up for Miri.
 Sam intends to use it daily and release it publicly as free and open-source software.
 The interface addresses Sam's dissatisfaction with Paneru's existing UI.
 
@@ -40,7 +40,7 @@ By default, Miri checks for updates daily and asks before installing.
 If the user enables automatic updates, Miri installs updates silently in the background at startup.
 
 Sam enrolls in the Apple Developer Program before the first public release.
-Development builds use ad-hoc signing on Sam's Mac.
+Development builds sign with the Miri Developer Local Signing identity when it exists, and ad-hoc otherwise.
 
 The bundle ID is `io.github.samanyudas.miri`, and the engine helper uses `io.github.samanyudas.miri.engine`.
 Development builds are named **Miri Developer** and use `io.github.samanyudas.miri.dev` and `io.github.samanyudas.miri.dev.engine`.
@@ -49,14 +49,14 @@ A contributor can therefore keep the released Miri installed in Applications nex
 Development builds sign with a stable local identity when one exists, so their Accessibility grant survives rebuilds.
 Sam accepted this on 14 October 2026.
 
-The `samanyudas/miri` repository becomes public at the first working build.
+The `samanyudas/miri` repository is public.
 The GPL requires the source to be public by the time any binary is distributed.
 
 ### Privacy and diagnostics
 
 Miri sends no telemetry or window-management data off the Mac.
 Update checks and downloads use the network.
-Logs stay local, and a **Copy diagnostics** control prepares information for GitHub issues.
+Logs stay local, and a **Copy Diagnostics** control prepares information for GitHub issues.
 Diagnostics include versions, monitor setup, permission status, engine status, and redacted logs.
 Window titles, document paths, usernames, and raw configuration are excluded by default.
 Miri provides a preview before copying.
@@ -64,11 +64,11 @@ Miri provides a preview before copying.
 ### Default shortcuts and layout
 
 Default shortcuts follow the [keybinding reference](keybinding%20reference.md).
-Actions it does not cover use Paneru's defaults, changed only where they clash with macOS.
+Actions it does not cover have no default shortcut, because Paneru's default configuration binds no keys.
 
 Default width presets are `[0.25, 0.33, 0.5, 0.66, 0.75]`, and the inner and outer gaps are 8 points each.
 The width preset list uses Paneru's `[options].preset_column_widths` key.
-Mapping the accepted eight-point gaps to the pinned engine's padding fields remains engineering work.
+Miri writes half the inner gap as per-window padding and the rest of the outer gap as display padding.
 New windows start at 50% of display width, and existing windows retain their widths.
 Each width or height adjustment changes the size by five percentage points of the display's corresponding dimension, subject to window size constraints.
 
@@ -137,7 +137,7 @@ Native fullscreen windows stay unmanaged and return to their original column whe
 Trackpad scrolling moves the strip on the display under the pointer by default.
 A setting lets the user choose the focused window's strip instead.
 Keyboard commands always act on the focused strip.
-Paneru's current trackpad behavior needs checking, and the setting may need an engine patch.
+Neither target nor the setting is built yet, and both need an engine change.
 Paneru's experimental virtual workspaces stay turned off, with their commands and menu bar indicator hidden.
 Sam dropped them on 1 November 2026, because macOS Spaces already give each display several strips.
 The earlier reference to "vertically arranged" sets was accidental and does not request additional virtual workspace rows.
@@ -177,7 +177,7 @@ Windows that never left their display keep their place, including reordering don
 A window opened while a display was gone stays on the display it was opened on, and a window closed meanwhile is forgotten.
 Windows from several Spaces of one display return together to the Space that display shows.
 Miri keeps this record in memory and offers no reconnection settings in v1.
-This behavior requires verification on hardware, including sleep and wake cycles.
+A cable unplug passed on hardware, and lid close and sleep still drop some windows ([#147](https://github.com/samanyudas/miri/issues/147)).
 The decision is recorded in [ADR 0008](../docs/adr/0008-follow-macos-space-migration-for-display-changes.md).
 
 ## Strip gestures
@@ -236,9 +236,11 @@ Moving the pointer alone does not change focus, and Miri keyboard commands do no
 Clicks, keyboard commands, and macOS window switching still change focus.
 Sam confirmed this rule in [issue #90](https://github.com/samanyudas/miri/issues/90).
 
-Directional monitor focus uses Control-Option-Command with W, A, S, and D for up, left, down, and right.
-Adding Shift moves the focused window in the corresponding monitor direction.
-These bindings preserve the previously selected shortcuts and require verification against the engine and macOS.
+Control-Option-Command with Up Arrow or Down Arrow focuses the display above or below.
+With Left Arrow or Right Arrow, it focuses the strip's first or last column, and a press there focuses the display on that side.
+Each direction also accepts H, J, K, and L, and W, A, S, and D.
+Adding Shift moves the focused column the same way.
+[Keybinding reference](keybinding%20reference.md) records these bindings.
 Shortcut recording follows [Binding customization](keybinding%20reference.md#binding-customization).
 Tabbed columns, the minimap, inactive-window dimming, and advanced window rules are deferred to v2.
 Focus borders, pointer-following controls, display exclusions, fixed-pixel presets, animation tuning, and Hyper-key recording are also deferred to v2.

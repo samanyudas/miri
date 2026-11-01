@@ -5,7 +5,9 @@ The deleted design conversations are not a source for this draft.
 Accepted requirements describe intended behavior, not implemented or verified behavior.
 Implementation and test status lives in [PROGRESS.md](../../PROGRESS.md), not in this document.
 Sam confirmed both testing seam proposals below.
-This draft does not publish a GitHub issue or authorize implementation before the recorded prerequisites and shared-understanding confirmation.
+Sam confirmed shared understanding, and the app is implemented and merged.
+The Further Notes, Engineering prerequisites, and Configuration location sections record the state on 14 October 2026.
+[PROGRESS.md](../../PROGRESS.md) and [Design tree status](../../decisions/design-tree-status.md) record what is resolved since then.
 
 ## Problem Statement
 
@@ -188,7 +190,7 @@ Stacking in either direction moves only the focused window, and the rest of its 
 110. As a Miri user, I want clicking a window on another display to change focus, so that pointer focus works across monitors.
 111. As a Miri user, I want strips to stay on connected displays, so that their display ownership remains stable during ordinary use.
 112. As a Miri user, I want a disconnected display's strips to follow their macOS Space and retain window order, so that migration follows macOS.
-113. As a Miri user, I want strips to return when macOS returns their Space to a reconnected display, so that reconnection follows Space migration.
+113. As a Miri user, I want each window to return to its display when that display reconnects, so that reconnection restores my layout.
 114. As a Miri user, I want failed strip re-attachment to leave reachable floating windows, so that disconnecting a display never loses window access.
 115. As a Miri user, I want every window reachable after unplugging, lid changes, sleep, wake, or display reconfiguration, so that display changes preserve access.
 116. As a Miri user, I want virtual-workspace commands and their indicator hidden in v1, so that the interface reflects the native-Space-only scope.
@@ -254,7 +256,7 @@ Hardware support has not been validated.
 164. As a Miri user, I want app updates to carry the pinned engine, so that the app and engine upgrade together.
 165. As a Miri user, I want update controls available through the app, so that I can inspect available updates.
 166. As a Miri user, I want access to local engine logs, so that I can investigate setup or engine failures.
-167. As a Miri user, I want a Copy diagnostics control, so that I can prepare information for a GitHub report.
+167. As a Miri user, I want a Copy Diagnostics control, so that I can prepare information for a GitHub report.
 168. As a Miri user, I want diagnostics to include versions, monitor setup, permission status, engine status, and redacted logs, so that reports contain relevant context.
 169. As a Miri user, I want window titles, document paths, usernames, and raw configuration excluded by default, so that diagnostics omit those private fields.
 170. As a Miri user, I want a diagnostics preview before copying, so that I can inspect the information prepared for the clipboard.
@@ -286,15 +288,15 @@ They do not establish completed modules or verified engine capabilities.
   The complete protocol contract still requires verification against the selected release.
 - Use `io.github.samanyudas.miri` for the app bundle identity and `io.github.samanyudas.miri.engine` for the helper.
   Isolate Miri's process and service identities from standalone Paneru.
-- Complete the Accessibility attribution prototype before other implementation work.
-  The permission identity and final guidance depend on the prototype's observed result.
+- The Accessibility attribution prototype is complete for the development bundle.
+  Turning on Miri alone grants both the app and its helper, and the signed release needs the same check.
 
 ### Engine dependency and compatibility
 
 - Use the selected Paneru `v0.5.2` release at `b1b6abbd3f1a4be138152b6f0389c9ff1b27a269`, plus Miri patches.
   This records the selection saved on 14 October 2026 rather than a claim about a later latest release.
 - Keep Miri patches in the `samanyudas/paneru` fork, included as a git submodule and rebased onto each selected release tag.
-  The checkout does not yet contain that engine integration.
+  The `vendor/paneru` submodule holds the pinned engine.
 - Upgrade one release tag at a time after a multi-monitor regression check on Sam's hardware.
   Sparkle delivers engine upgrades with app updates.
 - Limit engine changes to app integration, isolation, and verified compatibility fixes.
@@ -307,7 +309,8 @@ They do not establish completed modules or verified engine capabilities.
 
 - Start management when Miri opens after Accessibility permission is available, unless the explicit stopped state was saved.
 - Provide Start, Stop, restart, Quit Miri, and diagnostic controls through the app interface.
-  The menu bar menu and Settings > General hold these controls, and Settings > Diagnostics also opens Copy Diagnostics.
+  The menu bar menu holds Start or Stop, Restart Engine, Copy Diagnostics, and Quit Miri.
+  Settings > General holds Start or Stop and Restart Engine, and Settings > Diagnostics opens Copy Diagnostics.
   Update controls remain planned setup behavior rather than separately accepted v1 controls.
 - Enable launch at login by default and expose a Settings control.
 - Restart an isolated engine crash automatically with startup session restore enabled.
@@ -316,7 +319,7 @@ They do not establish completed modules or verified engine capabilities.
   Reconcile the displayed state with the running engine.
 - Keep every managed window reachable after Stop, Quit Miri, and unrecoverable engine failure.
   Recovery must not depend on the failed engine's clean-shutdown handler or a successful restart.
-  The recovery mechanism remains engineering work.
+  The app moves stranded windows back into view through Accessibility without the engine, and `make e2e` checks this with a fixture window.
 
 ### Layout, sizing, and display ownership
 
@@ -333,9 +336,9 @@ They do not establish completed modules or verified engine capabilities.
 - Support horizontal, vertical, and mixed physical monitor arrangements that Sam can verify on real hardware.
   Reliable horizontal scrolling is a v1 release blocker.
 - Follow macOS Space migration during display disconnection and reconnection.
-  Preserve strip window order, and return strips only when macOS returns their Space.
+  When a display reconnects, return each window to the display it was on, in its old order and stack.
 - If strip re-attachment fails within the engine's timeout, make its windows floating and reachable.
-  Keep no separate saved display-layout state or reconnection settings in v1.
+  Keep the display record in memory only, and offer no reconnection settings in v1.
   The timeout and this behavior require verification against the selected engine and hardware.
 - Start new resizable windows at 50% of display width and retain existing window widths.
   Each width or height adjustment changes size by five percentage points of the display's corresponding dimension, subject to window size constraints.
@@ -401,11 +404,9 @@ The following table records the selected v1 defaults without claiming tested act
 - A maximized column is distinct from native macOS fullscreen.
   macOS Space switching, fullscreen, app switching, closing, and ordinary app commands remain macOS or application interactions.
 - `[` means left and `]` means right for both stacking and popping out, as selected in the reference.
-  Stacking moves only the focused window, so Miri must change Paneru's whole-column behavior.
-- Supply stack-right and pop-left through Miri's integration because the selected engine source lacks those commands.
-  Final action contracts, repeated-command behavior, and safe fullscreen interaction still need reconciliation.
-- Actions without selected bindings use Paneru's defaults, changed only where they clash with macOS.
-  The complete effective v1 fallback set still requires an audit against the selected release and deferred-feature exclusions.
+  Stacking moves only the focused window.
+- The engine fork adds stack-right and pop-left, moves only the focused window, and checks for fullscreen columns before it changes the layout.
+- Actions without selected bindings have no default shortcut, because Paneru's default configuration binds no keys.
 - Provide a shortcut recorder with several bindings per action and support AZERTY, QWERTZ, and Dvorak layouts.
   Reject a binding already assigned to a different Miri action, warn about known macOS conflicts, and never silently replace another binding.
 - Preserve user bindings on upgrade, add defaults only where keys are free, and offer an explicit reset to the current default set.
@@ -440,8 +441,7 @@ The following table records the selected v1 defaults without claiming tested act
 - Use one TOML file in Miri's Application Support directory as the configuration source of truth.
   The app reads and writes it, watches external edits, and passes its path explicitly to the engine.
 - Reuse Paneru TOML key names and store app-only settings, including launch at login and updates, in `[miri]`.
-  Verify that the selected engine can coexist with that section.
-  Proposed binding identifiers, parser syntax, and additional app-only keys remain unadopted until verified or selected.
+  The engine runs with Miri's `[miri]` section, and Miri writes `[bindings]` with the engine's command names and chord syntax.
 - Apply valid settings immediately and persist them without a Save action or restart.
   If a file is invalid or unwritable, retain the last valid settings and report the error in Settings and the menu bar.
   Report the line for invalid TOML and never overwrite a file that could not be read correctly.
@@ -449,7 +449,7 @@ The following table records the selected v1 defaults without claiming tested act
   An environment variable alone does not establish this isolation.
 - Back up configuration before migration and preserve user values.
   If migration cannot preserve those values, leave the original file untouched and report an error.
-  The migration schema and backup mechanism remain engineering work.
+  Miri backs up the file to `config.toml.backups/` before each default-shortcut upgrade, and a general migration schema remains engineering work.
 - Refuse management startup while a competing window manager runs or Displays have separate Spaces is off.
   Name the competing tool and explain the logout requirement for the Spaces setting.
 - Report missing Accessibility permission, the Spaces setting, Stage Manager, competing window managers, and relevant macOS gesture conflicts.
@@ -463,7 +463,7 @@ The following table records the selected v1 defaults without claiming tested act
 - Provisionally target Apple silicon Macs on macOS 27 and later, with initial validation on Sam's macOS 27.0 Mac.
   Revisit the minimum version later and add older versions only after community testing.
   Intel support remains deferred unless Sam needs it.
-- Use ad-hoc signing for development builds on Sam's Mac.
+- Sign development builds with the Miri Developer Local Signing identity when it exists, and ad-hoc otherwise.
   Enroll in the Apple Developer Program before the first public release.
 - Distribute a Developer ID signed and Apple-notarized disk image and offer a Homebrew cask.
   Configure Sparkle for app updates carrying the selected engine.
@@ -474,19 +474,19 @@ The following table records the selected v1 defaults without claiming tested act
   License Miri as `GPL-3.0-or-later` and retain Paneru's required MIT copyright and permission notices.
 - Send no telemetry or window-management data off the Mac.
   Update checks and downloads may use the network.
-- Keep logs local and provide **Copy diagnostics** with a preview before copying.
+- Keep logs local and provide **Copy Diagnostics** with a preview before copying.
   Include versions, monitor setup, permission status, engine status, and redacted logs.
 - Exclude window titles, document paths, usernames, and raw configuration by default from both preview and clipboard content.
   The Setup document additionally plans user-initiated diagnostic collection that stays local until the user chooses to share it.
-- Define bounded log storage before release.
-  The retention limit and mechanism are not selected in the saved documents.
+- Bound log storage.
+  The engine log keeps at most two files of 1 MiB each.
 
 ## Testing Decisions
 
 The app acceptance checklist and multi-monitor acceptance checklist define the documented checks below.
-Neither checklist has run against an app implementation.
+Neither checklist has a full run, and selected checks ran on earlier builds.
 The engine assessments are source inspection, not prior runtime tests.
-No existing automated testing seam, test framework, fixtures, or reusable test suite exists in this checkout.
+This checkout has Swift unit tests, engine tests, harness tests, and `make e2e` selftests that drive the packaged app with the AXFixture app.
 
 ### Test behavior and preserve evidence
 
@@ -495,9 +495,9 @@ No existing automated testing seam, test framework, fixtures, or reusable test s
   Calling an internal handler or inspecting an engine query alone does not establish the user-visible result.
 - Cover the native app interface, bundled helper integration, setup checker, configuration, shortcuts, gesture verification, updates, diagnostics, and release installation.
   Verify real window effects where those components affect window management.
-- Complete the Accessibility attribution prototype before other implementation.
+- Recheck Accessibility attribution on the Developer ID signed, notarized bundle.
   Run permission and lifecycle checks with the actual app bundle and helper identities.
-- Use ad-hoc signing for development checks and the Developer ID signed, notarized bundle for public-release checks.
+- Use development signing for development checks and the Developer ID signed, notarized bundle for public-release checks.
   Keep the installed location stable during permission validation, apart from explicit movement and replacement recovery checks.
 - Record app build, pinned engine revision, macOS version, display setup, and observed result for every check.
   An unavailable, unverified, failed, or inconclusive check does not pass.
@@ -556,7 +556,7 @@ Any failure blocks merging the change that caused it.
 2. Scroll one strip without changing another strip's focus or scroll position.
 3. Move focus and a window to the other display in both directions.
 4. Unplug and replug the external display three times without losing windows.
-   Strips return when macOS returns their Space.
+   Each window returns to the display it was on, in its old order and stack.
 5. Close and open the lid once with an external display connected.
 6. Sleep and wake three times.
 7. Force-quit the engine once and verify automatic restart with restored layout.
@@ -597,7 +597,7 @@ Use a browser, terminal, Electron app, and document app to cover different windo
     A window-loss bug restarts that period.
 
 After each display change in items 5 through 9, verify every window remains reachable.
-Verify strips return to their display when macOS returns their Space.
+Verify each window returns to the display it was on, in its old order and stack.
 
 A single failure fails the release blocker.
 Failures include lost windows, wrong-display windows, macOS relocation of off-screen windows, and an engine that does not recover.
@@ -610,7 +610,7 @@ This draft does not shorten either requirement.
 
 Sam confirmed both proposals after drafting.
 This confirmation establishes the testing policy and does not add product behavior or prove implementation.
-Neither seam nor its test driver has been implemented.
+The `make e2e` selftests drive the packaged app and its helper with the AXFixture app, which partly covers the primary seam.
 
 1. **Confirmed primary seam through the packaged app.**
    Use one app-level end-to-end driver for the actual Miri bundle, its real bundled helper, and observable macOS window effects.
@@ -618,7 +618,6 @@ Neither seam nor its test driver has been implemented.
    Supply external inputs through configuration edits, helper termination, controlled update availability, and known diagnostic data.
    Assert visible state, window accessibility and geometry, persisted configuration, clipboard contents, and process outcomes.
    Keep the documented real-hardware and signed-release checks at this same system boundary, using manual procedures where necessary.
-   The driver technology and fixture implementation are not selected.
 2. **Confirmed conditional seam at the app's external-services boundary.**
    Add a single narrow boundary only for cases that cannot be produced reliably through the real system.
    Candidate inputs include unavailable setup inspection, controlled crash-count time, and update-service responses.
@@ -692,7 +691,7 @@ An accepted deferral does not commit every candidate to a future implementation.
    Record the measurement method and proposed pass rule before treating this requirement as satisfied.
    This draft does not invent a limit.
 6. **Gap validation and several schemas remain unselected.**
-   The eight-point defaults are accepted, but the allowed gap range and coordinate mapping are not selected.
+   The eight-point defaults are accepted, but the allowed gap range is not selected.
    Additional app-only keys, shortcut action identifiers, binding syntax, migration schema, and backup mechanism remain engineering work.
    Do not adopt proposed examples as a verified Miri schema.
 7. **Broad feature documents contain proposals beyond the accepted v1 contract.**
@@ -710,10 +709,6 @@ An accepted deferral does not commit every candidate to a future implementation.
    The accepted reference delegates unlisted bindings to Paneru defaults, adjusted only for macOS conflicts.
    The precise effective set, parser contracts, and compatibility with hidden v2 commands require selected-release verification.
    Native macOS commands in the reference are companion interactions, not Miri-owned shortcuts.
-10. **One settled-branches line is malformed.**
-    The status report joins numbered-column semantics and new-window sizing in one bullet.
-    Release scope and the app checklist record both decisions separately and clearly.
-    This draft retains both without changing their meaning.
 
 ### Engineering prerequisites and unverified behavior
 

@@ -51,8 +51,8 @@ S-6 remains pending on a frozen candidate.
 
 ## Scope accepted after the checklists
 
-[Release scope](../decisions/release-scope.md) added these behaviors on 19 October 2026.
-The checklists do not list them yet, so this ledger tracks them here.
+[Release scope](../decisions/release-scope.md) added these behaviors from 19 October to 1 November 2026.
+The checklists list only parts of them, so this ledger tracks all of them here.
 
 | ID | Check | App revision | Engine pin | macOS | Hardware | Result | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -166,7 +166,7 @@ Source: [App acceptance](../decisions/v1-app-acceptance-checklist.md).
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | AU-1 | Check the default update policy on a new installation. | | | | | Pending | |
 | AU-2 | Enable automatic updates and start Miri with an update available. | | | | | Pending | |
-| AU-3 | Open logs and use **Copy diagnostics**. | | | | | Pending | |
+| AU-3 | Open logs and use **Copy Diagnostics**. | | | | | Pending | |
 | AU-4 | Observe network activity during management, update checks, and update downloads. | | | | | Pending | |
 | AU-5 | Exercise diagnostics with known window titles, document paths, usernames, and raw configuration values in the test data. | | | | | Pending | |
 

@@ -1,7 +1,7 @@
 # Keybinding reference
 
 Status: accepted as Miri's default bindings on 14 October 2026.
-Actions this reference does not cover use Paneru's defaults, changed only where they clash with macOS.
+Actions this reference does not cover have no default shortcut, because Paneru's default configuration binds no keys.
 
 These bindings define Miri's default set for new installations.
 Miri writes them to `[bindings]` from one table in `Sources/MiriCore/Bindings.swift`.
@@ -158,7 +158,7 @@ Clicking a window on another display also changes focus.
 
 ## Engine mapping
 
-This table maps each accepted action to the command that the pinned engine `ec7fc7c` runs.
+This table maps each accepted action to the command that the pinned engine runs.
 The mapping describes commands and their expected behavior.
 [PROGRESS.md](../PROGRESS.md) records runtime and hardware checks.
 A blank engine command means that Miri leaves the action unbound.
@@ -232,7 +232,7 @@ Offer an explicit action to switch to the current default set.
 ## Actions without selected bindings
 
 This default set does not assign bindings for cycling presets backward, expanding to available width, centering all visible columns, or pulling a neighboring window into the focused column.
-Actions not covered here use Paneru's defaults, changed only where they clash with macOS.
+Paneru's default configuration binds no keys, so these actions have no shortcut until the user adds one.
 
 V1 has no dedicated binding to switch focus between floating and tiled windows.
 Users can click a window or use macOS app and window switching.

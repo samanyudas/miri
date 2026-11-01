@@ -1,7 +1,7 @@
 # Contributing to Miri
 
 Miri is licensed under GPL-3.0-or-later, and contributions are accepted under the same license.
-The project is in its design and prototype stage, so check [PROGRESS.md](PROGRESS.md) and the open issues before you start.
+Miri is a working development app with no release yet, so check [PROGRESS.md](PROGRESS.md) and the open issues before you start.
 
 ## Set up
 
@@ -31,12 +31,12 @@ The pre-push hook that `make setup` installs runs `make pre-push`, the checks th
 | Target | What it proves |
 | --- | --- |
 | `make docs` | Relative links and heading anchors resolve, no em dash appears, and the agent map and handoff record are well formed. |
-| `make harness-tests` | The docs check and the command guard behave as documented. |
+| `make harness-tests` | The docs check, the command guard, the CI skip rule, and the workflow permissions behave as documented. |
 | `make shell`, `make actions` | Shell scripts and workflows pass ShellCheck and actionlint. |
 | `make compat` | Declared macOS minimums agree, the Rust pin satisfies the engine, and the engine pin is published on the fork branch. |
 | `make swift-lint`, `make engine-lint` | Swift formatting, rustfmt, and Clippy with warnings as errors. |
 | `make build`, `make test` | The signed app bundle builds, and the Swift and engine unit tests pass. |
-| `make e2e` | The packaged app and engine run a real Accessibility observation through Launch Services. |
+| `make e2e` | The packaged app and engine run a real Accessibility observation through Launch Services, and the app recovers a stranded fixture window. |
 | `make package` | Miri Developer packs into a DMG that mounts with valid signatures. |
 
 `make e2e` reports `observed-ungranted` on a Mac without the Accessibility grant, which is a pass.

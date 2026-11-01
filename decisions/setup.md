@@ -20,7 +20,7 @@ Screen Recording permission is needed only for the opt-in **Show window contents
 With that switch off, Miri does not capture the screen, as [ADR 0002](../docs/adr/0002-limit-system-access.md) records.
 
 Public releases use Developer ID signing and Apple notarization.
-Development builds use ad-hoc signing on Sam's Mac.
+Development builds sign with the Miri Developer Local Signing identity when it exists, and ad-hoc otherwise.
 
 ## Install and start Miri
 
@@ -55,8 +55,8 @@ Explain why Miri needs permission to move windows.
 Direct users to **System Settings > Privacy & Security > Device Control and Data Access**.
 On macOS 27, this pane holds the Accessibility permission.
 
-Whether macOS attributes permission to `Miri.app` or its engine helper requires a prototype.
-Verify that identity before finalizing the permission instructions.
+The [permission prototype](../docs/prototypes/helper-permission.md) showed that turning on Miri alone grants both the app and its engine helper in the development bundle.
+Recheck this on the Developer ID signed, notarized bundle before finalizing the permission instructions.
 See [ADR 0009](../docs/adr/0009-run-the-engine-as-a-helper-process.md).
 
 1. Enable the verified Miri Accessibility entry.
@@ -134,7 +134,7 @@ Each managed display and native Space has its own strip.
 Scrolling one strip must not change another strip's focus or scroll position.
 
 Off-screen windows must remain on their assigned displays without macOS relocating them.
-The edge-handling mechanism requires engine and hardware verification.
+The engine keeps a sliver of each hidden column at a free display edge, and tucks it past a free bottom corner at an edge shared with another display.
 Reliable horizontal multi-monitor scrolling blocks the v1 release until it passes the [acceptance checklist](v1-acceptance-checklist.md).
 
 Display changes follow macOS Space migration as recorded in [ADR 0008](../docs/adr/0008-follow-macos-space-migration-for-display-changes.md).
@@ -149,14 +149,14 @@ Stop, Quit, and window recovery follow [App controls and window recovery](releas
 
 Settings provide gaps, width presets, shortcut editing, permission guidance, and access to logs.
 Logs remain local.
-A **Copy diagnostics** control prepares information for GitHub issues.
+A **Copy Diagnostics** control prepares information for GitHub issues.
 Diagnostics contents and redaction follow [Privacy and diagnostics](release-scope.md#privacy-and-diagnostics).
 **Copy Diagnostics** is in the menu bar menu and on Settings > Diagnostics.
 
 Advanced users can edit `~/Library/Application Support/Miri/config.toml`.
 Miri keeps standalone Paneru's configuration files untouched.
 
-## Setup checks to implement
+## Setup checks
 
 Report missing Accessibility permission, **Displays have separate Spaces** turned off, Stage Manager turned on, competing window managers, macOS tiling options turned on, and conflicting macOS gestures.
 Explain the relevant System Settings path for each failure.
@@ -200,7 +200,7 @@ Window management continues while settings are closed.
 
 ### Collect information for an unresolved problem
 
-Use **Copy diagnostics** to prepare a report.
+Use **Copy Diagnostics** to prepare a report.
 Record the macOS version, Miri version, and observed behavior.
 Use the redacted engine log when relevant.
 Review the diagnostics preview before copying.
