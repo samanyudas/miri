@@ -24,6 +24,7 @@ Read this map first, then the linked document for the area you touch.
 | `.github/` | CI and issue and PR templates. |
 | `decisions/` | Accepted product direction and open questions. |
 | `docs/adr/` | Architecture decisions. |
+| `verification/` | TLA+ models that a project skill in `.claude/skills/` checks, such as the engine lifecycle. |
 | `docs/specs/`, `docs/prototypes/` | The v1 specification and prototype records. |
 | `docs/acceptance-ledger.md` | The recorded result of every v1 acceptance check. |
 | `docs/limitations.md` | Every known limitation, with its evidence. Add a confirmed limitation here, and remove it when its fix is verified. |
@@ -47,6 +48,7 @@ If your change contradicts an ADR, say so explicitly instead of overriding it.
 | `make check` | `make lint` and `make native`. This is the gate before a PR. |
 | `make build`, `make test`, `make e2e`, `make package` | One stage of `make native`. `make test` is `make swift-test` and `make engine-test`. |
 | `make format` | Formats Swift sources with `.swift-format`. |
+| `make verify-engine-lifecycle` | Model-checks engine start, stop, restart, and quit. Use it when you change that code. |
 
 Run cargo from the repository root so `rust-toolchain.toml` and `.cargo/config.toml` apply.
 CI in `.github/workflows/ci.yml` runs the same make targets, with the macOS stages as parallel jobs.
