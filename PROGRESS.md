@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `ci/engine-test-executor`, based on `main` at `c0f79e29`
+Updated: 2026-11-01 on branch `ci/engine-test-executor`, based on `main` at `fa6e6696`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,15 +16,16 @@ The public release path and the complete acceptance runs follow.
 
 ## Dock changes while the engine runs
 
-[#215](https://github.com/samanyudas/miri/issues/215) is fixed in [engine PR #106](https://github.com/samanyudas/paneru/pull/106), which this branch pins at its merge commit `036c73b`. That commit also carries [engine PR #105](https://github.com/samanyudas/paneru/pull/105), the #87 tests for a Dock and a too-wide maximized window.
-The engine read each display's Dock position only at startup or after a display change, so a Dock that showed, hid, or moved later left windows laid out for the old Dock.
-The engine now re-reads every display on `NSApplicationDidChangeScreenParametersNotification`.
+[#215](https://github.com/samanyudas/miri/issues/215) is fixed in two engine PRs. This branch pins `8b585cc`, the merge of the second.
+[Engine PR #106](https://github.com/samanyudas/paneru/pull/106), merged as `036c73b` with [engine PR #105](https://github.com/samanyudas/paneru/pull/105)'s #87 tests, re-reads every display on `NSApplicationDidChangeScreenParametersNotification`.
+Before it, the engine read each display's Dock position only at startup or after a display change, so a Dock that showed, hid, or moved later left windows laid out for the old Dock.
 A changed Dock position moves that display's strips with its usable area, through the same layout step as an edge padding change, so a maximized column seen there fills the new area.
-The Dock's own notifications arrive 0.1 to 1 s before `NSScreen.visibleFrame` changes, so they are not used.
+macOS can publish a Dock change late or never: after a size change every process read the old work area for 7 s, and a hiding `killall Dock` could leave the old Dock area reserved.
+[Engine PR #108](https://github.com/samanyudas/paneru/pull/108), merged as `8b585cc`, therefore also reads the Dock's own icon-list frame and auto-hide preference 0.5 s and 2 s after the Dock reports a preference change or restart. macOS's work area wins while the two agree within 8 points on the same side.
 Live on 1 November, windows on the 2560x1440 display went from 1402 to 1324 points tall when the Dock showed at its bottom, and back when it hid, without a restart.
 With the Dock moved to the left of the built-in display, a maximized window there went from 2040 points wide at x -2044 to 1962 wide at x -1966, beside the Dock.
-Sol reviewed the engine PR in 3 rounds and approved it.
-Hiding the Dock with `killall Dock` left macOS reporting the old Dock area, with no notification, in 2 of 3 tries. Toggling the Dock in System Events cleared it.
+With `8b585cc`, a Dock at size 0.7 gave 1282-point windows while macOS still reported the old area, and a hiding `killall Dock` gave full-height windows while macOS kept the stale area.
+Sol approved engine PR #106 after 3 rounds and #108 after 2.
 #87's remaining criteria passed live on 1 November: Window > Zoom, Make column full width, a Dock known at startup, and a built-in display at 2x beside a 1x display.
 
 ## Pointer drop target
@@ -57,7 +58,7 @@ GitHub's macOS runner gives Bevy one compute thread, against four on Sam's Mac, 
 - The macOS job is split into four parallel jobs: Swift, engine lint, engine tests, and the app build with selftests and packaging. The engine tests job is the slowest.
 - Measured on 1 November over the GitHub Actions API: 89 green runs from 28 to 31 October took a median of 9.9 minutes, p90 14.3. The 19 green runs after #194 took a median of 5.2 minutes, p90 7.0. Documentation-only pull requests take 12 s.
 - The engine tests job was then the critical path, a median of 299 s, with 182 s spent in the 1146 tests. Bevy's multi-threaded executor woke its threads on every frame, so 39% of the suite's CPU time was kernel time.
-- Production already ran its frame schedules on the single-threaded executor, but the test apps did not. [Engine PR #107](https://github.com/samanyudas/paneru/pull/107) makes both call one function, so the tests match production. On Sam's Mac with 3 test threads, the suite went from 68 to 90 s to 26 to 28 s. In CI on #217, an earlier version that switched every test schedule ran the 1146 tests in 61.8 s, against 182 s. The branch `ci/engine-test-executor` pins its merge commit `68365bc`, which also carries [engine PR #108](https://github.com/samanyudas/paneru/pull/108) for #215, so it merges after #218.
+- Production already ran its frame schedules on the single-threaded executor, but the test apps did not. [Engine PR #107](https://github.com/samanyudas/paneru/pull/107) makes both call one function, so the tests match production. On Sam's Mac with 3 test threads, the suite went from 68 to 90 s to 26 to 28 s. [#217](https://github.com/samanyudas/miri/pull/217) pins its merge commit `68365bc`. In CI there, the 1152 engine tests ran in 38.5 s, against 182 s, and the whole run took 2.75 minutes.
 
 ## Rust 1.99
 
