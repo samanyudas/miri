@@ -16,11 +16,14 @@ The public release path and the complete acceptance runs follow.
 
 ## Dock changes while the engine runs
 
-[#215](https://github.com/samanyudas/miri/issues/215) is fixed in [engine PR #106](https://github.com/samanyudas/paneru/pull/106), which this branch pins at `58f35a4`.
+[#215](https://github.com/samanyudas/miri/issues/215) is fixed in [engine PR #106](https://github.com/samanyudas/paneru/pull/106), which this branch pins at `3854da2`.
 The engine read each display's Dock position only at startup or after a display change, so a Dock that showed, hid, or moved later left windows laid out for the old Dock.
-The engine now re-reads every display on `NSApplicationDidChangeScreenParametersNotification`, and a changed Dock position lays out that display's strips again.
+The engine now re-reads every display on `NSApplicationDidChangeScreenParametersNotification`.
+A changed Dock position moves that display's strips with its usable area, through the same layout step as an edge padding change, so a maximized column seen there fills the new area.
 The Dock's own notifications arrive 0.1 to 1 s before `NSScreen.visibleFrame` changes, so they are not used.
-Live on 1 November, windows on the 2560x1440 display went from 1402 to 1324 points tall when the Dock showed, and back when it hid or moved to the other display, without a restart.
+Live on 1 November, windows on the 2560x1440 display went from 1402 to 1324 points tall when the Dock showed at its bottom, and back when it hid, without a restart.
+With the Dock moved to the left of the built-in display, a maximized window there went from 2040 points wide at x -2044 to 1962 wide at x -1966, beside the Dock.
+Sol reviewed the engine PR in 3 rounds and approved it.
 Hiding the Dock with `killall Dock` once left macOS reporting the old Dock area with no notification. Toggling the Dock in System Events cleared it.
 #87's remaining criteria passed live on 1 November: Window > Zoom, Make column full width, a Dock known at startup, and a built-in display at 2x beside a 1x display.
 
