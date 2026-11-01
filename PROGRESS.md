@@ -25,6 +25,7 @@ The skill lists all four under Known findings.
 Three come from one cause: for up to 3 seconds after a stop begins, `engineState` stays `.running`, and a restart in that time queues a `start` that no later Stop or Quit removes.
 The fourth is the status after Restart from a failed engine while a setup check blocks start.
 Next: Sam picks the fixes for #234, #235, and #236.
+[#241](https://github.com/samanyudas/miri/pull/241) fixes #236: Restart from a failed engine while a check blocks start now shows `Waiting: <check>` with Stop, and `WaitingIsShown` holds.
 
 ## App and menu bar icons
 

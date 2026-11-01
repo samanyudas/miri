@@ -59,7 +59,7 @@ The model found each one on 2026-11-01, and a live run on a `main` build at `bbe
    Reproduced in part: the engine log showed Miri launching an engine after SIGTERM, but that engine was gone within 50 ms of the app's exit. It has no issue of its own, because it has the same cause as #234.
 4. Fixed. `WaitingIsShown`: the engine is `.failed`, a setup check blocks start, and you press Restart. `AppModel.start()` begins the setup poll, but `engineState` stays `.failed`, so `statusText` says "Stopped after repeated engine failures" and the menu shows no Stop button to cancel the wait.
    Reproduced live: [#236](https://github.com/samanyudas/miri/issues/236).
-   Now `start()` stops a supervisor that does not run before it polls, and Start becomes Stop while a check blocks start, so the rule holds.
+   Fixed in [#241](https://github.com/samanyudas/miri/pull/241): `start()` stops a supervisor that does not run before it polls, and Start becomes Stop while a check blocks start, so the rule holds.
 
 Findings 1 to 3 have one cause: for up to 3 seconds after a stop begins, `engineState` stays `.running`, and a restart in that time queues a `start` that no later Stop or Quit removes.
 When a fix lands, the rule it fixes prints `UNEXPECTED ... holds`.
