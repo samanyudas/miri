@@ -104,7 +104,6 @@ Working notes in PROGRESS.md and issue comments do not count as documentation.
 These reports are not established limitations.
 Each one has an open issue with the next investigation step.
 
-- Windows show in Mission Control or a window switcher but are not on the expected desktop: [#85](https://github.com/samanyudas/miri/issues/85).
 - Window interactions feel delayed: [#78](https://github.com/samanyudas/miri/issues/78).
 
 ## Deferred to v2
