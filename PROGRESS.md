@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `docs/222-verified`, based on `main` at `7b95cbc0`
+Updated: 2026-11-02 on branch `fix/issue-220`, based on `main` at `e8d69276`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -23,6 +23,14 @@ The model found four lifecycle bugs on 2026-11-01.
 A live run on Miri Developer built from `main` at f37f425b passed every acceptance criterion on 2 November 2026, and #234, #235, and #236 are closed.
 [#243](https://github.com/samanyudas/miri/pull/243) makes `verify-miri end` and `renew` refuse a run that another thread owns, after one agent's `end` closed another agent's live run.
 Nothing is in flight here.
+
+## Logs from the engine failure view
+
+Branch `fix/issue-220` adds `Show Logs in Finder` next to `Restart Engine` in the failed state of the menu and Settings > General, for [#220](https://github.com/samanyudas/miri/issues/220).
+A `verify-miri` run on 2 November 2026 killed the test engine three times on `main` at e8d69276 and on the branch.
+On `main`, both views showed only `Restart Engine`.
+On the branch, both views showed the new button, and each press opened Finder with `engine.log` selected.
+Finder came to the front from Settings. System Events clicks in the menu let no app take the front, so that part of the menu path stays unobserved.
 
 ## Live verification skill
 
