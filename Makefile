@@ -63,9 +63,13 @@ swift-test:
 engine-test:
 	env -u CARGO_BUILD_TARGET cargo test $(ENGINE)
 
+# The selftests launch Miri Developer from this checkout, so they hold the live-test lock while they run.
+# An agent that already holds the lock passes its own owner: `make e2e LIVE_LOCK_OWNER="<owner>"`.
+LIVE_LOCK_OWNER ?= make e2e in $(CURDIR)
 e2e:
-	scripts/test-permission-prototype.sh
-	scripts/test-window-recovery.sh
+	python3 scripts/live-lock.py run --owner "$(LIVE_LOCK_OWNER)" --minutes 15 \
+		--task "make e2e launches Miri Developer selftests from this checkout" \
+		-- sh -c 'scripts/test-permission-prototype.sh && scripts/test-window-recovery.sh'
 
 package:
 	scripts/package-dmg.sh
