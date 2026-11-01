@@ -678,28 +678,22 @@ An accepted deferral does not commit every candidate to a future implementation.
    Record the measurement method and proposed pass rule before treating this requirement as satisfied.
    This draft does not invent a limit.
 6. **Gap validation and several schemas remain unselected.**
-   The eight-point defaults are accepted, but the allowed gap range and coordinate mapping are not selected.
-   Additional app-only keys, shortcut action identifiers, binding syntax, migration schema, and backup mechanism remain engineering work.
+   The eight-point defaults are accepted, but the allowed gap range is not selected.
+   Additional app-only keys and the general migration schema remain engineering work.
    Do not adopt proposed examples as a verified Miri schema.
 7. **Broad feature documents contain proposals beyond the accepted v1 contract.**
-   New-window insertion beside the focused window, avoiding focus theft from background windows, nearest-column gesture settling, spring details, and refresh-rate synchronization appear there.
+   New-window insertion beside the focused window, avoiding focus theft from background windows, spring details, and refresh-rate synchronization appear there.
    Engine-side shortcut handling and event-driven idling also appear as proposed engineering behavior.
-   Scrolling to reveal the focused window also appears in that proposal document without a separate accepted commitment.
    Those statements lack the same explicit accepted status as the release scope and app checklist.
    Zero gaps appear in the feature proposal while the accepted configuration documents leave the gap range unresolved.
    This draft does not make those statements new v1 acceptance requirements.
 8. **Setup recipes are proposed guidance.**
    The three-finger and four-finger macOS setting recipes and disabling automatic Space rearrangement require supported-version verification.
-   Proposed macOS tiling-setting changes concern deferred drag-to-reorder behavior.
    They do not add v1 startup blockers or authorize automatic settings changes.
-9. **The fallback shortcut set remains unaudited.**
-   The accepted reference delegates unlisted bindings to Paneru defaults, adjusted only for macOS conflicts.
-   The precise effective set, parser contracts, and compatibility with hidden v2 commands require selected-release verification.
+   The setup checker reports macOS tiling options that are on, because macOS tiling moves dragged windows, as [Dragging windows](../../decisions/release-scope.md#dragging-windows) describes.
+9. **The fallback shortcut set is empty.**
+   Paneru's default configuration binds no keys, so actions the reference leaves unbound have no shortcut.
    Native macOS commands in the reference are companion interactions, not Miri-owned shortcuts.
-10. **One settled-branches line is malformed.**
-    The status report joins numbered-column semantics and new-window sizing in one bullet.
-    Release scope and the app checklist record both decisions separately and clearly.
-    This draft retains both without changing their meaning.
 
 ### Engineering prerequisites and unverified behavior
 
