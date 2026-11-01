@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `docs/stale-status-claims`, based on `main` at `fabf16d4`
+Updated: 2026-11-01 on branch `fix/215-dock-refresh`, based on `main` at `c0f79e29`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,19 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Dock changes while the engine runs
+
+[#215](https://github.com/samanyudas/miri/issues/215) is fixed in [engine PR #106](https://github.com/samanyudas/paneru/pull/106), which this branch pins at its merge commit `036c73b`. That commit also carries [engine PR #105](https://github.com/samanyudas/paneru/pull/105), the #87 tests for a Dock and a too-wide maximized window.
+The engine read each display's Dock position only at startup or after a display change, so a Dock that showed, hid, or moved later left windows laid out for the old Dock.
+The engine now re-reads every display on `NSApplicationDidChangeScreenParametersNotification`.
+A changed Dock position moves that display's strips with its usable area, through the same layout step as an edge padding change, so a maximized column seen there fills the new area.
+The Dock's own notifications arrive 0.1 to 1 s before `NSScreen.visibleFrame` changes, so they are not used.
+Live on 1 November, windows on the 2560x1440 display went from 1402 to 1324 points tall when the Dock showed at its bottom, and back when it hid, without a restart.
+With the Dock moved to the left of the built-in display, a maximized window there went from 2040 points wide at x -2044 to 1962 wide at x -1966, beside the Dock.
+Sol reviewed the engine PR in 3 rounds and approved it.
+Hiding the Dock with `killall Dock` left macOS reporting the old Dock area, with no notification, in 2 of 3 tries. Toggling the Dock in System Events cleared it.
+#87's remaining criteria passed live on 1 November: Window > Zoom, Make column full width, a Dock known at startup, and a built-in display at 2x beside a 1x display.
 
 ## Pointer drop target
 
