@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `ci/engine-test-executor`, based on `main` at `fa6e6696`
+Updated: 2026-11-01 on branch `chore/pr-evidence`, based on `main` at `1e250b86`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -998,6 +998,9 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 
 ## Done
 
+- `chore/pr-evidence` adds an acceptance evidence table to the PR template, with one row per acceptance criterion.
+  [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#capture-evidence) now says how to capture window evidence without showing the desktop.
+  The pre-push hook runs `scripts/check-pushed-media.py`, which rejects new commits that add a recording, or an image outside `assets/` and `Sources/`.
 - `chore/agent-owned-issue-closure` removes the GitHub Actions issue lifecycle and its dedicated harness tests and fixtures.
   Agents verify every acceptance criterion on landed code, post evidence, and close completed issues under the [issue lifecycle](CONTRIBUTING.md#issue-lifecycle).
   Partial or unverified issues remain open, and release distribution acceptance stays separate.
