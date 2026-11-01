@@ -21,9 +21,9 @@ class Rule(NamedTuple):
 
 RULES = (
     Rule(frozenset({".mov", ".mp4", ".m4v", ".webm", ".gif"}), (),
-         "recordings stay local, so describe what they show in text"),
+         "a recording needs Sam's approval before it leaves this Mac"),
     Rule(frozenset({".png", ".jpg", ".jpeg", ".heic", ".tif", ".tiff"}), ("assets/", "Sources/"),
-         "images belong only under assets/ or Sources/, so attach an approved screenshot to the PR instead"),
+         "an image outside assets/ or Sources/ needs Sam's approval before it leaves this Mac"),
 )
 
 
