@@ -85,8 +85,8 @@ That crossing is not built yet.
 
 Display directions follow the physical arrangement in **System Settings > Displays**.
 Focus and movement within a column stay on the current display at the column's top or bottom edge.
-Only the monitor shortcuts, the edge-or-monitor shortcuts at a display's end, and ⌃⌥N cross to another display.
-[Release scope](release-scope.md#multiple-monitors) requires this split, which settles the question in miri#23.
+Today only the monitor shortcuts, the edge-or-monitor shortcuts at a display's end, and ⌃⌥N cross to another display.
+The accepted #104 behavior will also let plain horizontal focus and move cross at the strip's end, as [Release scope](release-scope.md#multiple-monitors) records.
 Stop window manager runs the same Stop as the menu bar, and Miri registers it itself.
 Its shortcuts are customizable and live in `[miri].stop_shortcut`, as one chord string or an array of chord strings in the engine's syntax.
 An absent key means ⌃⌥Q, and an empty array means Stop has no shortcut.

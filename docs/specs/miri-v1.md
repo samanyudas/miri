@@ -179,7 +179,7 @@ Stacking in either direction moves only the focused window, and the rest of its 
 101. As a Miri user, I want trackpad scrolling to target the display under the pointer by default, so that the pointed-at strip moves.
 102. As a Miri user, I want a setting to target the focused window's strip instead, so that I can choose the alternative trackpad target.
 103. As a Miri user, I want keyboard commands to act on the focused strip, so that keyboard targeting remains predictable.
-104. As a Miri user, I want ordinary strip navigation and scrolling to remain within the current display, so that displays retain independent navigation.
+104. As a Miri user, I want strip scrolling and vertical navigation to remain within the current display, and horizontal focus and moves to cross only at the strip's end, so that displays retain independent navigation.
 105. As a Miri user, I want dedicated focus commands for monitors above, left, below, and right, so that navigation follows physical positions.
 106. As a Miri user, I want dedicated window-move commands for those monitor directions, so that I can move a window across displays deliberately.
 107. As a Miri user, I want the next-display shortcut retained, so that the accepted default set includes that dedicated monitor command.
@@ -319,7 +319,8 @@ They do not establish completed modules or verified engine capabilities.
 - Use an independent horizontal scrolling strip for each physical monitor and native Space.
   Keep window order, focus, and scroll position independent between strips.
 - Disable Paneru's experimental virtual workspaces in v1 and hide their commands and menu bar indicator.
-- Keep ordinary strip navigation and scrolling within the current display.
+- Keep strip scrolling and vertical focus and move within the current display.
+  At a strip's end, Focus column left or right and Move column left or right cross to the neighboring display.
   Dedicated monitor navigation commands cross displays according to their physical positions.
 - Target trackpad scrolling at the display under the pointer by default.
   Offer a setting to target the focused window's strip instead.
@@ -484,7 +485,7 @@ The engine assessments are source inspection, not prior runtime tests.
   Verify real window effects where those components affect window management.
 - Complete the Accessibility attribution prototype before other implementation.
   Run permission and lifecycle checks with the actual app bundle and helper identities.
-- Use ad-hoc signing for development checks and the Developer ID signed, notarized bundle for public-release checks.
+- Use the development signing identity, or ad-hoc signing without it, for development checks, and the Developer ID signed, notarized bundle for public-release checks.
   Keep the installed location stable during permission validation, apart from explicit movement and replacement recovery checks.
 - Record app build, pinned engine revision, macOS version, display setup, and observed result for every check.
   An unavailable, unverified, failed, or inconclusive check does not pass.
