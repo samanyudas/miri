@@ -16,14 +16,18 @@ The public release path and the complete acceptance runs follow.
 
 ## Initial setup
 
-[#219](https://github.com/samanyudas/miri/issues/219) is implemented on branch `feat/219-initial-setup`, with no PR yet.
+[#219](https://github.com/samanyudas/miri/issues/219) is implemented on branch `feat/219-initial-setup`.
 On first launch Miri opens a Set Up Miri window with the window management status, any start blockers, and the strip swipe controls from Settings > Gestures.
 Setup selects four fingers when no finger count is chosen.
 The swipe stays off until a confirmed gesture test, or turns on at once when a matching saved test exists.
 Closing the window saves `initialSetupDone` in user defaults, and quitting with the window open does not.
 Launch with `-initialSetupDone NO` to show setup again.
 `swift build`, `make swift-test`, `make lint`, `make swift-lint`, and `make build` passed.
-Nobody has opened the window in the running app yet, and a real four-finger swipe test on trackpad hardware is unverified.
+A live run of the app bundle on 1 November 2026 showed setup on a real first launch, changed Off to four fingers, and reported this Mac's four-finger macOS conflict with the test disabled.
+Quitting with setup open left it pending, Done finished it, and the next launch showed no setup.
+With three fingers, which have no conflict on that Mac, the test from setup passed and turned the swipe on after confirmation.
+Engine focus commands moved the strip in that run, not a trackpad, so it is not trackpad evidence.
+AG-2 and AG-3 still need a real swipe on trackpad hardware, and AG-3 needs a Mac with no four-finger macOS conflict.
 
 ## Dock changes while the engine runs
 

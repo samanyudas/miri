@@ -40,6 +40,7 @@ struct GestureSettings: View {
 /// The finger count choice, the swipe status, and the gesture test, shared by Settings and initial setup.
 struct StripSwipeSections<ChoiceAccessory: View, TestAccessory: View>: View {
     let model: AppModel
+    var header: LocalizedStringKey? = nil
     let choiceFooter: LocalizedStringKey
     let testFooter: LocalizedStringKey
     @ViewBuilder let choiceAccessory: ChoiceAccessory
@@ -58,6 +59,8 @@ struct StripSwipeSections<ChoiceAccessory: View, TestAccessory: View>: View {
                 Text("Four fingers (recommended)").tag(StripGesture.four)
             }
             choiceAccessory
+        } header: {
+            if let header { Text(header) }
         } footer: {
             Text(choiceFooter).foregroundStyle(.secondary)
         }
@@ -80,9 +83,13 @@ struct StripSwipeSections<ChoiceAccessory: View, TestAccessory: View>: View {
 }
 
 extension StripSwipeSections where ChoiceAccessory == EmptyView, TestAccessory == EmptyView {
-    init(model: AppModel, choiceFooter: LocalizedStringKey, testFooter: LocalizedStringKey) {
+    init(
+        model: AppModel, header: LocalizedStringKey? = nil, choiceFooter: LocalizedStringKey,
+        testFooter: LocalizedStringKey
+    ) {
         self.init(
-            model: model, choiceFooter: choiceFooter, testFooter: testFooter, choiceAccessory: { EmptyView() },
+            model: model, header: header, choiceFooter: choiceFooter, testFooter: testFooter,
+            choiceAccessory: { EmptyView() },
             testAccessory: { EmptyView() })
     }
 }

@@ -25,6 +25,7 @@ struct InitialSetupView: View {
                 }
                 StripSwipeSections(
                     model: model,
+                    header: "Strip Swipe",
                     choiceFooter: "Swipe left or right on the trackpad to slide the windows.",
                     testFooter:
                         "The swipe stays off until you test it and confirm that the strip followed your fingers. Settings > Gestures has the same controls later."
@@ -38,7 +39,7 @@ struct InitialSetupView: View {
             }
             .padding([.horizontal, .bottom], 20)
         }
-        .frame(width: 520, height: 600)
+        .frame(width: 520, height: 720)
         .onAppear { model.refreshSetup() }
     }
 }
