@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `docs/203-trackpad-pass`, based on `main` at `32fcd301`
+Updated: 2026-11-01 on branch `fix/228-live-status-labels`, based on `main` at `65b03031`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -29,6 +29,15 @@ With three fingers, which have no conflict on that Mac, the test from setup pass
 Engine focus commands moved the strip in that run, not a trackpad, so it is not trackpad evidence.
 Sam then ran the test from setup with three fingers on the trackpad on 1 November 2026: the strip followed, and the status read "On, verified by user test".
 AG-3 with four fingers still needs a Mac with no four-finger macOS conflict.
+
+## Status rows and VoiceOver
+
+The fix for [#228](https://github.com/samanyudas/miri/issues/228) is implemented on branch `fix/228-live-status-labels`.
+On macOS 27, `LabeledContent` keeps the first accessibility value of its content, so VoiceOver kept reading an old status after the status changed.
+A new `LiveText` view restates its string as its accessibility value, and the Status rows in Settings, Set Up Miri, and the strip swipe controls use it, as do the gap stepper labels.
+`swift build`, `make swift-test`, `make lint`, `make swift-lint`, and `make build` passed.
+On 1 November 2026, Accessibility API reads on the `main` build showed a stale outer value in the gap, management status, and swipe status rows, and the fix build kept all three current through each change.
+VoiceOver itself was not run.
 
 ## Windows missing from the expected desktop
 

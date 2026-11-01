@@ -18,7 +18,7 @@ struct InitialSetupView: View {
                     .fixedSize(horizontal: false, vertical: true)
                 }
                 Section("Window Management") {
-                    LabeledContent("Status", value: model.statusText)
+                    LabeledContent("Status") { LiveText(model.statusText) }
                     ForEach(model.startBlockers) { check in
                         SetupCheckRow(check: check)
                     }
