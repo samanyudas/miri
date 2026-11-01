@@ -76,6 +76,9 @@ Never report one as another.
 If you need one of these, stop and ask Sam.
 Do not work around the guard with another command.
 
+The pre-push hook rejects new commits that add a screen recording anywhere, or an image outside `assets/` and `Sources/`.
+Share window evidence as [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#capture-evidence) describes.
+
 ## Writing rules
 
 - Never use the em dash character. `make docs` rejects it.

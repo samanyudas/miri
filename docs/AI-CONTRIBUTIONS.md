@@ -18,6 +18,39 @@ Resolve product questions with Sam before the agent builds a new subsystem.
 - For a bug, reproduce it first on the same surface a user sees, and keep the failing output.
 - Test legitimate inputs that a new guard must still allow.
 - Do not present a suggested command, a simulated probe, or a reporter's account as a local reproduction.
+- In the PR, give each acceptance criterion of the issue its own row in the template's evidence table.
+  Each row names the check, the result, and the evidence kind: automated, observed live, or Sam's hardware check.
+
+## Capture evidence
+
+Window evidence must never show Sam's desktop.
+GitHub keeps every pushed file reachable by commit URL, even after its branch is deleted.
+On 31 October 2026, full-screen recordings on a pushed branch showed private chats, and only GitHub Support could purge them.
+
+Prefer window state as text.
+Run the engine's `query state` before and after the action, and paste the relevant frames:
+
+```sh
+PANERU_MACH_SERVICE=io.github.samanyudas.miri.dev.engine \
+  ".build/app/Miri Developer.app/Contents/Helpers/miri-engine" query state
+```
+
+Run it from the checkout whose `make build` produced the running Miri Developer.
+Without `PANERU_MACH_SERVICE`, the query reports that the engine is not running.
+The output names every open window with its title, and titles can be private.
+Paste only the windows that the check uses, with fields such as `window_id`, `frame`, `focused`, and `visible`.
+
+When a picture is necessary, capture only one Miri window or the AXFixture test window.
+Use `screencapture -l <window_id>` with the `window_id` from `query state`, and never capture the full desktop.
+Keep captures out of git.
+Show Sam the exact files and get approval before you upload any image to GitHub.
+Upload an approved image as a PR or issue attachment, never as a commit.
+
+Recordings stay local.
+Describe what a recording shows in text.
+
+The pre-push hook enforces part of this.
+`scripts/check-pushed-media.py` rejects a push whose new commits add a recording anywhere, or an image outside `assets/` and `Sources/`.
 
 ## Boundaries
 
