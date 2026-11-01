@@ -32,8 +32,8 @@ Next: Sam picks the fixes for #234, #235, and #236.
 `scripts/build-app.sh` renders `AppIcon.icns` from `assets/icon.svg` with `sips` and `iconutil`, and copies the two menu bar SVGs into the bundle.
 The menu bar shows the filled window while the engine runs or restarts and the outlined window while it is stopped.
 Failed and blocked states keep the warning triangle.
-Miri Developer swaps the blue and violet colors for yellow when the build renders its icon, and the released Miri will use `icon.svg` unchanged.
-The build stops with an error if `icon.svg` drops one of the colors it swaps.
+Miri Developer swaps the blue and violet colors for yellow and changes the opacity of the two rear windows when the build renders its icon, and the released Miri will use `icon.svg` unchanged.
+The build stops with an error if `icon.svg` drops one of the values it swaps.
 macOS's built-in SVG renderer does not draw the drop shadows in `icon.svg`, so the app icon has none.
 On 2 November 2026 the built bundle showed the yellow icon in Finder and in System Settings > Accessibility, and the dark menu bar showed both menu bar images tinted white.
 A recording showed the menu bar image change from filled to outlined and back through Stop and Start in its own menu.

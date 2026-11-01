@@ -12,6 +12,7 @@ The menu bar SVGs use black shapes on a transparent background.
 The native app must load the menu bar images as template images so macOS can apply the correct appearance.
 `scripts/build-app.sh` builds the app icon from `icon.svg` and copies the menu bar SVGs into the bundle, which the app loads as template images.
 Miri Developer swaps the blue and violet colors of `icon.svg` for yellow when `scripts/build-app.sh` builds its icon, so it never passes for the released Miri.
+The same build changes the opacity of the two rear windows, because pale yellow windows blend together on the white tile.
 The released Miri uses `icon.svg` unchanged.
 
 The updated Paper UI uses `#4F6BF5` for the primary accent and `#3048C8` for darker links and labels.

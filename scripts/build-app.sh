@@ -32,19 +32,22 @@ icon="$PWD/.build/app/AppIcon.svg"
 rm -rf "$iconset"
 mkdir "$iconset"
 # Miri Developer draws the mark in yellow so it never passes for the released Miri, which keeps the blue icon.svg.
-# Each yellow sits 35% of the way from its blue's OKLCH lightness to white, which keeps the stack and gradients visible.
+# Each yellow sits 35% of the way from its blue's OKLCH lightness to white, which keeps the gradients visible.
+# Pale yellow rear windows blend together on the white tile, so the taller one gets lighter and the shorter one more solid.
 cp assets/icon.svg "$icon"
-while read -r blue yellow; do
-    grep -q "$blue" "$icon" || { echo "assets/icon.svg no longer uses $blue. Update the Developer icon colors in $0." >&2; exit 1; }
-    sed -i '' "s/$blue/$yellow/g" "$icon"
-done <<'COLORS'
+while read -r from to; do
+    grep -q "$from" "$icon" || { echo "assets/icon.svg no longer contains $from. Update the Developer icon swaps in $0." >&2; exit 1; }
+    sed -i '' "s/$from/$to/g" "$icon"
+done <<'SWAPS'
 #A9D0FF #ECE191
 #5F95FA #DEB70B
 #5A63F2 #D69A09
 #C4DCFF #F4E8B1
 #B7B1F6 #FFC68A
 #3446C8 #B68806
-COLORS
+opacity="0.62" opacity="0.4"
+opacity="0.5" opacity="0.9"
+SWAPS
 for size in 16 32 128 256 512; do
     sips -s format png -z "$size" "$size" "$icon" --out "$iconset/icon_${size}x${size}.png" >/dev/null
     sips -s format png -z $((size * 2)) $((size * 2)) "$icon" --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
