@@ -21,6 +21,48 @@ Resolve product questions with Sam before the agent builds a new subsystem.
 - In the PR, give each acceptance criterion of the issue its own row in the template's evidence table.
   Each row names the check, the result, and the evidence kind: automated, observed live, or Sam's hardware check.
 
+## Take the live-test lock
+
+Several agent threads can test on Sam's Mac at once, and they share one desktop.
+A live run in one thread moves the windows that another thread measures.
+On 28 October 2026, one thread moved a display during another thread's probe run, and that run's results were lost.
+
+A live run is any step that changes the real desktop:
+
+- launching, quitting, or replacing Miri Developer or its engine, including `make e2e` and `make check`
+- opening, moving, or closing windows, or sending shortcuts and engine commands
+- changing the display arrangement, the Dock, or the input source
+
+Reading `query state`, logs, or the AX tree is not a live run.
+
+Hold the lock for every live run with `scripts/live-lock.py`.
+The lock is the file `/tmp/miri-live.lock`.
+
+```sh
+scripts/live-lock.py status
+scripts/live-lock.py take --owner "<thread name and id>" --minutes 30 --task "<what the run does on the desktop>"
+scripts/live-lock.py release --owner "<thread name and id>"
+```
+
+1. Run `status` right before each live round, not once per session.
+   If another run holds the lock, wait, and do not open or move windows in the meantime.
+2. Run `take` with an owner that names your thread, the minutes the run needs, and what the run does.
+3. If the run needs more time, run `take` again with the same owner before the lock expires.
+   This renews the lock.
+4. When the run ends, also after a failure, relaunch the Miri Developer build that ran before, and run `release`.
+
+`make e2e` takes the lock itself and stops at once if another run holds it.
+If your thread already holds the lock, pass its owner: `make e2e LIVE_LOCK_OWNER="<thread name and id>"`.
+
+An expired lock means its holder stopped without releasing it.
+`take` replaces an expired lock and prints the lock it replaced.
+A lock written by hand without an `expires:` line expires 60 minutes after its last change.
+Never delete a lock that another run holds and that has not expired.
+
+The lock does not cover Sam.
+If Sam is using the Mac, ask before a live run.
+A small `HIDIdleTime` in `ioreg -c IOHIDSystem` shows recent keyboard or trackpad use.
+
 ## Capture evidence
 
 Window evidence must never show Sam's desktop.

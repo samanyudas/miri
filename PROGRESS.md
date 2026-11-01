@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `chore/pr-evidence`, based on `main` at `1e250b86`
+Updated: 2026-11-01 on branch `chore/live-test-lock`, based on `main` at `97672bc7`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -998,6 +998,9 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 
 ## Done
 
+- `chore/live-test-lock` moves the live-test lock from agent memory into the repository.
+  `scripts/live-lock.py` takes, renews, checks, and releases `/tmp/miri-live.lock`, and an expired lock no longer blocks other runs.
+  `make e2e` holds the lock while the selftests run, and [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#take-the-live-test-lock) says when a run needs it.
 - `chore/pr-evidence` adds an acceptance evidence table to the PR template, with one row per acceptance criterion.
   [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#capture-evidence) now says how to capture window evidence without showing the desktop.
   The pre-push hook runs `scripts/check-pushed-media.py`, which rejects new commits that add a recording, or an image outside `assets/` and `Sources/`.
