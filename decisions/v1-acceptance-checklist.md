@@ -18,7 +18,7 @@ Run on whichever setup is available, with at least 5 windows per strip.
    No other strip changes its scroll position or focus.
 3. Move focus and a window to the other display in both directions.
 4. Unplug and replug the external display 3 times.
-   No window is lost, and strips return when macOS returns their Space.
+   No window is lost, and each window that left a display returns to it in its old order and stack.
 5. Close and open the lid once with an external display connected.
 6. Sleep and wake 3 times.
 7. Force-quit the engine once.
@@ -74,7 +74,7 @@ The release candidate build must pass 3 consecutive full runs.
 7. Unplug a display that shows a native fullscreen window.
 
 After each change, every window remains reachable.
-Strips return to their display when macOS returns their Space.
+Each window that left a display returns to it in its old order and stack, and other windows keep their place, as [Display changes](release-scope.md#display-changes) describes.
 
 ### Engine recovery
 

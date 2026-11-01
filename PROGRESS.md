@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `fix/147-locked-screen-handles`, based on `main` at `a3001115`
+Updated: 2026-11-01 on branch `docs/stale-status-claims`, based on `main` at `fabf16d4`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -10,8 +10,8 @@ Update it at the end of every session and in any PR that changes what is done or
 
 Reach a working v1 app that manages windows through the bundled engine, as defined in [release scope](decisions/release-scope.md).
 The app foundation, engine integration, configuration, default shortcuts, shortcut customization, and gesture controls are merged.
-The current milestone is the remaining v1 features: pointer-versus-focus gesture targeting and drag insertion into a stack.
-The stack limit and stack overflow are built and await their hardware checks.
+The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
+Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
 
 ## Pointer drop target
@@ -31,16 +31,16 @@ Sam's real-trackpad check is still open.
 
 ## CI speed
 
-[#184](https://github.com/samanyudas/miri/issues/184) tracks making CI fast enough for agent iteration, one PR per change.
+[#184](https://github.com/samanyudas/miri/issues/184), now closed, tracked making CI fast enough for agent iteration, one PR per change.
 On 30 and 31 October the macOS job took 8 to 15 minutes, and runners started within 4 s.
 The engine test binary alone took 403 to 620 s, and every run compiled the engine dependencies from nothing three times.
 GitHub's macOS runner gives Bevy one compute thread, against four on Sam's Mac, so the engine tests run far slower there.
 
 - [#185](https://github.com/samanyudas/miri/pull/185) caches engine build artifacts, saved only from `main`. A warm run took Clippy from 103 s to 28 s and the engine build from 176 s to 46 s.
 - [#186](https://github.com/samanyudas/miri/pull/186) skips the macOS job for documentation-only pull requests, verified in CI with throwaway #187.
-- [#188](https://github.com/samanyudas/miri/pull/188) adds a pre-push hook for the fast checks. After it merges, run `make setup` or `git config core.hooksPath .githooks` once.
+- [#188](https://github.com/samanyudas/miri/pull/188) adds a pre-push hook for the fast checks. Run `make setup` or `git config core.hooksPath .githooks` once to turn it on.
 - [#191](https://github.com/samanyudas/miri/pull/191) treats Swift warnings as errors.
-- Optimizing engine dependencies in the dev profile cut the local engine tests from 415 s to 99 s. Its PR is next.
+- Optimizing engine dependencies in the dev profile cut the local engine tests from 415 s to 99 s, in [#194](https://github.com/samanyudas/miri/pull/194).
 - The macOS job is split into four parallel jobs: Swift, engine lint, engine tests, and the app build with selftests and packaging. The engine tests job is the slowest.
 
 ## Rust 1.99
@@ -55,6 +55,7 @@ On 31 October, Miri Developer built with 1.99.0 restored all 14 windows, answere
 
 [#137](https://github.com/samanyudas/miri/issues/137) is implemented in [engine PR #96](https://github.com/samanyudas/paneru/pull/96), merged as `3cb2fa0` with no change from the tested tree.
 This branch pins `3cb2fa0`.
+Sam decided on 1 November 2026 that this sync was a one-off, so the release-tag rule in [ADR 0003](docs/adr/0003-bundle-a-pinned-paneru-engine.md) stays.
 It brings the 8 upstream `main` commits up to `425d37a` that `miri/v0.5.2` lacked, as a merge commit so later syncs keep upstream ancestry.
 Sam chose on 31 October to take all 8.
 With Miri's settings, the visible changes are lower idle CPU (`cc55f94`) and a stray-tab check that no longer queries every app each second (`425d37a`).
@@ -150,7 +151,7 @@ The engine now waits for the unlock before it starts the 1 s wait for a window's
 On 1 November on Sam's Mac, a sleep and wake on Sam's daily build dropped the 3 windows on the built-in display, and a screen lock with no sleep made every AX read fail until the unlock.
 On the fix build, a sleep and wake kept all 16 windows, and the 2 windows on the built-in display kept their order on its new Space.
 A lid close with the external display connected, which does not sleep, kept all 14 windows on the daily build.
-Stacks across a lid close or a sleep are not checked yet, so #142 stays open for that check.
+Stacks across a lid close or a sleep were not checked in these runs. Later on 1 November, a lid close and a sleep and wake with stacks on both displays kept every stack, and #142 closed.
 Off-screen windows during a lock may still drop through two other engine paths, which [#210](https://github.com/samanyudas/miri/issues/210) tracks.
 
 ## Side-by-side displays
@@ -1196,10 +1197,10 @@ Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
 
 1. Finish the remaining v1 features.
-   - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings.
-   - Complete drag and restoration acceptance for #43.
+   - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings (#212).
+   - Run Sam's real-trackpad check of the pointer drop target (#203).
      The #58 height defect is fixed and closed.
-   - Complete stack overflow acceptance (S-5) and repeat the verified stack-limit behavior on the frozen release candidate (S-7).
+   - Run the stack overflow (S-5) and stack limit (S-7) hardware checks, and record them against the frozen release candidate.
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
    Integrate Sparkle updates, then production signing, notarization, the release DMG, and the Homebrew cask.

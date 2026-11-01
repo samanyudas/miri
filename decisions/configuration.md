@@ -41,7 +41,9 @@ Paneru v0.5.2 has no `gap_inner` or `gap_outer` configuration keys.
 Its outer padding has separate top, right, bottom, and left fields.
 Its per-window padding contributes on both sides of adjacent windows.
 The accepted eight-point gap behavior remains unchanged.
-The app implements this mapping, but no one has checked the resulting coordinates on screen.
+The app implements this mapping.
+A live run on 15 October 2026 showed 8-point gaps on all sides and between windows on the built-in display.
+A native check for [#28](https://github.com/samanyudas/miri/issues/28) on 18 October 2026 measured 8-point gaps between four windows.
 The app provisionally accepts gaps from 0 to 32 points.
 The final Miri validation range is not yet selected.
 
@@ -50,8 +52,7 @@ The fourth width preset is `0.66`.
 [Release scope](release-scope.md#default-shortcuts-and-layout) defines the accepted new-window width and resize increment.
 Paneru's width rules also apply to existing windows discovered at startup.
 The new-window-only width behavior therefore requires integration beyond a blanket width rule.
-Paneru's grow and shrink commands select presets instead of applying a fixed increment.
-Miri must implement the accepted incremental behavior through its integration.
+Miri binds the engine's `window_step_grow` and `window_step_shrink`, which change the width by `window_resize_step` of the display, 0.05 by default.
 
 ## Layout behavior and remaining controls
 
@@ -130,7 +131,7 @@ The gesture test result is app state outside the file, so a file edit cannot mar
 The effect of `vertical = false` on Mission Control and App Exposé swipes still needs hardware verification.
 
 The accepted strip target for trackpad scrolling and keyboard commands is in [Multiple monitors](release-scope.md#multiple-monitors).
-Paneru's trackpad behavior needs verification and may require an engine patch.
+The pinned engine moves the strip on the display whose menu bar is active, so the pointer target and the setting need an engine change that is not built yet ([#212](https://github.com/samanyudas/miri/issues/212)).
 The inspected swipe path selects the active workspace rather than a strip from pointer coordinates.
 Miri's accepted pointer-target and focused-target behavior remains required integration work.
 
@@ -141,7 +142,8 @@ The setup experience is recorded in [Setup](setup.md).
 Strip motion should follow the display refresh rate.
 Configurable spring duration and damping are deferred to v2.
 V1 follows the Reduce Motion and disable-animation behavior in [V1 interactions](release-scope.md#v1-interactions).
-The file key and engine mechanism for this behavior require verification.
+The **Animate window movement** switch in Settings > General writes `[miri].animations`.
+When the switch is off or Reduce Motion is on, Miri removes `[options].animation_speed`, and the engine then moves windows instantly.
 The following option names, values, and behavior require validation in Miri before adoption.
 
 | Proposed option | Proposed default | Behavior |
@@ -169,8 +171,7 @@ Windows on excluded displays would retain manual positioning.
 Each managed display and native Space retains its own strip.
 macOS System Settings controls display arrangement, scaling, resolution, and Spaces.
 Display changes follow the accepted behavior in [Release scope](release-scope.md).
-Display-edge snapping and hiding a window after it slides halfway off remain candidate mechanisms.
-Their relationship and suitability for Miri require verification, as recorded in [Setup](setup.md#arrange-and-select-displays).
+The engine keeps a sliver of each hidden column at a free display edge, as [Setup](setup.md#arrange-and-select-displays) describes.
 
 ## Shortcut configuration
 
@@ -178,7 +179,7 @@ Use the settings recorder for ordinary edits.
 Allow several bindings per action and preserve user bindings across upgrades.
 Conflict handling during recording follows [Binding customization](keybinding%20reference.md#binding-customization).
 The selected defaults are in [Keybinding reference](keybinding%20reference.md).
-Actions not covered there use Paneru's defaults, changed only where they clash with macOS.
+Actions not covered there have no default shortcut, because Paneru's default configuration binds no keys.
 
 Miri writes the default set to `[bindings]`, with the engine's command names as keys and its chord syntax as values.
 The engine reads each key as command words split on `_`, so `window_focus_3` means `window focus 3`.
@@ -189,7 +190,7 @@ A short excerpt of the written table follows.
 
 ```toml
 [bindings]
-window_focus_west = ["ctrl+alt-leftarrow", "ctrl+alt-h"]
+window_focus_west = ["ctrl+alt-leftarrow", "ctrl+alt-h", "ctrl+alt-a"]
 window_focus_3 = "ctrl+alt-3"
 window_step_grow = "ctrl+alt-equal"
 window_stack_west = "ctrl+alt-leftbracket"

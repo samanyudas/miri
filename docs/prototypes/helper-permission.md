@@ -9,7 +9,7 @@ Its observations do not establish Developer ID or notarized-release behavior.
 
 ## Build the packaged prototype
 
-Use an arm64 Mac with macOS 27, Swift 6.2 or newer, Rust 1.95 or newer, Cargo, Python 3, and Xcode command-line tools.
+Use an arm64 Mac with macOS 27, Xcode 27 with Swift 6.2 or newer, rustup with the pinned Rust 1.99.0, and Python 3.11 or newer.
 
 ```sh
 git submodule update --init --recursive

@@ -1,7 +1,7 @@
 # Keybinding reference
 
 Status: accepted as Miri's default bindings on 14 October 2026.
-Actions this reference does not cover use Paneru's defaults, changed only where they clash with macOS.
+Actions this reference does not cover have no default shortcut, because Paneru's default configuration binds no keys.
 
 These bindings define Miri's default set for new installations.
 Miri writes them to `[bindings]` from one table in `Sources/MiriCore/Bindings.swift`.
@@ -80,11 +80,13 @@ The arriving column goes immediately after the destination's active column, whic
 With destination columns X, Y, and Z and Y active, moving column S there gives X, Y, S, Z.
 An empty destination receives the column as its first column.
 When no display lies in the requested direction, the shortcut does nothing, so a column or focus stays at the current display's end.
+On 1 November 2026, Sam decided that Focus column left or right and Move column left or right also cross at the strip's end ([#104](https://github.com/samanyudas/miri/issues/104)).
+That crossing is not built yet.
 
 Display directions follow the physical arrangement in **System Settings > Displays**.
 Focus and movement within a column stay on the current display at the column's top or bottom edge.
-Only the monitor shortcuts, the edge-or-monitor shortcuts at a display's end, and ⌃⌥N cross to another display.
-[Release scope](release-scope.md#multiple-monitors) requires this split, which settles the question in miri#23.
+Today only the monitor shortcuts, the edge-or-monitor shortcuts at a display's end, and ⌃⌥N cross to another display.
+The accepted #104 behavior will also let plain horizontal focus and move cross at the strip's end, as [Release scope](release-scope.md#multiple-monitors) records.
 Stop window manager runs the same Stop as the menu bar, and Miri registers it itself.
 Its shortcuts are customizable and live in `[miri].stop_shortcut`, as one chord string or an array of chord strings in the engine's syntax.
 An absent key means ⌃⌥Q, and an empty array means Stop has no shortcut.
@@ -158,7 +160,7 @@ Clicking a window on another display also changes focus.
 
 ## Engine mapping
 
-This table maps each accepted action to the command that the pinned engine `ec7fc7c` runs.
+This table maps each accepted action to the command that the pinned engine runs.
 The mapping describes commands and their expected behavior.
 [PROGRESS.md](../PROGRESS.md) records runtime and hardware checks.
 A blank engine command means that Miri leaves the action unbound.
@@ -232,7 +234,9 @@ Offer an explicit action to switch to the current default set.
 ## Actions without selected bindings
 
 This default set does not assign bindings for cycling presets backward, expanding to available width, centering all visible columns, or pulling a neighboring window into the focused column.
-Actions not covered here use Paneru's defaults, changed only where they clash with macOS.
+Paneru's default configuration binds no keys.
+Cycling presets backward is the engine's `window_resize_shrink`, which a user can bind in `config.toml`.
+The pinned engine has no command for the other three actions.
 
 V1 has no dedicated binding to switch focus between floating and tiled windows.
 Users can click a window or use macOS app and window switching.

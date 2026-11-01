@@ -19,7 +19,7 @@ Keep column order, widths, stacks, focus, and scroll position independent betwee
 Restore column order, widths, stacks, and maximized windows after restarting.
 
 Keep scrolled windows on their assigned displays without macOS relocating them.
-Verify the edge-handling mechanism on real hardware before selecting an implementation.
+The engine keeps a sliver of each hidden column at a free display edge, and tucks it past a free bottom corner at an edge shared with another display.
 See [Display arrangement and edge behavior](setup.md#arrange-and-select-displays).
 
 When focus changes, scroll far enough to reveal the focused window.
@@ -44,7 +44,7 @@ Advanced per-app rules for floating and strip placement are deferred to v2.
 ## Support keyboard, trackpad, and mouse input
 
 Use Control-Option as the default keyboard modifier.
-Support both arrow keys and Vim keys.
+Support the arrow keys, Vim keys, and W, A, S, and D for every directional action.
 Add Shift to directional bindings to move windows rather than change focus.
 
 Let users record new shortcuts and assign multiple bindings to an action.
@@ -149,7 +149,6 @@ Their syntax and supported actions remain unresolved.
 ## Open decisions
 
 - Define tab-bar click behavior and drag behavior for v2.
-- Select and verify the display-edge handling mechanism on real hardware.
 - Choose the shortcuts taught on first run and the minimap fade timing for v2.
 - Define Miri's automation interface before implementation.
 - Verify animation, focus, gesture, and window-rule behavior in Miri before treating proposals as tested behavior.

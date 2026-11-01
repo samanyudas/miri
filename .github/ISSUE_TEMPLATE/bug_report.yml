@@ -34,7 +34,7 @@ body:
     id: version
     attributes:
       label: Miri version or commit
-      placeholder: 0.1.0, or the commit you built
+      placeholder: The commit you built, such as fabf16d4
     validations:
       required: true
   - type: input
@@ -54,5 +54,5 @@ body:
     id: diagnostics
     attributes:
       label: Diagnostics or logs
-      description: Paste Copy diagnostics output if your version has it. Remove anything private first.
+      description: Paste the Copy Diagnostics output. Remove anything private first.
       render: text
