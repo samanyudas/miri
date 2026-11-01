@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `fix/215-dock-refresh`, based on `main` at `c0f79e29`
+Updated: 2026-11-01 on branch `fix/215-dock-frame`, based on `main` at `27951b99`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -24,7 +24,9 @@ The Dock's own notifications arrive 0.1 to 1 s before `NSScreen.visibleFrame` ch
 Live on 1 November, windows on the 2560x1440 display went from 1402 to 1324 points tall when the Dock showed at its bottom, and back when it hid, without a restart.
 With the Dock moved to the left of the built-in display, a maximized window there went from 2040 points wide at x -2044 to 1962 wide at x -1966, beside the Dock.
 Sol reviewed the engine PR in 3 rounds and approved it.
-Hiding the Dock with `killall Dock` left macOS reporting the old Dock area, with no notification, in 2 of 3 tries. Toggling the Dock in System Events cleared it.
+macOS can also publish a Dock change late or never: after a size change every process read the old work area for 7 s, and a hiding `killall Dock` could leave the old Dock area reserved.
+[Engine PR #108](https://github.com/samanyudas/paneru/pull/108), which this branch pins at `6bc0ec8`, therefore also reads the Dock's own icon-list frame and auto-hide preference, 0.5 s and 2 s after the Dock reports a change. macOS's work area wins while the two agree within 8 points.
+Live on 1 November with that engine, a Dock at size 0.7 gave 1282-point windows while macOS still reported the old area, and a hiding `killall Dock` gave full-height windows while macOS kept the stale area.
 #87's remaining criteria passed live on 1 November: Window > Zoom, Make column full width, a Dock known at startup, and a built-in display at 2x beside a 1x display.
 
 ## Pointer drop target
