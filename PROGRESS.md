@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `docs/85-verification`, based on `main` at `64527443`
+Updated: 2026-11-02 on branch `chore/verify-miri-skill`, based on `main` at `38b851c8`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -25,6 +25,17 @@ The skill lists all four under Known findings.
 Three come from one cause: for up to 3 seconds after a stop begins, `engineState` stays `.running`, and a restart in that time queues a `start` that no later Stop or Quit removes.
 The fourth is the status after Restart from a failed engine while a setup check blocks start.
 Next: Sam picks the fixes for #234, #235, and #236.
+
+## Live verification skill
+
+Branch `chore/verify-miri-skill` adds the project skill `.claude/skills/verify-miri/`.
+Its `verify-miri` command takes the live-test lock, backs up the window session, swaps in a test build, and puts back Sam's build and session afterwards.
+It drives shortcuts at the HID event tap, presses Settings controls through Accessibility, and opens AXFixture windows as tiled columns.
+Evidence stays in `~/.cache/miri/verify-miri/runs/`, outside the repository.
+AXFixture gained the opt-in options `--label`, `--resizable`, and `--activate`, and the selftests still use its default window.
+A run on 2026-11-02 at `main` 38b851c8 proved that ⌃⌥←, ⌃⌥→, ⌃⌥H, and ⌃⌥L move focus between two fixture columns, in both the engine and macOS, and `make e2e` passed in the same run.
+The feature map also lists recipes for the Start, Stop, and Restart controls, setup checks, and shortcut customization, which no `verify-miri` run has driven yet.
+Next: drive those recipes with `verify-miri` and record each result in `features/README.md`.
 
 ## Initial setup
 
