@@ -9,6 +9,7 @@ import ServiceManagement
     static let stoppedKey = "managementStopped"
     static let setupPollInterval: Duration = .seconds(2)
     static let gestureVerificationKey = "gestureVerification"
+    static let initialSetupKey = "initialSetupDone"
     /// How often Miri rereads the macOS gesture settings while a strip swipe is selected.
     static let gesturePollInterval: Duration = .seconds(5)
 
@@ -214,6 +215,21 @@ import ServiceManagement
         }
         dropStaleGestureVerification()
         applyGestureFingers()
+    }
+
+    // MARK: Initial setup
+
+    /// Launch arguments win over saved defaults, so `-initialSetupDone NO` shows setup again after it was finished.
+    var needsInitialSetup: Bool { !defaults.bool(forKey: Self.initialSetupKey) }
+
+    func finishInitialSetup() {
+        defaults.set(true, forKey: Self.initialSetupKey)
+    }
+
+    /// Selects four fingers unless the user already chose a finger count. This alone does not turn the swipe on. Only
+    /// a confirmed gesture test, or a saved one that still matches, turns it on.
+    func recommendStripGesture() {
+        if settings.stripGesture == .off { update { $0.stripGesture = .four } }
     }
 
     // MARK: Strip gestures

@@ -2,50 +2,29 @@ import AppKit
 import MiriCore
 import SwiftUI
 
-/// The strip swipe choice, its status, and the gesture test.
+/// Settings > Gestures adds the reverse toggle and the gesture change report to the shared strip swipe controls.
 struct GestureSettings: View {
     let model: AppModel
-    @State private var testing = false
     @State private var confirmingReport = false
 
     var body: some View {
         Form {
             ConfigurationIssueBanner(model: model)
-            Section {
-                Picker("Strip swipe", selection: setting(\.stripGesture)) {
-                    Text("Off").tag(StripGesture.off)
-                    Text("Three fingers").tag(StripGesture.three)
-                    Text("Four fingers (recommended)").tag(StripGesture.four)
-                }
-                Toggle("Reverse swipe direction", isOn: setting(\.reverseSwipe))
-            } footer: {
-                Text(
-                    "Swipe left or right on the trackpad to slide the windows. The strip follows your fingers unless you reverse it."
-                )
-                .foregroundStyle(.secondary)
-            }
-            Section {
-                GestureStatusRow(model: model)
-                HStack {
-                    Button("Test Gesture…") { testing = true }
-                        .disabled(model.gestureTestBlocker != nil)
-                    Spacer()
-                    Button("Report a macOS Gesture Change") { confirmingReport = true }
-                        .disabled(model.gestureVerification == nil)
-                }
-                if let blocker = model.gestureTestBlocker, model.settings.stripGesture != .off {
-                    Text(blocker).foregroundStyle(.secondary)
-                }
-            } footer: {
-                Text(
+            StripSwipeSections(
+                model: model,
+                choiceFooter:
+                    "Swipe left or right on the trackpad to slide the windows. The strip follows your fingers unless you reverse it.",
+                testFooter:
                     "Miri turns the swipe on only after you test it and confirm that the strip followed your fingers. Keyboard shortcuts work either way. Miri never changes macOS settings."
-                )
-                .foregroundStyle(.secondary)
+            ) {
+                Toggle("Reverse swipe direction", isOn: setting(\.reverseSwipe))
+            } testAccessory: {
+                Button("Report a macOS Gesture Change") { confirmingReport = true }
+                    .disabled(model.gestureVerification == nil)
             }
         }
         .formStyle(.grouped)
         .onAppear { model.refreshSetup() }
-        .sheet(isPresented: $testing) { GestureTestSheet(model: model) }
         .confirmationDialog("Report a macOS gesture change?", isPresented: $confirmingReport) {
             Button("Report Change") { model.reportGestureChange() }
         } message: {
@@ -55,6 +34,56 @@ struct GestureSettings: View {
 
     private func setting<Value>(_ key: WritableKeyPath<MiriSettings, Value>) -> Binding<Value> {
         Binding(get: { model.settings[keyPath: key] }, set: { value in model.update { $0[keyPath: key] = value } })
+    }
+}
+
+/// The finger count choice, the swipe status, and the gesture test, shared by Settings and initial setup.
+struct StripSwipeSections<ChoiceAccessory: View, TestAccessory: View>: View {
+    let model: AppModel
+    let choiceFooter: LocalizedStringKey
+    let testFooter: LocalizedStringKey
+    @ViewBuilder let choiceAccessory: ChoiceAccessory
+    @ViewBuilder let testAccessory: TestAccessory
+    @State private var testing = false
+
+    var body: some View {
+        Section {
+            Picker(
+                "Strip swipe",
+                selection: Binding(
+                    get: { model.settings.stripGesture }, set: { value in model.update { $0.stripGesture = value } })
+            ) {
+                Text("Off").tag(StripGesture.off)
+                Text("Three fingers").tag(StripGesture.three)
+                Text("Four fingers (recommended)").tag(StripGesture.four)
+            }
+            choiceAccessory
+        } footer: {
+            Text(choiceFooter).foregroundStyle(.secondary)
+        }
+        Section {
+            GestureStatusRow(model: model)
+            HStack {
+                Button("Test Gesture…") { testing = true }
+                    .disabled(model.gestureTestBlocker != nil)
+                Spacer()
+                testAccessory
+            }
+            .sheet(isPresented: $testing) { GestureTestSheet(model: model) }
+            if let blocker = model.gestureTestBlocker, model.settings.stripGesture != .off {
+                Text(blocker).foregroundStyle(.secondary)
+            }
+        } footer: {
+            Text(testFooter).foregroundStyle(.secondary)
+        }
+    }
+}
+
+extension StripSwipeSections where ChoiceAccessory == EmptyView, TestAccessory == EmptyView {
+    init(model: AppModel, choiceFooter: LocalizedStringKey, testFooter: LocalizedStringKey) {
+        self.init(
+            model: model, choiceFooter: choiceFooter, testFooter: testFooter, choiceAccessory: { EmptyView() },
+            testAccessory: { EmptyView() })
     }
 }
 

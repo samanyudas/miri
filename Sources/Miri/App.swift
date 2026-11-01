@@ -29,6 +29,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Arguments that start with a single dash are user defaults overrides, such as `-managementStopped YES`.
         guard let command = arguments.first, command.hasPrefix("--") else {
             model.launch()
+            if model.needsInitialSetup {
+                model.recommendStripGesture()
+                presenter.show(.initialSetup)
+            }
             return
         }
         runSelftest(arguments)
