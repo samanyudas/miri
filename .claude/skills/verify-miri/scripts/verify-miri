@@ -6,7 +6,7 @@ A run swaps the running Miri Developer for a test build, drives it, and puts eve
   verify-miri doctor                         read-only health check, safe at any time
   verify-miri begin --owner "<thread>"       take the live-test lock, back up the window session, launch the test build
   verify-miri <drive commands>               fixture, key, snapshot, focused, ax, settings, standin, watch, query, send-cmd
-  verify-miri end                            quit the test build, restore the session, relaunch the previous build, release the lock
+  verify-miri end --owner "<thread>"         quit the test build, restore the session, relaunch the previous build, release the lock
 
 .claude/skills/verify-miri/SKILL.md explains each step. Evidence stays in ~/.cache/miri/verify-miri/runs/<run id>/.
 """
@@ -144,6 +144,15 @@ def load_run(required: bool = True) -> dict | None:
             raise Failure("No run is in progress. Start one with `verify-miri begin --owner \"<thread>\"`.")
         return None
     return json.loads(CURRENT.read_text())
+
+
+def load_own_run(owner: str) -> dict:
+    """The current run, only for the thread that began it. The run record is shared by every thread on this Mac."""
+    run = load_run()
+    if run["owner"] != owner:
+        raise Failure(f"The run in progress belongs to {run['owner']!r}, not {owner!r}. Only its owner may end or renew it. "
+                      "Wait for the live-test lock, then begin your own run.")
+    return run
 
 
 def save_run(run: dict) -> None:
@@ -377,8 +386,8 @@ def cmd_doctor(args) -> int:
         print(f"info  run in progress: {run['dir']} (owner {run['owner']})")
         pid = run.get("test_pid")
         report(bool(pid) and any(a["pid"] == pid for a in apps), f"the running app is this run's test build (pid {pid})",
-               "Something replaced the test build. Run `verify-miri end`, then `begin` again.")
-        report(run["owner"] in lock_text, "this run holds the live-test lock", "Renew it with `verify-miri renew`.")
+               "Something replaced the test build. Run `verify-miri end --owner` with this run's owner, then `begin` again.")
+        report(run["owner"] in lock_text, "this run holds the live-test lock", "Renew it with `verify-miri renew --owner` and the run's owner.")
     if apps and len(apps) == 1:
         try:
             active = query("active", apps[0]["pid"])
@@ -393,8 +402,10 @@ def cmd_doctor(args) -> int:
 
 
 def cmd_begin(args) -> int:
-    if load_run(required=False):
-        raise Failure(f"A run is in progress ({load_run()['dir']}). Finish it with `verify-miri end` first.")
+    if running := load_run(required=False):
+        raise Failure(f"A run by {running['owner']!r} is in progress ({running['dir']}). "
+                      "If it is yours, finish it with `verify-miri end --owner` and your owner. "
+                      "If not, wait for the live-test lock, and never end it.")
     bundle = normal(str(Path(args.app).resolve()))
     if not Path(bundle, "Contents/MacOS/Miri").exists():
         raise Failure(f"No app at {bundle}. Run `make build` in the checkout, or pass --app.")
@@ -428,7 +439,7 @@ def cmd_begin(args) -> int:
     if apps:
         log(run, f"previous build: pid {apps[0]['pid']} from {apps[0]['bundle']}")
         if not quit_app(apps[0]["pid"], run, "previous build"):
-            raise Failure("The previous build did not quit. Run `verify-miri end` to put it back.")
+            raise Failure("The previous build did not quit. Run `verify-miri end --owner` with your owner to put it back.")
     else:
         log(run, "no Miri Developer was running before this run")
     # The engine saves the session when it exits, so the backup comes after the quit.
@@ -440,8 +451,8 @@ def cmd_begin(args) -> int:
     return 0
 
 
-def cmd_end(_args) -> int:
-    run = load_run()
+def cmd_end(args) -> int:
+    run = load_own_run(args.owner)
     problems = []
     folder = Path(run["dir"])
     for item in run.get("fixtures", []) + run.get("standins", []):
@@ -463,7 +474,7 @@ def cmd_end(_args) -> int:
             log(run, f"STILL RUNNING: {p['kind']} pid {p['pid']} from {p['bundle']}")
         log(run, "PROBLEM: a Miri process still runs, and it can overwrite the session when it exits. "
                  "The session was not restored, the previous build was not relaunched, and the lock stays held. "
-                 "Stop the process that this run started, then run `verify-miri end` again.")
+                 "Stop the process that this run started, then run `verify-miri end --owner` with this run's owner again.")
         return 1
     backup = folder / "backup/state.json"
     if backup.exists():
@@ -491,7 +502,7 @@ def cmd_end(_args) -> int:
 
 
 def cmd_renew(args) -> int:
-    run = load_run()
+    run = load_own_run(args.owner)
     result = lock("take", "--owner", run["owner"], "--minutes", str(args.minutes), "--task", "verify-miri run, renewed")
     log(run, (result.stdout + result.stderr).strip())
     return result.returncode
@@ -701,8 +712,11 @@ def main() -> int:
     p.add_argument("--task", default="verify-miri: swap in a test build of Miri Developer, open AXFixture windows, send shortcuts")
     p.add_argument("--app", default=default_app, help="the Miri Developer.app bundle to test")
     p.set_defaults(func=cmd_begin)
-    sub.add_parser("end", help="quit the test build, restore the session, relaunch the previous build, unlock").set_defaults(func=cmd_end)
+    p = sub.add_parser("end", help="quit the test build, restore the session, relaunch the previous build, unlock")
+    p.add_argument("--owner", required=True, help="the owner that began the run")
+    p.set_defaults(func=cmd_end)
     p = sub.add_parser("renew", help="extend the live-test lock")
+    p.add_argument("--owner", required=True, help="the owner that began the run")
     p.add_argument("--minutes", type=int, default=30)
     p.set_defaults(func=cmd_renew)
     p = sub.add_parser("fixture", help="open AXFixture windows that the run owns")

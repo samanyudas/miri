@@ -18,6 +18,8 @@ Every command below runs from the repository root of the checkout you test.
   Two builds cannot run side by side, because they share the engine's Mach service, the window session file, and user defaults.
   A run therefore replaces Sam's running build, and must put it back.
 - Every drive runs between `V begin` and `V end`.
+  `end` and `renew` take the same `--owner` as `begin`, and refuse a run that another thread owns, because the run record is shared by every thread on this Mac.
+  When `begin` fails because another thread's run is in progress, wait for the lock. Never run `end` for it.
   `begin` takes the [live-test lock](../../../docs/AI-CONTRIBUTIONS.md#take-the-live-test-lock), backs up the window session, and swaps in the test build.
   `end` puts back the session and Sam's build, and releases the lock.
   Run `end` also after a failure.
@@ -52,7 +54,7 @@ Every command below runs from the repository root of the checkout you test.
 
 When the test build starts no engine, `begin` fails with the Settings status.
 The usual causes are a saved Stop (`managementStopped = 1`) or a setup check that blocks start.
-Run `V end` at once in that case.
+Run `V end --owner "<thread name and id>"` at once in that case.
 
 ## Doctor
 
@@ -83,7 +85,7 @@ Each drive command logs to `<run>/log.txt` with a timestamp.
 | `V watch 12` | Logs every Miri app and engine start and exit for 12 seconds, at 50 ms intervals. Start it in the background before a fast sequence. |
 | `V query active` | Prints engine state. Window titles can be private. Never paste titles other than the fixtures'. |
 | `V send-cmd window focus first` | Sends an engine command, for setup only. |
-| `V renew --minutes 15` | Extends the lock for a long run. |
+| `V renew --owner "<thread>" --minutes 15` | Extends the lock for a long run. |
 
 Use stable handles:
 
@@ -108,7 +110,7 @@ Report that as a failure. Do not wait longer or retry until it passes.
 
 ## Cleanup
 
-`V end` does these steps, and continues past a failed step:
+`V end --owner "<thread name and id>"` does these steps, and continues past a failed step:
 
 1. Stops the fixtures and stand-ins this run started, by recorded process ID.
 2. Quits the test build with SIGTERM and waits for its engine to exit.
