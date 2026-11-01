@@ -27,6 +27,16 @@ bin=$(swift build --show-bin-path)
 bundle="$PWD/.build/app/Miri Developer.app"
 rm -rf "$bundle"
 mkdir -p "$bundle/Contents/MacOS" "$bundle/Contents/Helpers" "$bundle/Contents/Resources"
+iconset="$PWD/.build/app/AppIcon.iconset"
+rm -rf "$iconset"
+mkdir "$iconset"
+for size in 16 32 128 256 512; do
+    sips -s format png -z "$size" "$size" assets/icon.svg --out "$iconset/icon_${size}x${size}.png" >/dev/null
+    sips -s format png -z $((size * 2)) $((size * 2)) assets/icon.svg --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
+done
+iconutil -c icns "$iconset" -o "$bundle/Contents/Resources/AppIcon.icns"
+rm -rf "$iconset"
+cp assets/menubar-icon.svg assets/menubar-icon-stopped.svg "$bundle/Contents/Resources/"
 cp "$bin/Miri" "$bundle/Contents/MacOS/Miri"
 cp vendor/paneru/target/debug/paneru "$bundle/Contents/Helpers/miri-engine"
 [[ "$(lipo -archs "$bundle/Contents/MacOS/Miri")" == arm64 ]]
@@ -41,6 +51,7 @@ cat > "$bundle/Contents/Info.plist" <<'PLIST'
 <key>CFBundleIdentifier</key><string>io.github.samanyudas.miri.dev</string>
 <key>CFBundleName</key><string>Miri Developer</string>
 <key>CFBundleDisplayName</key><string>Miri Developer</string>
+<key>CFBundleIconFile</key><string>AppIcon</string>
 <key>CFBundleExecutable</key><string>Miri</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleVersion</key><string>1</string>
