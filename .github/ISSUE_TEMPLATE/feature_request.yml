@@ -7,6 +7,8 @@ body:
       value: |
         Check [release scope](https://github.com/samanyudas/miri/blob/main/decisions/release-scope.md) and the [v2 roadmap](https://github.com/samanyudas/miri/blob/main/decisions/v2-roadmap.md) first.
         Some features are deliberately deferred.
+        Write the title as one plain sentence about what changes for the person using Miri, such as "Each display scrolls its own strip".
+        Do not file an issue without a real need and evidence for it.
   - type: textarea
     id: problem
     attributes:
@@ -20,6 +22,24 @@ body:
       label: Proposed behavior
     validations:
       required: true
+  - type: input
+    id: requested-by
+    attributes:
+      label: Requested by
+      description: Who asked for this, or the decision or issue it comes from.
+      placeholder: Sam, or decisions/release-scope.md, or #142
+    validations:
+      required: true
+  - type: dropdown
+    id: release
+    attributes:
+      label: Release
+      options:
+        - v1
+        - v2
+        - Undecided
+    validations:
+      required: true
   - type: textarea
     id: acceptance
     attributes:
@@ -27,6 +47,8 @@ body:
       description: Observable results that show the feature works. One per line.
       placeholder: |
         - With two displays, the strip on each display scrolls independently.
+    validations:
+      required: true
   - type: textarea
     id: alternatives
     attributes:

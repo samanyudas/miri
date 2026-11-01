@@ -1,0 +1,36 @@
+name: Decision or investigation
+description: A question to decide, or a symptom to explain, before anyone builds
+labels: [decision, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Write the title as one plain sentence about what changes for the person using Miri, such as "Decide whether new windows open beside the focused window".
+        Do not file an issue without a real need and evidence for it.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: The question to decide, or the symptom to explain. Include the evidence you have.
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options
+      description: The options or hypotheses, with the tradeoffs of each.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Where the answer gets recorded, such as a file in decisions/ or an ADR, and who decides. Sam decides product calls.
+      placeholder: |
+        - Sam records the decision in decisions/new-window-placement.md.
+    validations:
+      required: true
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Recommendation

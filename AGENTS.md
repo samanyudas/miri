@@ -52,6 +52,17 @@ Run cargo from the repository root so `rust-toolchain.toml` and `.cargo/config.t
 CI in `.github/workflows/ci.yml` runs the same make targets, with the macOS stages as parallel jobs.
 Fix what the pre-push hook reports instead of skipping it.
 
+## Issues
+
+- File an issue only with exactly one type label (`bug`, `enhancement`, `task`, or `decision`) and every required section of its template in `.github/ISSUE_TEMPLATE/`.
+  Write the title as one plain sentence about what changes for the person using Miri.
+  File a bug only after you reproduce it yourself on the surface a user sees, and report it to Sam if you cannot.
+- Before you change code for an issue, confirm that you can check each acceptance criterion.
+  For a bug, also reproduce it on the current `main` build.
+  If either check fails, comment with the gap, add `needs-info`, and stop.
+- [File an issue](CONTRIBUTING.md#file-an-issue) and [Take up an issue](CONTRIBUTING.md#take-up-an-issue) have the full rules.
+  The command guard reads the templates and blocks a `gh issue create` command that breaks these rules.
+
 ## Definition of done
 
 - The issue's acceptance criteria hold, and you observed them on the real artifact.

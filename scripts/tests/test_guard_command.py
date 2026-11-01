@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import subprocess
 import sys
@@ -68,6 +69,107 @@ class GuardCommandTest(unittest.TestCase):
         ]:
             with self.subTest(command=command):
                 self.assertEqual(self.decide(command), "allow")
+
+    def test_issue_create_needs_exactly_one_type_label(self):
+        for command in [
+            f"gh issue create -t Gap -b '{BUG}'",
+            f"gh issue create -t Gap -l needs-triage -b '{BUG}'",
+            f"gh issue create -t Gap -l bug,task -b '{BUG}'",
+            f"gh issue new -t Gap -l bug --label enhancement -b '{BUG}'",
+            f"gh issue create -t Gap --body-file - <<'EOF'\nSam's Mac.\n{BUG}\nEOF",
+        ]:
+            with self.subTest(command=command):
+                reason = self.decide(command)
+                self.assertIn("exactly one type label", reason)
+                self.assertIn("bug, decision, enhancement, task", reason)
+
+    def test_issue_create_names_each_missing_section(self):
+        blocked = {
+            "gh issue create -t Gap -l bug -b 'Windows overlap.'": "Missing: Steps to reproduce, Expected result, "
+            "Actual result, Acceptance criteria, Miri version or commit, macOS version and Mac model.",
+            f"gh issue create -t Gap -l bug -b '{BUG.replace('Actual result', 'Result')}'": "Missing: Actual result.",
+            f"gh issue create -t Strip -l enhancement -b '{FEATURE_WITHOUT_SOURCE}'": "Missing: Requested by, Release.",
+            "gh issue create -t Gap -l task -b '## Acceptance\n- works'": "Missing: Outcome, Acceptance criteria",
+            "bash -c 'gh issue create -t Gap -l decision -b nothing'": "Missing: Question, Options, Acceptance criteria.",
+        }
+        for command, reason in blocked.items():
+            with self.subTest(command=command):
+                decision = self.decide(command)
+                self.assertIn(reason, decision)
+                self.assertIn("See File an issue in CONTRIBUTING.md", decision)
+
+    def test_issue_create_allows_complete_issues_however_the_body_arrives(self):
+        for command in [
+            f"gh issue create -t Gap -l 'bug,needs-triage' -b '{BUG}'",
+            f"gh issue create -t Strip --label=enhancement --body '{FEATURE}'",
+            f"gh issue create -t Permission -l task -b '{TASK}'",
+            f"gh issue create -t Placement -l decision -l needs-triage -b '{DECISION}'",
+            f"gh issue create -t Gap -l bug --body \"$(cat <<'EOF'\n{BUG}\nEOF\n)\"",
+            f"gh issue create -t Gap -l bug --body-file - <<'EOF'\nSam's Mac.\n{BUG}\nEOF",
+            f"gh issue create -t Gap -l \"needs-triage, bug\" -F - <<'EOF'\nSam's Mac.\n{BUG}\nEOF",
+            f"gh issue create -t Permission -l task --body=\"{TASK_ESCAPED}\"",
+            "gh issue create --web",
+            "gh issue view 7 --comments",
+            "gh issue comment 7 --body 'Reproduced on main.'",
+            "gh issue edit 7 --add-label needs-info",
+        ]:
+            with self.subTest(command=command):
+                self.assertEqual(self.decide(command), "allow")
+
+        with tempfile.TemporaryDirectory() as directory:
+            Path(directory, "bug.md").write_text(BUG)
+            Path(directory, "vague.md").write_text("Windows overlap.\n")
+            self.assertEqual(self.decide("gh issue create -t Gap -l bug -F bug.md", directory), "allow")
+            self.assertIn("Missing: Steps to reproduce", self.decide("gh issue create -t Gap -l bug -F vague.md", directory))
+
+    def test_every_template_section_is_required(self):
+        for type_label, sections in template_sections().items():
+            body = "\n".join(f"### {section}\nFilled in.\n" for section in sections)
+            with self.subTest(type_label=type_label):
+                self.assertEqual(self.decide(f"gh issue create -t Title -l {type_label} -b '{body}'"), "allow")
+            for section in sections:
+                without = body.replace(f"### {section}\n", "")
+                with self.subTest(type_label=type_label, section=section):
+                    self.assertIn(f"Missing: {section}.", self.decide(f"gh issue create -t T -l {type_label} -b '{without}'"))
+
+
+def template_sections() -> dict[str, list[str]]:
+    spec = importlib.util.spec_from_file_location("guard_command", HOOK)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.issue_types()
+
+
+def sections(*pairs: str) -> str:
+    return "\n\n".join(f"### {pairs[i]}\n{pairs[i + 1]}" for i in range(0, len(pairs), 2))
+
+
+BUG = sections(
+    "Steps to reproduce", "1. Connect a second display.\n2. Press Control-Option-Command-D.",
+    "Expected result", "Every window stays on screen.",
+    "Actual result", "One window moves off-screen.",
+    "Acceptance criteria", "- Following the steps, every window stays reachable.",
+    "Miri version or commit", "fabf16d4",
+    "macOS version and Mac model", "macOS 27.0, MacBook Air M3",
+)
+FEATURE_WITHOUT_SOURCE = sections(
+    "Problem", "One strip spans both displays.",
+    "Proposed behavior", "Each display scrolls its own strip.",
+    "Acceptance criteria", "- With two displays, each strip scrolls alone.",
+)
+FEATURE = FEATURE_WITHOUT_SOURCE + "\n\n" + sections("Requested by", "Sam", "Release", "v2")
+TASK = sections(
+    "Outcome", "Miri names the missing permission at launch.",
+    "Acceptance criteria", "- make test passes.",
+    "Verification level", "make check",
+)
+TASK_ESCAPED = TASK.replace("\n", "\\n")
+DECISION = sections(
+    "Question", "Should new windows open beside the focused window?",
+    "Options", "Beside the focused window, or at the end of the strip.",
+    "Acceptance criteria", "- Sam records the answer in decisions/new-window-placement.md.",
+    "Recommendation", "Beside the focused window.",
+)
 
 
 if __name__ == "__main__":
