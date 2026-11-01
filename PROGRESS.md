@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `chore/verify-engine-lifecycle`, based on `main` at `bbe31c28`
+Updated: 2026-11-02 on branch `docs/85-verification`, based on `main` at `64527443`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -66,6 +66,10 @@ Live on Miri Developer, the same script ran on engine `68365bc` and on the fix, 
 It launches Miri twice, then picks the other display's second Space in Mission Control while focus stays put.
 Before the fix, the 5 restored windows and one throwaway Finder window per display were 0% on screen.
 With the fix, all of them showed, and 3 rounds of Space switches on each display passed.
+
+On landed `main` at `bbe31c28` with engine `ffe0673`, the script passed twice, and Sam's hand checks with Control-Arrow passed 14 switches on both displays.
+[#85](https://github.com/samanyudas/miri/issues/85) closed on 1 November.
+Sam chose not to pursue one unreproduced failure from their first hand check.
 Synthetic Control-Arrow presses do not switch Spaces on macOS 27, so that path and switching to a window on a hidden Space are not yet checked by hand.
 The scripts are in `/tmp/miri85` (may be gone).
 
