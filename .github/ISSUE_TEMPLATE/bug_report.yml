@@ -6,11 +6,14 @@ body:
     attributes:
       value: |
         One problem per issue. A partial report is still useful.
+        Write the title as one plain sentence about what changes for the person using Miri, such as "Windows on a second display open off-screen".
+        Do not file an issue without a real need and evidence for it.
         Report security problems privately through [SECURITY.md](https://github.com/samanyudas/miri/blob/main/SECURITY.md) instead.
   - type: textarea
     id: steps
     attributes:
       label: Steps to reproduce
+      description: The steps you ran that show the problem, and the build or commit you ran them on.
       placeholder: |
         1. Connect a second display to the right of the built-in display.
         2. Press Control-Option-Command-D.

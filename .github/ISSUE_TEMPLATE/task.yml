@@ -1,7 +1,12 @@
 name: Task or spec
 description: A scoped piece of work for a contributor or an agent
-labels: [needs-triage]
+labels: [task, needs-triage]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Write the title as one plain sentence about what changes for the person using Miri, such as "Miri reports which permission is missing at launch".
+        Do not file an issue without a real need and evidence for it.
   - type: textarea
     id: outcome
     attributes:

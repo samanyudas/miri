@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Claude Code PreToolUse hook that blocks irreversible or outward-facing shell commands.
 
-It also blocks `gh issue create` when the body lacks the sections that CONTRIBUTING.md requires.
+It also blocks `gh issue create` unless the issue has one type label and every section its template requires.
 AGENTS.md explains the policy. Exit code 2 blocks the call and shows stderr to the agent.
 """
 import json
@@ -16,11 +16,10 @@ PROTECTED_BRANCHES = {"main"}
 WRAPPERS = {"sudo", "env", "command", "exec", "nohup", "time", "nice"}
 SEPARATORS = {";", "&&", "||", "|", "&", "(", ")", "|&", ";;"}
 GIT_OPTIONS_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace"}
+ISSUE_TEMPLATES = Path(__file__).resolve().parents[2] / ".github/ISSUE_TEMPLATE"
 ISSUE_CREATE = re.compile(r"\bgh\s+issue\s+(create|new)\b")
-ACCEPTANCE = re.compile(r"(^|\\n)#{1,6} *Acceptance criteria\b", re.I | re.M)
-REPRODUCE = re.compile(r"(^|\\n)#{1,6} *Steps to reproduce\b", re.I | re.M)
-BUG_LABEL = re.compile(r"(-l|--label)[ =]['\"]?[^'\"\s]*\bbug\b")
-ISSUE_HELP = "see File an issue in CONTRIBUTING.md"
+LABEL_OPTION = re.compile(r"(?<!\S)(?:-l|--label)[ =]+(?:'([^']*)'|\"([^\"]*)\"|(\S+))")
+ISSUE_HELP = "See File an issue in CONTRIBUTING.md"
 
 
 def segments(command: str):
@@ -94,11 +93,40 @@ def check_git(args: list[str], cwd: str) -> str | None:
     return None
 
 
-def check_issue_body(body: str, bug: bool) -> str | None:
-    if not ACCEPTANCE.search(body):
-        return f"an issue needs an '## Acceptance criteria' section; {ISSUE_HELP}"
-    if bug and not REPRODUCE.search(body):
-        return f"a bug issue needs a '## Steps to reproduce' section with steps you ran; {ISSUE_HELP}"
+def issue_types() -> dict[str, list[str]]:
+    """Map each template's type label, the first entry of its `labels:` list, to its required field labels."""
+    types = {}
+    for template in sorted(ISSUE_TEMPLATES.glob("*.yml")):
+        text = template.read_text(encoding="utf-8")
+        type_label = re.search(r"^labels:\s*\[\s*([^,\]\s]+)", text, re.M)
+        if not type_label:
+            continue
+        required = []
+        for field in re.split(r"^\s*- type:", text, flags=re.M)[1:]:
+            label = re.search(r"^\s*label:\s*(.+?)\s*$", field, re.M)
+            if label and re.search(r"^\s*required:\s*true\s*$", field, re.M):
+                required.append(label.group(1).strip("'\""))
+        types[type_label.group(1).strip("'\"")] = required
+    return types
+
+
+def has_heading(body: str, section: str) -> bool:
+    # A body passed in double quotes keeps "\n" as two characters, so accept it as a line break too.
+    pattern = rf"(?:^|\\n)[ \t]*#{{1,6}}[ \t]*{re.escape(section)}[ \t]*(?:$|\\n)"
+    return re.search(pattern, body, re.I | re.M) is not None
+
+
+def check_issue(labels: list[str], body: str) -> str | None:
+    types = issue_types()
+    given = sorted({label for label in labels if label in types})
+    if len(given) != 1:
+        return (f"an issue needs exactly one type label, given with --label. "
+                f"This command gives {', '.join(given) or 'none'}. "
+                f"The type labels are {', '.join(types)}. {ISSUE_HELP}")
+    missing = [section for section in types[given[0]] if not has_heading(body, section)]
+    if missing:
+        return (f"a {given[0]} issue needs each required template field as a Markdown heading, "
+                f"such as '### {missing[0]}'. Missing: {', '.join(missing)}. {ISSUE_HELP}")
     return None
 
 
@@ -127,7 +155,7 @@ def check_issue_create(args: list[str], cwd: str, command: str) -> str | None:
         except OSError:
             # The file may be written earlier in the same command, or the body may come from stdin.
             body = command
-    return check_issue_body(body or "", "bug" in labels)
+    return check_issue(labels, body or "")
 
 
 def check(argv: list[str], cwd: str, command: str) -> str | None:
@@ -161,7 +189,9 @@ def check_command(command: str, cwd: str) -> str | None:
     except ValueError:
         # An unquoted heredoc body with an apostrophe cannot be split, so check the issue text as written.
         if ISSUE_CREATE.search(command):
-            return check_issue_body(command, bool(BUG_LABEL.search(command)))
+            labels = [label.strip() for match in LABEL_OPTION.finditer(command)
+                      for label in "".join(match.groups(default="")).split(",")]
+            return check_issue(labels, command)
         return None
     for argv in parsed:
         reason = check(argv, cwd, command)
