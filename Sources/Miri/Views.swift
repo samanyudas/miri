@@ -18,13 +18,24 @@ extension AppModel {
         }
     }
 
-    var menuSymbol: String {
+    var menuIcon: Image {
         switch engineState {
-        case .running: "rectangle.split.3x1"
-        case .restarting: "rectangle.split.3x1"
-        case .failed: "exclamationmark.triangle"
-        case .stopped: startBlockers.isEmpty ? "rectangle.split.3x1.slash" : "exclamationmark.triangle"
+        case .running: .menuRunning
+        case .restarting: .menuRunning
+        case .failed: Image(systemName: "exclamationmark.triangle")
+        case .stopped: startBlockers.isEmpty ? .menuStopped : Image(systemName: "exclamationmark.triangle")
         }
+    }
+}
+
+extension Image {
+    fileprivate static let menuRunning = menuTemplate("menubar-icon")
+    fileprivate static let menuStopped = menuTemplate("menubar-icon-stopped")
+
+    private static func menuTemplate(_ name: String) -> Image {
+        let image = NSImage(contentsOf: Bundle.main.url(forResource: name, withExtension: "svg")!)!
+        image.isTemplate = true
+        return Image(nsImage: image)
     }
 }
 

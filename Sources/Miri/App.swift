@@ -10,7 +10,7 @@ struct MiriApp: App {
         MenuBarExtra {
             MenuContent(model: delegate.model, presenter: delegate.presenter)
         } label: {
-            Image(systemName: delegate.model.menuSymbol)
+            delegate.model.menuIcon
                 .accessibilityLabel("Miri")
         }
     }

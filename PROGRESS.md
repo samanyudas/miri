@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `chore/verify-miri-skill`, based on `main` at `38b851c8`
+Updated: 2026-11-02 on branch `feat/222-app-icons`, based on `main` at `10b91127`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -25,6 +25,19 @@ The skill lists all four under Known findings.
 Three come from one cause: for up to 3 seconds after a stop begins, `engineState` stays `.running`, and a restart in that time queues a `start` that no later Stop or Quit removes.
 The fourth is the status after Restart from a failed engine while a setup check blocks start.
 Next: Sam picks the fixes for #234, #235, and #236.
+
+## App and menu bar icons
+
+[#222](https://github.com/samanyudas/miri/issues/222) is implemented on branch `feat/222-app-icons`.
+`scripts/build-app.sh` renders `AppIcon.icns` from `assets/icon.svg` with `sips` and `iconutil`, and copies the two menu bar SVGs into the bundle.
+The menu bar shows the filled window while the engine runs or restarts and the outlined window while it is stopped.
+Failed and blocked states keep the warning triangle.
+Miri Developer swaps the blue and violet colors for yellow and changes the opacity of the two rear windows when the build renders its icon, and the released Miri will use `icon.svg` unchanged.
+The build stops with an error if `icon.svg` drops one of the values it swaps.
+macOS's built-in SVG renderer does not draw the drop shadows in `icon.svg`, so the app icon has none.
+On 2 November 2026 the built bundle showed the yellow icon in Finder and in System Settings > Accessibility, and the dark menu bar showed both menu bar images tinted white.
+A recording showed the menu bar image change from filled to outlined and back through Stop and Start in its own menu.
+A light menu bar was checked only with a forced-appearance status item outside Miri, because agents do not change the system appearance.
 
 ## Live verification skill
 
