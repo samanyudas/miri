@@ -36,7 +36,8 @@ The fix for [#228](https://github.com/samanyudas/miri/issues/228) is implemented
 On macOS 27, `LabeledContent` keeps the first accessibility value of its content, so VoiceOver kept reading an old status after the status changed.
 A new `LiveText` view restates its string as its accessibility value, and the Status rows in Settings, Set Up Miri, and the strip swipe controls use it, as do the gap stepper labels.
 `swift build`, `make swift-test`, `make lint`, `make swift-lint`, and `make build` passed.
-Live verification through the Accessibility API on the app bundle is pending.
+On 1 November 2026, Accessibility API reads on the `main` build showed a stale outer value in the gap, management status, and swipe status rows, and the fix build kept all three current through each change.
+VoiceOver itself was not run.
 
 ## Windows missing from the expected desktop
 
