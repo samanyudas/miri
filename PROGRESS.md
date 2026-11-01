@@ -55,6 +55,7 @@ On 31 October, Miri Developer built with 1.99.0 restored all 14 windows, answere
 
 [#137](https://github.com/samanyudas/miri/issues/137) is implemented in [engine PR #96](https://github.com/samanyudas/paneru/pull/96), merged as `3cb2fa0` with no change from the tested tree.
 This branch pins `3cb2fa0`.
+Sam decided on 1 November 2026 that this sync was a one-off, so the release-tag rule in [ADR 0003](docs/adr/0003-bundle-a-pinned-paneru-engine.md) stays.
 It brings the 8 upstream `main` commits up to `425d37a` that `miri/v0.5.2` lacked, as a merge commit so later syncs keep upstream ancestry.
 Sam chose on 31 October to take all 8.
 With Miri's settings, the visible changes are lower idle CPU (`cc55f94`) and a stray-tab check that no longer queries every app each second (`425d37a`).

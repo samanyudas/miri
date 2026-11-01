@@ -80,6 +80,8 @@ The arriving column goes immediately after the destination's active column, whic
 With destination columns X, Y, and Z and Y active, moving column S there gives X, Y, S, Z.
 An empty destination receives the column as its first column.
 When no display lies in the requested direction, the shortcut does nothing, so a column or focus stays at the current display's end.
+On 1 November 2026, Sam decided that Focus column left or right and Move column left or right also cross at the strip's end ([#104](https://github.com/samanyudas/miri/issues/104)).
+That crossing is not built yet.
 
 Display directions follow the physical arrangement in **System Settings > Displays**.
 Focus and movement within a column stay on the current display at the column's top or bottom edge.
