@@ -110,7 +110,7 @@ Report that as a failure. Do not wait longer or retry until it passes.
 
 ## Cleanup
 
-`V end` does these steps, and continues past a failed step:
+`V end --owner "<thread name and id>"` does these steps, and continues past a failed step:
 
 1. Stops the fixtures and stand-ins this run started, by recorded process ID.
 2. Quits the test build with SIGTERM and waits for its engine to exit.

@@ -386,7 +386,7 @@ def cmd_doctor(args) -> int:
         print(f"info  run in progress: {run['dir']} (owner {run['owner']})")
         pid = run.get("test_pid")
         report(bool(pid) and any(a["pid"] == pid for a in apps), f"the running app is this run's test build (pid {pid})",
-               "Something replaced the test build. Run `verify-miri end`, then `begin` again.")
+               "Something replaced the test build. Run `verify-miri end --owner` with this run's owner, then `begin` again.")
         report(run["owner"] in lock_text, "this run holds the live-test lock", "Renew it with `verify-miri renew --owner` and the run's owner.")
     if apps and len(apps) == 1:
         try:
@@ -439,7 +439,7 @@ def cmd_begin(args) -> int:
     if apps:
         log(run, f"previous build: pid {apps[0]['pid']} from {apps[0]['bundle']}")
         if not quit_app(apps[0]["pid"], run, "previous build"):
-            raise Failure("The previous build did not quit. Run `verify-miri end` to put it back.")
+            raise Failure("The previous build did not quit. Run `verify-miri end --owner` with your owner to put it back.")
     else:
         log(run, "no Miri Developer was running before this run")
     # The engine saves the session when it exits, so the backup comes after the quit.
@@ -474,7 +474,7 @@ def cmd_end(args) -> int:
             log(run, f"STILL RUNNING: {p['kind']} pid {p['pid']} from {p['bundle']}")
         log(run, "PROBLEM: a Miri process still runs, and it can overwrite the session when it exits. "
                  "The session was not restored, the previous build was not relaunched, and the lock stays held. "
-                 "Stop the process that this run started, then run `verify-miri end` again.")
+                 "Stop the process that this run started, then run `verify-miri end --owner` with this run's owner again.")
         return 1
     backup = folder / "backup/state.json"
     if backup.exists():
