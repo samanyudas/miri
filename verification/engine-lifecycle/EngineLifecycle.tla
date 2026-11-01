@@ -121,16 +121,17 @@ AppStart(t, ok) ==
   ELSE LET w == [u EXCEPT !.polling = FALSE] IN    \* setupPoll?.cancel(); setupPoll = nil
        IF w.engine = "running" THEN w ELSE RestartManually(w, ok)
 
-\* cancelSetupPoll(), AppModel.swift:432.
+\* cancelSetupPoll(), AppModel.swift:434.
 CancelPoll(t) == [t EXCEPT !.polling = FALSE, !.blockersShown = FALSE]
 
 \* stop(), AppModel.swift:364.
 AppStop(t, ok) == SupStop(CancelPoll([t EXCEPT !.stoppedByUser = TRUE]), "none", ok)
 
 \* restart(), AppModel.swift:376.
-AppRestart(t, ok) == IF t.engine = "running" THEN RestartManually(t, ok) ELSE AppStart(t, ok)
+AppRestart(t, ok) == LET u == [t EXCEPT !.stoppedByUser = FALSE] IN
+  IF u.engine = "running" THEN RestartManually(u, ok) ELSE AppStart(u, ok)
 
-\* prepareToQuit(completion:), AppModel.swift:381, with AppDelegate's reply as the completion.
+\* prepareToQuit(completion:), AppModel.swift:383, with AppDelegate's reply as the completion.
 PrepareToQuit(t, ok) == SupStop(CancelPoll(t), "quitReply", ok)
 
 (***************************************************************************)
@@ -188,7 +189,7 @@ KillTimerFires == s.app # "quit" /\ s.killArmed /\
 RestartTimerFires == s.app # "quit" /\ s.restartArmed /\ \E ok \in BOOLEAN :
   Step(SupStart([s EXCEPT !.restartArmed = FALSE], ok))
 
-\* pollSetupUntilReady() wakes after setupPollInterval, AppModel.swift:415.
+\* pollSetupUntilReady() wakes after setupPollInterval, AppModel.swift:417.
 PollTick == s.app # "quit" /\ s.polling /\ \E ok \in BOOLEAN :
   Step(IF s.blocked
        THEN [s EXCEPT !.blockersShown = TRUE]
