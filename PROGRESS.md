@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `chore/live-test-lock`, based on `main` at `a746e718`
+Updated: 2026-11-01 on branch `fix/85-restore-spaces`, based on `main` at `433781b2`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,24 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Windows missing from the expected desktop
+
+[#85](https://github.com/samanyudas/miri/issues/85) is fixed in [engine PR #110](https://github.com/samanyudas/paneru/pull/110), merged as `ffe0673`, which this branch pins.
+Its code is identical to the tested head `654c554`.
+The 25 October report had another cause, an extra hidden row in one Space, which [#139](https://github.com/samanyudas/miri/pull/139) fixed on 28 October.
+After an engine restart, session restore placed windows where Mission Control listed them but the desktop did not show them.
+Restore parked the selected row of every Space that was not showing, and only an activation on the display with focus unparked it.
+Restore also rebuilt each strip under its saved Space ID, although macOS can renumber Spaces while the windows stay put.
+On 1 November, the built-in display's Space 3097 had become 3234 for an unknown reason, so 5 of Sam's windows were restored into a parked strip for a Space that no longer existed.
+Restore now places every selected row in its viewport, and maps each saved Space to the Space that holds most of its windows.
+
+Live on Miri Developer, the same script ran on engine `68365bc` and on the fix, from the same saved session.
+It launches Miri twice, then picks the other display's second Space in Mission Control while focus stays put.
+Before the fix, the 5 restored windows and one throwaway Finder window per display were 0% on screen.
+With the fix, all of them showed, and 3 rounds of Space switches on each display passed.
+Synthetic Control-Arrow presses do not switch Spaces on macOS 27, so that path and switching to a window on a hidden Space are not yet checked by hand.
+The scripts are in `/tmp/miri85` (may be gone).
 
 ## Dock changes while the engine runs
 
