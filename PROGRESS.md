@@ -43,8 +43,10 @@ On 1 November, synthetic Finder drags ran on Miri Developer built from that `mai
 - A stacked window dropped over the neighboring column's near quarter left its stack. A synthetic diagonal drag of that window sometimes never started, so the passing drag first moved straight down (#71).
 - A window grabbed near the right end on the 27-inch display and dropped with the pointer over the right quarter of a column on the built-in display became a new column after it there. Its centre was over that column's middle, so the old rule would have joined it.
 
-During each hold the engine's drag overlay was on the display under the pointer.
-The hold screenshots, kept local, show the insertion line on the gap next to the pointer.
+In the second run, the engine's drag overlay was on the display under the pointer during all five holds.
+Two hold screenshots, kept local, show the insertion line next to the pointer.
+In the first case a vertical line sits on the gap at about x 1019, with the pointer at x 989.
+In the second case a horizontal line sits at the bottom of the target column.
 Sam's real-trackpad check is still open.
 
 ## CI speed
