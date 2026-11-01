@@ -131,6 +131,16 @@ import Testing
         #expect(launcher.engines.count == 1)
     }
 
+    @Test func manualRestartStartsAgainOnceTheEngineExits() {
+        let engine = supervisor()
+        engine.start()
+        launcher.engines[0].exitsOnInterrupt = false
+        engine.restartManually()
+        #expect(launcher.engines.count == 1)
+        launcher.engines[0].onExit(0)
+        #expect(engine.state == .running(pid: 101))
+    }
+
     @Test func stopAfterAManualRestartKeepsTheEngineStopped() {
         let engine = supervisor()
         engine.start()
