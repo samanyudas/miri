@@ -71,7 +71,11 @@ struct MenuContent: View {
         case .failed:
             Button("Restart Engine") { model.restart() }
         case .stopped:
-            Button("Start Window Management") { model.start() }
+            if model.startBlockers.isEmpty {
+                Button("Start Window Management") { model.start() }
+            } else {
+                Button("Stop Window Management") { model.stop() }
+            }
         }
         Divider()
         Button("Settings…") { presenter.show(.settings) }
@@ -138,7 +142,12 @@ struct GeneralSettings: View {
                 }
                 HStack {
                     switch model.engineState {
-                    case .stopped: Button("Start Window Management") { model.start() }
+                    case .stopped:
+                        if model.startBlockers.isEmpty {
+                            Button("Start Window Management") { model.start() }
+                        } else {
+                            Button("Stop Window Management") { model.stop() }
+                        }
                     case .failed: Button("Restart Engine") { model.restart() }
                     case .running, .restarting:
                         Button("Stop Window Management") { model.stop() }

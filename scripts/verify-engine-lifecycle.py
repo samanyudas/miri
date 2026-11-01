@@ -26,7 +26,7 @@ SKILL = ROOT / ".claude" / "skills" / "verify-engine-lifecycle" / "SKILL.md"
 INVARIANTS = ["StopStands", "SavedStopMatches", "QuitLeavesNoEngine", "OneEngine", "StoppedMeansNoEngine", "WaitingIsShown"]
 PROPERTIES = ["QuitFinishes"]
 # Rules that the current code breaks. Each one is a reported finding, not a modeling error.
-KNOWN_FINDINGS = {"StopStands", "SavedStopMatches", "QuitLeavesNoEngine", "WaitingIsShown"}
+KNOWN_FINDINGS = {"StopStands", "SavedStopMatches", "QuitLeavesNoEngine"}
 # Each mutant changes one step of the model the way a plausible code change would, and must break its rule.
 MUTANTS = {
     "restart_without_waiting": "OneEngine",
