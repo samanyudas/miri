@@ -32,17 +32,18 @@ icon="$PWD/.build/app/AppIcon.svg"
 rm -rf "$iconset"
 mkdir "$iconset"
 # Miri Developer draws the mark in yellow so it never passes for the released Miri, which keeps the blue icon.svg.
+# Each yellow keeps the OKLCH lightness of the blue it replaces, so the stack and gradients keep their contrast.
 cp assets/icon.svg "$icon"
 while read -r blue yellow; do
     grep -q "$blue" "$icon" || { echo "assets/icon.svg no longer uses $blue. Update the Developer icon colors in $0." >&2; exit 1; }
     sed -i '' "s/$blue/$yellow/g" "$icon"
 done <<'COLORS'
-#A9D0FF #FFE680
-#5F95FA #FFCC00
-#5A63F2 #F5B000
-#C4DCFF #FFEDB0
-#B7B1F6 #FFD970
-#3446C8 #B08900
+#A9D0FF #D7CF93
+#5F95FA #B59504
+#5A63F2 #9D7000
+#C4DCFF #E4DBB2
+#B7B1F6 #E5AF75
+#3446C8 #735503
 COLORS
 for size in 16 32 128 256 512; do
     sips -s format png -z "$size" "$size" "$icon" --out "$iconset/icon_${size}x${size}.png" >/dev/null
