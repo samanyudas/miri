@@ -26,6 +26,10 @@ extension AppModel {
         case .stopped: startBlockers.isEmpty ? .menuStopped : Image(systemName: "exclamationmark.triangle")
         }
     }
+
+    func showLogsInFinder() {
+        NSWorkspace.shared.activateFileViewerSelecting([log.url])
+    }
 }
 
 extension Image {
@@ -70,6 +74,7 @@ struct MenuContent: View {
             Button("Restart Engine") { model.restart() }
         case .failed:
             Button("Restart Engine") { model.restart() }
+            Button("Show Logs in Finder") { model.showLogsInFinder() }
         case .stopped:
             if model.startBlockers.isEmpty {
                 Button("Start Window Management") { model.start() }
@@ -148,7 +153,9 @@ struct GeneralSettings: View {
                         } else {
                             Button("Stop Window Management") { model.stop() }
                         }
-                    case .failed: Button("Restart Engine") { model.restart() }
+                    case .failed:
+                        Button("Restart Engine") { model.restart() }
+                        Button("Show Logs in Finder") { model.showLogsInFinder() }
                     case .running, .restarting:
                         Button("Stop Window Management") { model.stop() }
                         Button("Restart Engine") { model.restart() }
@@ -408,9 +415,7 @@ struct DiagnosticsSettings: View {
         Form {
             Section {
                 LabeledContent("Logs") {
-                    Button("Show in Finder") {
-                        NSWorkspace.shared.activateFileViewerSelecting([model.log.url])
-                    }
+                    Button("Show in Finder") { model.showLogsInFinder() }
                 }
                 LabeledContent("Configuration file") {
                     Button("Show in Finder") {
