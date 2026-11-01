@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `fix/228-live-status-labels`, based on `main` at `32fcd301`
+Updated: 2026-11-01 on branch `fix/228-live-status-labels`, based on `main` at `65b03031`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -90,7 +90,7 @@ In the second run, the engine's drag overlay was on the display under the pointe
 Two hold screenshots, kept local, show the insertion line next to the pointer.
 In the first case a vertical line sits on the gap at about x 1019, with the pointer at x 989.
 In the second case a horizontal line sits at the bottom of the target column.
-Sam's real-trackpad check is still open.
+On 1 November Sam made the same five drags with the real trackpad on Miri Developer with engine `ffe0673`, and all five landed under the pointer, so #203 is closed.
 
 ## CI speed
 
@@ -1280,8 +1280,6 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 1. Finish the remaining v1 features.
    - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings (#212).
-   - Run Sam's real-trackpad check of the pointer drop target (#203).
-     The #58 height defect is fixed and closed.
    - Run the stack overflow (S-5) and stack limit (S-7) hardware checks, and record them against the frozen release candidate.
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
