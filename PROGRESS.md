@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `feat/219-initial-setup`, based on `main` at `35df5f09`
+Updated: 2026-11-01 on branch `docs/203-verify-main`, based on `main` at `050bac63`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -67,14 +67,20 @@ Sol approved engine PR #106 after 3 rounds and #108 after 2.
 [#203](https://github.com/samanyudas/miri/issues/203) makes the pointer pick a drag's drop target, as Sam chose on 1 November after trying drags with the trackpad.
 It replaces the #72 rule, where the dragged window's centre picked the column.
 Over the dragged window's own column a drop only reorders its stack, so the #72 grab near the end of the title bar still works.
-[Engine PR #102](https://github.com/samanyudas/paneru/pull/102) carries the change, with tests that fail on the old rule.
-On 1 November, synthetic Finder drags on an empty virtual workspace of the 27-inch display ran on Miri Developer with engine `fb97826`, and the same script ran on the daily build as a control:
+[Engine PR #102](https://github.com/samanyudas/paneru/pull/102) carries the change, and [#208](https://github.com/samanyudas/miri/pull/208) pins it.
+On `main` `97672bc7` with engine `68365bc`, the 213 engine drag tests pass, and the two own-stack tests fail when the own-column exception is removed.
+On 1 November, synthetic Finder drags ran on Miri Developer built from that `main`, twice, and passed 5 of 5 both times:
 
-- A window grabbed near the right end of its title bar and dropped with the pointer over another column's right quarter became a new column. The control joined that column, because the centre was over its middle.
-- A window grabbed near the left end and dropped with the pointer over another column's middle near the bottom joined that column at the bottom. The control left it in place.
+- A window grabbed near the right end of its title bar and dropped with the pointer over another column's right quarter became a new column. A control on the old build had joined that column, because the centre was over its middle.
+- A window grabbed near the left end and dropped with the pointer over another column's middle near the bottom joined that column at the bottom.
 - The #72 case, a stacked window grabbed near the right end of its title bar and dragged straight down, reordered its stack.
 - A stacked window dropped over the neighboring column's near quarter left its stack. A synthetic diagonal drag of that window sometimes never started, so the passing drag first moved straight down (#71).
+- A window grabbed near the right end on the 27-inch display and dropped with the pointer over the right quarter of a column on the built-in display became a new column after it there. Its centre was over that column's middle, so the old rule would have joined it.
 
+In the second run, the engine's drag overlay was on the display under the pointer during all five holds.
+Two hold screenshots, kept local, show the insertion line next to the pointer.
+In the first case a vertical line sits on the gap at about x 1019, with the pointer at x 989.
+In the second case a horizontal line sits at the bottom of the target column.
 Sam's real-trackpad check is still open.
 
 ## CI speed
