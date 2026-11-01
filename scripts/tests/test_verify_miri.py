@@ -1,7 +1,12 @@
 """Checks the verify-miri skill helper without a Mac desktop, so `make lint` catches drift on any machine."""
 import importlib.machinery
 import importlib.util
+import json
+import os
 import re
+import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -55,6 +60,16 @@ class VerifyMiriTest(unittest.TestCase):
 
     def test_evidence_lives_outside_the_repository(self):
         self.assertNotIn(str(ROOT), str(self.vm.HOME))
+
+    def test_end_refuses_a_run_that_another_thread_owns(self):
+        with tempfile.TemporaryDirectory() as home:
+            current = Path(home, "current.json")
+            current.write_text(json.dumps({"id": "r1", "dir": str(Path(home, "runs/r1")), "owner": "thread A"}))
+            result = subprocess.run([sys.executable, str(SCRIPT), "end", "--owner", "thread B"], capture_output=True,
+                                    text=True, env={**os.environ, "MIRI_VERIFY_HOME": home})
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertIn("thread A", result.stderr)
+            self.assertTrue(current.exists(), "the other thread's run record must stay")
 
 
 if __name__ == "__main__":
