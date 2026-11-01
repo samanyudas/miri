@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `docs/lifecycle-fixes-landed`, based on `main` at `f37f425b`
+Updated: 2026-11-02 on branch `docs/222-verified`, based on `main` at `7b95cbc0`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -23,19 +23,6 @@ The model found four lifecycle bugs on 2026-11-01.
 A live run on Miri Developer built from `main` at f37f425b passed every acceptance criterion on 2 November 2026, and #234, #235, and #236 are closed.
 [#243](https://github.com/samanyudas/miri/pull/243) makes `verify-miri end` and `renew` refuse a run that another thread owns, after one agent's `end` closed another agent's live run.
 Nothing is in flight here.
-
-## App and menu bar icons
-
-[#222](https://github.com/samanyudas/miri/issues/222) is implemented on branch `feat/222-app-icons`.
-`scripts/build-app.sh` renders `AppIcon.icns` from `assets/icon.svg` with `sips` and `iconutil`, and copies the two menu bar SVGs into the bundle.
-The menu bar shows the filled window while the engine runs or restarts and the outlined window while it is stopped.
-Failed and blocked states keep the warning triangle.
-Miri Developer swaps the blue and violet colors for yellow and changes the opacity of the two rear windows when the build renders its icon, and the released Miri will use `icon.svg` unchanged.
-The build stops with an error if `icon.svg` drops one of the values it swaps.
-macOS's built-in SVG renderer does not draw the drop shadows in `icon.svg`, so the app icon has none.
-On 2 November 2026 the built bundle showed the yellow icon in Finder and in System Settings > Accessibility, and the dark menu bar showed both menu bar images tinted white.
-A recording showed the menu bar image change from filled to outlined and back through Stop and Start in its own menu.
-A light menu bar was checked only with a forced-appearance status item outside Miri, because agents do not change the system appearance.
 
 ## Live verification skill
 
@@ -1095,6 +1082,12 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
 
 ## Done
 
+- [#222](https://github.com/samanyudas/miri/issues/222) is closed, delivered by [#239](https://github.com/samanyudas/miri/pull/239).
+  The app bundle renders `AppIcon.icns` from `assets/icon.svg`, and the menu bar shows the filled window while the engine runs and the outlined window while it is stopped.
+  Miri Developer draws the mark in yellow, and the released Miri will use `icon.svg` unchanged.
+  macOS's built-in SVG renderer does not draw the drop shadows in `icon.svg`, so the app icon has none.
+  On 2 November 2026 a build of `main` at `7b95cbc0` showed the icon in Finder and System Settings > Accessibility, and both menu bar images on dark and light menu bars.
+  The light bar needed a light wallpaper as well as Light appearance, because macOS colors the bar from a saturated wallpaper.
 - `chore/live-test-lock` moves the live-test lock from agent memory into the repository.
   `scripts/live-lock.py` takes, renews, checks, and releases `/tmp/miri-live.lock`, and an expired lock no longer blocks other runs.
   `make e2e` holds the lock while the selftests run, and [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#take-the-live-test-lock) says when a run needs it.
@@ -1111,7 +1104,7 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
   SVG parsing and a browser preview passed for all three assets, including the menu bar marks on light and dark backgrounds.
   `make lint` passed on current `main` plus these assets, including all 18 harness tests.
   `make native` was skipped because this change contains only SVG assets and documentation.
-  The native app does not yet load these assets, and the Paper UI screens remain unexported because Paper Desktop was closed.
+  The Paper UI screens remain unexported because Paper Desktop was closed.
 - The v1 specification and product decisions are merged (#3).
 - The Accessibility permission prototype is merged (#4).
   Enabling only the Miri entry authorizes both the app and its engine in the development build.
