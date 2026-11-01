@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-01 on branch `fix/147-locked-screen-handles`, based on `main` at `a3001115`
+Updated: 2026-11-01 on branch `docs/142-verified`, based on `main` at `fabf16d4`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -150,7 +150,7 @@ The engine now waits for the unlock before it starts the 1 s wait for a window's
 On 1 November on Sam's Mac, a sleep and wake on Sam's daily build dropped the 3 windows on the built-in display, and a screen lock with no sleep made every AX read fail until the unlock.
 On the fix build, a sleep and wake kept all 16 windows, and the 2 windows on the built-in display kept their order on its new Space.
 A lid close with the external display connected, which does not sleep, kept all 14 windows on the daily build.
-Stacks across a lid close or a sleep are not checked yet, so #142 stays open for that check.
+On 1 November on `main` `fabf16d4`, a recorded sleep and wake kept both stacks on the built-in display, and Sam saw a lid close keep a stack on each display. #142 is closed.
 Off-screen windows during a lock may still drop through two other engine paths, which [#210](https://github.com/samanyudas/miri/issues/210) tracks.
 
 ## Side-by-side displays
