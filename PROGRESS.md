@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `docs/222-verified`, based on `main` at `7b95cbc0`
+Updated: 2026-11-02 on branch `fix/issue-221`, based on `main` at `e8d69276`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -23,6 +23,14 @@ The model found four lifecycle bugs on 2026-11-01.
 A live run on Miri Developer built from `main` at f37f425b passed every acceptance criterion on 2 November 2026, and #234, #235, and #236 are closed.
 [#243](https://github.com/samanyudas/miri/pull/243) makes `verify-miri end` and `renew` refuse a run that another thread owns, after one agent's `end` closed another agent's live run.
 Nothing is in flight here.
+
+## Configuration error in the menu
+
+Branch `fix/issue-221` makes the menu bar menu show the configuration error and its line, for [#221](https://github.com/samanyudas/miri/issues/221).
+`ConfigurationIssue.menuSummary` puts the line number before the message and cuts the text to 80 characters, so a cut keeps the line.
+Live runs on 2 November 2026 with a broken `config.toml` showed "Configuration error. Open Settings for details." on the `main` build at e8d69276, and "Configuration error on line 88: Expected ] to close the table header." on the fix build.
+A long key name showed as "Configuration error on line 88: Expected = after the key miri_window_gap_settin…".
+`verify-miri` cannot open the menu bar menu yet, so these runs read it with a scratch Accessibility tool outside the repository.
 
 ## Live verification skill
 
