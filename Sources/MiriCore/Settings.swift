@@ -257,4 +257,17 @@ public enum ConfigurationIssue: Error, Equatable, Sendable, CustomStringConverti
         case .notEditable(let reason): reason
         }
     }
+
+    private static let menuSummaryLimit = 80
+
+    /// One line for the menu bar menu, cut to fit with the line number before the message so the cut keeps it.
+    public var menuSummary: String {
+        let summary =
+            switch self {
+            case .invalidTOML(let error): "Configuration error on line \(error.line): \(error.message)"
+            default: "Configuration error: \(description)"
+            }
+        guard summary.count > Self.menuSummaryLimit else { return summary }
+        return summary.prefix(Self.menuSummaryLimit - 1) + "…"
+    }
 }

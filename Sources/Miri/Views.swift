@@ -64,7 +64,7 @@ struct MenuContent: View {
     var body: some View {
         Text(model.statusText)
         if let issue = model.configurationIssue {
-            Text("Configuration error. Open Settings for details.")
+            Text(issue.menuSummary)
                 .help(issue.description)
         }
         Divider()

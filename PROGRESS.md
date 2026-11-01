@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `fix/issue-220`, based on `main` at `e8d69276`
+Updated: 2026-11-02 on branch `fix/issue-220`, based on `main` at `c7b11455`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -31,6 +31,14 @@ A `verify-miri` run on 2 November 2026 killed the test engine three times on `ma
 On `main`, both views showed only `Restart Engine`.
 On the branch, both views showed the new button, and each press opened Finder with `engine.log` selected.
 Finder came to the front from Settings. System Events clicks in the menu let no app take the front, so that part of the menu path stays unobserved.
+
+## Configuration error in the menu
+
+Branch `fix/issue-221` makes the menu bar menu show the configuration error and its line, for [#221](https://github.com/samanyudas/miri/issues/221).
+`ConfigurationIssue.menuSummary` puts the line number before the message and cuts the text to 80 characters, so a cut keeps the line.
+Live runs on 2 November 2026 with a broken `config.toml` showed "Configuration error. Open Settings for details." on the `main` build at e8d69276, and "Configuration error on line 88: Expected ] to close the table header." on the fix build.
+A long key name showed as "Configuration error on line 88: Expected = after the key miri_window_gap_settin…".
+`verify-miri` cannot open the menu bar menu yet, so these runs read it with a scratch Accessibility tool outside the repository.
 
 ## Live verification skill
 

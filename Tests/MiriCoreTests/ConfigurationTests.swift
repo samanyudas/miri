@@ -149,6 +149,42 @@ struct ConfigurationStoreTests {
     }
 }
 
+struct ConfigurationIssueMenuSummaryTests {
+    private let directory = FileManager.default.temporaryDirectory.appending(
+        path: "miri-menu-summary-\(UUID().uuidString)")
+    private var url: URL { directory.appending(path: "config.toml") }
+
+    private func issue(_ text: String) throws -> ConfigurationIssue? {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try text.write(to: url, atomically: true, encoding: .utf8)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
+        store.load(reduceMotion: false)
+        return store.issue
+    }
+
+    @Test func showsTheLineAndMessageOfASyntaxError() throws {
+        let summary = try issue("[miri]\ninner_gap = 4\nouter_gap =\n")?.menuSummary
+        #expect(summary == "Configuration error on line 3: Expected a value.")
+    }
+
+    @Test func keepsAnUnclosedTableHeaderWhole() throws {
+        let summary = try issue("[miri\n")?.menuSummary
+        #expect(summary == "Configuration error on line 1: Expected ] to close the table header.")
+    }
+
+    @Test func cutsALongErrorButKeepsItsLine() throws {
+        let summary = try issue("[miri]\n\(String(repeating: "a", count: 80))\n")?.menuSummary
+        #expect(
+            summary == "Configuration error on line 2: Expected = after the key \(String(repeating: "a", count: 23))…")
+        #expect(summary?.count == 80)
+    }
+
+    @Test func showsOtherIssuesWithoutALine() {
+        let summary = ConfigurationIssue.invalidValue(key: "miri.inner_gap", message: "Something is wrong.").menuSummary
+        #expect(summary == "Configuration error: Something is wrong.")
+    }
+}
+
 struct StackLimitConfigurationTests {
     private let directory = FileManager.default.temporaryDirectory.appending(
         path: "miri-stack-limit-\(UUID().uuidString)")
