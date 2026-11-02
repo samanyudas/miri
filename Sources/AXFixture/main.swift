@@ -5,11 +5,13 @@ import AppKit
 //   --label <text>       adds <text> to the window title and text, so evidence names each fixture
 //   --resizable          lets the window resize, so the engine tiles it in a column instead of floating it
 //   --activate           brings the fixture to the front, as when a person opens an app
+//   --min-height <pt>    refuses a frame shorter than <pt> points, as an app with a minimum height does
 struct Options {
     var readyFile: String?
     var label: String?
     var resizable = false
     var activate = false
+    var minHeight: Double?
 
     init(_ arguments: [String]) {
         var rest = arguments[...]
@@ -19,6 +21,7 @@ struct Options {
             case "--label": label = rest.popFirst()
             case "--resizable": resizable = true
             case "--activate": activate = true
+            case "--min-height": minHeight = rest.popFirst().flatMap(Double.init)
             default:
                 FileHandle.standardError.write(Data("AXFixture: unknown option \(argument)\n".utf8))
                 exit(2)
@@ -42,6 +45,7 @@ final class FixtureDelegate: NSObject, NSApplicationDelegate {
         window.contentView = NSTextField(
             wrappingLabelWithString:
                 "Test fixture\(suffix). Selftests may read or move this window. Process ID \(getpid()).")
+        if let minHeight = options.minHeight { window.minSize = NSSize(width: 0, height: minHeight) }
         window.center()
         window.makeKeyAndOrderFront(nil)
         if options.activate { NSApplication.shared.activate() }
