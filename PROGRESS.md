@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-03 on branch `docs/156-done`, based on `main` at `6219fa9a`
+Updated: 2026-11-03 on branch `fix/263-verify-miri-strip-check`, based on `main` at `9c5b9230`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -129,6 +129,10 @@ AXFixture gained the opt-in options `--label`, `--resizable`, and `--activate`, 
 A run on 2026-11-02 at `main` 38b851c8 proved that ⌃⌥←, ⌃⌥→, ⌃⌥H, and ⌃⌥L move focus between two fixture columns, in both the engine and macOS, and `make e2e` passed in the same run.
 The feature map also lists recipes for the Start, Stop, and Restart controls, setup checks, and shortcut customization, which no `verify-miri` run has driven yet.
 Next: drive those recipes with `verify-miri` and record each result in `features/README.md`.
+
+[#263](https://github.com/samanyudas/miri/issues/263): `verify-miri begin` now records every strip of Sam's build by window ID, and `end` reports each window that the restore left in another strip or position, keeps the lock, and exits 1.
+The engine's session restore puts a saved strip in the Space that now holds most of its windows, so a run that moves a majority of one strip's windows to the other display leaves the whole strip there, with the same `matched` count.
+On a `main` build at 9c5b9230, run `20261103-013706` with the old script ended with exit 0 in that case, and run `20261103-013756` with the new script reported both windows and passed after `send-cmd` put them back.
 
 ## Initial setup
 
