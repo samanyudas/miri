@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `docs/124-done`, based on `main` at `c0f26f92`
+Updated: 2026-11-02 on branch `fix/issue-69`, based on `main` at `a1fe9913`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -45,6 +45,21 @@ The model found four lifecycle bugs on 2026-11-01.
 A live run on Miri Developer built from `main` at f37f425b passed every acceptance criterion on 2 November 2026, and #234, #235, and #236 are closed.
 [#243](https://github.com/samanyudas/miri/pull/243) makes `verify-miri end` and `renew` refuse a run that another thread owns, after one agent's `end` closed another agent's live run.
 Nothing is in flight here.
+
+## Scroll position after a restart
+
+Branch `fix/issue-69` pins engine `d169943`, the merge of [engine PR #113](https://github.com/samanyudas/paneru/pull/113), for [#69](https://github.com/samanyudas/miri/issues/69).
+The session file now saves each row's view: one window in the row, and where its column sat on the display.
+A restart puts that column back in the same place, so a row on a display without focus no longer starts at its first column.
+A `verify-miri` run on 2 November 2026 restarted the engine from the menu bar with seven fixture windows in a scrolled row on display 3 and focus on display 1.
+On `main` at 70ad7f0f, every fixture in that row moved to x 2551.
+On the fix build at engine `f5a3866`, every fixture kept its x, and a restart from Settings did the same.
+Engine PR #112 then resized restored columns after the scroll was measured, which put a row too far over when macOS handed the windows back at another width.
+Engine `a358a36` measures each column at its saved width, and a menu bar restart on that build at 16:52 kept every fixture's x and width, after exit cleanup had handed them back 8 points narrower.
+`make verify-engine-lifecycle` still holds all seven rules, but its model covers only start, stop, restart, and quit, so it cannot show this fix.
+A row with a maximized column is not tested yet, and [docs/limitations.md](docs/limitations.md) keeps it as unverified.
+A restart also moves focus away from the window or app in use, which [#248](https://github.com/samanyudas/miri/issues/248) tracks.
+Next: after Sam merges the Miri PR, verify on a build of the merged `main` and close #69.
 
 ## Logs from the engine failure view
 
@@ -979,7 +994,7 @@ Evidence is in `/tmp/miri-e2e-20261025/` on Sam's Mac and is not published.
 
 Two gaps remained open.
 [#68](https://github.com/samanyudas/miri/issues/68) is now fixed on `main` through engine `23bcf1b`.
-[#69](https://github.com/samanyudas/miri/issues/69): restore does not keep a strip's scroll offset, so a strip whose focus moved starts at its first column after a restart.
+[#69](https://github.com/samanyudas/miri/issues/69) is fixed on branch `fix/issue-69`, which the [scroll position after a restart](#scroll-position-after-a-restart) section describes.
 
 ## Stack sizing and order fixes
 
