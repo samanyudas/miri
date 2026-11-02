@@ -78,6 +78,58 @@ class VerifyMiriTest(unittest.TestCase):
             self.assertEqual(lock.returncode, 0, lock.stderr)
             self.assertIn("free", lock.stdout)
 
+    @staticmethod
+    def state(*strips):
+        """A `query state` reply. Each strip is (Space, row, [(window ID, display, floating), ...]) in column order."""
+        return {"virtual_workspaces": [
+            {"native_workspace_id": space, "number": row, "windows": [
+                {"window_id": wid, "app_name": f"App{wid}", "title": "private", "display_id": display, "floating": floating}
+                for wid, display, floating in windows]}
+            for space, row, windows in strips]}
+
+    def test_layout_records_strips_by_window_id_without_titles(self):
+        layout = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, None, False), (12, 1, True)])))
+        self.assertEqual(layout, [
+            {"window_id": 10, "app": "App10", "space": 6, "row": 1, "display": 1, "position": 0},
+            {"window_id": 11, "app": "App11", "space": 6, "row": 1, "display": 1, "position": 1},
+            {"window_id": 12, "app": "App12", "space": 6, "row": 1, "display": 1, "position": None},
+        ])
+        self.assertNotIn("private", json.dumps(layout))
+
+    def test_an_unchanged_layout_has_no_differences(self):
+        before = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False)]), (3773, 1, [(20, 3, False)])))
+        self.assertEqual(self.vm.layout_differences(before, before), [])
+
+    def test_a_window_on_another_display_is_reported(self):
+        before = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False)]), (3773, 1, [(20, 3, False)])))
+        after = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False), (20, 1, False)]), (3773, 1, [])))
+        differences = self.vm.layout_differences(before, after)
+        self.assertEqual(len(differences), 1, differences)
+        self.assertIn("App20 window 20", differences[0])
+        self.assertIn("Space 3773 row 1 on display 3", differences[0])
+        self.assertIn("Space 6 row 1 on display 1", differences[0])
+
+    def test_a_window_in_another_row_or_position_is_reported(self):
+        before = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False), (12, 1, False)])))
+        after = self.vm.layout(self.state((6, 1, [(11, 1, False), (10, 1, False)]), (6, 2, [(12, 1, False)])))
+        differences = self.vm.layout_differences(before, after)
+        self.assertEqual(len(differences), 3, differences)
+        self.assertTrue(any("window 12" in line and "row 2" in line for line in differences), differences)
+        self.assertTrue(any("window 10" in line and "position 1 of 2" in line for line in differences), differences)
+        self.assertTrue(any("window 11" in line and "position 2 of 2" in line for line in differences), differences)
+
+    def test_closed_and_new_windows_do_not_shift_the_others(self):
+        before = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False), (12, 1, False)])))
+        after = self.vm.layout(self.state((6, 1, [(99, 1, False), (11, 1, False), (12, 1, False)])))
+        self.assertEqual(self.vm.layout_differences(before, after), [])
+
+    def test_a_window_that_floats_now_is_reported(self):
+        before = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False)])))
+        after = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, True)])))
+        differences = self.vm.layout_differences(before, after)
+        self.assertEqual(len(differences), 1, differences)
+        self.assertIn("window 11 was tiled, now floating", differences[0])
+
     def test_end_refuses_a_run_that_another_thread_owns(self):
         with tempfile.TemporaryDirectory() as home:
             current = Path(home, "current.json")
