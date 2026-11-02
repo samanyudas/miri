@@ -24,6 +24,7 @@ import signal
 import subprocess
 import sys
 import time
+from collections import Counter
 from pathlib import Path
 
 SKILL = Path(__file__).resolve().parent.parent
@@ -254,6 +255,58 @@ def focus_record(run: dict) -> dict:
     }
 
 
+def layout(state: dict) -> list[dict]:
+    """Where each managed window sits: its Space, row, the row's display, and its position among the row's tiled
+    windows, which the engine lists in column order. Keeps app names and window IDs, never titles."""
+    records = []
+    for workspace in state.get("virtual_workspaces", []):
+        windows = workspace.get("windows", [])
+        # The engine names a display per window from its frame, and a window scrolled off screen can name none.
+        displays = Counter(w["display_id"] for w in windows if w.get("display_id") is not None)
+        display = displays.most_common(1)[0][0] if displays else None
+        tiled = [w["window_id"] for w in windows if not w.get("floating")]
+        for window in windows:
+            records.append({"window_id": window["window_id"], "app": window.get("app_name"),
+                            "space": workspace.get("native_workspace_id"), "row": workspace.get("number"),
+                            "display": display,
+                            "position": None if window.get("floating") else tiled.index(window["window_id"])})
+    return records
+
+
+def layout_differences(before: list[dict], after: list[dict]) -> list[str]:
+    """Each window from `before` that is now in another strip, tiles or floats differently, or sits in another order
+    among the windows that stayed in its strip. Closed and new windows do not count, and do not shift the others."""
+    now = {w["window_id"]: w for w in after}
+    lines = []
+    stayed: dict[tuple, list[tuple[dict, dict]]] = {}
+
+    def label(window: dict) -> str:
+        return f"{window['app']} window {window['window_id']}"
+
+    def place(window: dict) -> str:
+        return f"Space {window['space']} row {window['row']} on display {window['display']}"
+
+    for was in before:
+        current = now.get(was["window_id"])
+        if current is None:
+            continue
+        if (was["space"], was["row"]) != (current["space"], current["row"]):
+            lines.append(f"{label(was)} was in {place(was)}, now in {place(current)}")
+        elif (was["position"] is None) != (current["position"] is None):
+            lines.append(f"{label(was)} was {'floating' if was['position'] is None else 'tiled'}, "
+                         f"now {'floating' if current['position'] is None else 'tiled'}, in {place(current)}")
+        elif was["position"] is not None:
+            stayed.setdefault((was["space"], was["row"]), []).append((was, current))
+    for pairs in stayed.values():
+        old = [was["window_id"] for was, _ in sorted(pairs, key=lambda pair: pair[0]["position"])]
+        new = [current["window_id"] for _, current in sorted(pairs, key=lambda pair: pair[1]["position"])]
+        for was, _ in pairs:
+            i, j = old.index(was["window_id"]), new.index(was["window_id"])
+            if i != j:
+                lines.append(f"{label(was)} was at position {i + 1} of {len(old)} in {place(was)}, now at position {j + 1}")
+    return lines
+
+
 def engine_log_since_launch() -> str:
     """The engine log text after the newest "Miri started the engine" line, across one rotation."""
     text = ""
@@ -440,6 +493,12 @@ def cmd_begin(args) -> int:
 
     if apps:
         log(run, f"previous build: pid {apps[0]['pid']} from {apps[0]['bundle']}")
+        try:
+            recorded = layout(query("state", apps[0]["pid"]))
+            (backup / "layout.json").write_text(json.dumps(recorded, indent=2) + "\n")
+            log(run, f"recorded the strip, display, and position of {len(recorded)} windows in {backup / 'layout.json'}")
+        except Failure as error:
+            log(run, f"WARNING: could not record the window layout, so `end` cannot check it: {error}")
         if not quit_app(apps[0]["pid"], run, "previous build"):
             raise Failure("The previous build did not quit. Run `verify-miri end --owner` with your owner to put it back.")
     else:
@@ -468,9 +527,10 @@ def cmd_end(args) -> int:
     if pid and alive(pid) and APP_PATTERN.match(command_of(pid)):
         quit_app(pid, run, "test build")
     previous = run.get("previous_app")
-    # When `begin` failed before it stopped the previous build, that build still runs whole, and nothing needs restoring.
-    untouched = not run.get("test_pid") and any(p["kind"] == "app" and p["bundle"] == previous for p in processes())
-    leftover = [] if untouched else processes()
+    # The previous build runs whole when `begin` failed before it stopped it, or when an earlier `end` relaunched it.
+    back = next((a["pid"] for a in running_apps() if a["bundle"] == previous
+                 and (not run.get("test_pid") or a["pid"] == run.get("restored_pid"))), None)
+    leftover = [p for p in processes() if back not in (p["pid"], p["ppid"])]
     if leftover:
         for p in leftover:
             log(run, f"STILL RUNNING: {p['kind']} pid {p['pid']} from {p['bundle']}")
@@ -478,15 +538,18 @@ def cmd_end(args) -> int:
                  "The session was not restored, the previous build was not relaunched, and the lock stays held. "
                  "Stop the process that this run started, then run `verify-miri end --owner` with this run's owner again.")
         return 1
-    backup = folder / "backup/state.json"
-    if backup.exists():
-        shutil.copy2(backup, SESSION)
-        log(run, "restored the window session backup")
-    if previous and not any(a["bundle"] == previous for a in running_apps()):
-        try:
-            launch_app(previous, run, "previous build")
-        except Failure as error:
-            problems.append(str(error))
+    if back is None:
+        backup = folder / "backup/state.json"
+        if backup.exists():
+            shutil.copy2(backup, SESSION)
+            log(run, "restored the window session backup")
+        if previous:
+            try:
+                back = launch_app(previous, run, "previous build")
+                run["restored_pid"] = back
+                save_run(run)
+            except Failure as error:
+                problems.append(str(error))
     defaults_backup = folder / "backup/defaults.plist"
     if defaults_backup.exists():
         before = plistlib.loads(defaults_backup.read_bytes()).get("managementStopped")
@@ -494,6 +557,36 @@ def cmd_end(args) -> int:
         if str(int(before or 0)) != (after or "0"):
             problems.append(f"managementStopped was {before} before the run and is {after} now. "
                             "Press Start or Stop Window Management in Settings > General to put it back.")
+    recorded = folder / "backup/layout.json"
+    if back and recorded.exists():
+        before_layout = json.loads(recorded.read_text())
+        try:
+            after_layout = layout(query("state", back))
+        except Failure as error:
+            log(run, f"PROBLEM: could not read the restored build's strips: {error}. The lock and the run record stay. "
+                     "Run `verify-miri end --owner` with this run's owner again.")
+            return 1
+        differences = layout_differences(before_layout, after_layout)
+        present = {w["window_id"] for w in after_layout}
+        gone = [f"{w['app']} window {w['window_id']}" for w in before_layout if w["window_id"] not in present]
+        if gone:
+            log(run, f"not managed now, for example because they closed during the run: {', '.join(gone)}")
+        if differences and args.accept_layout:
+            log(run, f"accepted {len(differences)} layout differences with --accept-layout")
+        elif differences:
+            for difference in differences:
+                log(run, f"MOVED: {difference}")
+            for problem in problems:
+                log(run, f"PROBLEM: {problem}")
+            log(run, "PROBLEM: the restored build does not show every window where it was at `begin`. "
+                     "The lock and the run record stay, so no other run records this layout as Sam's. "
+                     "Put each window back with `verify-miri send-cmd`, which reaches the restored build now, "
+                     "then run `verify-miri end --owner` with this run's owner again. "
+                     "Pass --accept-layout only when Sam says the current layout is right.")
+            return 1
+        else:
+            log(run, f"layout check passed: {len(before_layout) - len(gone)} windows are in the strip, display, "
+                     "and position they had at `begin`")
     released = lock("release", "--owner", run["owner"])
     log(run, (released.stdout + released.stderr).strip())
     for problem in problems:
@@ -692,7 +785,9 @@ def cmd_query(args) -> int:
 
 def cmd_send(args) -> int:
     run = load_run()
-    pid = test_pid(run)
+    # After an `end` that found moved windows, the run sends to the restored build, so the agent can put them back.
+    restored = run.get("restored_pid")
+    pid = restored if restored and alive(restored) and APP_PATTERN.match(command_of(restored)) else test_pid(run)
     engine = engine_of(pid)
     binary = f"{engine['bundle']}/Contents/Helpers/miri-engine"
     env = {**os.environ, "PANERU_MACH_SERVICE": MACH_SERVICE}
@@ -718,6 +813,8 @@ def main() -> int:
     p.set_defaults(func=cmd_begin)
     p = sub.add_parser("end", help="quit the test build, restore the session, relaunch the previous build, unlock")
     p.add_argument("--owner", required=True, help="the owner that began the run")
+    p.add_argument("--accept-layout", action="store_true",
+                   help="end even though windows are not where they were at begin. Only when Sam says the layout is right")
     p.set_defaults(func=cmd_end)
     p = sub.add_parser("renew", help="extend the live-test lock")
     p.add_argument("--owner", required=True, help="the owner that began the run")
