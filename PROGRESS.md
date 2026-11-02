@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `fix/156-display-move-strips`, based on `main` at `5f1ab7e3`
+Updated: 2026-11-03 on branch `fix/262-settings-window`, based on `main` at `57289e11`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,17 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## System Settings window after a display rearrangement
+
+[#262](https://github.com/samanyudas/miri/issues/262) is fixed in [paneru#116](https://github.com/samanyudas/paneru/pull/116), merged as `ecd584a`, which this branch pins: the System Settings window keeps its strip after you rearrange the displays in System Settings.
+macOS carries the window with its display, and a few seconds later System Settings moves it back toward its old place, with its centre and the middle of its top edge on no display.
+The engine adopted that move, and the next Space read moved the window into the other display's strip.
+Now such a stranded window counts as on its strip's display, and the engine puts it back, both when the app reports the move and at the next Space read.
+On a `main` build at 57289e11, `verify-miri` run `20261102-223015` reproduced it: System Settings and a parked Helium window joined the 27-inch strip.
+Fix builds passed 11 of 12 System Settings drags (runs `20261102-232440`, `20261102-234313`, `20261102-234952`).
+One drag back in run `20261102-234313`, on a build without trace lines, still moved System Settings to the 27-inch strip, and six later traced drags did not repeat it.
+Next: after this PR merges, verify on a merged `main` build, watch for that one failure, and close #262.
 
 ## Strips when a display moves
 
