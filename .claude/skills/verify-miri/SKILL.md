@@ -47,7 +47,9 @@ Every command below runs from the repository root of the checkout you test.
 
 - Takes the lock, or stops and prints the holder.
 - Copies `config.toml` and the app's user defaults to `<run>/backup/`.
-- Records the running build's bundle path, quits it with SIGTERM, and waits for its app and engine to exit.
+- Records the running build's bundle path.
+- Records every strip of the running build in `<run>/backup/layout.json`: each window by window ID and app name, with its Space, row, display, and position in the row.
+- Quits the running build with SIGTERM, and waits for its app and engine to exit.
 - Copies `state.json` (the window session) to `<run>/backup/`. The engine saves the session when it exits, so this copy comes after the quit.
 - Opens the test bundle and waits until it is usable: the engine runs, logs `Session restore applied`, and answers `query active`.
   A launch prints a line such as `ready after 2.3 s: Session restore applied: matched=12, strips=2, missing=0`.
@@ -119,11 +121,23 @@ Report that as a failure. Do not wait longer or retry until it passes.
 4. Opens the build that ran before, and waits for its session restore line.
 5. Compares `managementStopped` with the backup, and reports a difference.
    The command guard blocks `defaults write`, so put it back with the Settings button that the report names.
-6. Releases the lock and deletes `~/.cache/miri/verify-miri/current.json`.
+6. Compares the restored build's strips with `layout.json`.
+   It prints a `MOVED:` line for each window that is in another strip, on another display, in another position, or that floats or tiles differently.
+   It lists windows that are no longer managed, such as a window Sam closed during the run, but does not fail for them.
+   When a window moved, `end` stops here, keeps the lock and the run record, and exits 1.
+7. Releases the lock and deletes `~/.cache/miri/verify-miri/current.json`.
 
 It never deletes the run folder.
-After `end`, check that `log.txt` shows `matched=<n>, ... missing=0` for the restored build, the same count as at `begin`.
-A lower count with `missing=0` usually means Sam closed a window during the run.
+
+When `end` prints `MOVED:` lines, put each window back with `V send-cmd`, which reaches the restored build at this point.
+For example, `window movedisplay east` moves the focused window to the display on the right, and `window swap west` moves it one column left.
+Then run `end` again with the same `--owner`.
+It does not relaunch anything, and checks the layout again.
+Pass `--accept-layout` only when Sam says that the current layout is right.
+
+The `matched` count in the session restore line does not prove that the windows are back.
+The session restore keeps each window in the Space where macOS files it now, so `matched` also counts a window on the wrong display.
+The layout check in step 6 is the proof.
 
 ## Lessons from earlier live runs
 
