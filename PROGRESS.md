@@ -16,14 +16,14 @@ The public release path and the complete acceptance runs follow.
 
 ## Stack overlap with real minimum heights
 
-Branch `fix/issue-124` pins engine `c339eac` from [paneru#111](https://github.com/samanyudas/paneru/pull/111) for [#124](https://github.com/samanyudas/miri/issues/124).
+Branch `fix/issue-124` pins engine `cd6b8b5`, the merge of [paneru#111](https://github.com/samanyudas/paneru/pull/111) for [#124](https://github.com/samanyudas/miri/issues/124).
 A stack now overlaps only when its windows' known minimum heights, with a top bar for each window of unknown minimum, do not fit the column.
 Before, every window counted as at least 200 points, so a stack overlapped although its windows could shrink further.
 A `verify-miri` run on 2 November 2026 stacked two plain fixtures with an 1100 point minimum fixture on the 1402 point primary column.
 The `main` build overlapped them: 1402, 1108, and 200 point rows.
 The fixed build gave 147, 1108, and 147 point rows with no overlap, in both the engine and the macOS window bounds.
 With a 300 point minimum on one plain fixture, the fixed build recorded that minimum after the refusal, overlapped the stack, and kept the same frames 4 seconds later.
-`make compat` fails until Sam merges the engine PR and the pin moves to the merged commit.
+The merge commit has the same tree as `c339eac`, the engine head that the live runs and the Sol review used.
 
 ## Engine lifecycle model check
 
