@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `fix/issue-220`, based on `main` at `c7b11455`
+Updated: 2026-11-02 on branch `fix/issue-153`, based on `main` at `70ad7f0f`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,18 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Column widths across a relaunch
+
+Branch `fix/issue-153` makes a Miri relaunch keep each column's width, for [#153](https://github.com/samanyudas/miri/issues/153).
+On quit, exit cleanup returns each tiled window to its frame from when that engine started, and the next engine read column widths from those frames.
+The engine change in [paneru#112](https://github.com/samanyudas/paneru/pull/112) saves each tiled window's width as a share of its strip's viewport, and session restore gives the window that width again.
+A `verify-miri` run on 2 November 2026 narrowed a fixture column, relaunched Miri, widened it, and relaunched again.
+On the `main` build at 70ad7f0f the column came back at 638 points instead of 842, and on the fix build it kept 842, in the engine state and in the window image.
+`make verify-engine-lifecycle` passes, and its model does not cover window frames or session restore.
+Sam merged paneru#112 as `5f22d8e`, which also holds the #124 engine change from paneru#111.
+This branch pins the tested commit `7b27b40`, which is on `miri/v0.5.2`, so it delivers #153 without the #124 change.
+Next: Sam reviews and merges the Miri PR, and then #153 is verified on a merged `main` build and closed.
 
 ## Engine lifecycle model check
 
