@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `docs/69-done`, based on `main` at `cc46a347`
+Updated: 2026-11-02 on branch `fix/253-finder-desktop`, based on `main` at `de3e051f`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,20 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Focus on an empty display
+
+[#253](https://github.com/samanyudas/miri/issues/253) is implemented on branch `fix/253-finder-desktop`, which pins engine `53226d6`, the merge of [paneru#114](https://github.com/samanyudas/paneru/pull/114).
+Its tree matches the tested commit `e6216a5`.
+On macOS 27.0.1, WindowManager puts an "Event Shield Window" over each display at the desktop-icon level, in front of Finder's desktop window.
+The engine took the first window at that level, so ⌃⌥⌘ toward an empty display brought WindowManager to the front, which showed the desktop of the display that had focus and left focus there.
+The engine now takes only Finder's desktop window.
+A probe that made the engine's macOS calls kept focus on the 27-inch display 3 times out of 3 with the shield window, and moved it to the built-in display 3 times out of 3 with Finder's window.
+On a `main` build at de3e051f, ⌃⌥⌘← from T3 Code toward the built-in display, emptied with a virtual workspace, failed 2 of 4 times.
+On the fix build with engine `e6216a5`, it worked 6 of 6 times, and ⌃⌥⌘→ returned to T3 Code 3 of 3 times.
+Sam checked by hand on the first fix build, engine `362988a`, with the built-in display on an empty native Space, and the first press moved focus there from T3 Code and from Finder.
+The final engine commit `e6216a5` only splits the window choice out for a unit test, and the 6 key presses above ran on it.
+[#177](https://github.com/samanyudas/miri/issues/177) did not reproduce on `main` on 2 November 2026 and waits on `needs-info`.
 
 ## Stack overlap with real minimum heights
 
