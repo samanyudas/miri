@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `docs/156-done`, based on `main` at `7227f856`
+Updated: 2026-11-03 on branch `docs/156-done`, based on `main` at `6219fa9a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,16 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## System Settings window after a display rearrangement
+
+[#262](https://github.com/samanyudas/miri/issues/262) is fixed in [paneru#116](https://github.com/samanyudas/paneru/pull/116) and [#268](https://github.com/samanyudas/miri/pull/268), on `main` at `d77f8d46` with engine `ecd584a`, and is closed.
+After you rearrange the displays in System Settings, the System Settings window keeps its strip.
+A window with its centre and the middle of its top edge on no display now counts as on its strip's display, and the engine puts it back.
+On `main` at `d77f8d46`, `verify-miri` run `20261103-004356` kept every strip through 4 drags.
+A traced build of the same engine kept every strip through 20 more drags (run `20261103-005228`), and the issue comments record each run.
+One drag back on a fix build still moved System Settings into the other strip, in 1 of 36 drags, with no known cause.
+[Known limitations](docs/limitations.md#displays) records it.
 
 ## Strips when a display moves
 

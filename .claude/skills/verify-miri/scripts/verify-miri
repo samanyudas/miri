@@ -10,6 +10,8 @@ A run swaps the running Miri Developer for a test build, drives it, and puts eve
 
 .claude/skills/verify-miri/SKILL.md explains each step. Evidence stays in ~/.cache/miri/verify-miri/runs/<run id>/.
 """
+from __future__ import annotations
+
 import argparse
 import datetime
 import hashlib
@@ -127,7 +129,7 @@ def wait(condition, seconds: float, step: float = 0.1):
 
 
 def idle_seconds() -> int | None:
-    out = subprocess.run(["ioreg", "-c", "IOHIDSystem"], capture_output=True, text=True).stdout
+    out = subprocess.run(["/usr/sbin/ioreg", "-c", "IOHIDSystem"], capture_output=True, text=True).stdout
     match = re.search(r'"HIDIdleTime" = (\d+)', out)
     return int(match.group(1)) // 1_000_000_000 if match else None
 
@@ -357,7 +359,7 @@ def cmd_doctor(args) -> int:
     report(not orphans, "no engine runs without its app", "Stop the orphan engine pid that this run started, if any.")
     for engine in engines:
         binary = Path(engine["bundle"]) / "Contents/Helpers/miri-engine"
-        listed = subprocess.run(["lsof", "-a", "-p", str(engine["pid"]), "-d", "txt", "-Fi"], capture_output=True, text=True).stdout
+        listed = subprocess.run(["/usr/sbin/lsof", "-a", "-p", str(engine["pid"]), "-d", "txt", "-Fi"], capture_output=True, text=True).stdout
         inode = str(binary.stat().st_ino) if binary.exists() else "missing"
         report(f"i{inode}" in listed.split(), f"engine pid {engine['pid']} runs the binary now on disk",
                "The bundle was rebuilt after launch. Quit and relaunch it.")
@@ -612,7 +614,7 @@ def cmd_snapshot(args) -> int:
     for item in run["fixtures"]:
         if item.get("window_id") and alive(item["pid"]):
             image = folder / f"{args.label}-{item['name']}.png"
-            subprocess.run(["screencapture", "-x", "-o", "-l", str(item["window_id"]), str(image)], check=False)
+            subprocess.run(["/usr/sbin/screencapture", "-x", "-o", "-l", str(item["window_id"]), str(image)], check=False)
             if image.exists():
                 shots.append(image.name)
     log(run, f"snapshot {args.label}: engine focus {record['engine_focused_fixture'] or record['engine_focused_window_id']}, "
