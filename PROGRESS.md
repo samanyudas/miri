@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `fix/issue-153`, based on `main` at `70ad7f0f`
+Updated: 2026-11-02 on branch `docs/153-done`, based on `main` at `4c30e66b`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,15 +16,12 @@ The public release path and the complete acceptance runs follow.
 
 ## Column widths across a relaunch
 
-Branch `fix/issue-153` makes a Miri relaunch keep each column's width, for [#153](https://github.com/samanyudas/miri/issues/153).
+[#153](https://github.com/samanyudas/miri/issues/153) is done and closed on 2 November 2026: a Miri relaunch keeps each column's width.
 On quit, exit cleanup returns each tiled window to its frame from when that engine started, and the next engine read column widths from those frames.
 The engine change in [paneru#112](https://github.com/samanyudas/paneru/pull/112) saves each tiled window's width as a share of its strip's viewport, and session restore gives the window that width again.
-A `verify-miri` run on 2 November 2026 narrowed a fixture column, relaunched Miri, widened it, and relaunched again.
-On the `main` build at 70ad7f0f the column came back at 638 points instead of 842, and on the fix build it kept 842, in the engine state and in the window image.
-`make verify-engine-lifecycle` passes, and its model does not cover window frames or session restore.
-Sam merged paneru#112 as `5f22d8e`, which also holds the #124 engine change from paneru#111.
-This branch pins the tested commit `7b27b40`, which is on `miri/v0.5.2`, so it delivers #153 without the #124 change.
-Next: Sam reviews and merges the Miri PR, and then #153 is verified on a merged `main` build and closed.
+[#251](https://github.com/samanyudas/miri/pull/251) pins its tested commit `7b27b40`, not the merge `5f22d8e`, which also holds the #124 engine change from paneru#111.
+On a build of `main` at 4c30e66b, `verify-miri` run `20261102-165439` resized a single column and a stacked column twice, with a relaunch after each resize, and both kept 631 and then 956 points.
+Not verified: real apps with their own size limits, a second display, a Dock on the side, and a display change between quit and relaunch.
 
 ## Engine lifecycle model check
 
