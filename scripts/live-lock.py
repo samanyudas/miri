@@ -3,6 +3,8 @@
 
 docs/AI-CONTRIBUTIONS.md#take-the-live-test-lock explains when a run needs the lock.
 """
+from __future__ import annotations
+
 import argparse
 import datetime
 import os
