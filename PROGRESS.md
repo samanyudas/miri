@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-03 on branch `docs/262-limitation`, based on `main` at `d77f8d46`
+Updated: 2026-11-03 on branch `docs/156-done`, based on `main` at `6219fa9a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -26,7 +26,8 @@ One drag back on a fix build still moved System Settings into the other strip, i
 
 ## Strips when a display moves
 
-[#156](https://github.com/samanyudas/miri/issues/156) is fixed in [paneru#115](https://github.com/samanyudas/paneru/pull/115), merged as `6cb0330`, which this branch pins: moving a display beside another no longer moves windows between the two displays' strips.
+[#156](https://github.com/samanyudas/miri/issues/156) is done and closed on 2 November 2026: moving a display beside another no longer moves windows between the two displays' strips.
+[#260](https://github.com/samanyudas/miri/pull/260) pinned engine `6cb0330`, the merge of [paneru#115](https://github.com/samanyudas/paneru/pull/115).
 When the arrangement changes, macOS moves the windows the engine parks past a display's edge and files each one in the Space of the display that now holds its centre.
 The engine's display-change read took that report, and display homes kept the move because the window's own Space still existed.
 Now the engine records the displays present when a burst of display events begins, and during that burst a report never moves a window between two of them.
@@ -34,8 +35,8 @@ A display plugged in during the burst still gets the windows macOS files on it.
 On a `main` build at 5f1ab7e3, `verify-miri` run `20261102-181845` moved display 3 to the left of, above, and to the right of the built-in display, and windows changed strips at every move.
 On the fix commit `118d277`, run `20261102-184144` kept both strips' windows identical at every move.
 The engine test `moving_a_display_beside_another_keeps_every_window_in_its_strip` fails without the fix.
+On a build of `main` at 7227f856, `verify-miri` run `20261102-190025` kept every strip's windows the same after all 4 display moves.
 Not verified: a display moved by hand in System Settings, the built-in display moved instead of the external one, and a burst that adds a display and moves another at once.
-Next: after the Miri PR merges, verify on a merged `main` build and close #156.
 
 ## Focus on an empty display
 
