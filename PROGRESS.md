@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `fix/issue-124`, based on `main` at `70ad7f0f`
+Updated: 2026-11-02 on branch `fix/issue-124`, based on `main` at `4c30e66b`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,14 +16,28 @@ The public release path and the complete acceptance runs follow.
 
 ## Stack overlap with real minimum heights
 
-Branch `fix/issue-124` pins engine `cd6b8b5`, the merge of [paneru#111](https://github.com/samanyudas/paneru/pull/111) for [#124](https://github.com/samanyudas/miri/issues/124).
+Branch `fix/issue-124` pins engine `5f22d8e` for [#124](https://github.com/samanyudas/miri/issues/124).
+That commit merges [paneru#112](https://github.com/samanyudas/paneru/pull/112) for #153 on top of `cd6b8b5`, the merge of [paneru#111](https://github.com/samanyudas/paneru/pull/111).
 A stack now overlaps only when its windows' known minimum heights, with a top bar for each window of unknown minimum, do not fit the column.
 Before, every window counted as at least 200 points, so a stack overlapped although its windows could shrink further.
 A `verify-miri` run on 2 November 2026 stacked two plain fixtures with an 1100 point minimum fixture on the 1402 point primary column.
 The `main` build overlapped them: 1402, 1108, and 200 point rows.
 The fixed build gave 147, 1108, and 147 point rows with no overlap, in both the engine and the macOS window bounds.
 With a 300 point minimum on one plain fixture, the fixed build recorded that minimum after the refusal, overlapped the stack, and kept the same frames 4 seconds later.
-The merge commit has the same tree as `c339eac`, the engine head that the live runs and the Sol review used.
+The live runs and the Sol review used engine `c339eac`, which has the same tree as `cd6b8b5`.
+
+## Column widths across a relaunch
+
+Branch `fix/issue-153` makes a Miri relaunch keep each column's width, for [#153](https://github.com/samanyudas/miri/issues/153).
+On quit, exit cleanup returns each tiled window to its frame from when that engine started, and the next engine read column widths from those frames.
+The engine change in [paneru#112](https://github.com/samanyudas/paneru/pull/112) saves each tiled window's width as a share of its strip's viewport, and session restore gives the window that width again.
+A `verify-miri` run on 2 November 2026 narrowed a fixture column, relaunched Miri, widened it, and relaunched again.
+On the `main` build at 70ad7f0f the column came back at 638 points instead of 842, and on the fix build it kept 842, in the engine state and in the window image.
+`make verify-engine-lifecycle` passes, and its model does not cover window frames or session restore.
+Sam merged paneru#112 as `5f22d8e`, which also holds the #124 engine change from paneru#111.
+[#251](https://github.com/samanyudas/miri/pull/251) pinned the tested commit `7b27b40`, which is on `miri/v0.5.2`, so it delivered #153 without the #124 change.
+Branch `fix/issue-124` moves the pin to `5f22d8e`, which holds both changes.
+Next: #153 is verified on a merged `main` build and closed.
 
 ## Engine lifecycle model check
 
