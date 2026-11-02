@@ -75,7 +75,7 @@ Each drive command logs to `<run>/log.txt` with a timestamp.
 
 | Command | It does |
 | --- | --- |
-| `V fixture --count 2` | Opens AXFixture windows named `fixture-1`, `fixture-2`, and so on. Each one is wrapped in a minimal app in `<run>/fixtures/` and opened with `open`, so macOS brings it forward as when a person opens an app. Each window can resize, so the engine tiles it as a column. `--fixed` makes a window that cannot resize, which the engine floats. |
+| `V fixture --count 2` | Opens AXFixture windows named `fixture-1`, `fixture-2`, and so on. Each one is wrapped in a minimal app in `<run>/fixtures/` and opened with `open`, so macOS brings it forward as when a person opens an app. Each window can resize, so the engine tiles it as a column. `--fixed` makes a window that cannot resize, which the engine floats. `--min-height 1100` makes a window that refuses a frame shorter than 1100 points, as an app with a minimum height does. |
 | `V key "ctrl+alt-leftarrow"` | Presses a chord, written as in `config.toml`, at the HID event tap. |
 | `V focused [--wait-for fixture-1]` | Prints the engine's focused window and macOS's frontmost app, named as fixtures. With `--wait-for`, exits 1 unless both views show that fixture within `--timeout` seconds (3 by default). |
 | `V snapshot <label>` | Writes `<label>.json` (the focus record and every fixture's frame, focus, visibility, and floating state) and one PNG per fixture window. |
