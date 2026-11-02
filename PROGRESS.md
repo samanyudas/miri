@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-02 on branch `docs/153-done`, based on `main` at `0d878f80`
+Updated: 2026-11-02 on branch `docs/124-done`, based on `main` at `c0f26f92`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,15 +16,13 @@ The public release path and the complete acceptance runs follow.
 
 ## Stack overlap with real minimum heights
 
-Branch `fix/issue-124` pins engine `5f22d8e` for [#124](https://github.com/samanyudas/miri/issues/124).
-That commit merges [paneru#112](https://github.com/samanyudas/paneru/pull/112) for #153 on top of `cd6b8b5`, the merge of [paneru#111](https://github.com/samanyudas/paneru/pull/111).
-A stack now overlaps only when its windows' known minimum heights, with a top bar for each window of unknown minimum, do not fit the column.
-Before, every window counted as at least 200 points, so a stack overlapped although its windows could shrink further.
-A `verify-miri` run on 2 November 2026 stacked two plain fixtures with an 1100 point minimum fixture on the 1402 point primary column.
-The `main` build overlapped them: 1402, 1108, and 200 point rows.
-The fixed build gave 147, 1108, and 147 point rows with no overlap, in both the engine and the macOS window bounds.
-With a 300 point minimum on one plain fixture, the fixed build recorded that minimum after the refusal, overlapped the stack, and kept the same frames 4 seconds later.
-The live runs and the Sol review used engine `c339eac`, which has the same tree as `cd6b8b5`.
+[#124](https://github.com/samanyudas/miri/issues/124) is done and closed on 2 November 2026: a stack overlaps only when its windows' real minimum heights do not fit the column.
+The engine change in [paneru#111](https://github.com/samanyudas/paneru/pull/111) sums each window's known minimum height, with a top bar for each window of unknown minimum, instead of 200 points per window.
+[#252](https://github.com/samanyudas/miri/pull/252) pinned engine `5f22d8e`, which holds paneru#111 and paneru#112, and added `verify-miri fixture --min-height`.
+On a build of `main` at 0d878f80, `verify-miri` on display 3, a 1042 point column, stacked two plain fixtures with an 800 point minimum fixture.
+The rows were 117, 808, and 117 points with no overlap, where the `main` build before #252 gave 1042, 808, and 200 with overlap.
+With a 300 point minimum on one plain fixture, the stack overlapped after the refusal, and the frames held 4 seconds later.
+Not verified: real apps such as the #93 case, and a hardware check by Sam.
 
 ## Column widths across a relaunch
 
