@@ -61,6 +61,23 @@ class VerifyMiriTest(unittest.TestCase):
     def test_evidence_lives_outside_the_repository(self):
         self.assertNotIn(str(ROOT), str(self.vm.HOME))
 
+    def test_runs_on_the_macos_system_python(self):
+        # T3 Code agent shells start with only the system paths on PATH, and macOS ships Python 3.9 there.
+        system = "/usr/bin/python3"
+        version = subprocess.run([system, "-c", "import sys; print(sys.version_info < (3, 10))"],
+                                 capture_output=True, text=True) if Path(system).exists() else None
+        if not version or version.stdout.strip() != "True":
+            self.skipTest(f"{system} is missing or is Python 3.10 or later")
+        with tempfile.TemporaryDirectory() as home:
+            env = {"PATH": "/usr/bin:/bin", "HOME": os.environ["HOME"], "MIRI_LIVE_LOCK": str(Path(home, "lock"))}
+            usage = subprocess.run([system, str(SCRIPT), "--help"], capture_output=True, text=True, env=env)
+            self.assertEqual(usage.returncode, 0, usage.stderr)
+            self.assertIn("doctor", usage.stdout)
+            lock = subprocess.run([system, str(ROOT / "scripts/live-lock.py"), "status"], capture_output=True,
+                                  text=True, env=env)
+            self.assertEqual(lock.returncode, 0, lock.stderr)
+            self.assertIn("free", lock.stdout)
+
     def test_end_refuses_a_run_that_another_thread_owns(self):
         with tempfile.TemporaryDirectory() as home:
             current = Path(home, "current.json")
