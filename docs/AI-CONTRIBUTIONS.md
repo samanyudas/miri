@@ -63,6 +63,21 @@ The lock does not cover Sam.
 If Sam is using the Mac, ask before a live run.
 A small `HIDIdleTime` in `ioreg -c IOHIDSystem` shows recent keyboard or trackpad use.
 
+## Hand a check to Sam
+
+Some checks need Sam's hands, such as trackpad swipes, title-bar drags, and Space switches.
+Before you ask Sam for one, make sure the build you want checked is the Miri Developer that runs now.
+
+1. Build the bundle outside `.build/app`, or copy it to a folder that no later build overwrites.
+   A rebuild of `.build/app` replaces the bundle that Sam runs.
+2. Quit the running Miri Developer, open that bundle, and wait until its engine answers `query active`.
+   `V end` from [verify-miri](../.claude/skills/verify-miri/SKILL.md) relaunches the previous build, so do this after `end`.
+3. Confirm the running build with `ps -axww`: the process path must be the bundle from step 1.
+4. In the request, name the commit, the engine commit, and the bundle path that runs, and the steps to try.
+
+If you cannot launch the build, say so in the request instead of asking Sam to test.
+After Sam answers, leave that build running unless Sam asks for another one.
+
 ## Capture evidence
 
 Window evidence must never show Sam's desktop.
