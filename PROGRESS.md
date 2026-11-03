@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-03 on branch `fix/issue-143`, based on `main` at `c356ad7a`
+Updated: 2026-11-03 on branch `docs/issue-143-closed`, based on `main` at `49ff99fc`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,13 +16,14 @@ The public release path and the complete acceptance runs follow.
 
 ## Mission Control drag to the other display
 
-[#143](https://github.com/samanyudas/miri/issues/143) is fixed in [paneru#118](https://github.com/samanyudas/paneru/pull/118) and [paneru#119](https://github.com/samanyudas/paneru/pull/119), with the engine pin at `af52f84` in this branch.
+[#143](https://github.com/samanyudas/miri/issues/143) is fixed in [paneru#118](https://github.com/samanyudas/paneru/pull/118) and [paneru#119](https://github.com/samanyudas/paneru/pull/119), merged to `main` in [#272](https://github.com/samanyudas/miri/pull/272) with the engine pin at `af52f84`, and closed.
 A window you drag in Mission Control onto the other display's desktop now joins that desktop's strip and stays there.
 macOS 27 reports the drop's new Space about 300 ms before the window's new frame, so the engine refused the report and then wrote the window back to its old strip.
 The engine now reads every Space again when a native move carries a window onto another display, and when Mission Control closes.
 On `main` at `c356ad7a`, `verify-miri` run `20261103-110506` sent the window back on every drop.
 With the fix, run `20261103-111539` kept it where each of Sam's drops put it, across both displays and both desktops of the built-in display.
-Next: once this PR merges, verify on `main`, close #143, and tick the #89 checkbox, as #142 is already closed.
+On `main` at `49ff99fc`, run `20261103-115304` kept the window on the built-in display after each drop.
+The last open [#89](https://github.com/samanyudas/miri/issues/89) checkbox is now ticked.
 
 ## System Settings window after a display rearrangement
 
