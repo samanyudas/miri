@@ -357,7 +357,7 @@ Off-screen windows during a lock may still drop through two other engine paths, 
 
 ## Side-by-side displays
 
-[#103](https://github.com/samanyudas/miri/issues/103) is open with 3 of its 6 criteria proven on `main` at c356ad7a.
+[#103](https://github.com/samanyudas/miri/issues/103) is open with 4 of its 6 criteria proven.
 It closed on 3 November 2026 and reopened the same day, because 3 criteria were only partly checked.
 [#156](https://github.com/samanyudas/miri/issues/156) fixed the last criterion that failed outright, a display move that moved windows between strips.
 `verify-miri` run `20261103-021450` moved the built-in display below, left, right, beside only the lower part of the 27-inch display, and below again.
@@ -367,10 +367,12 @@ The same script on `main` at e1f74751, before [#148](https://github.com/samanyud
 Option and scroll wheel scrolled each strip without moving the other (run `20261103-022523`).
 Still open:
 - A four-finger trackpad swipe on each display, side by side, by hand.
-- The cue on the right shared edge. The run saw the slice photo only on display 3's left edge.
 - Sam's call on whether a System Settings window that moved strips once in 36 Arrange-sheet drags, recorded under [#262](https://github.com/samanyudas/miri/issues/262), blocks the strip criterion.
 
 The [reopen comment](https://github.com/samanyudas/miri/issues/103#issuecomment-6593084386) records each criterion and gap.
+On `main` at a1d0e5ac with an HP 840 G9 AiO beside the built-in display, runs `20261103-125245`, `20261103-125446`, and `20261103-125716` saw an engine slice panel on the left and the right shared edges.
+With a maximized window focused, no panel shows, which matches free edges, where the maximized window covers the slivers.
+The [cue comment](https://github.com/samanyudas/miri/issues/103#issuecomment-6593902863) records these runs.
 
 [#103](https://github.com/samanyudas/miri/issues/103) is fixed by [engine PR #76](https://github.com/samanyudas/paneru/pull/76).
 The engine hid an off-screen column by leaving a sliver at mid-height and hanging the rest of the window past the display edge.
