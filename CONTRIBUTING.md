@@ -130,8 +130,11 @@ GitHub Actions does not manage issue completion, and silence is never evidence o
    Record Sam's hardware results where required, and distinguish them from automated observations.
 4. Post a concise issue comment with the verified artifact, applicable revisions, commands, observed results, evidence links, and remaining limits.
    If any criterion is incomplete, partial, or unverified, record the gaps and leave the issue open.
-5. When evidence proves every criterion, close the issue with `gh issue close <number> --reason completed`.
-6. Search [Known limitations](docs/limitations.md) for the issue number.
+5. In the issue body, tick the checkbox of each criterion that the comment proves, with `gh issue edit <number> --body-file <file>`.
+   Leave a criterion's box unticked while its evidence is missing or partial.
+   Tick a box that another issue names, such as one on a parent issue, when its condition holds.
+6. When evidence proves every criterion, close the issue with `gh issue close <number> --reason completed`.
+7. Search [Known limitations](docs/limitations.md) for the issue number.
    Remove or narrow each entry that the verified fix clears, in a pull request.
    Keep the entry if the limitation remains, and add the gap that the issue comment records.
 
