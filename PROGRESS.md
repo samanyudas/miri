@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-04 on branch `impl/104-display-crossing`, based on `main` at `61026f2c`
+Updated: 2026-11-05 on branch `fix/issue-159`, based on `main` at `b42ebae4`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,15 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Columns leaving a shared edge
+
+[#159](https://github.com/samanyudas/miri/issues/159) has an engine fix in [paneru#120](https://github.com/samanyudas/paneru/pull/120), merged as `4dc453f`, which this branch pins.
+With **Show window contents on edges next to another display** off, a column that leaves across an edge shared with another display now slides with the row before it tucks.
+Before, it vanished on the first frame.
+It stops at about its midpoint, which [known limitations](docs/limitations.md#displays) records.
+`verify-miri` run `20261103-112536` on `main` showed the jump in 3 of 3 presses, and run `20261103-113541` on the fix showed the slide in 3 of 3.
+Next: recheck on the merged engine `4dc453f`, then verify the landed build before issue closure.
 
 ## Plain horizontal shortcuts cross touching displays
 
