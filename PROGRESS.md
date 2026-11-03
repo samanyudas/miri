@@ -357,15 +357,20 @@ Off-screen windows during a lock may still drop through two other engine paths, 
 
 ## Side-by-side displays
 
-[#103](https://github.com/samanyudas/miri/issues/103) is done and closed on 3 November 2026: a column hidden off screen stays on its own display, and its strip keeps it, with the displays side by side.
-[#156](https://github.com/samanyudas/miri/issues/156) fixed the last failing criterion, a display move that moved windows between strips.
-On a build of `main` at c356ad7a, `verify-miri` run `20261103-021450` moved the built-in display below, left, right, beside only the lower part of the 27-inch display, and below again.
+[#103](https://github.com/samanyudas/miri/issues/103) is open with 3 of its 6 criteria proven on `main` at c356ad7a.
+It closed on 3 November 2026 and reopened the same day, because 3 criteria were only partly checked.
+[#156](https://github.com/samanyudas/miri/issues/156) fixed the last criterion that failed outright, a display move that moved windows between strips.
+`verify-miri` run `20261103-021450` moved the built-in display below, left, right, beside only the lower part of the 27-inch display, and below again.
 It scrolled display 3's strip to both ends in each arrangement, and display 1's strip in the left arrangement.
 In all 20 steps, no window had its centre on another display, and every window stayed in its strip.
 The same script on `main` at e1f74751, before [#148](https://github.com/samanyudas/miri/pull/148), failed at launch and at every side-by-side step (run `20261103-021135`).
 Option and scroll wheel scrolled each strip without moving the other (run `20261103-022523`).
-Not verified: a four-finger trackpad swipe by hand, and three displays.
-The [issue comment](https://github.com/samanyudas/miri/issues/103#issuecomment-6591650888) records each criterion.
+Still open:
+- A four-finger trackpad swipe on each display, side by side, by hand.
+- The cue on the right shared edge. The run saw the slice photo only on display 3's left edge.
+- Sam's call on whether a System Settings window that moved strips once in 36 Arrange-sheet drags, recorded under [#262](https://github.com/samanyudas/miri/issues/262), blocks the strip criterion.
+
+The [reopen comment](https://github.com/samanyudas/miri/issues/103#issuecomment-6593084386) records each criterion and gap.
 
 [#103](https://github.com/samanyudas/miri/issues/103) is fixed by [engine PR #76](https://github.com/samanyudas/paneru/pull/76).
 The engine hid an off-screen column by leaving a sliver at mid-height and hanging the rest of the window past the display edge.
