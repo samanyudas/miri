@@ -348,7 +348,8 @@ Off-screen windows during a lock may still drop through two other engine paths, 
 
 [#103](https://github.com/samanyudas/miri/issues/103) is done and closed on 3 November 2026: a column hidden off screen stays on its own display, and its strip keeps it, with the displays side by side.
 [#156](https://github.com/samanyudas/miri/issues/156) fixed the last failing criterion, a display move that moved windows between strips.
-On a build of `main` at c356ad7a, `verify-miri` run `20261103-021450` moved the built-in display below, left, right, beside only the lower part of the 27-inch display, and below again, and scrolled both strips to both ends at each step.
+On a build of `main` at c356ad7a, `verify-miri` run `20261103-021450` moved the built-in display below, left, right, beside only the lower part of the 27-inch display, and below again.
+It scrolled display 3's strip to both ends in each arrangement, and display 1's strip in the left arrangement.
 In all 20 steps, no window had its centre on another display, and every window stayed in its strip.
 The same script on `main` at e1f74751, before [#148](https://github.com/samanyudas/miri/pull/148), failed at launch and at every side-by-side step (run `20261103-021135`).
 Option and scroll wheel scrolled each strip without moving the other (run `20261103-022523`).
