@@ -66,16 +66,18 @@ A small `HIDIdleTime` in `ioreg -c IOHIDSystem` shows recent keyboard or trackpa
 ## Hand a check to Sam
 
 Some checks need Sam's hands, such as trackpad swipes, title-bar drags, and Space switches.
-Before you ask Sam for one, make sure the build you want checked is the Miri Developer that runs now.
+When you ask Sam for one, the build under test becomes Sam's build and stays running.
+Never put the previous build back before Sam checks.
 
 1. Build the bundle outside `.build/app`, or copy it to a folder that no later build overwrites.
-   A rebuild of `.build/app` replaces the bundle that Sam runs.
-2. Quit the running Miri Developer, open that bundle, and wait until its engine answers `query active`.
-   `V end` from [verify-miri](../.claude/skills/verify-miri/SKILL.md) relaunches the previous build, so do this after `end`.
-3. Confirm the running build with `ps -axww`: the process path must be the bundle from step 1.
-4. In the request, name the commit, the engine commit, and the bundle path that runs, and the steps to try.
+   A rebuild of the bundle replaces the app that Sam runs.
+2. Swap it in with `V begin --app <bundle>` from [verify-miri](../.claude/skills/verify-miri/SKILL.md), and finish any automated drive.
+3. Run `V end --owner <owner> --keep-test-build`.
+   It stops the run's fixtures and releases the lock, but leaves the test build running and does not relaunch the previous build.
+4. Confirm with `ps -axww` that the running Miri Developer comes from the bundle in step 1.
+5. In the request, name the commit, the engine commit, the bundle path, and the steps to try.
 
-If you cannot launch the build, say so in the request instead of asking Sam to test.
+If the build under test does not run, say so instead of asking Sam to test.
 After Sam answers, leave that build running unless Sam asks for another one.
 
 ## Capture evidence

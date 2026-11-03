@@ -7,6 +7,7 @@ A run swaps the running Miri Developer for a test build, drives it, and puts eve
   verify-miri begin --owner "<thread>"       take the live-test lock, back up the window session, launch the test build
   verify-miri <drive commands>               fixture, key, snapshot, focused, ax, settings, standin, watch, query, send-cmd
   verify-miri end --owner "<thread>"         quit the test build, restore the session, relaunch the previous build, release the lock
+  verify-miri end --keep-test-build ...      stop the fixtures, keep the test build running for Sam, release the lock
 
 .claude/skills/verify-miri/SKILL.md explains each step. Evidence stays in ~/.cache/miri/verify-miri/runs/<run id>/.
 """
@@ -524,6 +525,8 @@ def cmd_end(args) -> int:
                 os.kill(pid, signal.SIGKILL)
             log(run, f"stopped {item['name']} pid {pid}")
     pid = run.get("test_pid")
+    if args.keep_test_build:
+        return keep_test_build(run, pid)
     if pid and alive(pid) and APP_PATTERN.match(command_of(pid)):
         quit_app(pid, run, "test build")
     previous = run.get("previous_app")
@@ -594,6 +597,27 @@ def cmd_end(args) -> int:
     log(run, f"run ended. Evidence kept in {folder}")
     CURRENT.unlink(missing_ok=True)
     return 1 if problems else 0
+
+
+def keep_test_build(run, pid) -> int:
+    """Leave the test build running as Sam's build, so a hand check runs on the build under test."""
+    if not (pid and alive(pid) and APP_PATTERN.match(command_of(pid))):
+        log(run, "PROBLEM: the test build does not run, so it cannot stay as Sam's build. "
+                 "Run `verify-miri end --owner` with this run's owner and without --keep-test-build to put the previous build back.")
+        return 1
+    others = [p for p in running_apps() if p["pid"] != pid]
+    if others:
+        for p in others:
+            log(run, f"STILL RUNNING: pid {p['pid']} from {p['bundle']}")
+        log(run, "PROBLEM: another Miri Developer runs next to the test build. The lock stays held.")
+        return 1
+    log(run, f"kept the test build as Sam's build: pid {pid} from {run['test_app']}. "
+             f"The previous build {run.get('previous_app')} and the session backup were not put back")
+    released = lock("release", "--owner", run["owner"])
+    log(run, (released.stdout + released.stderr).strip())
+    log(run, f"run ended. Evidence kept in {run['dir']}")
+    CURRENT.unlink(missing_ok=True)
+    return 0
 
 
 def cmd_renew(args) -> int:
@@ -815,6 +839,9 @@ def main() -> int:
     p.add_argument("--owner", required=True, help="the owner that began the run")
     p.add_argument("--accept-layout", action="store_true",
                    help="end even though windows are not where they were at begin. Only when Sam says the layout is right")
+    p.add_argument("--keep-test-build", action="store_true",
+                   help="leave the test build running as Sam's build, for a hand check by Sam. "
+                        "Stops the run's fixtures, does not relaunch the previous build or restore the session")
     p.set_defaults(func=cmd_end)
     p = sub.add_parser("renew", help="extend the live-test lock")
     p.add_argument("--owner", required=True, help="the owner that began the run")

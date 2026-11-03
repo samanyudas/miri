@@ -22,6 +22,7 @@ Every command below runs from the repository root of the checkout you test.
   When `begin` fails because another thread's run is in progress, wait for the lock. Never run `end` for it.
   `begin` takes the [live-test lock](../../../docs/AI-CONTRIBUTIONS.md#take-the-live-test-lock), backs up the window session, and swaps in the test build.
   `end` puts back the session and Sam's build, and releases the lock.
+  Before you ask Sam for a hand check, run `end --keep-test-build` instead, so the test build stays as Sam's build.
   Run `end` also after a failure.
 - Reading `V doctor`, `V query`, logs, or the AX tree is not a drive and needs no lock.
 - Run `V doctor` right before `begin`.
