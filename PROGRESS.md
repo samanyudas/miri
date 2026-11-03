@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-03 on branch `docs/issue-143-closed`, based on `main` at `49ff99fc`
+Updated: 2026-11-03 on branch `docs/103-closed`, based on `main` at `a1d0e5ac`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -356,6 +356,19 @@ Stacks across a lid close or a sleep were not checked in these runs. Later on 1 
 Off-screen windows during a lock may still drop through two other engine paths, which [#210](https://github.com/samanyudas/miri/issues/210) tracks.
 
 ## Side-by-side displays
+
+[#103](https://github.com/samanyudas/miri/issues/103) is done and closed on 3 November 2026, with all 6 criteria ticked: a column hidden off screen stays on its own display, and its strip keeps it, with the displays side by side.
+It first closed and then reopened the same day, because 3 criteria were only partly checked.
+[#156](https://github.com/samanyudas/miri/issues/156) fixed the last criterion that failed outright, a display move that moved windows between strips.
+`verify-miri` run `20261103-021450`, on a build of `main` at c356ad7a, moved the built-in display below, left, right, beside only the lower part of the 27-inch display, and below again.
+In all 20 steps, no window had its centre on another display, and every window stayed in its strip.
+The same script on `main` at e1f74751, before [#148](https://github.com/samanyudas/miri/pull/148), failed at launch and at every side-by-side step (run `20261103-021135`).
+With an HP 840 G9 AiO beside the built-in display, runs `20261103-125245`, `20261103-125446`, and `20261103-125716` on `main` at a1d0e5ac saw an engine slice panel on the left and the right shared edges.
+With a maximized window focused, no panel shows, which matches free edges, where the maximized window covers the slivers.
+Sam swiped with four fingers on each display, side by side, and only that display's strip moved.
+Sam decided that the System Settings window that moved strips once in 36 Arrange-sheet drags stays a known limitation under [#262](https://github.com/samanyudas/miri/issues/262).
+Not verified: three displays.
+The [closing comment](https://github.com/samanyudas/miri/issues/103#issuecomment-6594159604) links the evidence for each criterion.
 
 [#103](https://github.com/samanyudas/miri/issues/103) is fixed by [engine PR #76](https://github.com/samanyudas/paneru/pull/76).
 The engine hid an off-screen column by leaving a sliver at mid-height and hanging the rest of the window past the display edge.
