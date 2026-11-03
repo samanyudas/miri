@@ -22,6 +22,7 @@ Every command below runs from the repository root of the checkout you test.
   When `begin` fails because another thread's run is in progress, wait for the lock. Never run `end` for it.
   `begin` takes the [live-test lock](../../../docs/AI-CONTRIBUTIONS.md#take-the-live-test-lock), backs up the window session, and swaps in the test build.
   `end` puts back the session and Sam's build, and releases the lock.
+  Before you ask Sam for a hand check, run `end --keep-test-build` instead, so the test build stays as Sam's build.
   Run `end` also after a failure.
 - Reading `V doctor`, `V query`, logs, or the AX tree is not a drive and needs no lock.
 - Run `V doctor` right before `begin`.
@@ -148,7 +149,7 @@ The layout check in step 6 is the proof.
 - A process started from a background shell cannot become the frontmost app. Open a window through `open` on an app bundle, as `V fixture` does.
 - The engine floats every window that cannot resize, and column shortcuts skip floating windows.
 - Find processes by executable path with `ps -axww`, never by name. A shell whose command line contains a Miri path matches `pgrep -f`.
-- Synthetic Control-Arrow does not switch Spaces, and synthetic title-bar drags and trackpad swipes do not act like Sam's hands. Ask Sam for those checks.
+- Synthetic Control-Arrow does not switch Spaces, and synthetic title-bar drags and trackpad swipes do not act like Sam's hands. Ask Sam for those checks, after you launch the build under test as [Hand a check to Sam](../../../docs/AI-CONTRIBUTIONS.md#hand-a-check-to-sam) says.
 - macOS can renumber Spaces, for example after the Dock restarts, so a restored session can name a Space that no longer exists. Compare the restore line's `missing` count with the count at `begin` before you trust a restore.
 
 ## Helpers

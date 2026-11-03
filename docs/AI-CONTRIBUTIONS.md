@@ -63,6 +63,23 @@ The lock does not cover Sam.
 If Sam is using the Mac, ask before a live run.
 A small `HIDIdleTime` in `ioreg -c IOHIDSystem` shows recent keyboard or trackpad use.
 
+## Hand a check to Sam
+
+Some checks need Sam's hands, such as trackpad swipes, title-bar drags, and Space switches.
+When you ask Sam for one, the build under test becomes Sam's build and stays running.
+Never put the previous build back before Sam checks.
+
+1. Build the bundle outside `.build/app`, or copy it to a folder that no later build overwrites.
+   A rebuild of the bundle replaces the app that Sam runs.
+2. Swap it in with `V begin --app <bundle>` from [verify-miri](../.claude/skills/verify-miri/SKILL.md), and finish any automated drive.
+3. Run `V end --owner <owner> --keep-test-build`.
+   It stops the run's fixtures and releases the lock, but leaves the test build running and does not relaunch the previous build.
+4. Confirm with `ps -axww` that the running Miri Developer comes from the bundle in step 1.
+5. In the request, name the commit, the engine commit, the bundle path, and the steps to try.
+
+If the build under test does not run, say so instead of asking Sam to test.
+After Sam answers, leave that build running unless Sam asks for another one.
+
 ## Capture evidence
 
 Window evidence must never show Sam's desktop.

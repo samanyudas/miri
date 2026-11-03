@@ -140,6 +140,47 @@ class VerifyMiriTest(unittest.TestCase):
             self.assertIn("thread A", result.stderr)
             self.assertTrue(current.exists(), "the other thread's run record must stay")
 
+    def keep(self, apps, test_alive=True):
+        vm = self.vm
+        calls, logs = [], []
+        saved = {n: getattr(vm, n) for n in ("alive", "command_of", "running_apps", "lock", "log", "CURRENT")}
+        app = "/Applications/Miri Developer.app/Contents/MacOS/Miri"
+        with tempfile.TemporaryDirectory() as home:
+            current = Path(home, "current.json")
+            current.write_text("{}")
+            vm.alive = lambda pid: test_alive
+            vm.command_of = lambda pid: app
+            vm.running_apps = lambda: apps
+            vm.lock = lambda *a: calls.append(a) or subprocess.CompletedProcess(a, 0, "released", "")
+            vm.log = lambda run, line: logs.append(line)
+            vm.CURRENT = current
+            try:
+                run = {"owner": "t", "dir": home, "test_app": "/x/Miri Developer.app", "previous_app": "/y"}
+                code = vm.keep_test_build(run, 42)
+                return code, calls, logs, current.exists()
+            finally:
+                for n, v in saved.items():
+                    setattr(vm, n, v)
+
+    def test_keep_test_build_leaves_it_running_and_releases_the_lock(self):
+        code, calls, logs, current = self.keep([{"pid": 42, "bundle": "/x/Miri Developer.app"}])
+        self.assertEqual(code, 0, logs)
+        self.assertEqual(calls, [("release", "--owner", "t")])
+        self.assertFalse(current)
+        self.assertTrue(any("kept the test build" in line for line in logs), logs)
+
+    def test_keep_test_build_refuses_when_the_test_build_stopped(self):
+        code, calls, logs, current = self.keep([], test_alive=False)
+        self.assertEqual(code, 1)
+        self.assertEqual(calls, [])
+        self.assertTrue(current, "the lock and run record must stay")
+
+    def test_keep_test_build_refuses_when_another_build_runs(self):
+        code, calls, _, current = self.keep([{"pid": 42, "bundle": "/x"}, {"pid": 7, "bundle": "/y"}])
+        self.assertEqual(code, 1)
+        self.assertEqual(calls, [])
+        self.assertTrue(current)
+
 
 if __name__ == "__main__":
     unittest.main()
