@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-03 on branch `fix/263-verify-miri-strip-check`, based on `main` at `9c5b9230`
+Updated: 2026-11-03 on branch `docs/103-closed`, based on `main` at `c356ad7a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -345,6 +345,15 @@ Stacks across a lid close or a sleep were not checked in these runs. Later on 1 
 Off-screen windows during a lock may still drop through two other engine paths, which [#210](https://github.com/samanyudas/miri/issues/210) tracks.
 
 ## Side-by-side displays
+
+[#103](https://github.com/samanyudas/miri/issues/103) is done and closed on 3 November 2026: a column hidden off screen stays on its own display, and its strip keeps it, with the displays side by side.
+[#156](https://github.com/samanyudas/miri/issues/156) fixed the last failing criterion, a display move that moved windows between strips.
+On a build of `main` at c356ad7a, `verify-miri` run `20261103-021450` moved the built-in display below, left, right, beside only the lower part of the 27-inch display, and below again, and scrolled both strips to both ends at each step.
+In all 20 steps, no window had its centre on another display, and every window stayed in its strip.
+The same script on `main` at e1f74751, before [#148](https://github.com/samanyudas/miri/pull/148), failed at launch and at every side-by-side step (run `20261103-021135`).
+Option and scroll wheel scrolled each strip without moving the other (run `20261103-022523`).
+Not verified: a four-finger trackpad swipe by hand, and three displays.
+The [issue comment](https://github.com/samanyudas/miri/issues/103#issuecomment-6591650888) records each criterion.
 
 [#103](https://github.com/samanyudas/miri/issues/103) is fixed by [engine PR #76](https://github.com/samanyudas/paneru/pull/76).
 The engine hid an off-screen column by leaving a sliver at mid-height and hanging the rest of the window past the display edge.
