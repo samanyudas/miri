@@ -45,7 +45,8 @@ The Opus comment and cross-model trail audit failed after repeated API errors an
 `make verify-engine-lifecycle` passed seven rules and three mutation checks on main and fix.
 Its 196-state process model does not cover display crossing.
 The first `make check` stopped at the unchanged unpublished engine-pin guard.
-Next: rerun the complete gate with the merged engine pin, publish the app PR, then verify the landed build before issue closure.
+After normal engine publication and repinning, the complete `make check` passed on app `563e74a1` with engine `6b5dbc5`, including both native selftests and DMG packaging.
+Next: publish and review the app PR, then verify the landed build before issue closure.
 
 ## Accept shortcuts sent by AppleScript
 
