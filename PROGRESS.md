@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-04 on branch `fix/issue-276`, based on `main` at `cae36f6a`
+Updated: 2026-11-04 on branch `fix/issue-279`, based on `main` at `cae36f6a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,32 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Accept shortcuts sent by AppleScript
+
+[#279](https://github.com/samanyudas/miri/issues/279) reproduces on current main `cae36f6a`, with engine `1bcbb2e` and a behavior-preserving test diff, in `verify-miri` run `20261104-180936`.
+The AppleScript Control-Option-Left command leaves both engine and macOS focus on fixture-2, while `V key` moves both to fixture-1.
+The keyboard path ignores generic modifier flags, although the modifier-scroll path already handles them.
+Engine test commit `8dd49fb` records the generic Control-Option regression failing with `Modifiers(0x0)` before fix `1e6e900` shares the existing fallback with keyboard bindings.
+The fix preserves modifier sides when device bits exist.
+All 42 library and 1174 binary tests pass without default features, and 56 library and 1270 binary tests pass with defaults.
+Both configurations pass strict Clippy, and formatting passes.
+The app passes 192 Swift tests, 56 harness tests, docs, shell, actions, and strict Swift formatting.
+Sol-loop approves the behavior diff in one round with GPT-6.1 Sol at high reasoning effort, with no findings.
+The comment audit has no findings.
+The diff remains one engine file with 34 additions and 9 deletions before and after review.
+Sol usage was not returned.
+The listen-only tap captured neither synthetic input, so the actual AppleScript event flags remain unverified.
+The baseline run restored the previous build and stopped its fixtures, but the layout check reported the two Helium native-tab members in reverse order.
+Sam explicitly accepted that current layout, and cleanup released the lock.
+Fixed-build live verification and native selftests await the desktop lock held by the #276 run.
+Only the two unit-test acceptance boxes are ticked.
+The signed build and DMG packaging pass.
+The fix is pushed normally and open as draft [paneru#122](https://github.com/samanyudas/paneru/pull/122), pending the live check.
+The engine-lifecycle model does not cover keyboard input decoding, so `make verify-engine-lifecycle` cannot detect this finding and is skipped.
+The new engine commit must merge onto `miri/v0.5.2` before Miri's publication guard can accept the pin.
+`make check` stops at `make compat` because `1e6e900` is not published on that branch.
+No guard changed, no push bypass ran, and neither repository was merged by an agent.
 
 ## Supervisor test timing
 
