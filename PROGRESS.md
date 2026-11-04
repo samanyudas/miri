@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-04 on branch `fix/issue-279`, based on `main` at `cae36f6a`
+Updated: 2026-11-04 on branch `fix/issue-279`, based on `main` at `e120875c`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -50,17 +50,18 @@ Sol usage was not returned.
 The comment audits have no findings.
 The configured Claude design runner failed with a low-credit error and returned no recommendation.
 
-The final engine commit is pushed normally as ready-for-review [paneru#122](https://github.com/samanyudas/paneru/pull/122).
-GitHub reports it clean and mergeable, with no review findings.
-CodeRabbit skips this non-default target branch.
+Sam merged [paneru#122](https://github.com/samanyudas/paneru/pull/122) as `0e9659cd`, whose source tree exactly matches verified engine `fe946875`.
+The Miri integration pins that merge and is rebased onto current main `e120875c`.
+CodeRabbit skipped the engine PR because it targeted a non-default branch.
 The two unit-test boxes and the live box are ticked with [recorded evidence](https://github.com/samanyudas/miri/issues/279#issuecomment-6626309150).
 The engine-lifecycle model covers Swift app start, stop, restart, and quit, not keyboard event delivery.
 No covered Swift code changed, so `make verify-engine-lifecycle` cannot catch this finding and is skipped.
-`make check` stops at the unchanged publication guard because the engine fix has not merged onto `miri/v0.5.2`.
-That acceptance box remains unticked.
+The prior `make check` stopped at the unchanged publication guard before the engine merged.
+The merged pin now satisfies publication, and the complete gate is pending a fresh run.
+That acceptance box remains unticked until the run passes.
 No guard changed, no push bypass ran, and neither repository was merged by an agent.
-The parent integration pin is committed locally and awaits the published engine commit before its push can pass.
-Landed-main verification remains pending the engine merge and Miri integration.
+The parent integration pin is committed locally, and its PR follows the full gate.
+Landed-main verification remains pending Sam merging the Miri integration.
 
 ## Supervisor test timing
 
