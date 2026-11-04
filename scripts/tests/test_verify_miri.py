@@ -100,6 +100,23 @@ class VerifyMiriTest(unittest.TestCase):
         before = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False)]), (3773, 1, [(20, 3, False)])))
         self.assertEqual(self.vm.layout_differences(before, before), [])
 
+    def test_a_floating_window_keeps_each_native_space_membership(self):
+        first = (6, 1, [(10, 1, True)])
+        second = (7, 1, [(10, 1, True)])
+        before = self.vm.layout(self.state(first, second))
+        for strips in [(first, second), (second, first)]:
+            with self.subTest(strips=strips):
+                after = self.vm.layout(self.state(*strips))
+                self.assertEqual(self.vm.layout_differences(before, after), [])
+
+    def test_losing_one_native_space_membership_is_reported(self):
+        before = self.vm.layout(self.state((6, 1, [(10, 1, True)]), (7, 1, [(10, 1, True)])))
+        after = self.vm.layout(self.state((7, 1, [(10, 1, True)])))
+        differences = self.vm.layout_differences(before, after)
+        self.assertEqual(len(differences), 1, differences)
+        self.assertIn("Space 6 row 1 on display 1", differences[0])
+        self.assertIn("Space 7 row 1 on display 1", differences[0])
+
     def test_a_window_on_another_display_is_reported(self):
         before = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False)]), (3773, 1, [(20, 3, False)])))
         after = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False), (20, 1, False)]), (3773, 1, [])))
