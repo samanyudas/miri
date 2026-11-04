@@ -50,14 +50,6 @@ import Testing
         EngineSupervisor(launcher: launcher, recoverWindows: recovered, now: now)
     }
 
-    /// Waits up to 30 seconds for `condition`. A loaded machine can run the supervisor timers several seconds late.
-    private func eventually(_ condition: () -> Bool) async throws {
-        let deadline = ContinuousClock.now + .seconds(30)
-        while !condition(), ContinuousClock.now < deadline {
-            try await Task.sleep(for: .milliseconds(20))
-        }
-    }
-
     @Test func startsAndStopsCleanlyAndRecoversWindows() async {
         var recovered = 0
         let engine = supervisor(recovered: { recovered += 1 })
@@ -73,27 +65,33 @@ import Testing
         #expect(recovered == 1)
     }
 
-    @Test func killsAnEngineThatIgnoresTheStopRequest() async throws {
+    @Test(.timeLimit(.minutes(1))) func killsAnEngineThatIgnoresTheStopRequest() async {
         let engine = supervisor()
         engine.start()
+        let states = AsyncStream<EngineState> { continuation in
+            engine.onChange = { continuation.yield($0) }
+        }
         launcher.engines[0].exitsOnInterrupt = false
         var stopped = false
         engine.stop { stopped = true }
         #expect(!stopped)
-        try await eventually { stopped }
+        _ = await states.first(where: { @Sendable in $0 == .stopped })
         #expect(launcher.engines[0].kills == 1)
         #expect(stopped)
         #expect(engine.state == .stopped)
     }
 
-    @Test func restartsAfterACrashAndRecoversWindowsFirst() async throws {
+    @Test(.timeLimit(.minutes(1))) func restartsAfterACrashAndRecoversWindowsFirst() async {
         var recovered = 0
         let engine = supervisor(recovered: { recovered += 1 })
         engine.start()
+        let states = AsyncStream<EngineState> { continuation in
+            engine.onChange = { continuation.yield($0) }
+        }
         launcher.engines[0].crash()
         #expect(engine.state == .restarting(crashes: 1))
         #expect(recovered == 1)
-        try await eventually { engine.state == .running(pid: 101) }
+        _ = await states.first(where: { @Sendable in $0 == .running(pid: 101) })
         #expect(engine.state == .running(pid: 101))
     }
 
