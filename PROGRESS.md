@@ -36,7 +36,7 @@ All three acceptance criteria are ticked with fix-build evidence in the issue.
 Sol-loop approved the exact behavior diff in one round with GPT-6.1 Sol at high effort and no findings.
 The configured Claude comment and decision-trail review failed after repeated API errors and produced no verdict.
 The engine PR is merged.
-The companion Miri pin is ready for its own PR and remains unmerged.
+The companion Miri pin is open in [#283](https://github.com/samanyudas/miri/pull/283) and remains unmerged.
 Next: merge the companion Miri PR, then verify the landed main build before closing the issue.
 
 ## Keyboard slides in v1
