@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-04 on branch `docs/276-verified`, based on `main` at `e120875c`
+Updated: 2026-11-04 on branch `fix/issue-279`, based on `main` at `b3dd9d42`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,60 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Accept shortcuts sent by AppleScript
+
+[#279](https://github.com/samanyudas/miri/issues/279) reproduces on current main `cae36f6a`, with engine `1bcbb2e` and a behavior-preserving test diff, in `verify-miri` run `20261104-180936`.
+AppleScript leaves both engine and macOS focus on fixture-2, while the HID control moves both to fixture-1.
+Diagnostic run `20261104-183311` captures AppleScript keycode 123 at session, annotated-session, and app-specific taps, but not at the engine's HID tap.
+Its flags `0x2c0021` already include left Control and Option device bits.
+The generic-modifier fallback alone, engine `1e6e900`, failed all three live trials in run `20261104-182743`.
+Engine `fe946875` adds a session key-down tap beside the unchanged HID input path.
+Matched HID keys are consumed before session, so one shortcut cannot dispatch twice.
+One pinned handler owns, installs, checks, rebuilds, and removes both taps together.
+The change also shares the existing generic-modifier fallback with keyboard bindings and preserves device-side distinctions.
+Test commit `8dd49fb` records the generic Control-Option regression failing before the fallback fix.
+
+On the signed final bundle, run `20261104-184915` passes the exact AppleScript command in three of three trials, with both engine and macOS focus changing from fixture-2 to fixture-1.
+The HID control passes, and one HID shortcut moves fixture-3 to fixture-2 without a second dispatch to fixture-1.
+The previous build and session are restored, fixtures have exited, and the live-test lock is released.
+Sanitized engine `printstate` evidence confirms Helium windows 242797 and 242798 remain in one native tab group on display 1, Space 5195.
+Sam authorized current and future order-only reversals of those tab members when the group, strip, Space, and display stay the same.
+The final cleanup check passes for all nine pre-existing windows.
+No physical keyboard, trackpad, permission-attribution, or other automation-app check ran.
+
+All 42 library and 1174 binary tests pass without default features, and 56 library and 1270 binary tests pass with defaults.
+Both configurations pass strict Clippy, and formatting passes.
+The unchanged app passes 192 Swift tests, 56 harness tests, docs, shell, actions, and strict Swift formatting.
+The final signed build passes.
+Final DMG packaging passes.
+After issue 276 released the desktop lock, `make e2e` passed on the final signed bundle in run `20261104-190653`.
+Its permission observation reports `observed-granted`, with attribution unresolved, and the missing-helper and aliased-path checks pass.
+The recovery selftest strands its fixture and recovers it to a reachable position.
+Cleanup restores the previous build/session, leaves no test processes, and releases the lock after accepting only the authorized native-tab order reversal.
+Sol-loop approves the generic-flag diff in round one and the complete final behavior diff in round two with GPT-6.1 Sol at high effort, with no findings or open IDs.
+The final diff is one engine file with 133 additions and 68 deletions.
+Sol usage was not returned.
+The comment audits have no findings.
+The configured Claude design runner failed with a low-credit error and returned no recommendation.
+
+Sam merged [paneru#122](https://github.com/samanyudas/paneru/pull/122) as `0e9659cd`, whose source tree exactly matches verified engine `fe946875`.
+The Miri integration pins that merge and includes main `b3dd9d42`, whose later changes only update the issue 276 verification record.
+CodeRabbit skipped the engine PR because it targeted a non-default branch.
+The two unit-test boxes and the live box are ticked with [recorded evidence](https://github.com/samanyudas/miri/issues/279#issuecomment-6626309150).
+The engine-lifecycle model covers Swift app start, stop, restart, and quit, not keyboard event delivery.
+No covered Swift code changed, so `make verify-engine-lifecycle` cannot catch this finding and is skipped.
+The prior `make check` stopped at the unchanged publication guard before the engine merged.
+The merged pin satisfies publication.
+The complete `CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 make check` gate passes with exit 0 on integration commit `0fefc13` in run `20261104-191340`.
+It passes 56 harness tests, 193 Swift tests, 42 engine library tests, and 1174 engine binary tests, plus lint, the signed build, native selftests, and DMG packaging.
+Permission attribution remains unresolved.
+Cleanup restores the prior app/session and releases the lock after accepting only the authorized native-tab order reversal.
+All four acceptance boxes are ticked.
+No guard changed, no push bypass ran, and neither repository was merged by an agent.
+The parent integration is open as [#288](https://github.com/samanyudas/miri/pull/288) after the passing full gate.
+The normal pre-push hook passes, and CI and review are pending.
+Landed-main verification remains pending Sam merging the Miri integration.
 
 ## Supervisor test timing
 
