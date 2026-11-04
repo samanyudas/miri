@@ -33,8 +33,15 @@ The regression failed both desktop-swipe assertions before the change.
 The revised advice and all 10 `SetupCheckerTests` pass on current main plus this fix, with engine `1bcbb2e`.
 Nonlive checks pass, including lint, the signed build, 193 Swift tests, and 42 library plus 1172 binary engine tests.
 Sol GPT-6.1 at high reasoning effort approved the change in one round with no findings.
-Live verification, full `make check`, and the PR remain pending.
-The desktop test lock was held by issue 279 when this session reached live verification.
+`verify-miri` run `20261104-182024` shows every sentence in the native Setup page with four-finger value 2 and three-finger value 0.
+The visible text wraps without clipping.
+The run restored the previous build and all eight original window positions, including the Helium native-tab order, and released the lock.
+The first full `make check` hit four assertions in two existing supervisor tests after their 30-second polling deadline expired.
+The separate test-only [#285](https://github.com/samanyudas/miri/pull/285) replaces that polling with state notifications.
+This branch is stacked on #285, with the advice and its regression unchanged from the verified build.
+With those test waits, `CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 make check` passes on `d66acd77`, including 193 Swift tests, 42 library plus 1172 binary engine tests, native Accessibility observations, fixture recovery, and DMG packaging.
+Accessibility attribution remains unresolved, and no physical swipe test ran.
+The advice PR remains pending.
 `make verify-engine-lifecycle` does not apply because its model covers engine process transitions and cannot check advice text.
 The issue stays open for verification on the landed change after Sam merges.
 
