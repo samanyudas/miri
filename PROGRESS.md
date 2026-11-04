@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-04 on branch `fix/issue-279`, based on `main` at `b3dd9d42`
+Updated: 2026-11-04 on branch `fix/verify-miri-native-memberships`, based on `main` at `418e0962`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -64,9 +64,19 @@ Permission attribution remains unresolved.
 Cleanup restores the prior app/session and releases the lock after accepting only the authorized native-tab order reversal.
 All four acceptance boxes are ticked.
 No guard changed, no push bypass ran, and neither repository was merged by an agent.
-The parent integration is open as [#288](https://github.com/samanyudas/miri/pull/288) after the passing full gate.
-The normal pre-push hook passes, and CI and review are pending.
-Landed-main verification remains pending Sam merging the Miri integration.
+Sam merged the parent integration [#288](https://github.com/samanyudas/miri/pull/288) as main `418e0962`.
+Its complete source tree matches the CI-green PR head `55bbe671`, and all six CI jobs passed.
+The fresh signed main build and all 34 focused input tests pass.
+Landed-main run `20261104-193236` stopped before shortcut input because the fixtures were off-screen and unfocused.
+No landed-main shortcut result is claimed yet.
+The cleanup checker reported a floating window moving Spaces even though its backup and captured restored state both list it in the same two Spaces.
+The checker collapsed multiple memberships by window ID.
+A separate helper fix matches window ID, Space, and row before checking whether a membership moved.
+Its unchanged-membership regression fails before the fix, and all 19 helper tests pass after it, including a lost-membership check.
+Replaying the captured restored state with the fix reports no differences.
+Ordinary cleanup then finished without an override and released the lock, with six saved records no longer managed at that time.
+The helper fix will have its own PR.
+Landed-main verification still needs valid fixture setup and three shortcut trials.
 
 ## Supervisor test timing
 

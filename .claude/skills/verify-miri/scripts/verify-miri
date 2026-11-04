@@ -278,6 +278,7 @@ def layout_differences(before: list[dict], after: list[dict]) -> list[str]:
     """Each window from `before` that is now in another strip, tiles or floats differently, or sits in another order
     among the windows that stayed in its strip. Closed and new windows do not count, and do not shift the others."""
     now = {w["window_id"]: w for w in after}
+    memberships = {(w["window_id"], w["space"], w["row"]): w for w in after}
     lines = []
     stayed: dict[tuple, list[tuple[dict, dict]]] = {}
 
@@ -288,7 +289,7 @@ def layout_differences(before: list[dict], after: list[dict]) -> list[str]:
         return f"Space {window['space']} row {window['row']} on display {window['display']}"
 
     for was in before:
-        current = now.get(was["window_id"])
+        current = memberships.get((was["window_id"], was["space"], was["row"]), now.get(was["window_id"]))
         if current is None:
             continue
         if (was["space"], was["row"]) != (current["space"], current["row"]):
