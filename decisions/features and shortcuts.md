@@ -81,9 +81,14 @@ Offer configurable width presets, a maximize toggle, width adjustments, height a
 Reserve Dock space as described in [V1 interactions](release-scope.md#v1-interactions).
 Allow separate gaps between windows and at display edges, including zero gaps.
 
-Use a spring animation for strip motion that starts as soon as a navigation key is pressed.
+A keyboard slide in v1 uses the engine's exponential ease-out.
+Sam chose this on 4 November 2026 in [#278](https://github.com/samanyudas/miri/issues/278).
+The slide starts when a navigation key is pressed.
+Each frame covers a share of the remaining distance.
+A new target during the slide sets the speed from that new distance.
+The slide does not keep its previous speed.
 Synchronize animation with the display refresh rate.
-Duration and damping controls are deferred to v2.
+A spring that keeps its speed across a new keyboard target is deferred to v2, together with duration and damping controls.
 Follow the Reduce Motion and disable-animation behavior in [V1 interactions](release-scope.md#v1-interactions).
 
 Apply valid settings as users change them.

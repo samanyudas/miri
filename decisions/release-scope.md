@@ -232,6 +232,10 @@ Sam replaced the earlier rule, which centered the focused column whenever the st
 The layout reserves space for the visible macOS Dock without a separate v1 setting.
 Miri respects macOS Reduce Motion and provides a setting to disable animation.
 Either Reduce Motion or the disable-animation setting makes strip movement instant.
+A keyboard slide in v1 is an exponential ease-out.
+Sam chose this on 4 November 2026 in [#278](https://github.com/samanyudas/miri/issues/278).
+A new target during a keyboard slide sets the speed from the remaining distance.
+A spring that keeps its speed across a new keyboard target is deferred to v2.
 Numbered jumps select columns and focus the last-focused window within the selected column.
 Moving the pointer alone does not change focus, and Miri keyboard commands do not move the pointer.
 Clicks, keyboard commands, and macOS window switching still change focus.

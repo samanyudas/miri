@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-03 on branch `docs/103-closed`, based on `main` at `a1d0e5ac`
+Updated: 2026-11-04 on branch `fix/issue-278`, based on `main` at `481d52ff`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,14 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Keyboard slides in v1
+
+Sam chose the v1 keyboard slide on 4 November 2026 in [#278](https://github.com/samanyudas/miri/issues/278).
+A keyboard slide keeps the exponential ease-out.
+A spring that keeps its speed when a keyboard target changes is deferred to v2.
+Swipe settling keeps the spring it already uses.
+[#280](https://github.com/samanyudas/miri/issues/280) still describes a spring as the expected result, so it waits until that result matches this choice.
 
 ## Mission Control drag to the other display
 
