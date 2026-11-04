@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-04 on branch `fix/issue-278`, based on `main` at `481d52ff`
+Updated: 2026-11-04 on branch `fix/issue-248`, based on `main` at `bc022f09`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,30 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Preserve focus during an engine restart
+
+[#248](https://github.com/samanyudas/miri/issues/248) is implemented and verified on the fix build, and remains open for landed-main verification.
+On current `main` at `bc022f09`, engine `af52f84`, `verify-miri` run `20261104-155648` moved both macOS and engine focus from Settings to fixture-2 after Restart Engine completed session restoration.
+The startup system explicitly focuses and raises the first active-row window even when it restores a saved session.
+Engine commit `40d154e` records two failing regressions before the fix and a passing first-launch regression.
+Engine fix `6f01709` in [paneru#121](https://github.com/samanyudas/paneru/pull/121) preserves native focus when an enabled saved session exists, and keeps the first-launch focus request when none exists.
+The three focused regressions and all 42 library plus 1172 binary tests pass with the Miri feature configuration.
+Default-feature tests pass 56 library and 1268 binary tests, and both configurations pass strict Clippy and formatting.
+On the signed fix bundle, `verify-miri` run `20261104-161343` kept Settings focused after its Restart Engine button, and kept fixture-2 focused after the actual status-menu Restart Engine item.
+All 11 recorded regular window ID and owner pairs kept their order after each restart and the delayed checks.
+The run restored the previous build, session, and all eight pre-existing window positions, then released the live-test lock.
+`make native` passes, including 192 Swift tests, the signed build, Accessibility selftests, fixture recovery, and DMG packaging.
+`make check` stops at compatibility because the engine fix is not yet on the fork's `miri/v0.5.2` branch.
+`make verify-engine-lifecycle` passes all seven rules and three mutation checks, but its process-state model does not cover window focus or raises.
+An abandoned verification run from #279 was recovered with Sam's approval to retain Space 5144 because its recorded Space 5080 no longer exists.
+The subsequent main-build runs restored all eight surviving windows to their saved strip positions.
+All three acceptance criteria are ticked with fix-build evidence in the issue.
+Sol-loop approved the exact behavior diff in one round with GPT-6.1 Sol at high effort and no findings.
+The configured Claude comment and decision-trail review failed after repeated API errors and produced no verdict.
+The engine PR is open and unmerged.
+The companion Miri pin is committed locally, and its existing compatibility gate blocks publication until the engine fix reaches the fork's integration branch.
+Next: review and merge the engine PR, publish the companion Miri pin, then verify the landed main build before closing the issue.
 
 ## Keyboard slides in v1
 
