@@ -16,52 +16,36 @@ The public release path and the complete acceptance runs follow.
 
 ## Plain horizontal shortcuts cross touching displays
 
-[#104](https://github.com/samanyudas/miri/issues/104) is implemented locally on main `61026f2c`, with engine `82779a3`.
-Keyboard dispatch promotes horizontal focus and move into typed step commands, while wheel, Lua, and direct engine commands retain their existing strip-local behavior.
+[#104](https://github.com/samanyudas/miri/issues/104) is implemented on main `61026f2c`, with [engine PR #123](https://github.com/samanyudas/paneru/pull/123) merged as `6b5dbc5`.
+Keyboard dispatch adds horizontal step intent while wheel, Lua, and direct engine commands keep their previous behavior.
 A fresh press at the strip end crosses only a touching horizontal display with positive vertical overlap.
 Plain moves arrive at the crossed destination edge, so the opposite press returns the whole column to the source end.
+This extends ADR 0005's earlier dedicated-command-only rule.
 Command-layer behavior and arrival after the destination active column stay unchanged.
 
-On a signed main build, `verify-miri` run `20261104-203946` kept fixture-3 on its source display after plain focus and move at each touching edge.
-The Command-layer controls crossed in both directions and kept focus in both macOS and the engine.
-The earlier run `20261104-203550` failed a fixture setup precondition and is inconclusive.
-Both runs restored the previous build and all eight recorded strip positions without an override.
-The second run compared unrelated frames and found four changed, so exact frame restoration was not achieved.
-All evidence remains outside the repository.
+Signed main `61026f2c` stayed on its source display after plain focus and move at both touching edges in `verify-miri` run `20261104-203946`.
+Signed fix `82779a3` crossed focus and move both ways, returned immediately with whole stacks and focus retained, and preserved width and maximize behavior in runs `20261104-205815` and `20261104-210106`.
+Outer-edge commands stayed on their display.
+Runs `20261104-211336` and `20261104-213022` confirmed repeat confinement in both directions, including local destination movement after the fresh crossing.
+The last run recorded east focus crossing to interior fixture-4 before repeats reached last fixture-3, with both focus observations agreeing.
+Vertical stack controls and Command-layer arrival after an interior active fixture retained their behavior.
+These are synthetic HID observations on two horizontally touching displays, not physical-keyboard or alternate-topology results.
+Evidence stays outside the repository under the named verify-miri run directories.
 
-Signed fix runs `20261104-205815` and `20261104-210106` cross focus and move in both directions through plain shortcuts, with engine and macOS focus agreeing.
-Plain moves arrive at the crossed edge and return immediately, including a two-member stack with its member order preserved.
-Outer-edge focus and move stay on the current display.
-Normal widths scale from 310 to 388 points, maximized widths from 2040 to 2552 points, and toggling maximize restores the expected width on each display.
-East move repeats and west focus repeats stop within their strip, and an east move invocation starting at the edge crosses once before repeating locally.
-The first fix run stopped at an outer-left setup precondition before sending that shortcut.
-The second run waited for both focus observations after direct display setup and established the correct strip end.
-Both runs restored all eight recorded strip positions, but their frame comparisons found five and four unrelated frames changed.
-Run `20261104-211033` stopped before feature shortcuts when its separate macOS focus baseline capture failed.
-Its cleanup restored the previous build and eight strip positions, with three unrelated frames changed.
-The delegate activated the original focused app after releasing the lock, which violated the test procedure.
-Run `20261104-211336` captured focus through AppKit before begin and performed every desktop action before end.
-West move repeats stopped at the touching edge, and a new invocation there crossed once before repeating locally on the destination.
-West focus repeats crossed once and then moved locally across the destination strip.
-Vertical stack focus and move controls kept both members on the same display.
-East focus repeats reached the source strip's last column without crossing, and a separate invocation there crossed east.
-That invocation began with the destination's last column active, so local movement did not independently prove its repeat delivery.
-The Command-layer move arrived immediately after the destination's interior active fixture, at index 2 after index 1.
-The delegate's stricter interior-source and extra-edge-fixture setups were incomplete, so those full planned cases are not claimed as passed.
-Cleanup restored the previous build and all eight strip positions without an override, but focus and four unrelated frames did not restore exactly.
-No physical-keyboard or alternate-topology result is claimed.
+Cleanup restored the previous build, engine, session, and all eight recorded strip positions.
+Exact unrelated frames and focus did not restore.
+Three runs stopped at setup preconditions before the affected feature action, and their results remain inconclusive.
+An earlier delegate activated an app after releasing the lock, which violated the test procedure.
+Later runs performed every drive before end and made no post-lock activation.
 
-Engine test commit `d847095` records two failing keyboard-dispatch crossing regressions before the fix.
-All eight new engine regressions pass after the fix, as do all 42 library plus 1182 binary engine tests without default features.
-Strict engine lint passes.
-Default-feature strict lint and all 56 library plus 1278 binary tests pass.
-All 193 Swift tests, Swift lint, the signed build, native selftests, and DMG packaging pass separately.
-`make check` passes docs, 58 harness tests, ShellCheck, and actionlint, then stops at the unchanged unpublished engine-pin guard.
-Parent delivery must publish the engine normally, repin its published revision, and rerun the complete gate.
-`make verify-engine-lifecycle` passes all seven rules and three mutation checks on both main and the implementation.
-Its process-state model does not cover display crossing and is regression evidence only.
-Next: parent review and sol-loop, normal engine publication and repin, then the complete gate and delivery.
-The east post-cross focus-repeat observation remains a bounded live-evidence gap.
+Two keyboard-dispatch regressions failed before the fix and passed afterward.
+All 193 Swift tests, 42 library plus 1182 binary developer-engine tests, 56 library plus 1278 binary default-feature tests, strict lint, the signed build, native selftests, and packaging passed separately.
+Sol-loop approved the app and engine behavior diff in one round with GPT-6.1 Sol on high, with no findings.
+The Opus comment and cross-model trail audit failed after repeated API errors and supplied no verdict.
+`make verify-engine-lifecycle` passed seven rules and three mutation checks on main and fix.
+Its 196-state process model does not cover display crossing.
+The first `make check` stopped at the unchanged unpublished engine-pin guard.
+Next: rerun the complete gate with the merged engine pin, publish the app PR, then verify the landed build before issue closure.
 
 ## Accept shortcuts sent by AppleScript
 

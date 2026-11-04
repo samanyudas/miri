@@ -37,6 +37,8 @@ In the proof run on 2026-11-02, both views agreed about 0.6 s after each key pre
 
 - `V fixture --fixed` makes a window that cannot resize. The engine floats it, and column focus skips it. Without `--resizable`, the old AXFixture behaved this way, and focus moved between Sam's windows instead.
 - A fixture started from a shell, not through `open`, never comes to the front. Focus then stays on Sam's window, and the before snapshot shows no fixture focused.
-- At the left end of the strip, ⌃⌥← does nothing. That is the expected result, not a failure.
+- At the left end of the strip, a fresh ⌃⌥← crosses only if a display touches that side.
+  With no touching display it does nothing.
+  Auto-repeat stays within the current strip.
 - New windows open on the primary display. Check `engine_active_display` in the snapshot before you compare positions.
 - The engine reports focus a few hundred milliseconds after the press. Use `--wait-for`, not a fixed sleep.
