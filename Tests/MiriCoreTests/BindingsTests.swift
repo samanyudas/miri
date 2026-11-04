@@ -1110,15 +1110,16 @@ struct DefaultBindingsTests {
         #expect(store.shortcuts?.chords(for: .engine(command: "window_focusdisplay_east")).count == 3)
     }
 
-    @Test(arguments: ["[]", "\"ctrl+alt+cmd-f\""])
-    func anExistingDirectMonitorValueKeepsItsEdgePredecessor(custom: String) throws {
-        let original = version4File(replacing: ["window_focusdisplay_west": custom])
+    @Test(
+        arguments: ["window_focusdisplay_west", "window_focusdisplay_west_custom"], ["[]", "\"ctrl+alt+cmd-f\""])
+    func anExistingDirectMonitorValueKeepsItsEdgePredecessor(command: String, custom: String) throws {
+        let original = version4File(replacing: [command: custom])
         let before = try TOMLDocument(original)
         let (store, document) = try load(original)
         #expect(store.issue == nil)
         #expect(
-            document.value(at: ["bindings", "window_focusdisplay_west"])
-                == before.value(at: ["bindings", "window_focusdisplay_west"]))
+            document.value(at: ["bindings", command])
+                == before.value(at: ["bindings", command]))
         #expect(
             document.value(at: ["bindings", "window_focusedge_west"])
                 == before.value(at: ["bindings", "window_focusedge_west"]))

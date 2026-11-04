@@ -283,7 +283,10 @@ public struct DefaultBinding: Sendable {
                 $0.command == old.command && $0.version == old.version && $0.chords.isEmpty
             }
             if leavesUnbound {
-                guard document.value(at: ["bindings", old.replacement]) == nil else { continue }
+                guard
+                    !boundCommands(in: document.value(at: ["bindings"])).contains(
+                        EngineCommand.canonical(old.replacement)!)
+                else { continue }
                 result = try result.setting(.array([]), table: ["bindings"], key: old.command)
             } else {
                 result = try result.removing(table: ["bindings"], key: old.command)

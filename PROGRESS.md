@@ -58,9 +58,13 @@ The migration transfers only exact offered defaults and preserves customized, di
 An existing direct-monitor value keeps both itself and its edge-focus predecessor.
 Stop registration now refreshes after a successful configuration migration, so a chord released by an edge default works without another reload.
 All 203 Swift tests pass, including the new default-transfer, customization, disabled-action, conflict, restart, and Stop-registration checks.
-Strict Swift lint and documentation checks pass.
-Next: review the migration and verify direct focus from an interior column and the empty edge-focus rows on the running app.
-No live result for these new defaults is recorded yet.
+Strict Swift lint, documentation checks, and `make lint` pass.
+Sol-loop approved the migration in two GPT-6.1 Sol high rounds after a canonical-alias destination check fixed the sole finding.
+Both empty and customized suffix aliases preserve the edge predecessor, and the regression failed before the fix.
+The comment audit found no added comments or suppressions.
+The separate lifecycle model passes all seven rules and three mutants, but cannot prove shortcut registration or monitor focus.
+Next: verify direct focus from an interior column and the empty edge-focus rows, then rebuild the approved alias-safe source and leave it running.
+The native run is still in progress on the earlier candidate, so no final-build live result is recorded yet.
 
 ## Accept shortcuts sent by AppleScript
 
