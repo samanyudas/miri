@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-04 on branch `fix/issue-279`, based on `main` at `b3dd9d42`
+Updated: 2026-11-04 on branch `fix/verify-miri-native-memberships`, based on `main` at `418e0962`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,57 +16,44 @@ The public release path and the complete acceptance runs follow.
 
 ## Accept shortcuts sent by AppleScript
 
-[#279](https://github.com/samanyudas/miri/issues/279) reproduces on current main `cae36f6a`, with engine `1bcbb2e` and a behavior-preserving test diff, in `verify-miri` run `20261104-180936`.
-AppleScript leaves both engine and macOS focus on fixture-2, while the HID control moves both to fixture-1.
-Diagnostic run `20261104-183311` captures AppleScript keycode 123 at session, annotated-session, and app-specific taps, but not at the engine's HID tap.
+[#279](https://github.com/samanyudas/miri/issues/279) is verified on landed main `418e0962`, with engine `0e9659cd`, and closed.
+Sam merged [paneru#122](https://github.com/samanyudas/paneru/pull/122) and the Miri pin in [#288](https://github.com/samanyudas/miri/pull/288).
+AppleScript sends its key event into the session stream after the engine's HID listener.
+Diagnostic run `20261104-183311` captures the key at session, annotated-session, and PID taps, but not HID.
 Its flags `0x2c0021` already include left Control and Option device bits.
-The generic-modifier fallback alone, engine `1e6e900`, failed all three live trials in run `20261104-182743`.
-Engine `fe946875` adds a session key-down tap beside the unchanged HID input path.
-Matched HID keys are consumed before session, so one shortcut cannot dispatch twice.
-One pinned handler owns, installs, checks, rebuilds, and removes both taps together.
-The change also shares the existing generic-modifier fallback with keyboard bindings and preserves device-side distinctions.
-Test commit `8dd49fb` records the generic Control-Option regression failing before the fallback fix.
+The generic-modifier fix alone failed all three earlier live trials.
+The final fix adds a session key-down listener beside the unchanged HID path, with shared tap ownership, cleanup, and recovery.
+Handled HID keys are consumed before session delivery and cannot dispatch twice.
+Keyboard bindings also accept generic modifier flags while retaining device-side distinctions.
 
-On the signed final bundle, run `20261104-184915` passes the exact AppleScript command in three of three trials, with both engine and macOS focus changing from fixture-2 to fixture-1.
-The HID control passes, and one HID shortcut moves fixture-3 to fixture-2 without a second dispatch to fixture-1.
-The previous build and session are restored, fixtures have exited, and the live-test lock is released.
-Sanitized engine `printstate` evidence confirms Helium windows 242797 and 242798 remain in one native tab group on display 1, Space 5195.
-Sam authorized current and future order-only reversals of those tab members when the group, strip, Space, and display stay the same.
-The final cleanup check passes for all nine pre-existing windows.
-No physical keyboard, trackpad, permission-attribution, or other automation-app check ran.
+On the fresh signed main build, `verify-miri` run `20261104-195010` moves focus from fixture-2 to fixture-1 in three of three exact AppleScript trials, in both the engine and macOS.
+The HID control passes, and one HID shortcut moves fixture-3 to fixture-2 without skipping to fixture-1.
+The fixture images and JSON agree.
+Cleanup restores the previous build/session, stops all test processes, and passes the layout comparison for all eight recorded windows without an exception.
+The live-test lock is free.
+The earlier landed-main attempt stopped during fixture setup and does not count as a passing shortcut test.
+All 34 input tests pass on the landed checkout.
+The full `CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 make check` gate passes on integration `0fefc13`, including 56 harness tests, 193 Swift tests, 42 engine library tests, 1174 engine binary tests, native selftests, and packaging.
+Landed main has exactly the same complete source tree as CI-green PR head `55bbe671`, where all six CI jobs passed.
+Default engine tests pass 56 library and 1270 binary tests, and both feature configurations pass strict Clippy and formatting.
+Sol-loop approves the final engine behavior in two rounds with GPT-6.1 Sol at high effort, with no findings or open IDs.
+The reviewed engine diff remains one file, +133/-68, and usage was not exposed.
+`make verify-engine-lifecycle` is skipped because its Swift process-lifecycle model cannot detect keyboard event delivery and no covered code changed.
+All four acceptance boxes are ticked, and the [landed-main verification comment](https://github.com/samanyudas/miri/issues/279#issuecomment-6627323701) records closure.
+No physical keyboard, trackpad, other automation-app, permission-attribution, or exact pixel-frame restoration result is claimed.
+No agent merged a PR, changed a guard, or bypassed a push check.
 
-All 42 library and 1174 binary tests pass without default features, and 56 library and 1270 binary tests pass with defaults.
-Both configurations pass strict Clippy, and formatting passes.
-The unchanged app passes 192 Swift tests, 56 harness tests, docs, shell, actions, and strict Swift formatting.
-The final signed build passes.
-Final DMG packaging passes.
-After issue 276 released the desktop lock, `make e2e` passed on the final signed bundle in run `20261104-190653`.
-Its permission observation reports `observed-granted`, with attribution unresolved, and the missing-helper and aliased-path checks pass.
-The recovery selftest strands its fixture and recovers it to a reachable position.
-Cleanup restores the previous build/session, leaves no test processes, and releases the lock after accepting only the authorized native-tab order reversal.
-Sol-loop approves the generic-flag diff in round one and the complete final behavior diff in round two with GPT-6.1 Sol at high effort, with no findings or open IDs.
-The final diff is one engine file with 133 additions and 68 deletions.
-Sol usage was not returned.
-The comment audits have no findings.
-The configured Claude design runner failed with a low-credit error and returned no recommendation.
+## Native Space cleanup comparison
 
-Sam merged [paneru#122](https://github.com/samanyudas/paneru/pull/122) as `0e9659cd`, whose source tree exactly matches verified engine `fe946875`.
-The Miri integration pins that merge and includes main `b3dd9d42`, whose later changes only update the issue 276 verification record.
-CodeRabbit skipped the engine PR because it targeted a non-default branch.
-The two unit-test boxes and the live box are ticked with [recorded evidence](https://github.com/samanyudas/miri/issues/279#issuecomment-6626309150).
-The engine-lifecycle model covers Swift app start, stop, restart, and quit, not keyboard event delivery.
-No covered Swift code changed, so `make verify-engine-lifecycle` cannot catch this finding and is skipped.
-The prior `make check` stopped at the unchanged publication guard before the engine merged.
-The merged pin satisfies publication.
-The complete `CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 make check` gate passes with exit 0 on integration commit `0fefc13` in run `20261104-191340`.
-It passes 56 harness tests, 193 Swift tests, 42 engine library tests, and 1174 engine binary tests, plus lint, the signed build, native selftests, and DMG packaging.
-Permission attribution remains unresolved.
-Cleanup restores the prior app/session and releases the lock after accepting only the authorized native-tab order reversal.
-All four acceptance boxes are ticked.
-No guard changed, no push bypass ran, and neither repository was merged by an agent.
-The parent integration is open as [#288](https://github.com/samanyudas/miri/pull/288) after the passing full gate.
-The normal pre-push hook passes, and CI and review are pending.
-Landed-main verification remains pending Sam merging the Miri integration.
+The failed setup run for #279 exposed a cleanup-helper false positive for a floating window listed in two native Spaces before and after restoration.
+The checker retained only the last membership for a window ID.
+[PR #289](https://github.com/samanyudas/miri/pull/289) prefers exact window ID, Space, and row, while retaining a same-ID fallback to report a genuinely lost membership.
+The unchanged-membership regression fails before the fix in both workspace iteration orders.
+All 19 helper tests and 58 harness tests pass after the fix, and a captured-state replay reports no differences.
+Ordinary cleanup completed without an override, although that floating window had closed by the final check.
+Sol approves the separate helper diff in one GPT-6.1 Sol high round, with no findings or open IDs.
+All six CI jobs pass at helper head `182ca136`, and the normal pre-push hook passes.
+The helper PR stays open for Sam to merge, with current CI and review status on the PR.
 
 ## Supervisor test timing
 
