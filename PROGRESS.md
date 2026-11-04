@@ -46,7 +46,8 @@ The Opus comment and cross-model trail audit failed after repeated API errors an
 Its 196-state process model does not cover display crossing.
 The first `make check` stopped at the unchanged unpublished engine-pin guard.
 After normal engine publication and repinning, the complete `make check` passed on app `563e74a1` with engine `6b5dbc5`, including both native selftests and DMG packaging.
-Next: publish and review the app PR, then verify the landed build before issue closure.
+The app changes are in [PR #291](https://github.com/samanyudas/miri/pull/291).
+Next: verify the landed build before issue closure.
 
 ## Direct monitor focus shortcuts
 
@@ -63,8 +64,17 @@ Sol-loop approved the migration in two GPT-6.1 Sol high rounds after a canonical
 Both empty and customized suffix aliases preserve the edge predecessor, and the regression failed before the fix.
 The comment audit found no added comments or suppressions.
 The separate lifecycle model passes all seven rules and three mutants, but cannot prove shortcut registration or monitor focus.
-Next: verify direct focus from an interior column and the empty edge-focus rows, then rebuild the approved alias-safe source and leave it running.
-The native run is still in progress on the earlier candidate, so no final-build live result is recorded yet.
+The approved source `554a4fc9`, with engine `6b5dbc5`, passes the full locked `make check`, including 203 Swift tests, engine tests, both native selftests, and packaging.
+In `verify-miri` run `20261104-225455`, one synthetic Command-layer arrow press crossed from an interior fixture on display 1 to the last-focused interior fixture on display 3, and the opposite arrow returned directly.
+Both engine and macOS focus agreed after each arrow and each H, L, A, and D alternative.
+A plain right-arrow control moved locally between fixture columns.
+The rendered Shortcuts rows showed all six monitor chords and both empty edge-focus actions.
+The earlier candidate migrated the actual version 4 configuration to version 5 without changing unrelated values, and the final build preserved that configuration.
+An earlier fixture-setup attempt was inconclusive before a valid proof key and does not count as a shortcut result.
+The final build remains running from this checkout's `.build/app/Miri Developer.app`.
+Cleanup restored eight recorded strip positions and released the lock, but five native frame rectangles and engine focus differed from the pre-gate capture, and one previously recorded window was absent.
+No physical-keyboard or alternate-topology result is claimed.
+Next: check PR #291 CI, then verify the landed build before issue closure.
 
 ## Accept shortcuts sent by AppleScript
 
