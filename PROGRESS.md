@@ -31,7 +31,12 @@ Sol usage was not returned.
 The listen-only tap captured neither synthetic input, so the actual AppleScript event flags remain unverified.
 The baseline run restored the previous build and stopped its fixtures, but the layout check reported the two Helium native-tab members in reverse order.
 Sam explicitly accepted that current layout, and cleanup released the lock.
-Fixed-build live verification and native selftests await the desktop lock held by the #276 run.
+Fixed-build run `20261104-182743` fails all three AppleScript trials at engine `1e6e900`, while the HID control moves both focus views to fixture-1.
+The generic-flag fallback alone does not fix the user-visible failure.
+The next check must establish where AppleScript posts its event before another behavior change.
+The run restored the previous build and session, but again reversed the two Helium native-tab members.
+Sam explicitly accepted the new current order, and cleanup released the lock.
+Native selftests have not run.
 Only the two unit-test acceptance boxes are ticked.
 The signed build and DMG packaging pass.
 The fix is pushed normally and open as draft [paneru#122](https://github.com/samanyudas/paneru/pull/122), pending the live check.
