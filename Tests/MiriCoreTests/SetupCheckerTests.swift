@@ -90,6 +90,19 @@ struct SetupCheckerTests {
         }
     }
 
+    @Test func aFourFingerConflictSaysThatOffStopsDesktopSwipes() {
+        var observation = ready
+        observation.fourFingerSwipe = 2
+        observation.threeFingerSwipe = 0
+        guard case .problem(let message) = status(.fourFingerGesture, observation) else {
+            Issue.record("Expected a four-finger conflict")
+            return
+        }
+        #expect(message.contains("stops swiping between desktops"))
+        #expect(message.contains("three fingers"))
+        #expect(message.contains("keeps swiping between desktops"))
+    }
+
     @Test func reportsGestureConflicts() {
         var observation = ready
         observation.fourFingerSwipe = 2
