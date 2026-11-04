@@ -175,6 +175,7 @@ public final class ConfigurationStore {
         try commit(next, replacing: current, backingUpBefore: upgrades ? "upgrading it" : nil)
         writtenGestureFingers = fingers
         refreshKeptDefaults(in: next)
+        stopChordsToRegister = Shortcuts(document: next, layout: layout).stopChordsToRegister(layout: layout)
     }
 
     /// Reports each changed default that kept its old chords, and each chord of a version 4 or later action that

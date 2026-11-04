@@ -161,7 +161,10 @@ Scrolling behavior remains consistent and independent across all connected displ
 Directional monitor navigation moves focus and windows between displays according to their physical positions.
 Strip scrolling and vertical focus and move stay within the current display.
 On 1 November 2026, Sam decided that Focus column left or right and Move column left or right cross to the neighboring display at the strip's end ([#104](https://github.com/samanyudas/miri/issues/104)).
-This crossing is not built yet, and where a column lands when it crosses back is still open.
+A fresh press crosses only when a display touches that horizontal side, with positive vertical overlap.
+A key auto-repeat stays inside its strip.
+A plain move arrives at the destination edge it crossed, so the opposite move returns it to the source strip end.
+The Command-layer and dedicated monitor moves keep their arrival-after-active-column rule.
 Scrolling reliability keeps off-screen windows on their assigned displays without macOS relocating them.
 These are distinct requirements.
 Reliable horizontal multi-monitor scrolling is a v1 release blocker.

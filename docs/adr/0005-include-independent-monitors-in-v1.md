@@ -14,6 +14,9 @@ V1 supports horizontal, vertical, and mixed monitor arrangements that Sam can ve
 Grid arrangements and the maximum display count move to v2, because v1 cannot verify them without the hardware.
 Physical monitor positions determine navigation between displays.
 Strip scrolling stays within the current display, and dedicated monitor navigation commands cross between displays.
+[#104](https://github.com/samanyudas/miri/issues/104) extends navigation to plain horizontal focus and move at a strip end.
+Only a fresh key press crosses a touching horizontal display, and a moved column lands at the destination edge it crossed.
+Vertical focus and move stay within the current display.
 Scrolling must keep off-screen windows on their assigned displays across all supported arrangements.
 Reliable horizontal multi-monitor scrolling blocks the v1 release until verified.
 Monitor disconnection and reconnection behavior is recorded in [ADR 0008](0008-follow-macos-space-migration-for-display-changes.md).

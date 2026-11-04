@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-04 on branch `fix/verify-miri-native-memberships`, based on `main` at `418e0962`
+Updated: 2026-11-04 on branch `impl/104-display-crossing`, based on `main` at `61026f2c`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,68 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Plain horizontal shortcuts cross touching displays
+
+[#104](https://github.com/samanyudas/miri/issues/104) is implemented on main `61026f2c`, with [engine PR #123](https://github.com/samanyudas/paneru/pull/123) merged as `6b5dbc5`.
+Keyboard dispatch adds horizontal step intent while wheel, Lua, and direct engine commands keep their previous behavior.
+A fresh press at the strip end crosses only a touching horizontal display with positive vertical overlap.
+Plain moves arrive at the crossed destination edge, so the opposite press returns the whole column to the source end.
+This extends ADR 0005's earlier dedicated-command-only rule.
+Command-layer move behavior and arrival after the destination active column stay unchanged.
+
+Signed main `61026f2c` stayed on its source display after plain focus and move at both touching edges in `verify-miri` run `20261104-203946`.
+Signed fix `82779a3` crossed focus and move both ways, returned immediately with whole stacks and focus retained, and preserved width and maximize behavior in runs `20261104-205815` and `20261104-210106`.
+Outer-edge commands stayed on their display.
+Runs `20261104-211336` and `20261104-213022` confirmed repeat confinement in both directions, including local destination movement after the fresh crossing.
+The last run recorded east focus crossing to interior fixture-4 before repeats reached last fixture-3, with both focus observations agreeing.
+Vertical stack controls and Command-layer arrival after an interior active fixture retained their behavior.
+These are synthetic HID observations on two horizontally touching displays, not physical-keyboard or alternate-topology results.
+Evidence stays outside the repository under the named verify-miri run directories.
+
+Cleanup restored the previous build, engine, session, and all eight recorded strip positions.
+Exact unrelated frames and focus did not restore.
+Three runs stopped at setup preconditions before the affected feature action, and their results remain inconclusive.
+An earlier delegate activated an app after releasing the lock, which violated the test procedure.
+Later runs performed every drive before end and made no post-lock activation.
+
+Two keyboard-dispatch regressions failed before the fix and passed afterward.
+All 193 Swift tests, 42 library plus 1182 binary developer-engine tests, 56 library plus 1278 binary default-feature tests, strict lint, the signed build, native selftests, and packaging passed separately.
+Sol-loop approved the app and engine behavior diff in one round with GPT-6.1 Sol on high, with no findings.
+The Opus comment and cross-model trail audit failed after repeated API errors and supplied no verdict.
+`make verify-engine-lifecycle` passed seven rules and three mutation checks on main and fix.
+Its 196-state process model does not cover display crossing.
+The first `make check` stopped at the unchanged unpublished engine-pin guard.
+After normal engine publication and repinning, the complete `make check` passed on app `563e74a1` with engine `6b5dbc5`, including both native selftests and DMG packaging.
+The app changes are in [PR #291](https://github.com/samanyudas/miri/pull/291).
+Next: verify the landed build before issue closure.
+
+## Direct monitor focus shortcuts
+
+Sam chose direct horizontal monitor focus on 4 November 2026 while reviewing [#104](https://github.com/samanyudas/miri/issues/104).
+Version 5 assigns Control-Option-Command plus Left, H, or A to `window_focusdisplay_west`, and Right, L, or D to `window_focusdisplay_east`.
+The edge-focus actions remain listed in Shortcuts without default chords.
+Column-move shortcuts keep their existing behavior.
+The migration transfers only exact offered defaults and preserves customized, disabled, conflicting, unversioned, and unsupported bindings.
+An existing direct-monitor value keeps both itself and its edge-focus predecessor.
+Stop registration now refreshes after a successful configuration migration, so a chord released by an edge default works without another reload.
+All 203 Swift tests pass, including the new default-transfer, customization, disabled-action, conflict, restart, and Stop-registration checks.
+Strict Swift lint, documentation checks, and `make lint` pass.
+Sol-loop approved the migration in two GPT-6.1 Sol high rounds after a canonical-alias destination check fixed the sole finding.
+Both empty and customized suffix aliases preserve the edge predecessor, and the regression failed before the fix.
+The comment audit found no added comments or suppressions.
+The separate lifecycle model passes all seven rules and three mutants, but cannot prove shortcut registration or monitor focus.
+The approved source `554a4fc9`, with engine `6b5dbc5`, passes the full locked `make check`, including 203 Swift tests, engine tests, both native selftests, and packaging.
+In `verify-miri` run `20261104-225455`, one synthetic Command-layer arrow press crossed from an interior fixture on display 1 to the last-focused interior fixture on display 3, and the opposite arrow returned directly.
+Both engine and macOS focus agreed after each arrow and each H, L, A, and D alternative.
+A plain right-arrow control moved locally between fixture columns.
+The rendered Shortcuts rows showed all six monitor chords and both empty edge-focus actions.
+The earlier candidate migrated the actual version 4 configuration to version 5 without changing unrelated values, and the final build preserved that configuration.
+An earlier fixture-setup attempt was inconclusive before a valid proof key and does not count as a shortcut result.
+The final build remains running from this checkout's `.build/app/Miri Developer.app`.
+Cleanup restored eight recorded strip positions and released the lock, but five native frame rectangles and engine focus differed from the pre-gate capture, and one previously recorded window was absent.
+No physical-keyboard or alternate-topology result is claimed.
+Next: check PR #291 CI, then verify the landed build before issue closure.
 
 ## Accept shortcuts sent by AppleScript
 
