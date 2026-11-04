@@ -64,7 +64,8 @@ Permission attribution remains unresolved.
 Cleanup restores the prior app/session and releases the lock after accepting only the authorized native-tab order reversal.
 All four acceptance boxes are ticked.
 No guard changed, no push bypass ran, and neither repository was merged by an agent.
-The parent integration pin is ready for a PR after the passing full gate.
+The parent integration is open as [#288](https://github.com/samanyudas/miri/pull/288) after the passing full gate.
+The normal pre-push hook passes, and CI and review are pending.
 Landed-main verification remains pending Sam merging the Miri integration.
 
 ## Supervisor test timing
