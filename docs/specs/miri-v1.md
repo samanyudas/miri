@@ -682,11 +682,12 @@ An accepted deferral does not commit every candidate to a future implementation.
    Additional app-only keys and the general migration schema remain engineering work.
    Do not adopt proposed examples as a verified Miri schema.
 7. **Broad feature documents contain proposals beyond the accepted v1 contract.**
-   New-window insertion beside the focused window, avoiding focus theft from background windows, spring details, and refresh-rate synchronization appear there.
+   New-window insertion beside the focused window, avoiding focus theft from background windows, and refresh-rate synchronization appear there.
    Engine-side shortcut handling and event-driven idling also appear as proposed engineering behavior.
    Those statements lack the same explicit accepted status as the release scope and app checklist.
    Zero gaps appear in the feature proposal while the accepted configuration documents leave the gap range unresolved.
    This draft does not make those statements new v1 acceptance requirements.
+   A spring that keeps its speed across a new keyboard target is deferred to v2, and a v1 keyboard slide is the ease-out in [V1 interactions](../../decisions/release-scope.md#v1-interactions).
 8. **Setup recipes are proposed guidance.**
    The three-finger and four-finger macOS setting recipes and disabling automatic Space rearrangement require supported-version verification.
    They do not add v1 startup blockers or authorize automatic settings changes.

@@ -140,6 +140,7 @@ The setup experience is recorded in [Setup](setup.md).
 ## Animation controls
 
 Strip motion should follow the display refresh rate.
+A keyboard slide in v1 uses the exponential ease-out recorded in [V1 interactions](release-scope.md#v1-interactions).
 Configurable spring duration and damping are deferred to v2.
 V1 follows the Reduce Motion and disable-animation behavior in [V1 interactions](release-scope.md#v1-interactions).
 The **Animate window movement** switch in Settings > General writes `[miri].animations`.
