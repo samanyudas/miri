@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-04 on branch `fix/issue-248`, fast-forwarded to `main` at `929a2c10`
+Updated: 2026-11-04 on branch `test/engine-supervisor-state-waits`, based on `main` at `cae36f6a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,16 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Supervisor test timing
+
+Verification for [#276](https://github.com/samanyudas/miri/issues/276) captured four supervisor assertions failing after 30.91 seconds, when polling expired before queued timer work completed.
+The two tests now subscribe to state changes before stop or crash and await their target state, with a one-minute Swift Testing time limit.
+Their kill, completion, current-state, and recovery assertions remain intact.
+A fresh baseline run passed all 192 Swift tests, so this session did not reproduce the captured failure.
+After the change, all nine focused supervisor tests and all 192 Swift tests pass, as do `make lint swift-lint` and `make pre-push`.
+This separate test-only change leaves product code and the lifecycle model unchanged.
+Desktop and native validation stay with the parent task.
 
 ## Preserve focus during an engine restart
 
