@@ -17,33 +17,48 @@ The public release path and the complete acceptance runs follow.
 ## Accept shortcuts sent by AppleScript
 
 [#279](https://github.com/samanyudas/miri/issues/279) reproduces on current main `cae36f6a`, with engine `1bcbb2e` and a behavior-preserving test diff, in `verify-miri` run `20261104-180936`.
-The AppleScript Control-Option-Left command leaves both engine and macOS focus on fixture-2, while `V key` moves both to fixture-1.
-The keyboard path ignores generic modifier flags, although the modifier-scroll path already handles them.
-Engine test commit `8dd49fb` records the generic Control-Option regression failing with `Modifiers(0x0)` before fix `1e6e900` shares the existing fallback with keyboard bindings.
-The fix preserves modifier sides when device bits exist.
+AppleScript leaves both engine and macOS focus on fixture-2, while the HID control moves both to fixture-1.
+Diagnostic run `20261104-183311` captures AppleScript keycode 123 at session, annotated-session, and app-specific taps, but not at the engine's HID tap.
+Its flags `0x2c0021` already include left Control and Option device bits.
+The generic-modifier fallback alone, engine `1e6e900`, failed all three live trials in run `20261104-182743`.
+Engine `fe946875` adds a session key-down tap beside the unchanged HID input path.
+Matched HID keys are consumed before session, so one shortcut cannot dispatch twice.
+One pinned handler owns, installs, checks, rebuilds, and removes both taps together.
+The change also shares the existing generic-modifier fallback with keyboard bindings and preserves device-side distinctions.
+Test commit `8dd49fb` records the generic Control-Option regression failing before the fallback fix.
+
+On the signed final bundle, run `20261104-184915` passes the exact AppleScript command in three of three trials, with both engine and macOS focus changing from fixture-2 to fixture-1.
+The HID control passes, and one HID shortcut moves fixture-3 to fixture-2 without a second dispatch to fixture-1.
+The previous build and session are restored, fixtures have exited, and the live-test lock is released.
+Sanitized engine `printstate` evidence confirms Helium windows 242797 and 242798 remain in one native tab group on display 1, Space 5195.
+Sam authorized current and future order-only reversals of those tab members when the group, strip, Space, and display stay the same.
+The final cleanup check passes for all nine pre-existing windows.
+No physical keyboard, trackpad, permission-attribution, or other automation-app check ran.
+
 All 42 library and 1174 binary tests pass without default features, and 56 library and 1270 binary tests pass with defaults.
 Both configurations pass strict Clippy, and formatting passes.
-The app passes 192 Swift tests, 56 harness tests, docs, shell, actions, and strict Swift formatting.
-Sol-loop approves the behavior diff in one round with GPT-6.1 Sol at high reasoning effort, with no findings.
-The comment audit has no findings.
-The diff remains one engine file with 34 additions and 9 deletions before and after review.
+The unchanged app passes 192 Swift tests, 56 harness tests, docs, shell, actions, and strict Swift formatting.
+The final signed build passes.
+Final DMG packaging passes.
+The native selftest attempt stopped without desktop changes because issue 276 holds the live-test lock.
+`make e2e` remains pending.
+Sol-loop approves the generic-flag diff in round one and the complete final behavior diff in round two with GPT-6.1 Sol at high effort, with no findings or open IDs.
+The final diff is one engine file with 133 additions and 68 deletions.
 Sol usage was not returned.
-The listen-only tap captured neither synthetic input, so the actual AppleScript event flags remain unverified.
-The baseline run restored the previous build and stopped its fixtures, but the layout check reported the two Helium native-tab members in reverse order.
-Sam explicitly accepted that current layout, and cleanup released the lock.
-Fixed-build run `20261104-182743` fails all three AppleScript trials at engine `1e6e900`, while the HID control moves both focus views to fixture-1.
-The generic-flag fallback alone does not fix the user-visible failure.
-The next check must establish where AppleScript posts its event before another behavior change.
-The run restored the previous build and session, but again reversed the two Helium native-tab members.
-Sam explicitly accepted the new current order, and cleanup released the lock.
-Native selftests have not run.
-Only the two unit-test acceptance boxes are ticked.
-The signed build and DMG packaging pass.
-The fix is pushed normally and open as draft [paneru#122](https://github.com/samanyudas/paneru/pull/122), pending the live check.
-The engine-lifecycle model does not cover keyboard input decoding, so `make verify-engine-lifecycle` cannot detect this finding and is skipped.
-The new engine commit must merge onto `miri/v0.5.2` before Miri's publication guard can accept the pin.
-`make check` stops at `make compat` because `1e6e900` is not published on that branch.
+The comment audits have no findings.
+The configured Claude design runner failed with a low-credit error and returned no recommendation.
+
+The final engine commit is pushed normally as ready-for-review [paneru#122](https://github.com/samanyudas/paneru/pull/122).
+GitHub reports it clean and mergeable, with no review findings.
+CodeRabbit skips this non-default target branch.
+The two unit-test boxes and the live box are ticked with [recorded evidence](https://github.com/samanyudas/miri/issues/279#issuecomment-6626309150).
+The engine-lifecycle model covers Swift app start, stop, restart, and quit, not keyboard event delivery.
+No covered Swift code changed, so `make verify-engine-lifecycle` cannot catch this finding and is skipped.
+`make check` stops at the unchanged publication guard because the engine fix has not merged onto `miri/v0.5.2`.
+That acceptance box remains unticked.
 No guard changed, no push bypass ran, and neither repository was merged by an agent.
+The parent integration pin is committed locally and awaits the published engine commit before its push can pass.
+Landed-main verification remains pending the engine merge and Miri integration.
 
 ## Supervisor test timing
 
