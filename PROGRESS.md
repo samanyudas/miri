@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-04 on branch `fix/issue-248`, based on `main` at `bc022f09`
+Updated: 2026-11-04 on branch `fix/issue-248`, fast-forwarded to `main` at `929a2c10`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,7 +16,7 @@ The public release path and the complete acceptance runs follow.
 
 ## Preserve focus during an engine restart
 
-[#248](https://github.com/samanyudas/miri/issues/248) is implemented and verified on the fix build, and remains open for landed-main verification.
+[#248](https://github.com/samanyudas/miri/issues/248) is verified on landed main `929a2c10`, with engine `1bcbb2e`, and closed.
 On current `main` at `bc022f09`, engine `af52f84`, `verify-miri` run `20261104-155648` moved both macOS and engine focus from Settings to fixture-2 after Restart Engine completed session restoration.
 The startup system explicitly focuses and raises the first active-row window even when it restores a saved session.
 Engine commit `40d154e` records two failing regressions before the fix and a passing first-launch regression.
@@ -32,12 +32,19 @@ The run restored the previous build, session, and all eight pre-existing window 
 `make verify-engine-lifecycle` passes all seven rules and three mutation checks, but its process-state model does not cover window focus or raises.
 An abandoned verification run from #279 was recovered with Sam's approval to retain Space 5144 because its recorded Space 5080 no longer exists.
 The subsequent main-build runs restored all eight surviving windows to their saved strip positions.
-All three acceptance criteria are ticked with fix-build evidence in the issue.
+All three acceptance criteria are ticked with fix-build and landed-main evidence in the issue.
 Sol-loop approved the exact behavior diff in one round with GPT-6.1 Sol at high effort and no findings.
 The configured Claude comment and decision-trail review failed after repeated API errors and produced no verdict.
 The engine PR is merged.
-The companion Miri pin is open in [#283](https://github.com/samanyudas/miri/pull/283) and remains unmerged.
-Next: merge the companion Miri PR, then verify the landed main build before closing the issue.
+Sam merged the companion Miri pin in [#283](https://github.com/samanyudas/miri/pull/283) as `929a2c10`, whose tree matches the integration tree that passed `make check`.
+On a freshly signed landed-main build, `verify-miri` run `20261104-171657` preserved Settings focus through its restart and fixture-2 focus through the actual status-menu restart, including delayed checks beyond restore grace.
+All 121 recorded regular layer-zero window ID and owner pairs retained identical order in both immediate and delayed comparisons for each restart.
+All three startup-focus regressions pass on landed main, including first launch without a saved session.
+Cleanup restored the previous build, session, and all eight original windows by Space, display, row, and strip position after correcting two exchanged Helium columns.
+The lock is free and `verify-miri doctor` passes.
+Cleanup did not independently compare pixel frames.
+The [landed-main verification comment](https://github.com/samanyudas/miri/issues/248#issuecomment-6624621125) records the evidence and closure.
+No issue-specific work remains.
 
 ## Keyboard slides in v1
 
