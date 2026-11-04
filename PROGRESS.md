@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-04 on branch `fix/issue-279`, based on `main` at `e120875c`
+Updated: 2026-11-04 on branch `fix/issue-279`, based on `main` at `b3dd9d42`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -51,7 +51,7 @@ The comment audits have no findings.
 The configured Claude design runner failed with a low-credit error and returned no recommendation.
 
 Sam merged [paneru#122](https://github.com/samanyudas/paneru/pull/122) as `0e9659cd`, whose source tree exactly matches verified engine `fe946875`.
-The Miri integration pins that merge and is rebased onto current main `e120875c`.
+The Miri integration pins that merge and includes main `b3dd9d42`, whose later changes only update the issue 276 verification record.
 CodeRabbit skipped the engine PR because it targeted a non-default branch.
 The two unit-test boxes and the live box are ticked with [recorded evidence](https://github.com/samanyudas/miri/issues/279#issuecomment-6626309150).
 The engine-lifecycle model covers Swift app start, stop, restart, and quit, not keyboard event delivery.
@@ -76,29 +76,26 @@ Their kill, completion, current-state, and recovery assertions remain intact.
 A fresh baseline run passed all 192 Swift tests, so this session did not reproduce the captured failure.
 After the change, all nine focused supervisor tests and all 192 Swift tests pass, as do `make lint swift-lint` and `make pre-push`.
 This separate test-only change leaves product code and the lifecycle model unchanged.
-Desktop and native validation stay with the parent task.
+Sam merged [#285](https://github.com/samanyudas/miri/pull/285), and the fresh landed-main gate below passes with these waits.
 
 ## Setup advice for desktop swipes
 
-[#276](https://github.com/samanyudas/miri/issues/276) adds the missing desktop-swipe consequences to the four-finger conflict advice.
+[#276](https://github.com/samanyudas/miri/issues/276) is verified on landed main `e120875c`, with engine `1bcbb2e`, and closed.
+Sam merged the advice in [#286](https://github.com/samanyudas/miri/pull/286) after the separate test-only [#285](https://github.com/samanyudas/miri/pull/285).
 Turning the macOS gesture off also stops desktop swipes, while three fingers keeps desktop swipes and leaves four fingers for the strip.
 The previous agent reproduced the old advice on main `481d52ff` in `verify-miri` run `20261104-130849` and committed the failing regression before the fix.
 The regression failed both desktop-swipe assertions before the change.
-The revised advice and all 10 `SetupCheckerTests` pass on current main plus this fix, with engine `1bcbb2e`.
-Nonlive checks pass, including lint, the signed build, 193 Swift tests, and 42 library plus 1172 binary engine tests.
 Sol GPT-6.1 at high reasoning effort approved the change in one round with no findings.
-`verify-miri` run `20261104-182024` shows every sentence in the native Setup page with four-finger value 2 and three-finger value 0.
+The fix-build `verify-miri` run `20261104-182024` and fresh landed-main run `20261104-190310` show every sentence in the native Setup page with four-finger value 2 and three-finger value 0.
 The visible text wraps without clipping.
-The run restored the previous build and all eight original window positions, including the Helium native-tab order, and released the lock.
-The first full `make check` hit four assertions in two existing supervisor tests after their 30-second polling deadline expired.
-The separate test-only [#285](https://github.com/samanyudas/miri/pull/285) replaces that polling with state notifications.
-This branch is stacked on #285, with the advice and its regression unchanged from the verified build.
-With those test waits, `CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 make check` passes on `d66acd77`, including 193 Swift tests, 42 library plus 1172 binary engine tests, native Accessibility observations, fixture recovery, and DMG packaging.
+Fresh `CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 make check` exits 0 on landed main, including 56 harness tests, 193 Swift tests, 42 library plus 1172 binary engine tests, the signed build, native Accessibility observations, fixture recovery, and DMG packaging.
+The landed-main run restored the original build and session, confirmed all nine recorded window positions, and released the lock after selecting the recorded first Helium native tab.
+Cleanup did not independently compare window frames.
+The Settings helper returned 1 because it looked for General-page status while Setup was open, and the native Setup control and exact text were verified directly.
 Accessibility attribution remains unresolved, and no physical swipe test ran.
-The advice PR is [#286](https://github.com/samanyudas/miri/pull/286), stacked on the test-only [#285](https://github.com/samanyudas/miri/pull/285).
-Both PRs remain open for Sam to merge, with [#285](https://github.com/samanyudas/miri/pull/285) first.
 `make verify-engine-lifecycle` does not apply because its model covers engine process transitions and cannot check advice text.
-The issue stays open for verification on the landed change after Sam merges.
+All three acceptance boxes are ticked, and the [landed verification comment](https://github.com/samanyudas/miri/issues/276#issuecomment-6626455144) records closure.
+No issue-specific work remains.
 
 ## Preserve focus during an engine restart
 
