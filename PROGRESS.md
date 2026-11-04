@@ -21,7 +21,7 @@ Keyboard dispatch adds horizontal step intent while wheel, Lua, and direct engin
 A fresh press at the strip end crosses only a touching horizontal display with positive vertical overlap.
 Plain moves arrive at the crossed destination edge, so the opposite press returns the whole column to the source end.
 This extends ADR 0005's earlier dedicated-command-only rule.
-Command-layer behavior and arrival after the destination active column stay unchanged.
+Command-layer move behavior and arrival after the destination active column stay unchanged.
 
 Signed main `61026f2c` stayed on its source display after plain focus and move at both touching edges in `verify-miri` run `20261104-203946`.
 Signed fix `82779a3` crossed focus and move both ways, returned immediately with whole stacks and focus retained, and preserved width and maximize behavior in runs `20261104-205815` and `20261104-210106`.
@@ -47,6 +47,20 @@ Its 196-state process model does not cover display crossing.
 The first `make check` stopped at the unchanged unpublished engine-pin guard.
 After normal engine publication and repinning, the complete `make check` passed on app `563e74a1` with engine `6b5dbc5`, including both native selftests and DMG packaging.
 Next: publish and review the app PR, then verify the landed build before issue closure.
+
+## Direct monitor focus shortcuts
+
+Sam chose direct horizontal monitor focus on 4 November 2026 while reviewing [#104](https://github.com/samanyudas/miri/issues/104).
+Version 5 assigns Control-Option-Command plus Left, H, or A to `window_focusdisplay_west`, and Right, L, or D to `window_focusdisplay_east`.
+The edge-focus actions remain listed in Shortcuts without default chords.
+Column-move shortcuts keep their existing behavior.
+The migration transfers only exact offered defaults and preserves customized, disabled, conflicting, unversioned, and unsupported bindings.
+An existing direct-monitor value keeps both itself and its edge-focus predecessor.
+Stop registration now refreshes after a successful configuration migration, so a chord released by an edge default works without another reload.
+All 203 Swift tests pass, including the new default-transfer, customization, disabled-action, conflict, restart, and Stop-registration checks.
+Strict Swift lint and documentation checks pass.
+Next: review the migration and verify direct focus from an interior column and the empty edge-focus rows on the running app.
+No live result for these new defaults is recorded yet.
 
 ## Accept shortcuts sent by AppleScript
 

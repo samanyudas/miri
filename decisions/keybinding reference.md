@@ -36,8 +36,8 @@ Sam chose this rule in [issue #79](https://github.com/samanyudas/miri/issues/79)
 | Focus column right | ⌃⌥→ | ⌃⌥L, ⌃⌥D |
 | Focus window above within column | ⌃⌥↑ | ⌃⌥K, ⌃⌥W |
 | Focus window below within column | ⌃⌥↓ | ⌃⌥J, ⌃⌥S |
-| Focus first column or monitor left | ⌃⌥⌘← | ⌃⌥⌘H, ⌃⌥⌘A |
-| Focus last column or monitor right | ⌃⌥⌘→ | ⌃⌥⌘L, ⌃⌥⌘D |
+| Focus monitor left | ⌃⌥⌘← | ⌃⌥⌘H, ⌃⌥⌘A |
+| Focus monitor right | ⌃⌥⌘→ | ⌃⌥⌘L, ⌃⌥⌘D |
 | Focus monitor above | ⌃⌥⌘↑ | ⌃⌥⌘K, ⌃⌥⌘W |
 | Focus monitor below | ⌃⌥⌘↓ | ⌃⌥⌘J, ⌃⌥⌘S |
 | Jump to column 1 through 9 | ⌃⌥1 through ⌃⌥9 | |
@@ -56,16 +56,16 @@ These actions have no default shortcut, and Settings lists them for custom short
 
 - Focus first column, and Focus last column.
 - Move column to first position, and Move column to last position.
-- Focus monitor left, and Focus monitor right.
+- Focus first column or monitor left, and Focus last column or monitor right.
 - Move column to monitor left, and Move column to monitor right.
 
 Numbered jumps select columns rather than individual windows.
 Within a stack, the selected column's last-focused window receives focus.
 
-Focus first column or monitor left focuses the current display's first column.
+Focus monitor left, right, above, and below focus the neighboring display at once, from any column in the current strip.
+The unbound Focus first column or monitor left action focuses the current display's first column.
 When that column already has focus, the same shortcut focuses the display to the left.
 Focus last column or monitor right does the same toward the last column and the display to the right.
-Focus monitor above and Focus monitor below focus the neighboring display at once.
 A focused display gives focus to its last-focused visible window, otherwise to its most visible window.
 These focus commands move no windows, switch no native desktops, and leave the pointer where it is.
 
@@ -213,7 +213,17 @@ A binding the user changed stays as it is.
 When another binding holds a chord that version 4 would add, that binding keeps the chord, and the Shortcuts settings page reports which action lacks it and which action holds it.
 An unversioned file keeps its bindings, gains no new chords on existing actions, and gains no edge-or-monitor action while it binds an action that one replaces.
 A `[bindings]` table in a form Miri does not rewrite stays unchanged.
-Reset to Defaults writes the version 4 set in every case.
+Version 5 gives Focus monitor left and Focus monitor right the horizontal Command-layer chords, so focus can switch displays from any column.
+Focus first column or monitor left and Focus last column or monitor right remain visible in Settings without default chords.
+The Shift shortcuts for moving columns keep their version 4 behavior.
+On upgrade from version 4, an exact default edge-focus array transfers to its direct-monitor action, and the edge-focus entry becomes empty.
+If the direct-monitor action already has a value, Miri preserves both entries.
+Customized, deleted, and explicitly empty edge-focus bindings stay as they are.
+A new direct-monitor default receives only free chords, and Settings reports chords held by other actions or Stop window manager.
+Those notices survive an app restart.
+Upgrades from versions 1 through 3 retire the exact old first-column and monitor defaults directly into the current monitor actions.
+An unversioned file keeps its existing bindings.
+Reset to Defaults writes the version 5 set in every case.
 
 Before [#106](https://github.com/samanyudas/miri/issues/106), the default for ⌃⌥F was `window_fullwidth`, which made a full-width column with gaps.
 Miri now writes `window_maximize` for a new file or a reset to defaults.

@@ -8,7 +8,8 @@ The engine scrolls the strip so the focused column shows, and macOS makes that w
 - `focus-west`: ⌃⌥← (also ⌃⌥H and ⌃⌥A) focuses the column to the left.
 - `focus-east`: ⌃⌥→ (also ⌃⌥L and ⌃⌥D) focuses the column to the right.
 - `focus-north`, `focus-south`: ⌃⌥↑ and ⌃⌥↓ focus the window above or below in a stacked column.
-- `focus-edge`: ⌃⌥⌘← and ⌃⌥⌘→ focus the first or last column, or the next display at the edge.
+- `focus-display`: ⌃⌥⌘← and ⌃⌥⌘→ focus the monitor on that side from any column in the strip.
+- `focus-edge`: Focus first column or monitor left and Focus last column or monitor right remain in Settings with no default shortcut.
 - `focus-number`: ⌃⌥1 to ⌃⌥9 focus a column by its position.
 
 ## How to get to it (user POV)
@@ -32,6 +33,23 @@ Preconditions:
 - **Stacks.** Not yet covered. Stacking needs ⌃⌥[ or ⌃⌥] first, then ⌃⌥↑ and ⌃⌥↓.
 
 In the proof run on 2026-11-02, both views agreed about 0.6 s after each key press.
+
+## Direct monitor focus
+
+Use two displays with at least three fixture columns on each display.
+Record the fixture IDs and use engine commands only to set up the source's interior column and the destination's active fixture.
+Confirm that the source fixture has a column on both sides before each shortcut.
+
+- Upgrade a version 4 configuration with the exact default edge-focus arrays.
+  Check that `window_focusdisplay_west` and `window_focusdisplay_east` now hold the Command-layer chords, and both edge-focus entries are empty.
+- Press ⌃⌥⌘→ from an interior column on the left display.
+  Record a snapshot and confirm that both engine focus and macOS focus select the destination fixture on the right display.
+- Press ⌃⌥⌘← from an interior column on the right display.
+  Confirm both focus observations on the left display.
+- Open Settings > Shortcuts.
+  Confirm that Focus first column or monitor left and Focus last column or monitor right remain visible with no shortcut chips.
+- In isolated configuration tests, cover customized, deleted, empty, and conflicting bindings, then load a fresh store to confirm that conflict notices persist.
+  Do not overwrite Sam's custom bindings for a live check.
 
 ## Gotchas
 

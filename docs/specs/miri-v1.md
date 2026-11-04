@@ -362,8 +362,8 @@ The following table records the selected v1 defaults without claiming tested act
 | Focus column right | Control-Option-Right | Control-Option-L, Control-Option-D |
 | Focus window above within column | Control-Option-Up | Control-Option-K, Control-Option-W |
 | Focus window below within column | Control-Option-Down | Control-Option-J, Control-Option-S |
-| Focus first column or monitor left | Control-Option-Command-Left | Control-Option-Command-H, Control-Option-Command-A |
-| Focus last column or monitor right | Control-Option-Command-Right | Control-Option-Command-L, Control-Option-Command-D |
+| Focus monitor left | Control-Option-Command-Left | Control-Option-Command-H, Control-Option-Command-A |
+| Focus monitor right | Control-Option-Command-Right | Control-Option-Command-L, Control-Option-Command-D |
 | Focus monitor above | Control-Option-Command-Up | Control-Option-Command-K, Control-Option-Command-W |
 | Focus monitor below | Control-Option-Command-Down | Control-Option-Command-J, Control-Option-Command-S |
 | Jump to column 1 through 9 | Control-Option-1 through Control-Option-9 | |

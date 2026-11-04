@@ -126,11 +126,11 @@ public struct DefaultBinding: Sendable {
                 "Focus window below within column", "window_focus_south", ctrlAlt("downarrow"), ctrlAlt("j"),
                 ctrlAlt("s")),
             DefaultBinding(
-                "Focus first column or monitor left", "window_focusedge_west", ctrlAlt("leftarrow", .command),
-                ctrlAlt("h", .command), ctrlAlt("a", .command), version: 4),
+                "Focus monitor left", "window_focusdisplay_west", ctrlAlt("leftarrow", .command),
+                ctrlAlt("h", .command), ctrlAlt("a", .command), version: 5),
             DefaultBinding(
-                "Focus last column or monitor right", "window_focusedge_east", ctrlAlt("rightarrow", .command),
-                ctrlAlt("l", .command), ctrlAlt("d", .command), version: 4),
+                "Focus monitor right", "window_focusdisplay_east", ctrlAlt("rightarrow", .command),
+                ctrlAlt("l", .command), ctrlAlt("d", .command), version: 5),
             DefaultBinding(
                 "Focus monitor above", "window_focusdisplay_north", ctrlAlt("uparrow", .command),
                 ctrlAlt("k", .command), ctrlAlt("w", .command), version: 2),
@@ -181,13 +181,12 @@ public struct DefaultBinding: Sendable {
             DefaultBinding("Pop focused window out to right", "window_unstack_east", ctrlAlt("rightbracket", .shift)),
             DefaultBinding("Pop focused window out to left", "window_unstack_west", ctrlAlt("leftbracket", .shift)),
             DefaultBinding("Float or unfloat focused window", "window_manage", ctrlAlt("t")),
-            // Version 4 gives these no shortcut, because the edge-or-monitor actions above took their chords.
             DefaultBinding("Focus first column", "window_focus_first"),
             DefaultBinding("Focus last column", "window_focus_last"),
             DefaultBinding("Move column to first position", "window_swap_first"),
             DefaultBinding("Move column to last position", "window_swap_last"),
-            DefaultBinding("Focus monitor left", "window_focusdisplay_west", version: 2),
-            DefaultBinding("Focus monitor right", "window_focusdisplay_east", version: 2),
+            DefaultBinding("Focus first column or monitor left", "window_focusedge_west", version: 5),
+            DefaultBinding("Focus last column or monitor right", "window_focusedge_east", version: 5),
             DefaultBinding("Move column to monitor left", "window_movedisplay_west", version: 2),
             DefaultBinding("Move column to monitor right", "window_movedisplay_east", version: 2),
         ]
@@ -197,19 +196,27 @@ public struct DefaultBinding: Sendable {
 
     /// Defaults that `version` removed, with the command that replaces each one. `offered` is the version that first
     /// wrote the retired default, so Miri can tell a binding the user deleted from one it never wrote.
-    static let retired: [(command: String, replacement: String, chord: Chord, offered: Int, version: Int)] = [
-        ("window_grow", "window_step_grow", ctrlAlt("equal"), 1, 2),
-        ("window_shrink", "window_step_shrink", ctrlAlt("minus"), 1, 2),
-        ("window_vertical_grow", "window_vertical_step_grow", ctrlAlt("equal", .shift), 1, 2),
-        ("window_vertical_shrink", "window_vertical_step_shrink", ctrlAlt("minus", .shift), 1, 2),
-        ("window_focus_first", "window_focusedge_west", ctrlAlt("leftarrow", .command), 1, 4),
-        ("window_focusdisplay_west", "window_focusedge_west", ctrlAlt("a", .command), 2, 4),
-        ("window_focus_last", "window_focusedge_east", ctrlAlt("rightarrow", .command), 1, 4),
-        ("window_focusdisplay_east", "window_focusedge_east", ctrlAlt("d", .command), 2, 4),
-        ("window_swap_first", "window_moveedge_west", ctrlAlt("leftarrow", .command, .shift), 1, 4),
-        ("window_movedisplay_west", "window_moveedge_west", ctrlAlt("a", .command, .shift), 2, 4),
-        ("window_swap_last", "window_moveedge_east", ctrlAlt("rightarrow", .command, .shift), 1, 4),
-        ("window_movedisplay_east", "window_moveedge_east", ctrlAlt("d", .command, .shift), 2, 4),
+    static let retired: [(command: String, replacement: String, chords: [Chord], offered: Int, version: Int)] = [
+        ("window_grow", "window_step_grow", [ctrlAlt("equal")], 1, 2),
+        ("window_shrink", "window_step_shrink", [ctrlAlt("minus")], 1, 2),
+        ("window_vertical_grow", "window_vertical_step_grow", [ctrlAlt("equal", .shift)], 1, 2),
+        ("window_vertical_shrink", "window_vertical_step_shrink", [ctrlAlt("minus", .shift)], 1, 2),
+        ("window_focus_first", "window_focusdisplay_west", [ctrlAlt("leftarrow", .command)], 1, 4),
+        ("window_focusdisplay_west", "window_focusdisplay_west", [ctrlAlt("a", .command)], 2, 4),
+        ("window_focus_last", "window_focusdisplay_east", [ctrlAlt("rightarrow", .command)], 1, 4),
+        ("window_focusdisplay_east", "window_focusdisplay_east", [ctrlAlt("d", .command)], 2, 4),
+        ("window_swap_first", "window_moveedge_west", [ctrlAlt("leftarrow", .command, .shift)], 1, 4),
+        ("window_movedisplay_west", "window_moveedge_west", [ctrlAlt("a", .command, .shift)], 2, 4),
+        ("window_swap_last", "window_moveedge_east", [ctrlAlt("rightarrow", .command, .shift)], 1, 4),
+        ("window_movedisplay_east", "window_moveedge_east", [ctrlAlt("d", .command, .shift)], 2, 4),
+        (
+            "window_focusedge_west", "window_focusdisplay_west",
+            [ctrlAlt("leftarrow", .command), ctrlAlt("h", .command), ctrlAlt("a", .command)], 4, 5
+        ),
+        (
+            "window_focusedge_east", "window_focusdisplay_east",
+            [ctrlAlt("rightarrow", .command), ctrlAlt("l", .command), ctrlAlt("d", .command)], 4, 5
+        ),
     ]
 
     /// Defaults whose chords changed in `version`. Version 3 makes `[` mean left and `]` mean right (miri#92).
@@ -270,8 +277,15 @@ public struct DefaultBinding: Sendable {
 
         var result = document
         let unwanted = replacementsToSkip(in: document, offered: offered)
-        for old in retired where offered >= 1 && old.version > offered {
-            if case .string(let text) = document.value(at: ["bindings", old.command]), text == old.chord.description {
+        for old in retired where offered >= old.offered && old.version > offered {
+            guard document.value(at: ["bindings", old.command]) == encoded(old.chords) else { continue }
+            let leavesUnbound = table.contains {
+                $0.command == old.command && $0.version == old.version && $0.chords.isEmpty
+            }
+            if leavesUnbound {
+                guard document.value(at: ["bindings", old.replacement]) == nil else { continue }
+                result = try result.setting(.array([]), table: ["bindings"], key: old.command)
+            } else {
                 result = try result.removing(table: ["bindings"], key: old.command)
             }
         }
