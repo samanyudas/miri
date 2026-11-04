@@ -40,8 +40,10 @@ Both configurations pass strict Clippy, and formatting passes.
 The unchanged app passes 192 Swift tests, 56 harness tests, docs, shell, actions, and strict Swift formatting.
 The final signed build passes.
 Final DMG packaging passes.
-The native selftest attempt stopped without desktop changes because issue 276 holds the live-test lock.
-`make e2e` remains pending.
+After issue 276 released the desktop lock, `make e2e` passed on the final signed bundle in run `20261104-190653`.
+Its permission observation reports `observed-granted`, with attribution unresolved, and the missing-helper and aliased-path checks pass.
+The recovery selftest strands its fixture and recovers it to a reachable position.
+Cleanup restores the previous build/session, leaves no test processes, and releases the lock after accepting only the authorized native-tab order reversal.
 Sol-loop approves the generic-flag diff in round one and the complete final behavior diff in round two with GPT-6.1 Sol at high effort, with no findings or open IDs.
 The final diff is one engine file with 133 additions and 68 deletions.
 Sol usage was not returned.
