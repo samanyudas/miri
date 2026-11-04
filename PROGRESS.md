@@ -29,12 +29,39 @@ Both runs restored the previous build and all eight recorded strip positions wit
 The second run compared unrelated frames and found four changed, so exact frame restoration was not achieved.
 All evidence remains outside the repository.
 
+Signed fix runs `20261104-205815` and `20261104-210106` cross focus and move in both directions through plain shortcuts, with engine and macOS focus agreeing.
+Plain moves arrive at the crossed edge and return immediately, including a two-member stack with its member order preserved.
+Outer-edge focus and move stay on the current display.
+Normal widths scale from 310 to 388 points, maximized widths from 2040 to 2552 points, and toggling maximize restores the expected width on each display.
+East move repeats and west focus repeats stop within their strip, and an east move invocation starting at the edge crosses once before repeating locally.
+The first fix run stopped at an outer-left setup precondition before sending that shortcut.
+The second run waited for both focus observations after direct display setup and established the correct strip end.
+Both runs restored all eight recorded strip positions, but their frame comparisons found five and four unrelated frames changed.
+Run `20261104-211033` stopped before feature shortcuts when its separate macOS focus baseline capture failed.
+Its cleanup restored the previous build and eight strip positions, with three unrelated frames changed.
+The delegate activated the original focused app after releasing the lock, which violated the test procedure.
+Run `20261104-211336` captured focus through AppKit before begin and performed every desktop action before end.
+West move repeats stopped at the touching edge, and a new invocation there crossed once before repeating locally on the destination.
+West focus repeats crossed once and then moved locally across the destination strip.
+Vertical stack focus and move controls kept both members on the same display.
+East focus repeats reached the source strip's last column without crossing, and a separate invocation there crossed east.
+That invocation began with the destination's last column active, so local movement did not independently prove its repeat delivery.
+The Command-layer move arrived immediately after the destination's interior active fixture, at index 2 after index 1.
+The delegate's stricter interior-source and extra-edge-fixture setups were incomplete, so those full planned cases are not claimed as passed.
+Cleanup restored the previous build and all eight strip positions without an override, but focus and four unrelated frames did not restore exactly.
+No physical-keyboard or alternate-topology result is claimed.
+
 Engine test commit `d847095` records two failing keyboard-dispatch crossing regressions before the fix.
-Both pass after the fix, as do the eight focused crossing checks and all 42 library plus 1182 binary engine tests without default features.
+All eight new engine regressions pass after the fix, as do all 42 library plus 1182 binary engine tests without default features.
 Strict engine lint passes.
+Default-feature strict lint and all 56 library plus 1278 binary tests pass.
+All 193 Swift tests, Swift lint, the signed build, native selftests, and DMG packaging pass separately.
+`make check` passes docs, 58 harness tests, ShellCheck, and actionlint, then stops at the unchanged unpublished engine-pin guard.
+Parent delivery must publish the engine normally, repin its published revision, and rerun the complete gate.
 `make verify-engine-lifecycle` passes all seven rules and three mutation checks on both main and the implementation.
 Its process-state model does not cover display crossing and is regression evidence only.
-Next: verify the signed fix through the same plain shortcuts, finish native checks, and hand the local commits to the parent for review and delivery.
+Next: parent review and sol-loop, normal engine publication and repin, then the complete gate and delivery.
+The east post-cross focus-repeat observation remains a bounded live-evidence gap.
 
 ## Accept shortcuts sent by AppleScript
 

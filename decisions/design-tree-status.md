@@ -28,6 +28,9 @@ The native app is implemented, but no complete acceptance run has passed.
 - Resize commands change size by five percentage points of the display's corresponding dimension, subject to window size constraints.
 - Control-Option-Command with Up or Down focuses the display above or below, and with Left or Right it focuses the strip's first or last column, then the display on that side.
   Each direction also accepts H, J, K, and L, and W, A, S, and D, and adding Shift moves the focused column the same way.
+- Plain horizontal focus and move cross only a touching display when a fresh key press starts at the strip's end ([#104](https://github.com/samanyudas/miri/issues/104)).
+  Plain moves arrive at the crossed destination edge, so the opposite press returns them to the source end.
+  Command-layer moves retain arrival after the active column.
 - V1 uses clicking and macOS window switching to access floating windows without a dedicated floating-to-tiled focus shortcut.
 - Fixed-size windows and Miri's settings float automatically.
 - When focus moves, the strip moves only as far as needed to show the focused column fully.
@@ -152,9 +155,6 @@ Their acceptance checks stay in the [acceptance ledger](../docs/acceptance-ledge
 [PROGRESS.md](../PROGRESS.md) records what is implemented and what is verified.
 
 - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings ([#212](https://github.com/samanyudas/miri/issues/212)).
-- Verify plain horizontal focus and move across touching displays at a strip's end ([#104](https://github.com/samanyudas/miri/issues/104)).
-  Plain moves arrive at the crossed destination edge, so the opposite press returns them to the source end.
-  Command-layer moves retain arrival after the active column.
 - Integrate Sparkle updates with the accepted update policy.
 - Configure Developer ID signing, notarization, signed update feeds, the release disk image, and the Homebrew cask.
 - Recheck app and helper Accessibility attribution on the Developer ID signed, notarized bundle.
