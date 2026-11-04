@@ -31,7 +31,9 @@ Turning the macOS gesture off also stops desktop swipes, while three fingers kee
 The previous agent reproduced the old advice on main `481d52ff` in `verify-miri` run `20261104-130849` and committed the failing regression before the fix.
 The regression failed both desktop-swipe assertions before the change.
 The revised advice and all 10 `SetupCheckerTests` pass on current main plus this fix, with engine `1bcbb2e`.
-Live verification, `make check`, Sol review, and the PR remain pending.
+Nonlive checks pass, including lint, the signed build, 193 Swift tests, and 42 library plus 1172 binary engine tests.
+Sol GPT-6.1 at high reasoning effort approved the change in one round with no findings.
+Live verification, full `make check`, and the PR remain pending.
 The desktop test lock was held by issue 279 when this session reached live verification.
 `make verify-engine-lifecycle` does not apply because its model covers engine process transitions and cannot check advice text.
 The issue stays open for verification on the landed change after Sam merges.
