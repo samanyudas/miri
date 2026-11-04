@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-04 on branch `fix/verify-miri-native-memberships`, based on `main` at `418e0962`
+Updated: 2026-11-04 on branch `impl/104-display-crossing`, based on `main` at `61026f2c`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,28 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Plain horizontal shortcuts cross touching displays
+
+[#104](https://github.com/samanyudas/miri/issues/104) is implemented locally on main `61026f2c`, with engine `82779a3`.
+Keyboard dispatch promotes horizontal focus and move into typed step commands, while wheel, Lua, and direct engine commands retain their existing strip-local behavior.
+A fresh press at the strip end crosses only a touching horizontal display with positive vertical overlap.
+Plain moves arrive at the crossed destination edge, so the opposite press returns the whole column to the source end.
+Command-layer behavior and arrival after the destination active column stay unchanged.
+
+On a signed main build, `verify-miri` run `20261104-203946` kept fixture-3 on its source display after plain focus and move at each touching edge.
+The Command-layer controls crossed in both directions and kept focus in both macOS and the engine.
+The earlier run `20261104-203550` failed a fixture setup precondition and is inconclusive.
+Both runs restored the previous build and all eight recorded strip positions without an override.
+The second run compared unrelated frames and found four changed, so exact frame restoration was not achieved.
+All evidence remains outside the repository.
+
+Engine test commit `d847095` records two failing keyboard-dispatch crossing regressions before the fix.
+Both pass after the fix, as do the eight focused crossing checks and all 42 library plus 1182 binary engine tests without default features.
+Strict engine lint passes.
+`make verify-engine-lifecycle` passes all seven rules and three mutation checks on both main and the implementation.
+Its process-state model does not cover display crossing and is regression evidence only.
+Next: verify the signed fix through the same plain shortcuts, finish native checks, and hand the local commits to the parent for review and delivery.
 
 ## Accept shortcuts sent by AppleScript
 

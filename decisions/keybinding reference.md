@@ -76,17 +76,23 @@ Holding an edge-or-monitor shortcut never crosses on a key repeat, and a hold wh
 Move column to monitor above, Move column to monitor below, and Send column to next display move the column at once.
 Every display move takes the whole column, so each stack member moves with it in the same order, and the focused member keeps focus.
 To move one member alone, pop it out into its own column first.
-The arriving column goes immediately after the destination's active column, which is the column a display focus would select there.
+For Command-layer and dedicated monitor moves, the arriving column goes immediately after the destination's active column, which is the column a display focus would select there.
 With destination columns X, Y, and Z and Y active, moving column S there gives X, Y, S, Z.
 An empty destination receives the column as its first column.
 When no display lies in the requested direction, the shortcut does nothing, so a column or focus stays at the current display's end.
 On 1 November 2026, Sam decided that Focus column left or right and Move column left or right also cross at the strip's end ([#104](https://github.com/samanyudas/miri/issues/104)).
-That crossing is not built yet.
+A fresh plain horizontal press crosses only when a display touches that side with positive vertical overlap.
+A plain move arrives at the destination's left edge when moving right, or its right edge when moving left.
+The opposite plain move therefore returns the column to the source strip end.
+Plain key auto-repeat can step within a strip but never crosses a display.
+Whole-column sizing, maximize, stack order, and focus follow use the same rules as dedicated monitor moves.
 
 Display directions follow the physical arrangement in **System Settings > Displays**.
 Focus and movement within a column stay on the current display at the column's top or bottom edge.
-Today only the monitor shortcuts, the edge-or-monitor shortcuts at a display's end, and ⌃⌥N cross to another display.
-The accepted #104 behavior will also let plain horizontal focus and move cross at the strip's end, as [Release scope](release-scope.md#multiple-monitors) records.
+The monitor shortcuts, edge-or-monitor shortcuts at a strip's end, plain horizontal shortcuts at a touching strip end, and ⌃⌥N cross to another display.
+Modifier-wheel scrolling stays inside its strip.
+Direct engine `window focus` and `window swap` commands remain strip-local.
+Keyboard dispatch gives their horizontal bindings the crossing behavior above.
 Stop window manager runs the same Stop as the menu bar, and Miri registers it itself.
 Its shortcuts are customizable and live in `[miri].stop_shortcut`, as one chord string or an array of chord strings in the engine's syntax.
 An absent key means ⌃⌥Q, and an empty array means Stop has no shortcut.
