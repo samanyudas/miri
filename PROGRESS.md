@@ -41,7 +41,8 @@ The separate test-only [#285](https://github.com/samanyudas/miri/pull/285) repla
 This branch is stacked on #285, with the advice and its regression unchanged from the verified build.
 With those test waits, `CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 make check` passes on `d66acd77`, including 193 Swift tests, 42 library plus 1172 binary engine tests, native Accessibility observations, fixture recovery, and DMG packaging.
 Accessibility attribution remains unresolved, and no physical swipe test ran.
-The advice PR remains pending.
+The advice PR is [#286](https://github.com/samanyudas/miri/pull/286), stacked on the test-only [#285](https://github.com/samanyudas/miri/pull/285).
+Both PRs remain open for Sam to merge, with [#285](https://github.com/samanyudas/miri/pull/285) first.
 `make verify-engine-lifecycle` does not apply because its model covers engine process transitions and cannot check advice text.
 The issue stays open for verification on the landed change after Sam merges.
 
