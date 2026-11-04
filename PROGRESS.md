@@ -57,10 +57,14 @@ The two unit-test boxes and the live box are ticked with [recorded evidence](htt
 The engine-lifecycle model covers Swift app start, stop, restart, and quit, not keyboard event delivery.
 No covered Swift code changed, so `make verify-engine-lifecycle` cannot catch this finding and is skipped.
 The prior `make check` stopped at the unchanged publication guard before the engine merged.
-The merged pin now satisfies publication, and the complete gate is pending a fresh run.
-That acceptance box remains unticked until the run passes.
+The merged pin satisfies publication.
+The complete `CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 make check` gate passes with exit 0 on integration commit `0fefc13` in run `20261104-191340`.
+It passes 56 harness tests, 193 Swift tests, 42 engine library tests, and 1174 engine binary tests, plus lint, the signed build, native selftests, and DMG packaging.
+Permission attribution remains unresolved.
+Cleanup restores the prior app/session and releases the lock after accepting only the authorized native-tab order reversal.
+All four acceptance boxes are ticked.
 No guard changed, no push bypass ran, and neither repository was merged by an agent.
-The parent integration pin is committed locally, and its PR follows the full gate.
+The parent integration pin is ready for a PR after the passing full gate.
 Landed-main verification remains pending Sam merging the Miri integration.
 
 ## Supervisor test timing
