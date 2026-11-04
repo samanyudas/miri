@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-04 on branch `test/engine-supervisor-state-waits`, based on `main` at `cae36f6a`
+Updated: 2026-11-04 on branch `fix/issue-276`, based on `main` at `cae36f6a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -23,6 +23,18 @@ A fresh baseline run passed all 192 Swift tests, so this session did not reprodu
 After the change, all nine focused supervisor tests and all 192 Swift tests pass, as do `make lint swift-lint` and `make pre-push`.
 This separate test-only change leaves product code and the lifecycle model unchanged.
 Desktop and native validation stay with the parent task.
+
+## Setup advice for desktop swipes
+
+[#276](https://github.com/samanyudas/miri/issues/276) adds the missing desktop-swipe consequences to the four-finger conflict advice.
+Turning the macOS gesture off also stops desktop swipes, while three fingers keeps desktop swipes and leaves four fingers for the strip.
+The previous agent reproduced the old advice on main `481d52ff` in `verify-miri` run `20261104-130849` and committed the failing regression before the fix.
+The regression failed both desktop-swipe assertions before the change.
+The revised advice and all 10 `SetupCheckerTests` pass on current main plus this fix, with engine `1bcbb2e`.
+Live verification, `make check`, Sol review, and the PR remain pending.
+The desktop test lock was held by issue 279 when this session reached live verification.
+`make verify-engine-lifecycle` does not apply because its model covers engine process transitions and cannot check advice text.
+The issue stays open for verification on the landed change after Sam merges.
 
 ## Preserve focus during an engine restart
 
