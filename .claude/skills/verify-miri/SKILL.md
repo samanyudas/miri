@@ -83,7 +83,8 @@ Each drive command logs to `<run>/log.txt` with a timestamp.
 | `V focused [--wait-for fixture-1]` | Prints the engine's focused window and macOS's frontmost app, named as fixtures. With `--wait-for`, exits 1 unless both views show that fixture within `--timeout` seconds (3 by default). |
 | `V snapshot <label>` | Writes `<label>.json` (the focus record and every fixture's frame, focus, visibility, and floating state) and one PNG per fixture window. |
 | `V settings` | Reopens the test app, which shows Settings, as a user does from Finder or Spotlight. |
-| `V ax test press "General"` | Presses Settings tabs and buttons by title. `dump` lists every element, `status` prints the General page status, and `windows` lists window numbers. |
+| `V relaunch` | Quits the test build with SIGTERM and opens it again, to check what it keeps across launches, such as a saved Stop. A build that starts no engine is a result, not a failure. |
+| `V ax test press "General"` | Presses Settings tabs and buttons by title, accessibility description, or help text, in order. It looks for each one again after the previous press, so a tab and a button on it work in one call. `dump` lists every element with its help text, `status` prints the text after the `Status` label of the tab that shows, and `windows` lists window numbers. |
 | `V standin yabai` | Runs a harmless compiled process named `yabai`, so the Setup page reports a competing window manager. |
 | `V watch 12` | Logs every Miri app and engine start and exit for 12 seconds, at 50 ms intervals. Start it in the background before a fast sequence. |
 | `V query active` | Prints engine state. Window titles can be private. Never paste titles other than the fixtures'. |
@@ -93,7 +94,8 @@ Each drive command logs to `<run>/log.txt` with a timestamp.
 Use stable handles:
 
 - Fixtures by name and window ID, never by position or another app's title.
-- Settings controls by title: tabs `General`, `Layout`, `Gestures`, `Shortcuts`, `Setup`, `Diagnostics`, and buttons such as `Start Window Management`, `Stop Window Management`, `Restart Engine`, `Check Again`, `Add Shortcut`.
+- Settings controls by title: tabs `General`, `Layout`, `Gestures`, `Shortcuts`, `Setup`, `Diagnostics`, and buttons such as `Start Window Management`, `Stop Window Management`, `Restart Engine`, `Check Again`.
+  When several buttons share a title, as every row's `Add Shortcut` does, use the help text that `dump` shows, such as `Add a shortcut for Focus column right`.
 - Shortcuts by the chord in `config.toml`, which [Bindings.swift](../../../Sources/MiriCore/Bindings.swift) writes.
 
 The feature map in [features/README.md](features/README.md) has one recipe per feature.
@@ -148,7 +150,7 @@ The layout check in step 6 is the proof.
 - Synthetic shortcuts match only when the event flags carry the left-side modifier bits. Arrow keys also need the numeric-pad and Fn flags that a real keyboard sets. `V key` sets both.
 - A process started from a background shell cannot become the frontmost app. Open a window through `open` on an app bundle, as `V fixture` does.
 - The engine floats every window that cannot resize, and column shortcuts skip floating windows.
-- Find processes by executable path with `ps -axww`, never by name. A shell whose command line contains a Miri path matches `pgrep -f`.
+- Find processes by executable path, never by name or by a match anywhere in the command line. A shell whose command line contains a Miri path matches `pgrep -f`. In a 2026-11-05 run, such a match most likely killed the run's own shell. Compare the executable column of `ps -axo pid=,comm=` with the full path.
 - Synthetic Control-Arrow does not switch Spaces, and synthetic title-bar drags and trackpad swipes do not act like Sam's hands. Ask Sam for those checks, after you launch the build under test as [Hand a check to Sam](../../../docs/AI-CONTRIBUTIONS.md#hand-a-check-to-sam) says.
 - macOS can renumber Spaces, for example after the Dock restarts, so a restored session can name a Space that no longer exists. Compare the restore line's `missing` count with the count at `begin` before you trust a restore.
 

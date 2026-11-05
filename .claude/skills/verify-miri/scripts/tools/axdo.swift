@@ -1,8 +1,9 @@
 // Reads and presses Accessibility elements of one app, and lists its on-screen windows.
 // Usage:
-//   axdo <pid> dump                  every element of every window: role, then title | description | value
+//   axdo <pid> dump                  every element of every window: role, then title | description | value | help
 //   axdo <pid> status                the text after the "Status" label in each window (Settings > General)
-//   axdo <pid> press <title>...      presses each button, tab, or radio button with that title, in order
+//   axdo <pid> press <title>...      presses each button, tab, or radio button with that title, description, or help
+//                                    text, in order. When several match, it presses the first.
 //   axdo <pid> windows               the CoreGraphics window number, layer, bounds, and title of each window
 //   axdo frontmost                   the process ID of the frontmost app
 // Exit status: 0 on success, 1 when a title has no element or a press fails, 2 on a usage error.
@@ -43,7 +44,7 @@ case "dump":
         walk(window) { element, depth in
             let role = text(element, kAXRoleAttribute) ?? "?"
             let parts = [text(element, kAXTitleAttribute), text(element, kAXDescriptionAttribute),
-                         attribute(element, kAXValueAttribute).map { "\($0)" }]
+                         attribute(element, kAXValueAttribute).map { "\($0)" }, text(element, kAXHelpAttribute).map { "help: \($0)" }]
             let label = parts.compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " | ")
             print(String(repeating: "  ", count: depth) + role + " " + label)
         }
@@ -62,15 +63,18 @@ case "status":
     }
 case "press":
     guard arguments.count >= 4 else { usage() }
-    var found: [String: AXUIElement] = [:]
-    for window in windows {
-        walk(window) { element, _ in
-            guard pressableRoles.contains(text(element, kAXRoleAttribute) ?? "") else { return }
-            let title = text(element, kAXTitleAttribute) ?? text(element, kAXDescriptionAttribute) ?? ""
-            if !title.isEmpty, found[title] == nil { found[title] = element }
-        }
-    }
     for title in arguments.dropFirst(3) {
+        // Walk again before each press: the previous press can show another tab, sheet, or alert.
+        var found: [String: AXUIElement] = [:]
+        for window in (attribute(app, kAXWindowsAttribute) as? [AXUIElement]) ?? [] {
+            walk(window) { element, _ in
+                guard pressableRoles.contains(text(element, kAXRoleAttribute) ?? "") else { return }
+                // A row's buttons can share a title. Their help text, such as "Add a shortcut for Focus column right", tells them apart.
+                for name in [kAXTitleAttribute, kAXDescriptionAttribute, kAXHelpAttribute] {
+                    if let key = text(element, name), !key.isEmpty, found[key] == nil { found[key] = element }
+                }
+            }
+        }
         guard let element = found[title] else {
             print("no element titled \(title); have \(found.keys.sorted())")
             exit(1)

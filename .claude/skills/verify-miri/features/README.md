@@ -32,7 +32,21 @@ Read the index, then use the matching feature file as the recipe.
 
 | Feature | Proven by this skill |
 | --- | --- |
-| [Focus a window with a shortcut](focus-window-shortcut.md) | Yes, on 2026-11-02 at `main` 38b851c8, with arrow and letter chords. Run `20261102-003047`. |
-| [Start, stop, and restart window management](window-management-controls.md) | Not yet with `V`. The #234-#236 reproduce run on 2026-11-01 drove the same controls with the same tools. |
-| [Setup checks](setup-checks.md) | Not yet with `V`. The #236 run drove the `yabai` stand-in with the same tools. |
-| [Customize shortcuts](shortcut-customization.md) | Not yet. Recording a chord was driven by hand-built tools on 2026-10-26. |
+| [Focus a window with a shortcut](focus-window-shortcut.md) | Yes, on 2026-11-05 at `main` c4ba432e, run `20261105-160539`: column, letter, number, stack, and monitor above and below. Monitor left and right were proved in run `20261104-225455`. |
+| [Start, stop, and restart window management](window-management-controls.md) | Yes, on 2026-11-05 at `main` c4ba432e, run `20261105-160539`: every sub-feature, the menu bar menu excepted. |
+| [Setup checks](setup-checks.md) | Yes, on 2026-11-05 at `main` c4ba432e, run `20261105-160539`: the `yabai` stand-in, Waiting, and auto-start. |
+| [Customize shortcuts](shortcut-customization.md) | Yes, on 2026-11-05 at `main` c4ba432e, run `20261105-160539`: remove, add, both conflicts, and reset. Not the filter. |
+
+## Surfaces without a map entry
+
+These user-facing surfaces have no recipe yet.
+`axdo press` reaches buttons, tabs, and radio buttons only, so a control marked "config" needs a `config.toml` edit as setup and a `V ax test dump` or `V snapshot` as proof.
+
+- Configuration error: the menu line and the Settings banner with `Show Configuration File in Finder` ([Views.swift](../../../../Sources/Miri/Views.swift), [Settings.swift](../../../../Sources/MiriCore/Settings.swift)). Drivable with a broken `config.toml`.
+- Diagnostics tab and `Copy Diagnostics…` window ([Views.swift](../../../../Sources/Miri/Views.swift)). Drivable with `ax press`.
+- Window recovery: windows that management stops leave on screen ([WindowRestorer.swift](../../../../Sources/Miri/WindowRestorer.swift)). Drivable with fixtures and Stop.
+- Layout tab: gaps, width presets, windows per stack, maximized window side, and the shared-edge switch ([Views.swift](../../../../Sources/Miri/Views.swift)). Config. The shared-edge switch also needs Screen Recording permission and two displays.
+- General toggles: `Launch at login` and `Animate window movement` ([Views.swift](../../../../Sources/Miri/Views.swift)). Never drive `Launch at login`, which changes Sam's login items.
+- Gestures tab and `Test Gesture…` ([GestureSettings.swift](../../../../Sources/Miri/GestureSettings.swift)). The test needs Sam's trackpad.
+- Initial setup, the Set Up Miri window on first launch ([InitialSetup.swift](../../../../Sources/Miri/InitialSetup.swift)). Showing it again needs the launch argument `-initialSetupDone NO`, which `V begin` does not pass.
+- The menu bar menu ([Views.swift](../../../../Sources/Miri/Views.swift)). `axdo` cannot open it. [Start, stop, and restart](window-management-controls.md) has the System Events route.

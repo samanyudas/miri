@@ -5,7 +5,7 @@ A run swaps the running Miri Developer for a test build, drives it, and puts eve
 
   verify-miri doctor                         read-only health check, safe at any time
   verify-miri begin --owner "<thread>"       take the live-test lock, back up the window session, launch the test build
-  verify-miri <drive commands>               fixture, key, snapshot, focused, ax, settings, standin, watch, query, send-cmd
+  verify-miri <drive commands>               fixture, key, snapshot, focused, ax, settings, relaunch, standin, watch, query, send-cmd
   verify-miri end --owner "<thread>"         quit the test build, restore the session, relaunch the previous build, release the lock
   verify-miri end --keep-test-build ...      stop the fixtures, keep the test build running for Sam, release the lock
 
@@ -762,6 +762,23 @@ def cmd_settings(_args) -> int:
     return 0 if shown else 1
 
 
+def cmd_relaunch(_args) -> int:
+    """Quit the test build and open it again, as a person does, to check what it keeps across launches.
+    A build with a saved Stop starts no engine. That is a result to read, not a failure."""
+    run = load_run()
+    old = test_pid(run)
+    if not quit_app(old, run, "test build"):
+        raise Failure("The test build or its engine did not exit. Run `verify-miri doctor`.")
+    try:
+        launch_app(run["test_app"], run, "test build", record=True)
+    except Failure as error:
+        new = run.get("test_pid")
+        if new == old or not new or not alive(new):
+            raise
+        log(run, f"relaunched test build pid {new} with no engine: {error}")
+    return 0
+
+
 def cmd_standin(args) -> int:
     run = load_run()
     build_tools(quiet=True)
@@ -869,6 +886,8 @@ def main() -> int:
     p.add_argument("rest", nargs=argparse.REMAINDER)
     p.set_defaults(func=cmd_ax)
     sub.add_parser("settings", help="open the test build's Settings window").set_defaults(func=cmd_settings)
+    sub.add_parser("relaunch", help="quit the test build and open it again, to check what it keeps across launches"
+                   ).set_defaults(func=cmd_relaunch)
     p = sub.add_parser("standin", help="run a harmless process with another app's name, such as yabai")
     p.add_argument("name")
     p.add_argument("--seconds", type=int, default=900)
