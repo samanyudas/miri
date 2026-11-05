@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-05 on branch `fix/issue-159`, based on `main` at `b42ebae4`
+Updated: 2026-11-05 on branch `docs/159-closed`, based on `main` at `5c575480`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,14 +16,9 @@ The public release path and the complete acceptance runs follow.
 
 ## Columns leaving a shared edge
 
-[#159](https://github.com/samanyudas/miri/issues/159) has an engine fix in [paneru#120](https://github.com/samanyudas/paneru/pull/120), merged as `4dc453f`, which this branch pins.
-With **Show window contents on edges next to another display** off, a column that leaves across an edge shared with another display now slides with the row before it tucks.
-Before, it vanished on the first frame.
-It stops at about its midpoint, which [known limitations](docs/limitations.md#displays) records.
-`verify-miri` run `20261103-112536` on `main` showed the jump in 3 of 3 presses, and run `20261103-113541` on the fix showed the slide in 3 of 3.
-Run `20261105-173029` on a build with engine `4dc453f` showed the slide in 3 of 3 presses with the switch off.
-The Miri change is in [PR #295](https://github.com/samanyudas/miri/pull/295).
-Next: after Sam merges it, verify the landed build before issue closure.
+[#159](https://github.com/samanyudas/miri/issues/159) closed on 5 November 2026, after `verify-miri` run `20261105-173442` on `main` at `5c575480` with engine `4dc453f`.
+With **Show window contents on edges next to another display** off, a column that leaves across a shared edge now slides in 3 of 3 presses, then tucks.
+It tucks at about its midpoint, which [known limitations](docs/limitations.md#displays) records.
 
 ## Plain horizontal shortcuts cross touching displays
 
