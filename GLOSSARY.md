@@ -88,7 +88,7 @@ Miri refuses to start while one runs.
 _Avoid_: Conflicting app
 
 **Window-snapping app**:
-A tool that moves a window only when you press its shortcut or drag the window to a screen edge, such as Rectangle or Loop.
+A tool that moves a window only when you press its shortcut or drag the window to a screen edge, such as Rectangle, Loop, or Magnet.
 The setup checker warns while one runs, but does not block start.
 
 **Setup checker**:

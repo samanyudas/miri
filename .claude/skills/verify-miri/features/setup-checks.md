@@ -9,8 +9,9 @@ A check that blocks start keeps the engine stopped, and Miri starts it once the 
 
 - `competing-manager`: a running Paneru, AeroSpace, Amethyst, or yabai shows `Quit <name> before starting Miri.` and `Blocks start`.
   Miri finds Paneru and AeroSpace by bundle ID or process name, Amethyst by bundle ID only, and yabai by process name only ([SetupChecker.swift](../../../../Sources/MiriCore/SetupChecker.swift)).
-- `snapping-app`: a running Rectangle or Loop shows a warning that names it, and does not block start.
+- `snapping-app`: a running Rectangle, Loop, or Magnet shows a warning that names it, and does not block start.
   Miri finds each app by bundle ID only, so a stand-in process cannot trigger it. Open the real app, then press `Check Again`.
+  To move a window without a key press, use `open -g "rectangle://execute-action?name=maximize"` or `open -g "loop://direction/maximize"`.
 - `check-again`: `Check Again` reruns every check. It only refreshes the rows, and does not stop an engine that already runs.
 - `auto-start`: Miri reruns the checks every 2 s while it waits, and starts the engine without a click when no check blocks start.
 - `permissions`: the Accessibility row. Never change it: the command guard blocks `tccutil reset`, and the permission selftest covers it.

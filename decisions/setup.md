@@ -129,7 +129,7 @@ Verify conflicts before requiring changes to these settings in **System Settings
 
 ## Check window-snapping apps
 
-A window-snapping app, such as Rectangle or Loop, moves a window when you press its shortcut or drag the window to a screen edge.
+A window-snapping app, such as Rectangle, Loop, or Magnet, moves a window when you press its shortcut or drag the window to a screen edge.
 The setup checker warns while one runs and names it ([#277](https://github.com/samanyudas/miri/issues/277)).
 The warning does not block window management, because the app acts only when you use it.
 Miri finds each app by the bundle identifier in its signed bundle.

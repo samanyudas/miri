@@ -16,12 +16,12 @@ The public release path and the complete acceptance runs follow.
 
 ## Window-snapping app warning
 
-[#277](https://github.com/samanyudas/miri/issues/277) adds a Window-snapping apps setup check that warns, without blocking start, while Rectangle or Loop runs.
+[#277](https://github.com/samanyudas/miri/issues/277) adds a Window-snapping apps setup check that warns, without blocking start, while Rectangle, Loop, or Magnet runs.
 On `main` at `6f398e2b`, `verify-miri` run `20261105-230335` showed that Rectangle 1.100's Maximize action moves a tiled window and can swap its column with its neighbor, and that the setup checker said nothing.
-Run `20261105-230759` on the fix showed the warning, a normal start while Rectangle ran, and a passed row after Rectangle quit.
-Magnet is not detected, because its bundle identifier could not be read without buying it, and Loop did not run beside Miri, because it needs an Accessibility grant.
+Runs `20261105-230759` and `20261105-234236` on the fix showed the warning naming each running app, a normal start, and a passed row after the app quit.
+In the second run, Loop, Magnet, and Rectangle each moved a tiled window, and Miri put it back within about 30 to 45 ms.
 Next: after Sam merges, verify on a `main` build and close #277.
-A real Rectangle key press and a real edge drag remain for Sam's hands, because synthetic presses did not reach Rectangle's shortcuts and Sam's Rectangle has edge snapping off.
+Magnet's edge snapping and a key press on a real keyboard remain for Sam's hands, because every press and drag in the runs was synthetic.
 
 ## Picture-in-Picture resizing
 
