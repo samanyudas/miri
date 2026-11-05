@@ -16,8 +16,8 @@ The public release path and the complete acceptance runs follow.
 
 ## V1 completion audit
 
-The [v1 audit](docs/v1-audit.md) for [#83](https://github.com/samanyudas/miri/issues/83) maps 97 v1 requirements on `main` at `6edff137`, engine `ee89647`.
-82 are built, 7 are partly built, and 8 are not built.
+The [v1 audit](docs/v1-audit.md) for [#83](https://github.com/samanyudas/miri/issues/83) maps 98 v1 requirements on `main` at `6edff137`, engine `ee89647`.
+84 are built, 6 are partly built, and 8 are not built.
 0 of 105 acceptance checks pass, because no release candidate is frozen.
 `verify-miri` run `20261106-090237` found that new windows keep their own width instead of 50% of the display, filed as [#305](https://github.com/samanyudas/miri/issues/305).
 CI on `6edff137` failed once on the flaky engine test `slice_photos::a_press_while_a_revealed_photo_waits_never_shows_its_window_beside_it`, then passed on rerun.
