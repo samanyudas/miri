@@ -40,6 +40,20 @@ struct SetupCheckerTests {
         #expect(spaces.contains("log out"))
     }
 
+    @Test func warnsWithoutBlockingWhileASnappingAppRuns() {
+        var observation = ready
+        observation.runningBundleIdentifiers.insert("com.knollsoft.Rectangle")
+        let checks = SetupChecker.evaluate(observation)
+        guard case .problem(let message) = checks.first(where: { $0.id == .snappingApps })?.status else {
+            Issue.record("Expected a snapping app problem")
+            return
+        }
+        #expect(message.contains("Rectangle") && message.contains("strip"))
+        #expect(!checks.contains { $0.isBlocking })
+        observation.runningBundleIdentifiers.remove("com.knollsoft.Rectangle")
+        #expect(status(.snappingApps, observation) == .passed)
+    }
+
     @Test func namesTheMacOS27PermissionPane() {
         var observation = ready
         observation.accessibilityTrusted = false

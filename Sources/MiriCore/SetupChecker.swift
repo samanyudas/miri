@@ -52,8 +52,8 @@ public enum SetupStatus: Equatable, Sendable {
 
 public struct SetupCheck: Equatable, Sendable, Identifiable {
     public enum Kind: String, Sendable, CaseIterable {
-        case accessibility, separateSpaces, competingManagers, stageManager, macOSTiling, fourFingerGesture
-        case threeFingerGesture
+        case accessibility, separateSpaces, competingManagers, snappingApps, stageManager, macOSTiling
+        case fourFingerGesture, threeFingerGesture
     }
 
     public let id: Kind
@@ -75,6 +75,13 @@ public enum SetupChecker {
         ("AeroSpace", ["bobko.aerospace"], ["AeroSpace"]),
         ("Amethyst", ["com.amethyst.Amethyst"], []),
         ("yabai", [], ["yabai"]),
+    ]
+
+    /// Apps that move a window when you use one of their window actions, by bundle identifier. Each identifier comes
+    /// from the app's signed bundle.
+    public static let snappingApps: [(name: String, bundleIdentifiers: Set<String>)] = [
+        ("Rectangle", ["com.knollsoft.Rectangle"]),
+        ("Loop", ["com.MrKai77.Loop"]),
     ]
 
     static let accessibilityURL = URL(
@@ -99,6 +106,9 @@ public enum SetupChecker {
             SetupCheck(
                 id: .competingManagers, title: "Other window managers",
                 status: competingStatus(observation), blocksStart: true, settingsURL: nil),
+            SetupCheck(
+                id: .snappingApps, title: "Window-snapping apps",
+                status: snappingStatus(observation), blocksStart: false, settingsURL: nil),
             SetupCheck(
                 id: .stageManager, title: "Stage Manager",
                 status: stageManagerStatus(observation),
@@ -130,6 +140,17 @@ public enum SetupChecker {
         guard !running.isEmpty else { return .passed }
         let names = ListFormatter.localizedString(byJoining: running)
         return .problem("Quit \(names) before starting Miri. Miri leaves \(names)'s configuration untouched.")
+    }
+
+    private static func snappingStatus(_ observation: SetupObservation) -> SetupStatus {
+        let running = snappingApps.filter {
+            !$0.bundleIdentifiers.isDisjoint(with: observation.runningBundleIdentifiers)
+        }
+        guard !running.isEmpty else { return .passed }
+        let names = ListFormatter.localizedString(byJoining: running.map(\.name))
+        return .problem(
+            "\(names) can move a window that Miri arranges, and the window's column can then change place in the strip. Quit \(names) while Miri manages windows."
+        )
     }
 
     private static func spacesStatus(_ observation: SetupObservation) -> SetupStatus {
