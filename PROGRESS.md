@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-05 on branch `docs/144-closed`, based on `main` at `37abded6`
+Updated: 2026-11-05 on branch `fix/249-250-pip-frame`, based on `main` at `214c4522`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,19 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Picture-in-Picture resizing
+
+[#249](https://github.com/samanyudas/miri/issues/249) and [#250](https://github.com/samanyudas/miri/issues/250) are fixed on this branch, which pins engine `ee89647`, the merge of [paneru#124](https://github.com/samanyudas/paneru/pull/124).
+A floating window now takes its new origin on a resize notification, so a left-corner drag of a Chrome Picture-in-Picture window keeps its right edge.
+Chrome's own resize of its Picture-in-Picture window falls behind the pointer after anything outside Chrome sets the window's frame.
+With Miri stopped, 2 Accessibility frame writes before a drag made 3 of 3 drags lag, and no writes made 0 of 4 lag.
+The engine made such writes when Chrome showed the window at the ordinary level before it raised it: the engine tiled it, then floated it and moved it back.
+A new window without a full-screen button now waits untiled for its 1 s level check, so a raised Picture-in-Picture window floats with no write.
+Every resizable standard window of the 6 apps open on Sam's Mac, and every AXFixture window, has a full-screen button and still tiles at once.
+In `verify-miri` runs on 5 November with the external display, `main` at `214c4522` failed 5 of 5 left-corner drags and lagged in 3 of 8 bottom-right drags.
+The fixed build passed 13 of 13 drags there, and 43 of 43 drags on the built-in display: 3 top-left, 20 bottom-left, and 20 bottom-right.
+These are synthetic CGEvent drags. Sam's hand drag of each corner is still open.
 
 ## Stacks when macOS moves their windows to another Space
 
