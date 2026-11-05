@@ -1,12 +1,11 @@
 name: Decision or investigation
 description: A question to decide, or a symptom to explain, before anyone builds
 labels: [decision, needs-triage]
-title: "decision: "
 body:
   - type: markdown
     attributes:
       value: |
-        Start the title with `decision:`, then write one plain sentence about what changes for the person using Miri, such as "decision: decide whether new windows open beside the focused window".
+        Write the title as one plain sentence about what changes for the person using Miri, such as "Decide whether new windows open beside the focused window".
         Do not file an issue without a real need and evidence for it.
   - type: textarea
     id: question
