@@ -6,11 +6,15 @@ Miri writes each change to `[bindings]` in `config.toml`, and the engine reloads
 
 ## Sub-features
 
-- `add`: `Add Shortcut` on a row records the next chord and adds it.
-- `remove`: `Remove <chord>` removes one chord from a row.
-- `conflict`: a chord that another action holds asks `Replace`, and one that macOS holds asks `Use Anyway`.
-- `filter`: the `Filter` field narrows the list.
-- `reset`: `Reset to Defaults…` restores every default chord.
+- `add`: the + button on a row shows a `Type Shortcut` chip and adds the next key press that holds Control, Option, or Command.
+  Its accessibility label is `Add Shortcut` on every row, and its help text is `Add a shortcut for <action title>`.
+  Escape cancels, and so does switching to another app.
+- `remove`: the × button on a chip, labeled `Remove <chord>` with the chord in menu symbols such as `⌃⌥H`, removes that chord.
+- `conflict`: a chord that another action holds shows the inline notice `<chord> is already used by <action title>.` and changes nothing.
+  A chord that macOS holds asks in an alert, with `Use Anyway` and `Cancel`.
+- `filter`: the `Filter shortcuts` field narrows the list.
+- `reset`: `Reset to Defaults…` asks `Replace all shortcuts with Miri's defaults?` with `Replace` and `Cancel`.
+  `Replace` first copies the file to `config.toml.backups/<id>.toml` beside `config.toml`.
 
 ## How to get to it (user POV)
 
@@ -24,13 +28,23 @@ Preconditions:
 - The baseline from the [index](README.md), with Settings open through `V settings`.
 - `<run>/backup/config.toml` holds the starting file.
 
-- **Show the page.** Run `V ax test press Shortcuts`, then `V ax test dump | rg "Remove|Add Shortcut"`. It lists one `Remove <chord>` button per chord.
-- **Remove a chord.** Run `V ax test press "Remove <chord>"` with a label from the dump. `diff <run>/backup/config.toml "$HOME/Library/Application Support/Miri Developer/config.toml"` shows the chord gone.
-- **Prove the engine reloaded it.** Open two fixtures and press the removed chord with `V key`. Focus does not move. Press a remaining chord, and focus moves.
-- **Add a chord.** Not drivable yet: every row has its own `Add Shortcut` button with the same title, and `axdo press` takes the first one. Filtering first needs text entry, which `axdo` cannot do yet.
-- **Put it back.** Copy `<run>/backup/config.toml` back before `V end`, or press `Reset to Defaults…` only if the backup had the defaults.
+Below, `CFG` is `~/Library/Application Support/Miri Developer/config.toml`.
+
+- **Record the start.** Save `ls "$CFG.backups"` to a file in the run folder, and count the `Reloading configuration file` lines in `engine.log`.
+- **Show the page.** Run `V ax test press Shortcuts`, then `V ax test dump | rg "Remove|Add Shortcut"`. It lists one `Remove <chord>` button per chord, and one `Add Shortcut` button per row with its help text.
+- **Remove a chord.** Run `V ax test press "Remove ⌃⌥H"`. `diff <run>/backup/config.toml "$CFG"` shows `ctrl+alt-h` gone from `window_focus_west`, and `engine.log` has one more `Reloading configuration file` line.
+- **Prove the engine reloaded it.** Open two new fixtures. With the right one focused, `V key ctrl+alt-h` leaves focus where it is. `V key ctrl+alt-leftarrow` and `V focused --wait-for` the left fixture exit 0.
+- **Add a chord.** Run `V settings`, so Miri is the frontmost app, and press the row's + button by its help text, such as `V ax test press "Add a shortcut for Focus column left"`. The dump shows `Type Shortcut`. Run `V key ctrl+alt-h`. The diff shows the chord added at the end of the row's list.
+- **Conflict with an action.** Press `"Add a shortcut for Focus column left"` again, then `V key ctrl+alt-l`. The dump shows `⌃⌥L is already used by Focus column right.`, and the file does not change.
+- **Conflict with macOS.** Press the + button again, then `V key ctrl+cmd-space`. The dump shows an alert, `⌃⌘Space is used by macOS for Emoji and Symbols.`, with `Cancel` and `Use Anyway`. Press `Cancel`. The file does not change.
+- **Reset.** Press `Reset to Defaults…`, then `Replace` in a second call. The diff shows the default `[bindings]`, and `$CFG.backups/` holds one new file, a copy of the file before the reset.
+- **Put it back.** Copy `<run>/backup/config.toml` over `$CFG`, check that `diff` is empty, and delete only the backup files this run added. The engine logs one more reload. Prove a restored chord with `V key` from a fixture.
 
 ## Gotchas
 
-- This map entry was not run with `V`. The 2026-10-26 run used a separate AX tool, and AppleScript `entire contents` returned nothing on this page.
 - `config.toml` is Sam's real configuration. Always diff it against the backup before `V end`.
+- The recorder cancels when another app comes to the front. Run `V settings` right before you press a + button.
+- Pressing a button in an alert can return `AXError -25205`, because the alert closes during the press. Read the dump to see whether the alert closed.
+- Miri Settings is a floating window, so ⌃⌥← and ⌃⌥→ do nothing while it has focus. Prove a chord from a fixture. [Focus a window with a shortcut](focus-window-shortcut.md) explains this.
+- Use ⌃⌘Space for the macOS conflict. If a press reaches macOS, it only opens the emoji picker, while a chord such as ⌃↑ opens Mission Control.
+- The `Filter shortcuts` field needs text entry, which `axdo` cannot do. The filter is not drivable yet.
