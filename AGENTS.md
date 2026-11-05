@@ -58,7 +58,8 @@ Before any step that changes the real desktop, including `make e2e`, take the [l
 ## Issues
 
 - File an issue only with exactly one type label (`bug`, `enhancement`, `task`, or `decision`) and every required section of its template in `.github/ISSUE_TEMPLATE/`.
-  Write the title as one plain sentence about what changes for the person using Miri.
+  Start the title with the prefix of its type: `fix:` for a bug, `feat:` for an enhancement, `chore:` for a task, or `decision:` for a decision.
+  After the prefix, write one plain sentence about what changes for the person using Miri, such as `feat: each display scrolls its own strip`.
   File a bug only after you reproduce it yourself on the surface a user sees, and report it to Sam if you cannot.
 - Before you change code for an issue, confirm that you can check each acceptance criterion.
   For a bug, also reproduce it on the current `main` build.
