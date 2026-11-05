@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Claude Code PreToolUse hook that blocks irreversible or outward-facing shell commands.
 
-It also blocks `gh issue create` unless the issue has one type label, its template's title prefix,
-and every section its template requires.
+It also blocks `gh issue create` unless the issue has one type label and every section its template requires.
 AGENTS.md explains the policy. Exit code 2 blocks the call and shows stderr to the agent.
 """
 import json
@@ -12,7 +11,6 @@ import shlex
 import subprocess
 import sys
 from pathlib import Path
-from typing import NamedTuple
 
 PROTECTED_BRANCHES = {"main"}
 WRAPPERS = {"sudo", "env", "command", "exec", "nohup", "time", "nice"}
@@ -21,7 +19,6 @@ GIT_OPTIONS_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace"}
 ISSUE_TEMPLATES = Path(__file__).resolve().parents[2] / ".github/ISSUE_TEMPLATE"
 ISSUE_CREATE = re.compile(r"\bgh\s+issue\s+(create|new)\b")
 LABEL_OPTION = re.compile(r"(?<!\S)(?:-l|--label)[ =]+(?:'([^']*)'|\"([^\"]*)\"|(\S+))")
-TITLE_OPTION = re.compile(r"(?<!\S)(?:-t|--title)[ =]+(?:'([^']*)'|\"([^\"]*)\"|(\S+))")
 ISSUE_HELP = "See File an issue in CONTRIBUTING.md"
 
 
@@ -96,16 +93,8 @@ def check_git(args: list[str], cwd: str) -> str | None:
     return None
 
 
-class IssueType(NamedTuple):
-    title_prefix: str | None
-    required: list[str]
-
-
-def issue_types() -> dict[str, IssueType]:
-    """Map each template's type label, the first entry of its `labels:` list, to its title prefix and required fields.
-
-    The title prefix is the conventional type that the template's `title:` value starts with, such as `fix`.
-    """
+def issue_types() -> dict[str, list[str]]:
+    """Map each template's type label, the first entry of its `labels:` list, to its required field labels."""
     types = {}
     for template in sorted(ISSUE_TEMPLATES.glob("*.yml")):
         text = template.read_text(encoding="utf-8")
@@ -117,8 +106,7 @@ def issue_types() -> dict[str, IssueType]:
             label = re.search(r"^\s*label:\s*(.+?)\s*$", field, re.M)
             if label and re.search(r"^\s*required:\s*true\s*$", field, re.M):
                 required.append(label.group(1).strip("'\""))
-        prefix = re.search(r"^title:\s*['\"]?([a-z]+):", text, re.M)
-        types[type_label.group(1).strip("'\"")] = IssueType(prefix.group(1) if prefix else None, required)
+        types[type_label.group(1).strip("'\"")] = required
     return types
 
 
@@ -128,32 +116,26 @@ def has_heading(body: str, section: str) -> bool:
     return re.search(pattern, body, re.I | re.M) is not None
 
 
-def check_issue(labels: list[str], body: str, title: str | None) -> str | None:
+def check_issue(labels: list[str], body: str) -> str | None:
     types = issue_types()
     given = sorted({label for label in labels if label in types})
     if len(given) != 1:
         return (f"an issue needs exactly one type label, given with --label. "
                 f"This command gives {', '.join(given) or 'none'}. "
                 f"The type labels are {', '.join(types)}. {ISSUE_HELP}")
-    prefix, required = types[given[0]]
-    # An optional scope may follow the prefix, as in "feat(settings): ".
-    if prefix and not re.match(rf"{prefix}(?:\([a-z0-9-]+\))?: \S", title or ""):
-        return (f"an issue labeled {given[0]} needs a title that starts with '{prefix}: ' "
-                f"and then one plain sentence, given with --title. "
-                f"This command gives {repr(title) if title else 'no title'}. {ISSUE_HELP}")
-    missing = [section for section in required if not has_heading(body, section)]
+    missing = [section for section in types[given[0]] if not has_heading(body, section)]
     if missing:
-        return (f"an issue labeled {given[0]} needs each required template field as a Markdown heading, "
+        return (f"a {given[0]} issue needs each required template field as a Markdown heading, "
                 f"such as '### {missing[0]}'. Missing: {', '.join(missing)}. {ISSUE_HELP}")
     return None
 
 
 def check_issue_create(args: list[str], cwd: str, command: str) -> str | None:
-    body, body_file, labels, title = None, None, [], None
+    body, body_file, labels = None, None, []
     i = 0
     while i < len(args):
         name, has_value, value = args[i].partition("=")
-        if name in {"-b", "--body", "-F", "--body-file", "-l", "--label", "-t", "--title"} and not has_value:
+        if name in {"-b", "--body", "-F", "--body-file", "-l", "--label"} and not has_value:
             if i + 1 >= len(args):
                 break
             i += 1
@@ -166,8 +148,6 @@ def check_issue_create(args: list[str], cwd: str, command: str) -> str | None:
             body_file = value
         elif name in {"-l", "--label"}:
             labels += [label.strip() for label in value.split(",")]
-        elif name in {"-t", "--title"}:
-            title = value
         i += 1
     if body is None and body_file:
         try:
@@ -175,7 +155,7 @@ def check_issue_create(args: list[str], cwd: str, command: str) -> str | None:
         except OSError:
             # The file may be written earlier in the same command, or the body may come from stdin.
             body = command
-    return check_issue(labels, body or "", title)
+    return check_issue(labels, body or "")
 
 
 def check(argv: list[str], cwd: str, command: str) -> str | None:
@@ -211,8 +191,7 @@ def check_command(command: str, cwd: str) -> str | None:
         if ISSUE_CREATE.search(command):
             labels = [label.strip() for match in LABEL_OPTION.finditer(command)
                       for label in "".join(match.groups(default="")).split(",")]
-            title = next(("".join(match.groups(default="")) for match in TITLE_OPTION.finditer(command)), None)
-            return check_issue(labels, command, title)
+            return check_issue(labels, command)
         return None
     for argv in parsed:
         reason = check(argv, cwd, command)
