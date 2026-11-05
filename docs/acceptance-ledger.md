@@ -36,6 +36,7 @@ Every check below is **Pending**.
 They include granted app and recovery checks, native gap checks, and physical horizontal and vertical display shortcut checks.
 These results are useful evidence, but they do not pass any check below.
 Each check needs a result on the release candidate.
+The [v1 audit](v1-audit.md) lists the newest evidence for each requirement on `main` at `6edff137`, with its revision and kind.
 
 The CI run [39222055411](https://github.com/samanyudas/miri/actions/runs/39222055411) on `main` at `e516edd` passed.
 Its permission selftest reported `observed-ungranted. Attribution unresolved.`
