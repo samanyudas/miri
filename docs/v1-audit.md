@@ -124,7 +124,7 @@ Abbreviations: `SC` is `Sources/MiriCore`, `SM` is `Sources/Miri`, `E` is `vendo
 | LAY-3 | New windows start at 50% of display width | **Not built.** Miri writes no width rule | None | Native, `6edff137`: a 380-point window tiled at 388 points on a 2560-point display | AS-5, [#305](https://github.com/samanyudas/miri/issues/305) |
 | LAY-4 | Existing windows keep their widths | Built | `ET/session_restore.rs` | Native, `4c30e66b`, #153, 2 Nov | AS-5 |
 | LAY-5 | Width and height change by five percentage points per press | Built: `window_resize_step` | `ET/tiling.rs` | Native, `4c30e66b`, #153, 2 Nov | AS-6 |
-| LAY-6 | Shortcuts and the recorder work with non-US layouts, including AZERTY, QWERTZ, and Dvorak | Built: `SC/KeyLayout.swift`, and `AppModel` restarts the engine when the layout changes | `ShortcutsTests`, `BindingsTests` on US, French, German, and Dvorak layouts | Hand, `a327d90` with engine `28f550f`, 27 Oct, #31: on AZERTY, ⌃⌥ with the number-row 1 and 2 keys focused the first and second columns. Nobody pressed ⌃⌥0 by hand, and QWERTZ and Dvorak have no press result | AS-2 |
+| LAY-6 | Shortcuts and the recorder work with non-US layouts, including AZERTY, QWERTZ, and Dvorak | Built: `SC/KeyLayout.swift`, and `AppModel` restarts the engine when the layout changes | `ShortcutsTests`, `BindingsTests` on US, French, German, and Dvorak layouts | Hand, `a327d90` with engine `28f550f`, 27 Oct, #31: on AZERTY, ⌃⌥ with the number-row 1 and 2 keys focused the first and second columns, and ⌃⌥0 equalized a stack. QWERTZ and Dvorak have no press result | AS-2 |
 
 ### Startup and crash recovery
 
