@@ -14,6 +14,15 @@ The current milestone is the open v1 work, which the [`v1 blocker` label](https:
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
 
+## Window-snapping app warning
+
+[#277](https://github.com/samanyudas/miri/issues/277) adds a Window-snapping apps setup check that warns, without blocking start, while Rectangle or Loop runs.
+On `main` at `6f398e2b`, `verify-miri` run `20261105-230335` showed that Rectangle 1.100's Maximize action moves a tiled window and can swap its column with its neighbor, and that the setup checker said nothing.
+Run `20261105-230759` on the fix showed the warning, a normal start while Rectangle ran, and a passed row after Rectangle quit.
+Magnet is not detected, because its bundle identifier could not be read without buying it, and Loop did not run beside Miri, because it needs an Accessibility grant.
+Next: after Sam merges, verify on a `main` build and close #277.
+A real Rectangle key press and a real edge drag remain for Sam's hands, because synthetic presses did not reach Rectangle's shortcuts and Sam's Rectangle has edge snapping off.
+
 ## Picture-in-Picture resizing
 
 [#249](https://github.com/samanyudas/miri/issues/249) and [#250](https://github.com/samanyudas/miri/issues/250) closed on 5 November 2026, after `verify-miri` runs `20261105-220252` and `20261105-222020` on `main` at `a5853509` with engine `ee89647`.
