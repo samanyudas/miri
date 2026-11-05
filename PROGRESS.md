@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-05 on branch `docs/159-closed`, based on `main` at `5c575480`
+Updated: 2026-11-05 on branch `fix/issue-144`, based on `main` at `3a547f78`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,33 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Stacks when macOS moves their windows to another Space
+
+[#144](https://github.com/samanyudas/miri/issues/144) is fixed in [paneru#117](https://github.com/samanyudas/paneru/pull/117), merged as `200109e`, which this branch pins.
+On engine `6b5dbc5`, a stack whose Space macOS destroys arrives in the new Space as one column per window, even when macOS lists all of them in one read.
+The engine dropped the destroyed Space's strip before any read placed its windows.
+The fix remembers such columns for 30 s and joins their windows back into one column where they land.
+Five engine tests cover one read, two reads in each order, and a read that splits the stack before the Space is destroyed.
+All 1191 engine tests pass on engine `43eadc5`, which has the same tree as `200109e`.
+
+Hardware, 5 November 2026:
+- Removing a Mission Control desktop that holds a two-window stack keeps the stack on main and on the fix, because macOS reports the move before it destroys the Space.
+- Sam closed the lid by hand on each build, with a two-fixture stack on the built-in display and the 27-inch attached.
+  Main split the stack into two columns on the 27-inch, in verify-miri run `20261105-174950`.
+  The fix kept one column, in run `20261105-175516`.
+- Mirroring the built-in onto the 27-inch for 15 s gave the same results, in runs `20261105-155553` and `20261105-160240`.
+- Local-only info logs showed one native read that listed both stack windows, 18 ms and 381 ms after the Space was destroyed.
+  That one read settles acceptance criterion 1, which is ticked on the issue.
+- When the display returns, macOS can bounce the windows between Spaces and move one stack window alone in an ordinary read.
+  On main and on the first fix the stack then showed as two columns for about 2 to 3 s until the display-home restore regrouped it.
+  Sam chose to fix this in paneru#117: a read that moves part of a stack while a display change settles now records it, and each display pass forgets the stacks it put back.
+  Two engine tests cover the return order and a later unstack, and both failed before their fix.
+  In three more lid cycles on engine `43eadc5`, run `20261105-183321`, the stack stayed one column every second, but macOS moved both windows together, so the new path did not run on hardware.
+
+The verify-miri end check reports a window as moved when macOS only renumbers its Space, and Sam accepted that layout for these runs.
+Sol approved the engine change after six rounds.
+Next: Sam merges the Miri PR, then a lid cycle on a main build checks criterion 2 before #144 closes.
 
 ## Columns leaving a shared edge
 
