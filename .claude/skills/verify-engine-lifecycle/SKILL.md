@@ -108,7 +108,6 @@ covers: Sources/Miri/AppModel.swift
 covers: Sources/Miri/App.swift
 covers: Sources/Miri/Views.swift
 covers: Sources/Miri/StopShortcut.swift
-covers: Sources/Miri/SettingsWindow.swift
 ```
 
 The script reads these lines.
@@ -120,7 +119,7 @@ The model describes these parts of the files:
 - `App.swift`: `applicationDidFinishLaunching`, `applicationShouldTerminate`, and `quitOnTerminationSignal()`.
 - `Views.swift`: `MenuContent` and `GeneralSettings`, which decide when Start, Stop, and Restart show, and `statusText`.
 - `StopShortcut.swift`: the hot key handler that calls `stopFromShortcut()`.
-- `SettingsWindow.swift` does not exist at the sync commit. When it lands with its Start, Stop, and Restart button, model that button.
+- The Settings window's Start, Stop, and Restart buttons are in `GeneralSettings` in `Views.swift`. `WindowPresenter.swift` opens that window and calls no lifecycle function, so it is not covered. A control that moves to another file, or a new file that calls `start()`, `stop()`, or `restart()`, must join this list.
 
 ## What the check does not cover
 
