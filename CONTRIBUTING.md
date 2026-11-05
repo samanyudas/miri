@@ -14,7 +14,11 @@ It reports each missing prerequisite with the command that fixes it.
 ## File an issue
 
 File an issue only for a real need that you have evidence for.
-Write the title as one plain sentence about what changes for the person using Miri.
+Start the title with the prefix of its type, the same conventional prefix that commits and PR titles use.
+Use `fix:` for a bug, `feat:` for an enhancement, `chore:` for a task, and `decision:` for a decision.
+A scope is optional, as in `feat(settings):`.
+After the prefix, write one plain sentence about what changes for the person using Miri, such as `fix: windows on a second display open off-screen`.
+Each issue template fills in its prefix, and the command guard checks it.
 Give every issue exactly one type label: `bug`, `enhancement`, `task`, or `decision`.
 The [issue templates](.github/ISSUE_TEMPLATE) set the type label and list the required sections for each type.
 When you file with `gh issue create`, write each required field label from the template as a `###` heading, such as `### Acceptance criteria`.

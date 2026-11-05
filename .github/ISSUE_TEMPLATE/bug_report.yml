@@ -1,12 +1,13 @@
 name: Bug report
 description: Report a window, display, permission, or app problem in Miri
 labels: [bug, needs-triage]
+title: "fix: "
 body:
   - type: markdown
     attributes:
       value: |
         One problem per issue. A partial report is still useful.
-        Write the title as one plain sentence about what changes for the person using Miri, such as "Windows on a second display open off-screen".
+        Start the title with `fix:`, then write one plain sentence about what changes for the person using Miri, such as "fix: windows on a second display open off-screen".
         Do not file an issue without a real need and evidence for it.
         Report security problems privately through [SECURITY.md](https://github.com/samanyudas/miri/blob/main/SECURITY.md) instead.
   - type: textarea
