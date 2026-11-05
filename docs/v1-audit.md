@@ -63,7 +63,7 @@ Counted on `6edff137` with a script that reads the map's tables:
 | Built and merged | 84 of 98 |
 | Partly built | 6 of 98 |
 | Not built | 8 of 98 |
-| Automatically tested | 83 of 98 |
+| Automatically tested | 82 of 98 |
 | Natively tested or hand checked on some revision | 66 of 98 |
 | Natively tested on `6edff137` | 6 of 98, and one of them, LAY-3, failed |
 | Hardware accepted | 0 of 98 |
@@ -124,7 +124,7 @@ Abbreviations: `SC` is `Sources/MiriCore`, `SM` is `Sources/Miri`, `E` is `vendo
 | LAY-3 | New windows start at 50% of display width | **Not built.** Miri writes no width rule | None | Native, `6edff137`: a 380-point window tiled at 388 points on a 2560-point display | AS-5, [#305](https://github.com/samanyudas/miri/issues/305) |
 | LAY-4 | Existing windows keep their widths | Built | `ET/session_restore.rs` | Native, `4c30e66b`, #153, 2 Nov | AS-5 |
 | LAY-5 | Width and height change by five percentage points per press | Built: `window_resize_step` | `ET/tiling.rs` | Native, `4c30e66b`, #153, 2 Nov | AS-6 |
-| LAY-6 | Shortcuts and the recorder work with non-US layouts, including AZERTY, QWERTZ, and Dvorak | Built: `SC/KeyLayout.swift`, and `AppModel` restarts the engine when the layout changes | `ShortcutsTests`, `BindingsTests` on US, French, German, and Dvorak layouts | Native, engine `28f550f` on the #31 branch, 26 Oct, branch commit not recorded: the engine logged top-row AZERTY digits, and no key press result counted | AS-2 |
+| LAY-6 | Shortcuts and the recorder work with non-US layouts, including AZERTY, QWERTZ, and Dvorak | Built: `SC/KeyLayout.swift`, and `AppModel` restarts the engine when the layout changes | `ShortcutsTests`, `BindingsTests` on US, French, German, and Dvorak layouts | Hand, `a327d90` with engine `28f550f`, 27 Oct, #31: on AZERTY, ⌃⌥ with the number-row 1 and 2 keys focused the first and second columns. Nobody pressed ⌃⌥0 by hand, and QWERTZ and Dvorak have no press result | AS-2 |
 
 ### Startup and crash recovery
 
@@ -136,7 +136,7 @@ Abbreviations: `SC` is `Sources/MiriCore`, `SM` is `Sources/Miri`, `E` is `vendo
 | REC-4 | The engine restarts after an isolated crash and restores the layout | Built: `EngineSupervisor.exited` | `EngineTests`, `ET/session_restore.rs` | Native, `6edff137`: after `kill -9`, a new engine ran within 2 s, restore matched 12 windows, fixture frames unchanged | AL-5, HQ-7, HR-1 |
 | REC-5 | Three crashes in five minutes stop retries and show the failure, logs, and Restart | Built: `CrashPolicy` | `EngineTests` | Native, #220 branch on `e8d69276`, 2 Nov | AL-6, HR-2 |
 | REC-6 | A successful manual restart resets the crash count | Built: `restartManually` | `EngineTests` | Native, `929a2c10`, run `20261104-171657` | AL-7 |
-| REC-7 | A floating rule beats a saved tiled placement, except a window tiled with the float toggle ([#15](https://github.com/samanyudas/miri/issues/15), [#93](https://github.com/samanyudas/miri/issues/93)) | Built: `E/ecs/tile_overrides.rs` | `ET/session_restore.rs` | Native, engine `e7036de` (same tree as `6325638`), #93: an engine restart kept the override, with commands sent to the engine. A Miri restart with a non-Miri window: none | None |
+| REC-7 | A floating rule beats a saved tiled placement, except a window tiled with the float toggle ([#15](https://github.com/samanyudas/miri/issues/15), [#93](https://github.com/samanyudas/miri/issues/93)) | Built: `E/ecs/tile_overrides.rs` | `ET/session_restore.rs` | Native, #93: an engine restart kept the override on engine `e7036de` (same tree as `6325638`), and Calculator stayed tiled across a Miri restart on engine `ae05362`, both with synthetic input | None |
 
 ### Setup and conflicts
 
@@ -188,7 +188,7 @@ Abbreviations: `SC` is `Sources/MiriCore`, `SM` is `Sources/Miri`, `E` is `vendo
 | DSP-1 | On disconnect, strips follow their Space and keep their order | Built | `ET/reconnect.rs` | Hand, cable unplug, 28 Oct, engine `e1705af`, app revision not recorded | HQ-4, HD-1 |
 | DSP-2 | On reconnect, each window returns to its display, column, and stack, and unmoved windows keep their place | Built: `E/ecs/display_homes.rs` | `ET/reconnect.rs` | Hand, one cable replug on `c356ad7a`, 3 Nov. [#265](https://github.com/samanyudas/miri/issues/265) is not reproduced | HQ-4, HD-1 |
 | DSP-3 | The same for lid close and open | Built | `ET/reconnect.rs` | Hand, lid cycle with a stack on `37abded6`, engine `200109e`, 5 Nov | HQ-5, HD-2 |
-| DSP-4 | The same for sleep and wake | Built | None specific | Hand, one sleep and wake, 16 of 16 windows, on `fabf16d4`, engine `589b44b`, 1 Nov. [#144](https://github.com/samanyudas/miri/issues/144) changed this path on 5 Nov | HQ-6, HD-3 |
+| DSP-4 | The same for sleep and wake | Built | None | Hand, one sleep and wake, 16 of 16 windows, on `fabf16d4`, engine `589b44b`, 1 Nov. [#144](https://github.com/samanyudas/miri/issues/144) changed this path on 5 Nov | HQ-6, HD-3 |
 | DSP-5 | A strip that cannot re-attach floats its windows | Built | `ET/reconnect.rs` | None | None |
 | DSP-6 | Display rearrangement, main display, resolution, and fullscreen changes keep every window reachable | Built | `ET/reconnect.rs` | Native, Arrange sheet drags on `d77f8d46`, 3 Nov: 1 failure in 36, accepted as a limitation | HD-4 to HD-7 |
 
