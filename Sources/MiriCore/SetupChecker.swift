@@ -82,6 +82,7 @@ public enum SetupChecker {
     public static let snappingApps: [(name: String, bundleIdentifiers: Set<String>)] = [
         ("Rectangle", ["com.knollsoft.Rectangle"]),
         ("Loop", ["com.MrKai77.Loop"]),
+        ("Magnet", ["com.crowdcafe.windowmagnet"]),
     ]
 
     static let accessibilityURL = URL(
