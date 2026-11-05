@@ -21,7 +21,8 @@ On `main` at `6f398e2b`, `verify-miri` run `20261105-230335` showed that Rectang
 Runs `20261105-230759` and `20261105-234236` on the fix showed the warning naming each running app, a normal start, and a passed row after the app quit.
 In the second run, Loop, Magnet, and Rectangle each moved a tiled window, and Miri put it back within about 30 to 45 ms.
 Next: after Sam merges, verify on a `main` build and close #277.
-Magnet's edge snapping and a key press on a real keyboard remain for Sam's hands, because every press and drag in the runs was synthetic.
+In Sam's hand check, run `20261106-000259`, Loop's Globe trigger resized a tiled window 14 times, and Miri restored it each time within 25 to 50 ms.
+Magnet's edge snapping showed no preview for a real drag even with Miri stopped, so that path is not checked.
 
 ## Picture-in-Picture resizing
 
