@@ -21,7 +21,9 @@ With **Show window contents on edges next to another display** off, a column tha
 Before, it vanished on the first frame.
 It stops at about its midpoint, which [known limitations](docs/limitations.md#displays) records.
 `verify-miri` run `20261103-112536` on `main` showed the jump in 3 of 3 presses, and run `20261103-113541` on the fix showed the slide in 3 of 3.
-Next: recheck on the merged engine `4dc453f`, then verify the landed build before issue closure.
+Run `20261105-173029` on a build with engine `4dc453f` showed the slide in 3 of 3 presses with the switch off.
+The Miri change is in [PR #295](https://github.com/samanyudas/miri/pull/295).
+Next: after Sam merges it, verify the landed build before issue closure.
 
 ## Plain horizontal shortcuts cross touching displays
 
