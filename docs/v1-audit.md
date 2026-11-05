@@ -79,7 +79,7 @@ The acceptance ledger has 105 checks: S-1 to S-7, 70 app checks, and 28 multi-mo
 Feature work and release readiness are separate:
 
 - **Features.** Most accepted window-management behavior is built and automatically tested.
-  The gaps are new-window width ([#305](https://github.com/samanyudas/miri/issues/305)), the swipe target and its setting ([#212](https://github.com/samanyudas/miri/issues/212)), the login item state ([#201](https://github.com/samanyudas/miri/issues/201)), and Karabiner-Elements and Hyper key support ([#302](https://github.com/samanyudas/miri/issues/302)).
+  The gaps are new-window width ([#305](https://github.com/samanyudas/miri/issues/305)), the swipe target and its setting ([#212](https://github.com/samanyudas/miri/issues/212)), the login item state ([#201](https://github.com/samanyudas/miri/issues/201)), Karabiner-Elements and Hyper key support ([#302](https://github.com/samanyudas/miri/issues/302)), and undoing macOS tiling after a drop on another display ([#123](https://github.com/samanyudas/miri/issues/123)).
 - **Release.** None of the signing, notarization, update, or Homebrew work exists ([#82](https://github.com/samanyudas/miri/issues/82)), no release candidate is frozen, and no acceptance or endurance check has passed.
 
 ## Requirement map
@@ -244,7 +244,7 @@ Abbreviations: `SC` is `Sources/MiriCore`, `SM` is `Sources/Miri`, `E` is `vendo
 | DRG-2 | Insertion lines, refusal with a not-allowed symbol, and the window returns | Built | `ET/drag.rs` | Hand, 31 Oct, engine `5e90388` | S-6 |
 | DRG-3 | Edge holds scroll the strip, including over a column cut off at a shared edge ([#205](https://github.com/samanyudas/miri/issues/205)) | Built | `ET/drag.rs` | Native, synthetic drags, 31 Oct, revision not recorded | S-6 |
 | DRG-4 | Floating windows never join the layout by drag | Built | `ET/drag` tests | Not recorded | S-6 |
-| DRG-5 | If macOS tiles a dropped window, the engine returns it to its place | Partly: a drop on another display that macOS tiles is not undone ([#123](https://github.com/samanyudas/miri/issues/123), labelled `v2 blocker`) | `ET/drag` tests | Not recorded | S-6 |
+| DRG-5 | If macOS tiles a dropped window, the engine returns it to its place | Partly: a drop on another display that macOS tiles is not undone ([#123](https://github.com/samanyudas/miri/issues/123)). Sam kept this case in v1 on 6 November 2026 | `ET/drag` tests | Not recorded | S-6 |
 
 ### Maximizing a window
 
@@ -305,7 +305,8 @@ The app code for the lifecycle, setup checks, and shortcut editing is unchanged 
 ### Known failures
 
 - New windows keep their own width instead of 50% ([#305](https://github.com/samanyudas/miri/issues/305), observed on `6edff137`).
-- A drop on another display that macOS then tiles stays tiled ([#123](https://github.com/samanyudas/miri/issues/123), labelled `v2 blocker`).
+- A drop on another display that macOS then tiles stays tiled ([#123](https://github.com/samanyudas/miri/issues/123)).
+  Sam kept this case in v1 on 6 November 2026, so it is a gap in v1, not a deferral.
 - One Arrange sheet drag in 36 moved System Settings into the other display's strip. Sam accepted it as a limitation when [#103](https://github.com/samanyudas/miri/issues/103) closed.
 - The engine test `slice_photos::a_press_while_a_revealed_photo_waits_never_shows_its_window_beside_it` is flaky in CI.
 
@@ -351,7 +352,7 @@ No issue has an assignee.
 | Memory-stability rule for HE-1 | Define a measurable pass rule | Unknown |
 | Endurance HE-1 and HE-2, and Q6 | See [Packaging, distribution, and endurance](#packaging-distribution-and-endurance) | Sam |
 | Configuration keys, validation ranges, and private API fallbacks | Review them against the pinned engine, as design tree status lists | Agent |
-| DRG-5: release scope says the engine undoes macOS tiling after a drop, but [#123](https://github.com/samanyudas/miri/issues/123), the cross-display case, is labelled `v2 blocker` | Decide whether the cross-display case is v1, then fix it or record the deferral in release scope | Sam to decide, then agent |
+| [#123](https://github.com/samanyudas/miri/issues/123) a drop on another display that macOS tiles is not undone. Sam kept it in v1 on 6 November 2026 | Accept or change the proposed acceptance criteria on #123. Then reproduce it on current `main`, which likely needs a hand drag, because synthetic title-bar drags did not move a window on `6edff137` ([#122](https://github.com/samanyudas/miri/issues/122)). Then fix it in `E/ecs/drag/tiling.rs` with an engine test, and verify | Sam for the criteria and the hand reproduction, then agent |
 | Flaky engine test | Make the slice photo test deterministic | Agent |
 
 ## Packaging, distribution, and endurance
