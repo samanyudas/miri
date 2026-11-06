@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-06 on branch `docs/122-not-reproduced`, based on `main` at `cf393f43`
+Updated: 2026-11-06 on branch `docs/123-320-closed`, based on `main` at `471737fb`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -21,10 +21,26 @@ The [v1 audit](docs/v1-audit.md) for [#83](https://github.com/samanyudas/miri/is
 0 of 105 acceptance checks pass, because no release candidate is frozen.
 `verify-miri` run `20261106-090237` found that new windows keep their own width instead of 50% of the display, filed as [#305](https://github.com/samanyudas/miri/issues/305).
 CI on `6edff137` failed once on the flaky engine test `slice_photos::a_press_while_a_revealed_photo_waits_never_shows_its_window_beside_it`, then passed on rerun.
-On 6 November 2026, Sam kept [#123](https://github.com/samanyudas/miri/issues/123), a drop on another display that macOS tiles, in v1.
-Sam chose the same day that such a window stays where the drop put it, which [#310](https://github.com/samanyudas/miri/pull/310) records in release scope.
-Sam accepted its criteria, and it needs Sam's hand-drag reproduction before a fix.
+[#83](https://github.com/samanyudas/miri/issues/83) closed on 6 November 2026 after the audit landed in [#306](https://github.com/samanyudas/miri/pull/306).
+The audit is a snapshot of `6edff137`.
+The owning documents and issues hold the current state.
 Next: the audit's [Remaining blockers](docs/v1-audit.md#remaining-blockers) table, and the stale [known limitations](docs/limitations.md) rows that the audit lists.
+
+## Drops on another display that macOS tiles
+
+[#123](https://github.com/samanyudas/miri/issues/123) closed on 6 November 2026 after Sam's hand drags on `main` at `471737fb`, engine `a20f56e3`.
+A title-bar drop on another display now stays where the drop put it, with any macOS tiling option on ([#310](https://github.com/samanyudas/miri/pull/310)).
+Two engine causes were fixed in [paneru#130](https://github.com/samanyudas/paneru/pull/130), delivered by [#321](https://github.com/samanyudas/miri/pull/321).
+A pointer in a display's menu bar now counts as on that display and picks the column below it.
+A drag also counts as a drag when macOS gives a tiled window its earlier size back as the drag starts, but not when the press is on a resize edge.
+Before the fix, 4 of 5 such drops ended back on the source display.
+After it, every hand drop held, including menu-bar fill, Option-drag, and same-display undo.
+
+## Columns slide back when a window leaves a strip
+
+[#320](https://github.com/samanyudas/miri/issues/320) closed on 6 November 2026 after Sam's hand drags on `main` at `471737fb`.
+A strip now keeps its scroll when a column leaves it, so the columns past it slide into its space, and a strip wider than its display never keeps empty space past an end ([paneru#131](https://github.com/samanyudas/paneru/pull/131), [#322](https://github.com/samanyudas/miri/pull/322)).
+A scroll that a dropped window's arrival caused stays when that window was not the strip's last column, as [known limitations](docs/limitations.md) records.
 
 ## Window-snapping app warning
 
@@ -1675,8 +1691,6 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
   With macOS tiling on, a dragged window that macOS filled or tiled returned to its column origin and width within 0.4 seconds, but kept the macOS height of 1410 points instead of 1394.
 
 ## Next
-
-Triage #122, #123, and #124 from the limitations audit.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
