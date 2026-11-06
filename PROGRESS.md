@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-06 on branch `fix/issue-280`, based on `main` at `7e633865`
+Updated: 2026-11-06 on branch `fix/issue-280`, based on `main` at `ea37e42d`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,18 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## V1 completion audit
+
+The [v1 audit](docs/v1-audit.md) for [#83](https://github.com/samanyudas/miri/issues/83) maps 98 v1 requirements on `main` at `6edff137`, engine `ee89647`.
+84 are built, 6 are partly built, and 8 are not built.
+0 of 105 acceptance checks pass, because no release candidate is frozen.
+`verify-miri` run `20261106-090237` found that new windows keep their own width instead of 50% of the display, filed as [#305](https://github.com/samanyudas/miri/issues/305).
+CI on `6edff137` failed once on the flaky engine test `slice_photos::a_press_while_a_revealed_photo_waits_never_shows_its_window_beside_it`, then passed on rerun.
+On 6 November 2026, Sam kept [#123](https://github.com/samanyudas/miri/issues/123), a drop on another display that macOS tiles, in v1.
+Sam chose the same day that such a window stays where the drop put it, which [#310](https://github.com/samanyudas/miri/pull/310) records in release scope.
+Sam accepted its criteria, and it needs Sam's hand-drag reproduction before a fix.
+Next: the audit's [Remaining blockers](docs/v1-audit.md#remaining-blockers) table, and the stale [known limitations](docs/limitations.md) rows that the audit lists.
 
 ## Picture-in-Picture resizing
 
