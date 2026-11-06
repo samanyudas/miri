@@ -37,7 +37,7 @@ Magnet's edge snapping placed Sam's own tiled windows, and Miri then moved them 
 A drop that kept the window's size slid back in 0.4 to 0.6 s, Miri's normal drop animation.
 A drop where Magnet changed the size took 0.5 to 7.5 s, and once Miri kept Magnet's half width (run `20261106-122455`).
 [#314](https://github.com/samanyudas/miri/issues/314) tracks both.
-Next: after Sam merges, verify on a `main` build and close #277.
+#277 closed on 6 November 2026 after `verify-miri` run `20261106-131827` on `main` at `5eb9366f`: the row named Rectangle and Magnet, management still started, and the row passed after both quit.
 
 ## Picture-in-Picture resizing
 
