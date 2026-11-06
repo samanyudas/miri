@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `docs/329-closeout`, based on `main` at `bff3ed5b`
+Updated: 2026-11-08 on branch `fix/issue-314`, based on `main` at `1dfed270`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -91,7 +91,11 @@ In Sam's hand check, run `20261106-000259`, Loop's Globe trigger resized a tiled
 Magnet's edge snapping placed Sam's own tiled windows, and Miri then moved them back to their columns.
 A drop that kept the window's size slid back in 0.4 to 0.6 s, Miri's normal drop animation.
 A drop where Magnet changed the size took 0.5 to 7.5 s, and once Miri kept Magnet's half width (run `20261106-122455`).
-[#314](https://github.com/samanyudas/miri/issues/314) tracks both.
+[#314](https://github.com/samanyudas/miri/issues/314) found two engine causes, and Sam chose fixes A1 and B1 on 6 November 2026.
+The fix is [paneru#134](https://github.com/samanyudas/paneru/pull/134), merged on 8 November 2026 as `ec85ffc` and delivered by the Miri PR on branch `fix/issue-314`.
+A size change after a drop now counts as a snapping app's tile, and frames an app reports while Miri moves the window count as the app catching up.
+In `verify-miri` run `20261107-010533`, drops with Magnet's own shortcuts returned in 0.34 to 0.60 s at the column's full size.
+Next: Sam merges the Miri PR, and drops onto Magnet are checked on `main` before #314 closes.
 #277 closed on 6 November 2026 after `verify-miri` run `20261106-131827` on `main` at `5eb9366f`: the row named Rectangle and Magnet, management still started, and the row passed after both quit.
 
 ## Picture-in-Picture resizing
