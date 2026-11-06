@@ -325,6 +325,9 @@ Either hold keeps scrolling one column about every 350 milliseconds while the po
 Sam chose this on 1 November 2026, so a strip beside another display can still scroll during a drag ([#205](https://github.com/samanyudas/miri/issues/205)).
 After a drop, the dropped window keeps focus, and the strip moves only as far as needed to show it.
 If macOS tiles the window instead, the engine returns it to its place in the layout.
+After a drop on the same display, that place is where the window was before the drag.
+After a drop on another display, it is the place the drop chose, so the window stays on that display.
+Sam chose this on 6 November 2026 ([#123](https://github.com/samanyudas/miri/issues/123)).
 
 ### Maximizing a window
 

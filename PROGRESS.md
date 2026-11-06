@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-05 on branch `docs/249-250-closed`, based on `main` at `a5853509`
+Updated: 2026-11-06 on branch `fix/issue-163`, based on `main` at `bdae19f0`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -14,17 +14,30 @@ The current milestone is the open v1 work, which the [`v1 blocker` label](https:
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
 
+## V1 completion audit
+
+The [v1 audit](docs/v1-audit.md) for [#83](https://github.com/samanyudas/miri/issues/83) maps 98 v1 requirements on `main` at `6edff137`, engine `ee89647`.
+84 are built, 6 are partly built, and 8 are not built.
+0 of 105 acceptance checks pass, because no release candidate is frozen.
+`verify-miri` run `20261106-090237` found that new windows keep their own width instead of 50% of the display, filed as [#305](https://github.com/samanyudas/miri/issues/305).
+CI on `6edff137` failed once on the flaky engine test `slice_photos::a_press_while_a_revealed_photo_waits_never_shows_its_window_beside_it`, then passed on rerun.
+On 6 November 2026, Sam kept [#123](https://github.com/samanyudas/miri/issues/123), a drop on another display that macOS tiles, in v1.
+Sam chose the same day that such a window stays where the drop put it, which [#310](https://github.com/samanyudas/miri/pull/310) records in release scope.
+Sam accepted its criteria, and it needs Sam's hand-drag reproduction before a fix.
+Next: the audit's [Remaining blockers](docs/v1-audit.md#remaining-blockers) table, and the stale [known limitations](docs/limitations.md) rows that the audit lists.
+
 ## Window-snapping app warning
 
 [#277](https://github.com/samanyudas/miri/issues/277) adds a Window-snapping apps setup check that warns, without blocking start, while Rectangle, Loop, or Magnet runs.
 On `main` at `6f398e2b`, `verify-miri` run `20261105-230335` showed that Rectangle 1.100's Maximize action moves a tiled window and can swap its column with its neighbor, and that the setup checker said nothing.
 Runs `20261105-230759` and `20261105-234236` on the fix showed the warning naming each running app, a normal start, and a passed row after the app quit.
 In the second run, Loop, Magnet, and Rectangle each moved a tiled window, and Miri put it back within about 30 to 45 ms.
-Next: after Sam merges, verify on a `main` build and close #277.
 In Sam's hand check, run `20261106-000259`, Loop's Globe trigger resized a tiled window 14 times, and Miri restored it each time within 25 to 50 ms.
 Magnet's edge snapping placed Sam's own tiled windows, and Miri then moved them back to their columns.
 A drop that kept the window's size slid back in 0.4 to 0.6 s, Miri's normal drop animation.
-A drop where Magnet changed the size took 0.5 to 7.5 s, and once Miri kept Magnet's half width (run `20261106-122455`). The cause is not yet known.
+A drop where Magnet changed the size took 0.5 to 7.5 s, and once Miri kept Magnet's half width (run `20261106-122455`).
+[#314](https://github.com/samanyudas/miri/issues/314) tracks both.
+Next: after Sam merges, verify on a `main` build and close #277.
 
 ## Picture-in-Picture resizing
 
@@ -216,7 +229,23 @@ Sam chose the v1 keyboard slide on 4 November 2026 in [#278](https://github.com/
 A keyboard slide keeps the exponential ease-out.
 A spring that keeps its speed when a keyboard target changes is deferred to v2.
 Swipe settling keeps the spring it already uses.
-[#280](https://github.com/samanyudas/miri/issues/280) still describes a spring as the expected result, so it waits until that result matches this choice.
+
+## First step of a keyboard slide
+
+[#280](https://github.com/samanyudas/miri/issues/280) now expects the ease-out from #278, with a first step of at most one 16 ms frame, about 20% of the move.
+Sam chose that bound on 6 November 2026.
+The fix is in [paneru#126](https://github.com/samanyudas/paneru/pull/126), merged on 6 November 2026, and [#311](https://github.com/samanyudas/miri/pull/311) pinned the engine at its merge commit `b2a14d3`.
+Idle pump sleep counted as animation time in two passes, because `Time` is sampled before the pump sleeps, so each of a slide's first two steps could cover 37% of what was left.
+The engine now leaves that sleep out, and the pass that starts a move counts at most one 16 ms frame.
+On verify-miri run `20261106-094155`, the largest engine first step fell from `t` 0.373 on `main` to 0.201, and the largest first visible frame in 10 untraced swaps was 19.6%.
+Settling slowed by a median 11 ms in the engine, and the window server settle reached 447 ms, as `main` did at 444 ms the same day.
+Sam therefore made the settle and shared-edge criteria regression checks against `main` on 6 November 2026, and both hold.
+Desktop shows beside a column while it changes width, up to 74 pt on `main` and 78 pt on the fix, which [#308](https://github.com/samanyudas/miri/issues/308) tracks.
+Sam's hand check on 6 November 2026 confirmed that with Reduce Motion on, a keyboard swap moves in one step.
+In Low Power Mode, verify-miri run `20261106-120817` kept every engine first step at `t` 0.201 or less over 10 traced swaps.
+Sam reworded the first-frame criterion to the engine's first step, because an app that draws late can show several steps at once.
+[#280](https://github.com/samanyudas/miri/issues/280) closed on 6 November 2026, after verify-miri runs `20261106-123306` and `20261106-123623` on `main` at `34cca407`.
+On landed `main`, the engine's first step stayed at `t` 0.199 or less over 30 traced swaps, and the median settle was 375 ms against 370 ms for the pre-fix build in the same session.
 
 ## Mission Control drag to the other display
 
@@ -668,7 +697,10 @@ Engine `ec7fc7c`, from [paneru#85](https://github.com/samanyudas/paneru/pull/85)
 A revealed window's photo slides in with the row and the real window takes over under it, and a column pushed off the edge slides out under its photo.
 Each window keeps its last photo, so a later crossing paints at once, and every hidden column's photo follows its place in the row.
 On 29 and 30 October, Sam confirmed a slice click slides smoothly, and burst captures of rapid keyboard presses on Sam's M3 showed no bare edge.
-The first crossing after the engine starts still moves at once, because no photo is kept yet.
+The first crossing after the engine starts now waits up to 1.5 s for its first photo, since the [#199](https://github.com/samanyudas/miri/issues/199) fix in [paneru#101](https://github.com/samanyudas/paneru/pull/101).
+On 6 November, `verify-miri` runs on `main` at `6edff137` with engine `ee89647` did not reproduce [#166](https://github.com/samanyudas/miri/issues/166), which closed that day with every criterion verified.
+After a fresh engine start, a fixture window, a stack of three fixtures, and a stack of three Helium windows each slid under a photo on their first crossing, 280 to 380 ms after the photo was asked for.
+Each stack slid back in under its photo, and a second crossing used the kept photo.
 Half-second stalls after some focus changes are [#162](https://github.com/samanyudas/miri/issues/162), and short gaps between ordinary columns are [#163](https://github.com/samanyudas/miri/issues/163), described below.
 
 On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
@@ -725,6 +757,14 @@ In 3 sessions of 10 tries that switch apps and reverse at once, desktop showed i
 A photo sliding in at the shared edge now closes only once the window server shows its window at rest, or after 250 ms.
 Before, it closed as soon as the app took the move, and the bare desktop flashed where the photo had been.
 The slice panels also take their places before the frame's window writes, so the window ahead no longer moves a frame before the photo grows beside it.
+With shared-edge photos on, photos now slide columns across the shared edge both ways, so parking and un-parking no longer snap there.
+[Engine PR #128](https://github.com/samanyudas/paneru/pull/128), merged into `miri/v0.5.2` at `ee3e3b5`, fixes two gaps left at a shared edge, with tests that fail before each fix.
+The column ahead of a slow window now waits while that window leaves for its tuck, and while it lands under its photo.
+On 6 November `main` showed the landing gap in 2 of 7 rounds with a slow stand-in app, and an engine log showed the column ahead moving on while the window server still showed the slow window at its tuck.
+The fix is not yet checked live: the stand-in stopped taking its moves in later runs, and a real Helium window never showed the gap, even on `main`.
+A live check needs a reliable app that shows each move about 60 ms late.
+A fast window next to the shared edge also went missing for a few frames, about 110 ms over 24 rounds on both builds, for a cause not yet found.
+[Engine PR #125](https://github.com/samanyudas/paneru/pull/125) fixed a slice photo test that failed about 1 run in 100 under load.
 Quick apps pause a little more often mid-motion: Spotify paused 4 times over 40 ms per burst instead of 2.
 A focus move between two windows of one app still resets nothing, and one burst of 4 showed 33 ms of desktop between two Helium windows.
 The recordings and frame captures were removed for privacy and stay local.
