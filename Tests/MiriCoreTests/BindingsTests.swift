@@ -22,7 +22,7 @@ struct DefaultBindingsTests {
     @Test func aNewInstallGetsTheAcceptedDefaultSet() throws {
         let (store, document) = try load()
         #expect(store.issue == nil)
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(5))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
         let expected: [String: TOMLValue] = [
             "window_focus_west": .array([.string("ctrl+alt-leftarrow"), .string("ctrl+alt-h"), .string("ctrl+alt-a")]),
             "window_focus_east": .array([.string("ctrl+alt-rightarrow"), .string("ctrl+alt-l"), .string("ctrl+alt-d")]),
@@ -46,11 +46,11 @@ struct DefaultBindingsTests {
             "window_focusdisplay_east": .array([
                 .string("ctrl+alt+cmd-rightarrow"), .string("ctrl+alt+cmd-l"), .string("ctrl+alt+cmd-d"),
             ]),
-            "window_moveedge_west": .array([
+            "window_swap_first": .array([
                 .string("ctrl+alt+cmd+shift-leftarrow"), .string("ctrl+alt+cmd+shift-h"),
                 .string("ctrl+alt+cmd+shift-a"),
             ]),
-            "window_moveedge_east": .array([
+            "window_swap_last": .array([
                 .string("ctrl+alt+cmd+shift-rightarrow"), .string("ctrl+alt+cmd+shift-l"),
                 .string("ctrl+alt+cmd+shift-d"),
             ]),
@@ -149,7 +149,7 @@ struct DefaultBindingsTests {
         let (_, document) = try load(original)
         #expect(document.text.hasPrefix("[miri]\ninner_gap = 8\n"))
         #expect(document.value(at: ["bindings", "window_manage"]) == .string("ctrl+alt-t"))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(5))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
     }
 
     @Test func rejectsAnInvalidVersionWithoutWriting() throws {
@@ -252,9 +252,10 @@ struct DefaultBindingsTests {
         #expect(bindings?["window_vertical_grow"] == .array([.string("ctrl+alt+shift-equal"), .string("fn-f1")]))
         #expect(bindings?["window_vertical_step_grow"] == nil)
         #expect(bindings?["window_focus_east"] == nil)
-        // This file deleted every first and last column default, so their edge-or-monitor replacements stay unbound.
+        // This file deleted every first and last column default, so their replacements stay unbound.
         for command in [
             "window_focusedge_west", "window_focusedge_east", "window_moveedge_west", "window_moveedge_east",
+            "window_swap_first", "window_swap_last",
         ] {
             #expect(bindings?[command] == nil)
         }
@@ -265,7 +266,7 @@ struct DefaultBindingsTests {
                     .string("ctrl+alt+cmd+shift-downarrow"), .string("ctrl+alt+cmd+shift-j"),
                     .string("ctrl+alt+cmd+shift-s"),
                 ]))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(5))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
     }
 
     @Test func deletedVersionOneResizeShortcutsStayDeletedAfterUpgrade() throws {
@@ -280,7 +281,7 @@ struct DefaultBindingsTests {
         #expect(
             document.value(at: ["bindings", "window_focusdisplay_north"])
                 == .array([.string("ctrl+alt+cmd-uparrow"), .string("ctrl+alt+cmd-k"), .string("ctrl+alt+cmd-w")]))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(5))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
     }
 
     @Test func keepsUnversionedUserBindingsThatMatchRetiredDefaults() throws {
@@ -300,7 +301,7 @@ struct DefaultBindingsTests {
         #expect(document.value(at: ["bindings", "window_vertical_shrink"]) == .string("ctrl+alt+shift-minus"))
         #expect(document.value(at: ["bindings", "window_step_grow"]) == nil)
         #expect(document.value(at: ["bindings", "window_vertical_step_grow"]) == nil)
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(5))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
     }
 
     @Test(arguments: [1, 2])
@@ -322,7 +323,7 @@ struct DefaultBindingsTests {
         #expect(bindings?["window_stack_east"] == .string("ctrl+alt-rightbracket"))
         #expect(bindings?["window_unstack_east"] == .string("ctrl+alt+shift-rightbracket"))
         #expect(bindings?["window_unstack_west"] == .string("ctrl+alt+shift-leftbracket"))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(5))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
         #expect(store.keptDefaults.isEmpty)
     }
 
@@ -353,7 +354,7 @@ struct DefaultBindingsTests {
             """
         let (store, document) = try load(original)
         #expect(store.issue == nil)
-        #expect(document.text.hasPrefix(original.replacingOccurrences(of: "= 2", with: "= 5")))
+        #expect(document.text.hasPrefix(original.replacingOccurrences(of: "= 2", with: "= 6")))
         #expect(
             store.keptDefaults == [
                 KeptDefault(
@@ -406,7 +407,7 @@ struct DefaultBindingsTests {
             default_bindings_version = 2
             """)
         let (restarted, document) = try load()
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(5))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
         #expect(restarted.keptDefaults.count == 1)
         #expect(restarted.keptDefaults == first.keptDefaults)
     }
@@ -753,7 +754,7 @@ struct DefaultBindingsTests {
                 == .array([
                     .string("ctrl+alt-rightarrow"), .string("ctrl+alt-l"), .string("ctrl+alt-d"),
                 ]))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(5))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
     }
 
     @Test func anUpgradeLeavesAStopChordToStop() throws {
@@ -946,7 +947,7 @@ struct DefaultBindingsTests {
         #expect(store.issue == nil)
         #expect(store.keptDefaults.isEmpty)
         #expect(document.value(at: ["bindings"]) == freshDocument.value(at: ["bindings"]))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(5))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
         let all = chords(in: document.value(at: ["bindings"]))
         #expect(Set(all).count == all.count)
     }
@@ -1015,11 +1016,12 @@ struct DefaultBindingsTests {
         #expect(bindings?["window_focusdisplay_west"] == .array([]))
     }
 
-    @Test func oneDeletedPredecessorStillGivesTheEdgeActionItsChords() throws {
+    @Test func oneDeletedPredecessorStillGivesTheFirstPositionMoveItsChords() throws {
         let (store, document) = try load(version3File(replacing: ["window_swap_first": nil]))
         #expect(store.issue == nil)
+        #expect(document.value(at: ["bindings", "window_moveedge_west"]) == nil)
         #expect(
-            document.value(at: ["bindings", "window_moveedge_west"])
+            document.value(at: ["bindings", "window_swap_first"])
                 == .array([
                     .string("ctrl+alt+cmd+shift-leftarrow"), .string("ctrl+alt+cmd+shift-h"),
                     .string("ctrl+alt+cmd+shift-a"),
@@ -1045,15 +1047,14 @@ struct DefaultBindingsTests {
         try store.apply(.resetToDefaults)
         #expect(
             store.shortcuts?.chords(for: .engine(command: "window_focusdisplay_west")).count == 3)
-        #expect(store.shortcuts?.chords(for: .engine(command: "window_focusedge_west")) == [])
+        #expect(store.shortcuts?.chords(for: .engine(command: "window_swap_first")).count == 3)
+        #expect(store.shortcuts?.document.value(at: ["bindings", "window_focusedge_west"]) == nil)
     }
 
     @Test func retiredActionsStayListedForCustomBindings() throws {
         let (store, _) = try load()
         for command in [
-            "window_focus_first", "window_focus_last", "window_swap_first", "window_swap_last",
-            "window_focusedge_west", "window_focusedge_east", "window_movedisplay_west",
-            "window_movedisplay_east",
+            "window_focus_first", "window_focus_last", "window_movedisplay_west", "window_movedisplay_east",
         ] {
             let action = ShortcutAction.engine(command: command)
             #expect(ShortcutAction.editable.contains(action))
@@ -1080,22 +1081,23 @@ struct DefaultBindingsTests {
         return version.map { text + "[miri]\ndefault_bindings_version = \($0)\n" } ?? text
     }
 
-    @Test func version4FocusDefaultsTransferToDirectMonitorActionsAndLeaveMovesUnchanged() throws {
+    @Test func version4EdgeDefaultsTransferToDirectMonitorFocusAndOneJobMoves() throws {
         let original = version4File()
         let before = try TOMLDocument(original)
         let (store, document) = try load(original)
         #expect(store.issue == nil)
         #expect(store.keptDefaults.isEmpty)
-        for side in ["west", "east"] {
-            #expect(document.value(at: ["bindings", "window_focusedge_\(side)"]) == .array([]))
+        for (side, end) in [("west", "first"), ("east", "last")] {
+            #expect(document.value(at: ["bindings", "window_focusedge_\(side)"]) == nil)
+            #expect(document.value(at: ["bindings", "window_moveedge_\(side)"]) == nil)
             #expect(
                 document.value(at: ["bindings", "window_focusdisplay_\(side)"])
                     == before.value(at: ["bindings", "window_focusedge_\(side)"]))
             #expect(
-                document.value(at: ["bindings", "window_moveedge_\(side)"])
+                document.value(at: ["bindings", "window_swap_\(end)"])
                     == before.value(at: ["bindings", "window_moveedge_\(side)"]))
         }
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(5))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
         let all = chords(in: document.value(at: ["bindings"]))
         #expect(Set(all).count == all.count)
     }
@@ -1151,13 +1153,19 @@ struct DefaultBindingsTests {
                     kept: [
                         Chord([.control, .option, .command], "leftarrow"), Chord([.control, .option, .command], "a"),
                     ],
-                    wanted: Chord([.control, .option, .command], "h"), owner: "Focus first column or monitor left")
+                    wanted: Chord([.control, .option, .command], "h"), owner: "window_focusedge_west")
             ])
+        #expect(
+            store.shortcuts?.others.contains(
+                Shortcuts.OtherBinding(
+                    key: "window_focusedge_west", chords: [Chord([.control, .option, .command], "h")]))
+                == true)
         let (restarted, _) = try load()
         #expect(restarted.issue == nil)
         #expect(restarted.keptDefaults == store.keptDefaults)
-        try restarted.apply(
-            .remove(Chord([.control, .option, .command], "h"), from: .engine(command: "window_focusedge_west")))
+        try document.text.replacingOccurrences(of: "window_focusedge_west = \"ctrl+alt+cmd-h\"\n", with: "").write(
+            to: url, atomically: true, encoding: .utf8)
+        restarted.load(reduceMotion: false)
         #expect(restarted.keptDefaults.isEmpty)
     }
 
@@ -1167,7 +1175,7 @@ struct DefaultBindingsTests {
             + "stop_shortcut = \"ctrl+alt+cmd-h\"\n"
         let (store, document) = try load(original)
         #expect(store.issue == nil)
-        #expect(document.value(at: ["bindings", "window_focusedge_west"]) == .array([]))
+        #expect(document.value(at: ["bindings", "window_focusedge_west"]) == nil)
         #expect(document.value(at: ["bindings", "window_focusdisplay_west"]) == .string("ctrl+alt+cmd-a"))
         #expect(document.value(at: ["bindings", "window_center"]) == .string("ctrl+alt+cmd-leftarrow"))
         #expect(store.stopChordsToRegister == [Chord([.control, .option, .command], "h")])
@@ -1196,11 +1204,14 @@ struct DefaultBindingsTests {
         let before = try TOMLDocument(original)
         let (store, document) = try load(original)
         #expect(store.issue == nil)
-        for side in ["west", "east"] {
-            #expect(
-                document.value(at: ["bindings", "window_focusedge_\(side)"])
-                    == before.value(at: ["bindings", "window_focusedge_\(side)"]))
+        for (side, end) in [("west", "first"), ("east", "last")] {
+            for edge in ["focusedge", "moveedge"] {
+                #expect(
+                    document.value(at: ["bindings", "window_\(edge)_\(side)"])
+                        == before.value(at: ["bindings", "window_\(edge)_\(side)"]))
+            }
             #expect(document.value(at: ["bindings", "window_focusdisplay_\(side)"]) == nil)
+            #expect(document.value(at: ["bindings", "window_swap_\(end)"]) == nil)
         }
     }
 
@@ -1223,11 +1234,151 @@ struct DefaultBindingsTests {
         #expect(document.text.hasPrefix(original))
         #expect(document.value(at: ["bindings", "window_focusdisplay_west"]) == nil)
         #expect(document.value(at: ["bindings", "window_focusdisplay_east"]) == nil)
+        #expect(document.value(at: ["bindings", "window_swap_first"]) == nil)
+        #expect(document.value(at: ["bindings", "window_swap_last"]) == nil)
         try store.apply(.resetToDefaults)
-        for side in ["west", "east"] {
-            #expect(store.shortcuts?.chords(for: .engine(command: "window_focusedge_\(side)")) == [])
+        for (side, end) in [("west", "first"), ("east", "last")] {
+            #expect(store.shortcuts?.document.value(at: ["bindings", "window_focusedge_\(side)"]) == nil)
             #expect(store.shortcuts?.chords(for: .engine(command: "window_focusdisplay_\(side)")).count == 3)
+            #expect(store.shortcuts?.chords(for: .engine(command: "window_swap_\(end)")).count == 3)
         }
+    }
+
+    @Test func deletedFirstPositionAndMonitorMovesLeaveTheFirstPositionMoveUnbound() throws {
+        let (store, document) = try load(
+            version3File(replacing: ["window_swap_first": nil, "window_movedisplay_west": "[]"]))
+        #expect(store.issue == nil)
+        let bindings = document.value(at: ["bindings"])
+        #expect(bindings?["window_swap_first"] == nil)
+        #expect(bindings?["window_movedisplay_west"] == .array([]))
+        #expect(bindings?["window_moveedge_west"] == nil)
+        #expect(
+            bindings?["window_swap_last"]
+                == .array([
+                    .string("ctrl+alt+cmd+shift-rightarrow"), .string("ctrl+alt+cmd+shift-l"),
+                    .string("ctrl+alt+cmd+shift-d"),
+                ]))
+    }
+
+    @Test func aCustomizedFirstPositionMoveStaysAndKeepsTheMonitorMoveDefault() throws {
+        let (store, document) = try load(
+            version3File(replacing: ["window_swap_first": "\"ctrl+alt+cmd+shift-f\""]))
+        #expect(store.issue == nil)
+        let bindings = document.value(at: ["bindings"])
+        #expect(bindings?["window_swap_first"] == .string("ctrl+alt+cmd+shift-f"))
+        #expect(bindings?["window_movedisplay_west"] == .string("ctrl+alt+cmd+shift-a"))
+        #expect(bindings?["window_moveedge_west"] == nil)
+        #expect(bindings?["window_movedisplay_east"] == nil)
+        let all = chords(in: bindings)
+        #expect(Set(all).count == all.count)
+    }
+
+    /// A file with the unchanged defaults that version 5 wrote, with `changes` applied. A `nil` value deletes the key.
+    private func version5File(replacing changes: [String: TOMLValue?] = [:]) throws -> String {
+        let moves = { (keys: [String]) in TOMLValue.array(keys.map { .string("ctrl+alt+cmd+shift-\($0)") }) }
+        var bindings: [String: TOMLValue?] = [
+            "window_swap_first": nil, "window_swap_last": nil,
+            "window_moveedge_west": moves(["leftarrow", "h", "a"]),
+            "window_moveedge_east": moves(["rightarrow", "l", "d"]),
+            "window_focusedge_west": .array([]), "window_focusedge_east": .array([]),
+        ]
+        bindings.merge(changes) { $1 }
+        var document = try DefaultBinding.adding(to: TOMLDocument(""))
+        for (key, value) in bindings.sorted(by: { $0.key < $1.key }) {
+            document =
+                try value.map { try document.setting($0, table: ["bindings"], key: key) }
+                ?? document.removing(table: ["bindings"], key: key)
+        }
+        return try document.setting(.integer(5), table: ["miri"], key: "default_bindings_version").text
+    }
+
+    @Test func anUnchangedVersion5FileUpgradesToTheNewInstallSet() throws {
+        let (fresh, freshDocument) = try load()
+        #expect(fresh.issue == nil)
+        try FileManager.default.removeItem(at: url)
+        let (store, document) = try load(try version5File())
+        #expect(store.issue == nil)
+        #expect(store.keptDefaults.isEmpty)
+        #expect(document.value(at: ["bindings"]) == freshDocument.value(at: ["bindings"]))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
+        #expect(store.shortcuts?.others == [])
+    }
+
+    @Test(arguments: [
+        "window_moveedge_west", "window_moveedge_east", "window_focusedge_west", "window_focusedge_east",
+    ])
+    func aCustomShortcutOnARemovedActionStaysAndShowsAsAnOtherBinding(command: String) throws {
+        let version5Moves = try TOMLDocument(version5File())
+        let (store, document) = try load(try version5File(replacing: [command: .string("fn-f1")]))
+        #expect(store.issue == nil)
+        #expect(document.value(at: ["bindings", command]) == .string("fn-f1"))
+        #expect(!ShortcutAction.editable.contains(.engine(command: command)))
+        #expect(store.shortcuts?.others == [Shortcuts.OtherBinding(key: command, chords: [Chord([.function], "f1")])])
+        // The removed action keeps its own chord, so the one-job move still gets every default chord.
+        for (side, end) in [("west", "first"), ("east", "last")] {
+            #expect(
+                document.value(at: ["bindings", "window_swap_\(end)"])
+                    == version5Moves.value(at: ["bindings", "window_moveedge_\(side)"]))
+        }
+        #expect(store.keptDefaults.isEmpty)
+    }
+
+    @Test func aTrimmedEdgeMoveStaysAndTheFirstPositionMoveGetsOnlyFreeChords() throws {
+        let original = try version5File(replacing: [
+            "window_moveedge_west": .array([.string("ctrl+alt+cmd+shift-leftarrow")])
+        ])
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        #expect(
+            document.value(at: ["bindings", "window_moveedge_west"])
+                == .array([.string("ctrl+alt+cmd+shift-leftarrow")]))
+        #expect(
+            document.value(at: ["bindings", "window_swap_first"])
+                == .array([.string("ctrl+alt+cmd+shift-h"), .string("ctrl+alt+cmd+shift-a")]))
+        #expect(
+            store.keptDefaults == [
+                KeptDefault(
+                    action: .engine(command: "window_swap_first"),
+                    kept: [
+                        Chord([.control, .option, .command, .shift], "h"),
+                        Chord([.control, .option, .command, .shift], "a"),
+                    ],
+                    wanted: Chord([.control, .option, .command, .shift], "leftarrow"), owner: "window_moveedge_west")
+            ])
+    }
+
+    @Test(arguments: [nil, TOMLValue.array([])])
+    func aDeletedOrEmptiedVersion5EdgeMoveLeavesTheFirstPositionMoveUnbound(value: TOMLValue?) throws {
+        let (store, document) = try load(try version5File(replacing: ["window_moveedge_west": value]))
+        #expect(store.issue == nil)
+        #expect(document.value(at: ["bindings", "window_moveedge_west"]) == value)
+        #expect(document.value(at: ["bindings", "window_swap_first"]) == nil)
+        #expect(store.shortcuts?.chords(for: .engine(command: "window_swap_last")).count == 3)
+        #expect(store.keptDefaults.isEmpty)
+    }
+
+    @Test(arguments: ["window_swap_first", "window_swap_first_custom"])
+    func anExistingFirstPositionMoveKeepsItsEdgePredecessor(command: String) throws {
+        let original = try version5File(replacing: [command: .string("fn-f1")])
+        let before = try TOMLDocument(original)
+        let (store, document) = try load(original)
+        #expect(store.issue == nil)
+        #expect(document.value(at: ["bindings", command]) == .string("fn-f1"))
+        #expect(
+            document.value(at: ["bindings", "window_moveedge_west"])
+                == before.value(at: ["bindings", "window_moveedge_west"]))
+        #expect(document.value(at: ["bindings", "window_moveedge_east"]) == nil)
+        #expect(store.shortcuts?.chords(for: .engine(command: "window_swap_last")).count == 3)
+    }
+
+    @Test func removedTwoJobActionsAreNotListed() {
+        for command in [
+            "window_moveedge_west", "window_moveedge_east", "window_focusedge_west", "window_focusedge_east",
+        ] {
+            #expect(!ShortcutAction.editable.contains(.engine(command: command)))
+        }
+        #expect(ShortcutAction.engine(command: "window_swap_first").title == "Move column to first position")
+        #expect(ShortcutAction.engine(command: "window_swap_last").title == "Move column to last position")
     }
 
     @Test func everyDirectionalActionUsesTheSameModifiersOnArrowsHJKLAndWASD() {
@@ -1237,8 +1388,10 @@ struct DefaultBindingsTests {
         ]
         let directional = DefaultBinding.table.filter { row in row.chords.contains { $0.key.hasSuffix("arrow") } }
         #expect(directional.count == 16)
+        let ends = ["first": "west", "last": "east"]
         for row in directional {
-            let direction = String(row.command.split(separator: "_").last!)
+            let suffix = String(row.command.split(separator: "_").last!)
+            let direction = ends[suffix] ?? suffix
             #expect(row.chords.map(\.key) == keys[direction], "\(row.command)")
             #expect(Set(row.chords.map(\.modifiers)).count == 1, "\(row.command)")
             #expect(row.chords.allSatisfy { !$0.modifiers.contains(.function) }, "\(row.command)")
