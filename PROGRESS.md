@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-06 on branch `fix/issue-163`, based on `main` at `bdae19f0`
+Updated: 2026-11-06 on branch `fix/maximize-command-restore`, based on `main` at `4f53fcd4`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -765,6 +765,10 @@ The fix is not yet checked live: the stand-in stopped taking its moves in later 
 A live check needs a reliable app that shows each move about 60 ms late.
 A fast window next to the shared edge also went missing for a few frames, about 110 ms over 24 rounds on both builds, for a cause not yet found.
 [Engine PR #125](https://github.com/samanyudas/paneru/pull/125) fixed a slice photo test that failed about 1 run in 100 under load.
+[#163](https://github.com/samanyudas/miri/issues/163) closed on 6 November after a live check on `main` at `159d9419`: in 24 rounds, desktop showed beside the slow window 0 times, against 5 on the build before.
+A photo that shows a frame late at the shared edge remains, as [#316](https://github.com/samanyudas/miri/issues/316).
+[Engine PR #129](https://github.com/samanyudas/paneru/pull/129), merged at `6c15fd6`, fixes the engine test `the_command_and_a_double_click_toggle_one_state`, which had failed since engine PR #126.
+The maximize command and the system that ends width runs had no order, and #126 changed the order Bevy picked, so the command's restore lost its anchor.
 Quick apps pause a little more often mid-motion: Spotify paused 4 times over 40 ms per burst instead of 2.
 A focus move between two windows of one app still resets nothing, and one burst of 4 showed 33 ms of desktop between two Helium windows.
 The recordings and frame captures were removed for privacy and stay local.
