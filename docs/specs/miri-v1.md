@@ -371,8 +371,8 @@ The following table records the selected v1 defaults without claiming tested act
 | Move column right | Control-Option-Shift-Right | Control-Option-Shift-L, Control-Option-Shift-D |
 | Move window up within column | Control-Option-Shift-Up | Control-Option-Shift-K, Control-Option-Shift-W |
 | Move window down within column | Control-Option-Shift-Down | Control-Option-Shift-J, Control-Option-Shift-S |
-| Move column to first position or monitor left | Control-Option-Command-Shift-Left | Control-Option-Command-Shift-H, Control-Option-Command-Shift-A |
-| Move column to last position or monitor right | Control-Option-Command-Shift-Right | Control-Option-Command-Shift-L, Control-Option-Command-Shift-D |
+| Move column to first position | Control-Option-Command-Shift-Left | Control-Option-Command-Shift-H, Control-Option-Command-Shift-A |
+| Move column to last position | Control-Option-Command-Shift-Right | Control-Option-Command-Shift-L, Control-Option-Command-Shift-D |
 | Move column to monitor above | Control-Option-Command-Shift-Up | Control-Option-Command-Shift-K, Control-Option-Command-Shift-W |
 | Move column to monitor below | Control-Option-Command-Shift-Down | Control-Option-Command-Shift-J, Control-Option-Command-Shift-S |
 | Send column to next display | Control-Option-N | |

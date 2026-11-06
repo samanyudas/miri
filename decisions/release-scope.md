@@ -165,7 +165,8 @@ On 1 November 2026, Sam decided that Focus column left or right and Move column 
 A fresh press crosses only when a display touches that horizontal side, with positive vertical overlap.
 A key auto-repeat stays inside its strip.
 A plain move arrives at the destination edge it crossed, so the opposite move returns it to the source strip end.
-The Command-layer and dedicated monitor moves keep their arrival-after-active-column rule.
+Move column to monitor above or below, the dedicated monitor moves, and ⌃⌥N keep their arrival-after-active-column rule.
+On 7 November 2026, Sam decided that ⌃⌥⌘⇧← and ⌃⌥⌘⇧→ only move the focused column to the first or last place on its own display and never cross to another display ([#331](https://github.com/samanyudas/miri/issues/331)).
 Scrolling reliability keeps off-screen windows on their assigned displays without macOS relocating them.
 These are distinct requirements.
 Reliable horizontal multi-monitor scrolling is a v1 release blocker.
