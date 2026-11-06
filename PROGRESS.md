@@ -657,7 +657,7 @@ A revealed window's photo slides in with the row and the real window takes over 
 Each window keeps its last photo, so a later crossing paints at once, and every hidden column's photo follows its place in the row.
 On 29 and 30 October, Sam confirmed a slice click slides smoothly, and burst captures of rapid keyboard presses on Sam's M3 showed no bare edge.
 The first crossing after the engine starts now waits up to 1.5 s for its first photo, since the [#199](https://github.com/samanyudas/miri/issues/199) fix in [paneru#101](https://github.com/samanyudas/paneru/pull/101).
-On 6 November, `verify-miri` runs on `main` at `6edff137` with engine `ee89647` did not reproduce [#166](https://github.com/samanyudas/miri/issues/166).
+On 6 November, `verify-miri` runs on `main` at `6edff137` with engine `ee89647` did not reproduce [#166](https://github.com/samanyudas/miri/issues/166), which closed that day with every criterion verified.
 After a fresh engine start, a fixture window, a stack of three fixtures, and a stack of three Helium windows each slid under a photo on their first crossing, 280 to 380 ms after the photo was asked for.
 Each stack slid back in under its photo, and a second crossing used the kept photo.
 Half-second stalls after some focus changes are [#162](https://github.com/samanyudas/miri/issues/162), and short gaps between ordinary columns are [#163](https://github.com/samanyudas/miri/issues/163), described below.
