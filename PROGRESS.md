@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-06 on branch `fix/issue-83`, based on `main` at `6edff137`
+Updated: 2026-11-06 on branch `fix/issue-83`, based on `main` at `7059461b`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -22,8 +22,8 @@ The [v1 audit](docs/v1-audit.md) for [#83](https://github.com/samanyudas/miri/is
 `verify-miri` run `20261106-090237` found that new windows keep their own width instead of 50% of the display, filed as [#305](https://github.com/samanyudas/miri/issues/305).
 CI on `6edff137` failed once on the flaky engine test `slice_photos::a_press_while_a_revealed_photo_waits_never_shows_its_window_beside_it`, then passed on rerun.
 On 6 November 2026, Sam kept [#123](https://github.com/samanyudas/miri/issues/123), a drop on another display that macOS tiles, in v1.
-Sam chose the same day that such a window stays where the drop put it.
-It needs accepted criteria and a reproduction before a fix.
+Sam chose the same day that such a window stays where the drop put it, which [#310](https://github.com/samanyudas/miri/pull/310) records in release scope.
+Sam accepted its criteria, and it needs Sam's hand-drag reproduction before a fix.
 Next: the audit's [Remaining blockers](docs/v1-audit.md#remaining-blockers) table, and the stale [known limitations](docs/limitations.md) rows that the audit lists.
 
 ## Picture-in-Picture resizing
@@ -668,7 +668,10 @@ Engine `ec7fc7c`, from [paneru#85](https://github.com/samanyudas/paneru/pull/85)
 A revealed window's photo slides in with the row and the real window takes over under it, and a column pushed off the edge slides out under its photo.
 Each window keeps its last photo, so a later crossing paints at once, and every hidden column's photo follows its place in the row.
 On 29 and 30 October, Sam confirmed a slice click slides smoothly, and burst captures of rapid keyboard presses on Sam's M3 showed no bare edge.
-The first crossing after the engine starts still moves at once, because no photo is kept yet.
+The first crossing after the engine starts now waits up to 1.5 s for its first photo, since the [#199](https://github.com/samanyudas/miri/issues/199) fix in [paneru#101](https://github.com/samanyudas/paneru/pull/101).
+On 6 November, `verify-miri` runs on `main` at `6edff137` with engine `ee89647` did not reproduce [#166](https://github.com/samanyudas/miri/issues/166), which closed that day with every criterion verified.
+After a fresh engine start, a fixture window, a stack of three fixtures, and a stack of three Helium windows each slid under a photo on their first crossing, 280 to 380 ms after the photo was asked for.
+Each stack slid back in under its photo, and a second crossing used the kept photo.
 Half-second stalls after some focus changes are [#162](https://github.com/samanyudas/miri/issues/162), and short gaps between ordinary columns are [#163](https://github.com/samanyudas/miri/issues/163), described below.
 
 On 28 October on Miri Developer, Sam's built-in display moved from below the 27-inch display to its left.
