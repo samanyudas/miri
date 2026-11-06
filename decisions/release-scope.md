@@ -301,6 +301,8 @@ A drag moves only the window it grabs, and moving a whole stack stays a keyboard
 Floating windows never join the layout by drag, and dragging only moves them.
 
 The pointer picks the display, the column and its zone, and the drop height, so the target is always under the pointer.
+The menu bar belongs to its display, so a pointer in the menu bar picks the column below it.
+Sam chose this on 6 November 2026 ([#123](https://github.com/samanyudas/miri/issues/123)).
 Over the dragged window's own column, a drop only reorders its stack, so a window grabbed near either end of its title bar and dragged straight down stays in its stack.
 To take a window out of its stack by drag, drop it over a neighboring column's near quarter or over empty space.
 Sam accepted this rule on 1 November 2026 ([#203](https://github.com/samanyudas/miri/issues/203)).
