@@ -83,8 +83,13 @@ A v2 layout that follows the user to a different set of physical monitors.
 _Avoid_: Display profile
 
 **Competing window manager**:
-Any other tool that moves or resizes windows, including standalone Paneru.
+Another tool that arranges windows on its own, including standalone Paneru.
+Miri refuses to start while one runs.
 _Avoid_: Conflicting app
+
+**Window-snapping app**:
+A tool that moves a window only when you press its shortcut or drag the window to a screen edge, such as Rectangle, Loop, or Magnet.
+The setup checker warns while one runs, but does not block start.
 
 **Setup checker**:
 The part of the app interface that reports macOS conditions that stop Miri from working correctly.

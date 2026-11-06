@@ -127,6 +127,13 @@ Verify conflicts before requiring changes to these settings in **System Settings
 - **Drag windows to menu bar to fill screen**.
 - **Hold Option key while dragging windows to tile**.
 
+## Check window-snapping apps
+
+A window-snapping app, such as Rectangle, Loop, or Magnet, moves a window when you press its shortcut or drag the window to a screen edge.
+The setup checker warns while one runs and names it ([#277](https://github.com/samanyudas/miri/issues/277)).
+The warning does not block window management, because the app acts only when you use it.
+Miri finds each app by the bundle identifier in its signed bundle.
+
 ## Arrange and select displays
 
 V1 supports horizontal, vertical, and mixed physical monitor arrangements that Sam can verify on real hardware.
@@ -158,7 +165,7 @@ Miri keeps standalone Paneru's configuration files untouched.
 
 ## Setup checks
 
-Report missing Accessibility permission, **Displays have separate Spaces** turned off, Stage Manager turned on, competing window managers, macOS tiling options turned on, and conflicting macOS gestures.
+Report missing Accessibility permission, **Displays have separate Spaces** turned off, Stage Manager turned on, competing window managers, running window-snapping apps, macOS tiling options turned on, and conflicting macOS gestures.
 Explain the relevant System Settings path for each failure.
 Update the check status as users resolve each problem.
 

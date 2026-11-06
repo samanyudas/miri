@@ -105,6 +105,7 @@ V1 includes a setup checker.
 It reports missing Accessibility permission, **Displays have separate Spaces** turned off, Stage Manager turned on, competing window managers, and macOS gestures that clash with the strip swipe.
 It also reports each macOS tiling option that is on, because macOS tiling moves windows that Miri arranges, including dragged windows ([#43](https://github.com/samanyudas/miri/issues/43)).
 The options are **Drag windows to screen edges to tile**, **Drag windows to menu bar to fill screen**, and **Hold Option key while dragging windows to tile**.
+It also warns while a window-snapping app runs, such as Rectangle, Loop, or Magnet, because the app can move a window out of its place in the strip when you press its shortcut or drag the window to a screen edge ([#277](https://github.com/samanyudas/miri/issues/277)).
 These conflicts never block window management.
 The setup checker links to the relevant System Settings page and never changes macOS settings itself.
 If a non-gesture setting cannot be inspected, the checker shows **Not checked** with manual instructions.
