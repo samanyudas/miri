@@ -22,6 +22,7 @@ The [v1 audit](docs/v1-audit.md) for [#83](https://github.com/samanyudas/miri/is
 `verify-miri` run `20261106-090237` found that new windows keep their own width instead of 50% of the display, filed as [#305](https://github.com/samanyudas/miri/issues/305).
 CI on `6edff137` failed once on the flaky engine test `slice_photos::a_press_while_a_revealed_photo_waits_never_shows_its_window_beside_it`, then passed on rerun.
 On 6 November 2026, Sam kept [#123](https://github.com/samanyudas/miri/issues/123), a drop on another display that macOS tiles, in v1.
+Sam chose the same day that such a window stays where the drop put it.
 It needs accepted criteria and a reproduction before a fix.
 Next: the audit's [Remaining blockers](docs/v1-audit.md#remaining-blockers) table, and the stale [known limitations](docs/limitations.md) rows that the audit lists.
 
