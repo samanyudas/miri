@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-06 on branch `docs/280-closed`, based on `main` at `34cca407`
+Updated: 2026-11-06 on branch `fix/issue-163`, based on `main` at `bdae19f0`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -744,6 +744,14 @@ In 3 sessions of 10 tries that switch apps and reverse at once, desktop showed i
 A photo sliding in at the shared edge now closes only once the window server shows its window at rest, or after 250 ms.
 Before, it closed as soon as the app took the move, and the bare desktop flashed where the photo had been.
 The slice panels also take their places before the frame's window writes, so the window ahead no longer moves a frame before the photo grows beside it.
+With shared-edge photos on, photos now slide columns across the shared edge both ways, so parking and un-parking no longer snap there.
+[Engine PR #128](https://github.com/samanyudas/paneru/pull/128), merged into `miri/v0.5.2` at `ee3e3b5`, fixes two gaps left at a shared edge, with tests that fail before each fix.
+The column ahead of a slow window now waits while that window leaves for its tuck, and while it lands under its photo.
+On 6 November `main` showed the landing gap in 2 of 7 rounds with a slow stand-in app, and an engine log showed the column ahead moving on while the window server still showed the slow window at its tuck.
+The fix is not yet checked live: the stand-in stopped taking its moves in later runs, and a real Helium window never showed the gap, even on `main`.
+A live check needs a reliable app that shows each move about 60 ms late.
+A fast window next to the shared edge also went missing for a few frames, about 110 ms over 24 rounds on both builds, for a cause not yet found.
+[Engine PR #125](https://github.com/samanyudas/paneru/pull/125) fixed a slice photo test that failed about 1 run in 100 under load.
 Quick apps pause a little more often mid-motion: Spotify paused 4 times over 40 ms per burst instead of 2.
 A focus move between two windows of one app still resets nothing, and one burst of 4 showed 33 ms of desktop between two Helium windows.
 The recordings and frame captures were removed for privacy and stay local.
