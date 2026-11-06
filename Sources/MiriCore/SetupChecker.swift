@@ -12,7 +12,7 @@ public struct SetupObservation: Equatable, Sendable {
     /// `TrackpadFourFingerHorizSwipeGesture`: 0 off, 2 swipe between full-screen apps.
     public var fourFingerSwipe: Int?
     public var threeFingerDrag: Bool?
-    /// `com.apple.WindowManager` `EnableTilingByEdgeDrag`: **Drag windows to screen edges to tile**.
+    /// `com.apple.WindowManager` `EnableTilingByEdgeDrag`: **Drag windows to left or right edge of screen to tile**.
     public var edgeTiling: Bool?
     /// `com.apple.WindowManager` `EnableTopTilingByEdgeDrag`: **Drag windows to menu bar to fill screen**.
     public var menuBarTiling: Bool?
@@ -179,7 +179,7 @@ public enum SetupChecker {
 
     private static func tilingStatus(_ observation: SetupObservation) -> SetupStatus {
         let options = [
-            (observation.edgeTiling, "Drag windows to screen edges to tile"),
+            (observation.edgeTiling, "Drag windows to left or right edge of screen to tile"),
             (observation.menuBarTiling, "Drag windows to menu bar to fill screen"),
             (observation.optionDragTiling, "Hold ⌥ key while dragging windows to tile"),
         ]
