@@ -123,7 +123,7 @@ macOS tiling controls can conflict with dragging windows in the layout, which is
 The setup checker reports each conflicting setting with manual steps, and Miri never changes it.
 Verify conflicts before requiring changes to these settings in **System Settings > Desktop & Dock > Windows**:
 
-- **Drag windows to screen edges to tile**.
+- **Drag windows to left or right edge of screen to tile**.
 - **Drag windows to menu bar to fill screen**.
 - **Hold Option key while dragging windows to tile**.
 

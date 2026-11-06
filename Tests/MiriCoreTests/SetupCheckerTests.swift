@@ -146,7 +146,7 @@ struct SetupCheckerTests {
             Issue.record("Expected a tiling conflict")
             return
         }
-        #expect(message.contains("Drag windows to screen edges to tile"))
+        #expect(message.contains("Drag windows to left or right edge of screen to tile"))
         #expect(message.contains("Hold ⌥ key while dragging windows to tile"))
         #expect(!message.contains("menu bar"))
         #expect(SetupChecker.evaluate(observation).filter(\.isBlocking).isEmpty)
@@ -172,6 +172,6 @@ struct SetupCheckerTests {
             Issue.record("Expected Not checked")
             return
         }
-        #expect(manual.contains("Drag windows to screen edges to tile"))
+        #expect(manual.contains("Drag windows to left or right edge of screen to tile"))
     }
 }
