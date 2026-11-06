@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-06 on branch `fix/maximize-command-restore`, based on `main` at `4f53fcd4`
+Updated: 2026-11-06 on branch `docs/122-not-reproduced`, based on `main` at `cf393f43`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -1295,7 +1295,8 @@ The engine undoes its own drop when macOS tiles the dropped window within one se
 It also restores a fill that macOS finishes after the restore or puts back after the hold, and it matches move and resize notifications that name no window ID, which Helium sends often.
 Each change has a regression test that fails without it.
 Live on Miri Developer with Helium, the old engine moved the window to a new column after an edge tile 3 of 3 times and kept the fill size in 3 of 3 fills; the fix passed 32 of 32 mixed tries.
-A drag that macOS does not fill can still leave the window 8 points up against the menu bar, which is a separate, older defect.
+A report that a drag macOS does not fill leaves the window 8 points up against the menu bar did not reproduce.
+Sam's hand check on 6 November 2026, with engine `ee3e3b5`, returned the window inside the outer gap, so [#122](https://github.com/samanyudas/miri/issues/122) closed as not reproduced.
 A drop onto another display that macOS then tiles is not undone.
 
 ## Stack resize and engine restart fixes
