@@ -326,6 +326,9 @@ That hold counts only within 200 points of the edge, and not over a column that 
 Either hold keeps scrolling one column about every 350 milliseconds while the pointer stays where the hold started.
 Sam chose this on 1 November 2026, so a strip beside another display can still scroll during a drag ([#205](https://github.com/samanyudas/miri/issues/205)).
 After a drop, the dropped window keeps focus, and the strip moves only as far as needed to show it.
+When a window leaves a strip, by a drag or a display command, the strip keeps its scroll, so the columns past the window slide into its space.
+A scroll that the window's arrival caused stays after it leaves, but a strip wider than its display never keeps empty space past either end.
+Sam chose this on 6 November 2026 ([#320](https://github.com/samanyudas/miri/issues/320)).
 If macOS tiles the window instead, the engine returns it to its place in the layout.
 After a drop on the same display, that place is where the window was before the drag.
 After a drop on another display, it is the place the drop chose, so the window stays on that display.
