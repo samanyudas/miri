@@ -217,6 +217,8 @@ Settling slowed by a median 11 ms in the engine, and the window server settle re
 Sam therefore made the settle and shared-edge criteria regression checks against `main` on 6 November 2026, and both hold.
 Desktop shows beside a column while it changes width, up to 74 pt on `main` and 78 pt on the fix, which [#308](https://github.com/samanyudas/miri/issues/308) tracks.
 Sam's hand check on 6 November 2026 confirmed that with Reduce Motion on, a keyboard swap moves in one step.
+In Low Power Mode, verify-miri run `20261106-120817` kept every engine first step at `t` 0.201 or less over 10 traced swaps.
+Sam reworded the first-frame criterion to the engine's first step, because an app that draws late can show several steps at once.
 #280 stays open until this branch is on `main` and verified there.
 
 ## Mission Control drag to the other display
