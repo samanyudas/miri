@@ -22,7 +22,9 @@ Runs `20261105-230759` and `20261105-234236` on the fix showed the warning namin
 In the second run, Loop, Magnet, and Rectangle each moved a tiled window, and Miri put it back within about 30 to 45 ms.
 Next: after Sam merges, verify on a `main` build and close #277.
 In Sam's hand check, run `20261106-000259`, Loop's Globe trigger resized a tiled window 14 times, and Miri restored it each time within 25 to 50 ms.
-Magnet's edge snapping placed Sam's own tiled windows, and Miri then slid them back to their columns with its normal 0.4 s drop animation.
+Magnet's edge snapping placed Sam's own tiled windows, and Miri then moved them back to their columns.
+A drop that kept the window's size slid back in 0.4 to 0.6 s, Miri's normal drop animation.
+A drop where Magnet changed the size took 0.5 to 7.5 s, and once Miri kept Magnet's half width (run `20261106-122455`). The cause is not yet known.
 
 ## Picture-in-Picture resizing
 
