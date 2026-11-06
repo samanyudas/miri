@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-06 on branch `fix/issue-280`, based on `main` at `ea37e42d`
+Updated: 2026-11-06 on branch `docs/280-closed`, based on `main` at `34cca407`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -221,7 +221,7 @@ Swipe settling keeps the spring it already uses.
 
 [#280](https://github.com/samanyudas/miri/issues/280) now expects the ease-out from #278, with a first step of at most one 16 ms frame, about 20% of the move.
 Sam chose that bound on 6 November 2026.
-The fix is in [paneru#126](https://github.com/samanyudas/paneru/pull/126), merged on 6 November 2026, and this branch pins the engine at its merge commit `b2a14d3`.
+The fix is in [paneru#126](https://github.com/samanyudas/paneru/pull/126), merged on 6 November 2026, and [#311](https://github.com/samanyudas/miri/pull/311) pinned the engine at its merge commit `b2a14d3`.
 Idle pump sleep counted as animation time in two passes, because `Time` is sampled before the pump sleeps, so each of a slide's first two steps could cover 37% of what was left.
 The engine now leaves that sleep out, and the pass that starts a move counts at most one 16 ms frame.
 On verify-miri run `20261106-094155`, the largest engine first step fell from `t` 0.373 on `main` to 0.201, and the largest first visible frame in 10 untraced swaps was 19.6%.
@@ -231,7 +231,8 @@ Desktop shows beside a column while it changes width, up to 74 pt on `main` and 
 Sam's hand check on 6 November 2026 confirmed that with Reduce Motion on, a keyboard swap moves in one step.
 In Low Power Mode, verify-miri run `20261106-120817` kept every engine first step at `t` 0.201 or less over 10 traced swaps.
 Sam reworded the first-frame criterion to the engine's first step, because an app that draws late can show several steps at once.
-#280 stays open until this branch is on `main` and verified there.
+[#280](https://github.com/samanyudas/miri/issues/280) closed on 6 November 2026, after verify-miri runs `20261106-123306` and `20261106-123623` on `main` at `34cca407`.
+On landed `main`, the engine's first step stayed at `t` 0.199 or less over 30 traced swaps, and the median settle was 375 ms against 370 ms for the pre-fix build in the same session.
 
 ## Mission Control drag to the other display
 
