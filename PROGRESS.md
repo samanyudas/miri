@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-06 on branch `fix/issue-83`, based on `main` at `7059461b`
+Updated: 2026-11-06 on branch `fix/issue-280`, based on `main` at `ea37e42d`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -216,7 +216,22 @@ Sam chose the v1 keyboard slide on 4 November 2026 in [#278](https://github.com/
 A keyboard slide keeps the exponential ease-out.
 A spring that keeps its speed when a keyboard target changes is deferred to v2.
 Swipe settling keeps the spring it already uses.
-[#280](https://github.com/samanyudas/miri/issues/280) still describes a spring as the expected result, so it waits until that result matches this choice.
+
+## First step of a keyboard slide
+
+[#280](https://github.com/samanyudas/miri/issues/280) now expects the ease-out from #278, with a first step of at most one 16 ms frame, about 20% of the move.
+Sam chose that bound on 6 November 2026.
+The fix is in [paneru#126](https://github.com/samanyudas/paneru/pull/126), merged on 6 November 2026, and this branch pins the engine at its merge commit `b2a14d3`.
+Idle pump sleep counted as animation time in two passes, because `Time` is sampled before the pump sleeps, so each of a slide's first two steps could cover 37% of what was left.
+The engine now leaves that sleep out, and the pass that starts a move counts at most one 16 ms frame.
+On verify-miri run `20261106-094155`, the largest engine first step fell from `t` 0.373 on `main` to 0.201, and the largest first visible frame in 10 untraced swaps was 19.6%.
+Settling slowed by a median 11 ms in the engine, and the window server settle reached 447 ms, as `main` did at 444 ms the same day.
+Sam therefore made the settle and shared-edge criteria regression checks against `main` on 6 November 2026, and both hold.
+Desktop shows beside a column while it changes width, up to 74 pt on `main` and 78 pt on the fix, which [#308](https://github.com/samanyudas/miri/issues/308) tracks.
+Sam's hand check on 6 November 2026 confirmed that with Reduce Motion on, a keyboard swap moves in one step.
+In Low Power Mode, verify-miri run `20261106-120817` kept every engine first step at `t` 0.201 or less over 10 traced swaps.
+Sam reworded the first-frame criterion to the engine's first step, because an app that draws late can show several steps at once.
+#280 stays open until this branch is on `main` and verified there.
 
 ## Mission Control drag to the other display
 
