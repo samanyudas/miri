@@ -39,4 +39,4 @@ Preconditions:
 - Never copy an Apple binary to make the stand-in. macOS kills the copy at launch with exit status 137, so the check never sees it. `V standin` compiles its own.
 - A stand-in started in a tool call's background job dies when that call ends. `V standin` detaches it and records it for `V end`.
 - A stand-in cannot trigger the Amethyst check, which matches only a bundle ID.
-- `V ax test status` prints nothing while the Setup tab shows, because that tab has no `Status` label. Press `General` first.
+- `V ax test status` prints nothing while the Setup page shows, because that page has no status text. Press `General` first.

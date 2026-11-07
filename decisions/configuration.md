@@ -143,7 +143,7 @@ Strip motion should follow the display refresh rate.
 A keyboard slide in v1 uses the exponential ease-out recorded in [V1 interactions](release-scope.md#v1-interactions).
 Configurable spring duration and damping are deferred to v2.
 V1 follows the Reduce Motion and disable-animation behavior in [V1 interactions](release-scope.md#v1-interactions).
-The **Animate window movement** switch in Settings > General writes `[miri].animations`.
+The **Animate window movement** switch in Settings > Layout writes `[miri].animations`.
 When the switch is off or Reduce Motion is on, Miri removes `[options].animation_speed`, and the engine then moves windows instantly.
 The following option names, values, and behavior require validation in Miri before adoption.
 

@@ -1,7 +1,7 @@
 // Reads and presses Accessibility elements of one app, and lists its on-screen windows.
 // Usage:
 //   axdo <pid> dump                  every element of every window: role, then title | description | value | help
-//   axdo <pid> status                the text after the "Status" label in each window (Settings > General)
+//   axdo <pid> status                the Settings status text in each window (General or Gestures)
 //   axdo <pid> press <title>...      presses each button, tab, or radio button with that title, description, or help
 //                                    text, in order. When several match, it presses the first.
 //   axdo <pid> windows               the CoreGraphics window number, layer, bounds, and title of each window
@@ -51,15 +51,24 @@ case "dump":
     }
 case "status":
     for window in windows {
+        // Settings marks its status text with this identifier. Older builds put it after a "Status" label.
+        var marked: String?
         var texts: [String] = []
         walk(window) { element, _ in
+            if marked == nil, text(element, "AXIdentifier") == "miri.status" {
+                marked = attribute(element, kAXValueAttribute) as? String
+            }
             if text(element, kAXRoleAttribute) == kAXStaticTextRole as String,
                 let value = attribute(element, kAXValueAttribute) as? String
             {
                 texts.append(value)
             }
         }
-        if let index = texts.firstIndex(of: "Status"), index + 1 < texts.count { print(texts[index + 1]) }
+        if let marked {
+            print(marked)
+        } else if let index = texts.firstIndex(of: "Status"), index + 1 < texts.count {
+            print(texts[index + 1])
+        }
     }
 case "press":
     guard arguments.count >= 4 else { usage() }
