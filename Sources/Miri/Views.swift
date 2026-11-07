@@ -58,6 +58,7 @@ struct LiveText: View {
     }
 }
 
+/// The menu bar menu: what Miri is doing, the one action that changes it, and the ways into Settings.
 struct MenuContent: View {
     let model: AppModel
     let presenter: WindowPresenter
@@ -72,24 +73,34 @@ struct MenuContent: View {
         switch model.engineState {
         case .running, .restarting:
             Button("Stop Window Management") { model.stop() }
+            Text("Your windows stay where they are.")
             Button("Restart Engine") { model.restart() }
         case .failed:
             Button("Restart Engine") { model.restart() }
             Button("Show Logs in Finder") { model.showLogsInFinder() }
+        case .stopped where !model.startBlockers.isEmpty:
+            Button("Open Setup Checker…") { presenter.showSettings(.setup) }
+            Button("Stop Window Management") { model.stop() }
+            Text("Miri starts by itself when setup is done.")
         case .stopped:
-            if model.startBlockers.isEmpty {
-                Button("Start Window Management") { model.start() }
-            } else {
-                Button("Stop Window Management") { model.stop() }
-            }
+            Button("Start Window Management") { model.start() }
         }
         Divider()
         Button("Settings…") { presenter.show(.settings) }
             .keyboardShortcut(",")
+        if model.startBlockers.isEmpty {
+            Button(setupCheckerTitle) { presenter.showSettings(.setup) }
+        }
         Button("Copy Diagnostics…") { presenter.show(.diagnostics) }
         Divider()
         Button("Quit Miri") { NSApp.terminate(nil) }
             .keyboardShortcut("q")
+    }
+
+    /// Names how many setup checks found a problem, as the Setup badge in Settings does.
+    private var setupCheckerTitle: String {
+        let problems = model.setupChecks.filter { if case .problem = $0.status { true } else { false } }.count
+        return problems == 0 ? "Setup Checker…" : "Setup Checker… (\(problems) to review)"
     }
 }
 
