@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `chore/lifecycle-model-109-sync`, based on `main` at `1dfed270`
+Updated: 2026-11-08 on branch `docs/345-closed`, based on `main` at `2ec9aad4`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -383,7 +383,8 @@ A live run on Miri Developer built from `main` at f37f425b passed every acceptan
 [#243](https://github.com/samanyudas/miri/pull/243) makes `verify-miri end` and `renew` refuse a run that another thread owns, after one agent's `end` closed another agent's live run.
 On `main` at 1dfed270 the check exited 3, because the #109 rehaul moved the Start, Stop, and Restart buttons into files the model did not cover.
 [#345](https://github.com/samanyudas/miri/issues/345) models those buttons, covers their files, and adds a `make lint` test that fails when a file with a lifecycle control is not covered.
-Its PR awaits Sam's merge.
+[#346](https://github.com/samanyudas/miri/pull/346) merged as 2ec9aad4, and #345 is verified and closed on 8 November 2026.
+Nothing is in flight here.
 
 ## Scroll position after a restart
 
