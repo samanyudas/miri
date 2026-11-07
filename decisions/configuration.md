@@ -76,7 +76,10 @@ The engine defaults `[options].focus_follows_mouse` and `[options].mouse_follows
 A configuration without these keys therefore keeps pointer-driven focus and pointer movement off after a restart or an upgrade.
 `focus_follows_mouse = true` is a hidden key that turns pointer-driven focus back on.
 Settings does not show it, and Miri preserves it when Settings writes the file.
-The engine also accepts `mouse_follows_focus = true`, which restores its pointer movement after focus changes and display commands.
+The engine also accepts `mouse_follows_focus = true`, which moves the pointer onto a window when a Miri command focuses it.
+Such commands include focus shortcuts, Centre column, display focus, display moves, and virtual workspace switches.
+A click, Cmd-Tab, an app bringing its own window forward, focus-follows-mouse, a new or closed window, and engine startup leave the pointer in place.
+Sam chose this rule, niri's, on 7 November 2026 in [#339](https://github.com/samanyudas/miri/issues/339).
 Miri does not offer that key as a setting.
 
 Focus borders and pointer-following controls are deferred to v2.
