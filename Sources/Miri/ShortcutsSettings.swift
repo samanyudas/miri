@@ -28,13 +28,14 @@ struct ShortcutsSettings: View {
         SettingsPage(
             title: "Shortcuts",
             subtitle:
-                "Press + to record a new shortcut. Miri won't let two actions share a key, and warns about macOS clashes."
+                "Press + to add a shortcut. Miri blocks keys another action uses, and warns about macOS clashes."
         ) {
             ConfigurationIssueNotice(model: model)
             if let shortcuts = model.shortcuts {
                 HStack(spacing: 10) {
                     SearchField(text: $filter, prompt: "Search actions or shortcuts")
                     Button("Reset to Defaults…") { confirmingReset = true }
+                        .controlSize(.large)
                 }
                 if !model.keptDefaults.isEmpty {
                     SettingsSection("Updated default shortcuts") {
@@ -75,7 +76,7 @@ struct ShortcutsSettings: View {
                             ForEach(others, id: \.self) { other in
                                 HStack(spacing: 6) {
                                     Text(other.key)
-                                        .font(.system(size: 12, design: .monospaced))
+                                        .font(.mono)
                                         .foregroundStyle(Palette.primaryText)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                     ForEach(other.chords, id: \.self) { chord in
@@ -130,7 +131,7 @@ struct ShortcutsSettings: View {
                     .font(.rowTitle)
                     .foregroundStyle(Palette.primaryText)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(keptText(kept))
+                Text(keptText(kept, movable: owner != nil))
                     .font(.detail)
                     .foregroundStyle(Palette.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
@@ -233,10 +234,12 @@ struct ShortcutsSettings: View {
             + "\(pendingConflict.shortcut.name)."
     }
 
-    private func keptText(_ kept: KeptDefault) -> String {
-        guard !kept.kept.isEmpty else { return "\(kept.action.title) has no shortcut until you move it." }
+    /// Says what Miri kept and, when the button can move the new default, that moving it takes it from its owner.
+    private func keptText(_ kept: KeptDefault, movable: Bool) -> String {
+        let wanted = model.keyLayout.label(for: kept.wanted)
         let labels = kept.kept.map(model.keyLayout.label(for:)).formatted(.list(type: .and))
-        return "Miri kept \(labels)."
+        let keptSentence = kept.kept.isEmpty ? "\(kept.action.title) has no shortcut now." : "Miri kept \(labels)."
+        return movable ? "\(keptSentence) Using \(wanted) removes it from \(kept.owner)." : keptSentence
     }
 
     private func matches(_ action: ShortcutAction, _ shortcuts: Shortcuts) -> Bool {
@@ -335,11 +338,13 @@ struct ShortcutChip: View {
                         .symbolRenderingMode(.palette)
                         .foregroundStyle(Palette.group, Palette.secondaryText)
                         .font(.system(size: 13))
+                        .frame(width: 20, height: 20)
+                        .contentShape(.rect)
                 }
                 .buttonStyle(.borderless)
                 .focused($removeFocused)
                 .opacity(showsRemove || removeFocused ? 1 : 0)
-                .offset(x: 6, y: -6)
+                .offset(x: 9, y: -9)
                 .help("Remove \(label)")
                 .accessibilityLabel("Remove \(label) from \(action)")
             }
@@ -355,19 +360,23 @@ struct RecordingChip: View {
     var body: some View {
         HStack(spacing: 2) {
             Text(modifiers.isEmpty ? "Type Shortcut" : KeyLayout.label(for: modifiers))
-                .foregroundStyle(modifiers.isEmpty ? .secondary : .primary)
+                .font(.detail.weight(.medium))
+                .foregroundStyle(modifiers.isEmpty ? Palette.secondaryText : Palette.primaryText)
                 .lineLimit(1)
             Button(action: cancel) {
                 Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Palette.secondaryText)
+                    .frame(width: 20, height: 20)
+                    .contentShape(.rect)
             }
             .buttonStyle(.borderless)
             .help("Cancel recording")
             .accessibilityLabel("Cancel Recording")
         }
         .padding(.leading, 7)
-        .padding(.trailing, 4)
-        .frame(height: 22)
+        .padding(.trailing, 2)
+        .frame(minWidth: 52, minHeight: 22)
+        .background(Palette.chip, in: .rect(cornerRadius: 5))
         .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Palette.accent, lineWidth: 1.5))
         .fixedSize()
     }

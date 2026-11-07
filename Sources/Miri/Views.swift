@@ -8,10 +8,10 @@ extension AppModel {
         switch engineState {
         case .running: "Managing windows"
         case .restarting: "Restarting the engine…"
-        case .failed: "Stopped after repeated engine failures"
+        case .failed: "Stopped after engine failures"
         case .stopped:
             if let blocker = startBlockers.first {
-                "Waiting: \(blocker.title)"
+                "Waiting for setup: \(blocker.title)"
             } else {
                 "Stopped"
             }
@@ -72,9 +72,9 @@ struct MenuContent: View {
         Divider()
         switch model.engineState {
         case .running, .restarting:
+            Button("Restart Engine") { model.restart() }
             Button("Stop Window Management") { model.stop() }
             Text("Your windows stay where they are.")
-            Button("Restart Engine") { model.restart() }
         case .failed:
             Button("Restart Engine") { model.restart() }
             Button("Show Logs in Finder") { model.showLogsInFinder() }
@@ -107,6 +107,9 @@ struct MenuContent: View {
 extension SetupCheck {
     /// A gesture check only looks for conflicts. Only a gesture test turns the swipe on, so it never says Passed.
     var isGestureCheck: Bool { id == .fourFingerGesture || id == .threeFingerGesture }
+
+    /// Whether the check found something the user should look at.
+    var needsAttention: Bool { status != .passed }
 }
 
 /// Previews the redacted report before anything reaches the clipboard.
@@ -129,7 +132,7 @@ struct DiagnosticsView: View {
             }
             ScrollView {
                 Text(report)
-                    .font(.system(size: 12, design: .monospaced))
+                    .font(.mono)
                     .foregroundStyle(Palette.primaryText)
                     .lineSpacing(2)
                     .textSelection(.enabled)
@@ -150,14 +153,19 @@ struct DiagnosticsView: View {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(report, forType: .string)
                     copied = true
+                    AccessibilityNotification.Announcement("Copied to the clipboard").post()
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Palette.accentFill)
                 .keyboardShortcut(.defaultAction)
             }
         }
-        .padding(24)
-        .frame(width: 640, height: 520)
+        .padding(.horizontal, 24)
+        .padding(.top, 44)
+        .padding(.bottom, 20)
+        // The window presenter sets the size, and the content runs under the title bar.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea()
         .background(Palette.content)
         .onAppear(perform: refresh)
     }

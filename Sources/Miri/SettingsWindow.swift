@@ -109,7 +109,7 @@ struct SettingsSidebar: View {
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
                 Text("Miri")
-                    .font(.system(size: 15, weight: .bold))
+                    .font(.sidebarName)
                     .tracking(-0.15)
                     .foregroundStyle(Palette.primaryText)
                 HStack(spacing: 5) {
@@ -228,10 +228,10 @@ extension AppModel {
         case .running:
             let count = NSScreen.screens.count
             return "Running · \(count) \(count == 1 ? "display" : "displays")"
-        case .restarting(let crashes): return "Restarting · crash \(crashes)"
-        case .failed: return "Stopped after failures"
+        case .restarting: return "Restarting the engine"
+        case .failed: return "Stopped after engine failures"
         case .stopped:
-            if !startBlockers.isEmpty { return "Setup required" }
+            if !startBlockers.isEmpty { return "Waiting for setup" }
             return stoppedByUser ? "Stopped by you" : "Stopped"
         }
     }

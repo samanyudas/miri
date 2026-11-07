@@ -48,7 +48,8 @@ final class WindowPresenter {
             switch kind {
             case .settings: NSSize(width: 880, height: 640)
             case .initialSetup: NSSize(width: 600, height: 580)
-            case .diagnostics, .permissionExperiment: nil
+            case .diagnostics: NSSize(width: 640, height: 540)
+            case .permissionExperiment: nil
             }
         if designSize != nil { host.sizingOptions = [] }
         let window = NSWindow(contentViewController: host)
@@ -56,16 +57,26 @@ final class WindowPresenter {
         window.styleMask = [.titled, .closable, .miniaturizable]
         window.isReleasedWhenClosed = false
         window.setFrameAutosaveName("Miri.\(kind)")
-        if !window.setFrameUsingName("Miri.\(kind)") { window.center() }
+        let restored = window.setFrameUsingName("Miri.\(kind)")
+        if !restored { window.center() }
         if let designSize {
             // The content runs under the title bar, so the window buttons sit on it, as in the design.
             window.styleMask.insert(.fullSizeContentView)
             window.titlebarAppearsTransparent = true
             window.titleVisibility = .hidden
             // The content covers the whole frame, so the frame is the design's size. Keep the saved top-left corner.
+            var size = designSize
+            if kind == .settings {
+                // Settings grows taller for long pages such as Shortcuts, and keeps the design's width.
+                window.styleMask.insert(.resizable)
+                window.contentMinSize = NSSize(width: designSize.width, height: 560)
+                window.contentMaxSize = NSSize(width: designSize.width, height: .greatestFiniteMagnitude)
+                // It opens at least as tall as the design, and keeps a taller height the user chose.
+                if restored { size.height = max(window.frame.height, designSize.height) }
+            }
             var frame = window.frame
-            frame.origin.y += frame.height - designSize.height
-            frame.size = designSize
+            frame.origin.y += frame.height - size.height
+            frame.size = size
             window.setFrame(frame, display: false)
         }
         if kind == .initialSetup {

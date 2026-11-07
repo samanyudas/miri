@@ -11,17 +11,17 @@ enum Palette {
     static let accentFill = dynamic(0x4B65E8, 0x465DCC)
 
     static let primaryText = dynamic(0x1D1D1F, 0xF2F2F5)
-    static let secondaryText = dynamic(0x6E6E73, 0xA1A1A8)
-    static let tertiaryText = dynamic(0x6E6E73, 0x8E8E96)
+    static let secondaryText = dynamic(0x6E6E73, 0xA1A1A8, contrast: (0x48484D, 0xC7C7CE))
+    static let tertiaryText = dynamic(0x6E6E73, 0x8E8E96, contrast: (0x48484D, 0xB4B4BC))
 
     static let sidebar = dynamic(0xF4F4F6, 0x252528)
-    static let sidebarBorder = dynamic(0xE3E3E7, 0x38383B)
+    static let sidebarBorder = dynamic(0xE3E3E7, 0x38383B, contrast: (0xA8A8AF, 0x6A6A70))
     static let content = dynamic(0xFFFFFF, 0x1E1E20)
     static let group = dynamic(0xFFFFFF, 0x2A2A2D)
-    static let groupRing = dynamic(0xE5E5EA, 0x3A3A3E)
-    static let divider = dynamic(0xEFEFF2, 0x353538)
+    static let groupRing = dynamic(0xE5E5EA, 0x3A3A3E, contrast: (0xA8A8AF, 0x6A6A70))
+    static let divider = dynamic(0xEFEFF2, 0x353538, contrast: (0xC4C4CA, 0x58585E))
     static let chip = dynamic(0xF2F2F5, 0x3A3A3D)
-    static let track = dynamic(0xEEEEF1, 0x3A3A3D)
+    static let track = dynamic(0xEEEEF1, 0x3A3A3D, contrast: (0xDADADF, 0x4A4A4E))
     static let segment = dynamic(0xFFFFFF, 0x636366)
     static let iconTile = dynamic(0x8E8E93, 0x5A5A5F)
 
@@ -30,6 +30,8 @@ enum Palette {
     static let heroTileBorder = dynamic(0xE3E8F4, 0x47507A)
 
     static let green = dynamic(0x1F9D55, 0x32C46E)
+    /// Green text, such as the On label. Darker than `green` in light mode so small text reaches 4.5:1.
+    static let greenText = dynamic(0x16763F, 0x32C46E)
     static let orange = dynamic(0xC2410C, 0xF0743A)
     static let red = dynamic(0xD92D20, 0xFF6B60)
     static let gray = dynamic(0x8E8E93, 0x8E8E96)
@@ -48,13 +50,27 @@ enum Palette {
     static let logBackground = dynamic(0x1D1D1F, 0x141416)
     static let logText = dynamic(0xE5E5EA, 0xD5D5DA)
 
+    /// A color with a light and a dark value, and stronger values for Increase Contrast when `contrast` is given.
     private static func dynamic(
-        _ light: UInt32, _ dark: UInt32, lightAlpha: Double = 1, darkAlpha: Double = 1
+        _ light: UInt32, _ dark: UInt32, lightAlpha: Double = 1, darkAlpha: Double = 1,
+        contrast: (light: UInt32, dark: UInt32)? = nil
     ) -> Color {
         Color(
             nsColor: NSColor(name: nil) { appearance in
-                let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
-                return NSColor(rgb: isDark ? dark : light, alpha: isDark ? darkAlpha : lightAlpha)
+                let match = appearance.bestMatch(from: [
+                    .aqua, .darkAqua, .accessibilityHighContrastAqua, .accessibilityHighContrastDarkAqua,
+                ])
+                let isDark = match == .darkAqua || match == .accessibilityHighContrastDarkAqua
+                let isHighContrast =
+                    match == .accessibilityHighContrastAqua || match == .accessibilityHighContrastDarkAqua
+                let value =
+                    switch (isDark, isHighContrast ? contrast : nil) {
+                    case (false, let contrast?): contrast.light
+                    case (true, let contrast?): contrast.dark
+                    case (false, nil): light
+                    case (true, nil): dark
+                    }
+                return NSColor(rgb: value, alpha: isDark ? darkAlpha : lightAlpha)
             })
     }
 }
@@ -79,6 +95,12 @@ extension Font {
     static let detail = Font.system(size: 12)
     /// Small labels, such as section labels and the version line.
     static let small = Font.system(size: 11)
+    /// The app name in the Settings sidebar.
+    static let sidebarName = Font.system(size: 15, weight: .bold)
+    /// File paths, engine binding names, and reports.
+    static let mono = Font.system(size: 12, design: .monospaced)
+    /// The engine log.
+    static let monoSmall = Font.system(size: 11, design: .monospaced)
 }
 
 /// A scrolling Settings page: a title, a short description, and its sections.
@@ -101,7 +123,7 @@ struct SettingsPage<Trailing: View, Content: View>: View {
                             .font(.rowTitle)
                             .foregroundStyle(Palette.secondaryText)
                             .fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: 420, alignment: .leading)
+                            .frame(maxWidth: 520, alignment: .leading)
                     }
                     Spacer(minLength: 0)
                     trailing
@@ -199,7 +221,7 @@ struct SettingsRow<Control: View>: View {
         HStack(alignment: .center, spacing: 16) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(monospacedTitle ? .system(size: 12, design: .monospaced) : .rowTitle)
+                    .font(monospacedTitle ? .mono : .rowTitle)
                     .foregroundStyle(Palette.primaryText)
                 if let detail {
                     LiveText(detail)
@@ -424,6 +446,8 @@ struct SegmentedChoice<Value: Hashable>: View {
     @Binding var selection: Value
     let options: [(title: String, value: Value)]
     @FocusState private var focused: Bool
+    /// Whether the focus came from the keyboard. A window that opens with the focus here shows no ring.
+    @State private var showsFocusRing = false
 
     var body: some View {
         HStack(spacing: 2) {
@@ -459,13 +483,17 @@ struct SegmentedChoice<Value: Hashable>: View {
             RoundedRectangle(cornerRadius: 10)
                 .strokeBorder(Palette.accent.opacity(0.6), lineWidth: 2.5)
                 .padding(-3)
-                .opacity(focused ? 1 : 0)
+                .opacity(focused && showsFocusRing ? 1 : 0)
         }
         .fixedSize()
         .focusable()
         .focused($focused)
         .focusEffectDisabled()
-        .onMoveCommand(perform: move)
+        .onChange(of: focused) { showsFocusRing = focused && NSApp.currentEvent?.type == .keyDown }
+        .onMoveCommand { direction in
+            showsFocusRing = true
+            move(direction)
+        }
         .accessibilityRepresentation {
             Picker(label, selection: $selection) {
                 ForEach(options.indices, id: \.self) { index in

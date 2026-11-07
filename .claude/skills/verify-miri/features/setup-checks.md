@@ -20,7 +20,7 @@ A check that blocks start keeps the engine stopped, and Miri starts it once the 
 
 - Settings > Setup.
 - The Set Up Miri window on first launch, which shows the status, the checks that block start, and the strip swipe choice.
-- The General page status, which reads `Waiting: <title of the first blocking check>` while Miri waits for setup.
+- The General page status, which reads `Waiting for setup: <title of the first blocking check>` while Miri waits for setup.
 
 ## Driving it with verify-miri
 
@@ -31,7 +31,7 @@ Preconditions:
 
 - **Clean state.** Run `V ax test press Setup`, then `V ax test dump | rg -A2 "Other window managers"`. It shows `Passed`.
 - **Add a blocker.** Run `V standin yabai`, then `V ax test press "Check Again"`. The dump shows `Quit yabai before starting Miri. Miri leaves yabai's configuration untouched.` and `Blocks start`.
-- **Blocked start.** Run `V ax test press General`, then press `Stop Window Management` and `Start Window Management`. `V ax test status` prints `Waiting: Other window managers`, the General page shows `Open Setup` and `Cancel Automatic Start` instead of Start, and `V doctor` shows no engine.
+- **Blocked start.** Run `V ax test press General`, then press `Stop Window Management` and `Start Window Management`. `V ax test status` prints `Waiting for setup: Other window managers`, the General page shows `Open Setup` and `Cancel Automatic Start` instead of Start, and `V doctor` shows no engine.
 - **Auto-start.** Stop the stand-in by its process ID, which `log.txt` records. Within 4 s a new engine runs, and the status reads `Managing windows`.
 
 ## Gotchas

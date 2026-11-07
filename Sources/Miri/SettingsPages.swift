@@ -51,7 +51,7 @@ struct GeneralSettings: View {
             SettingsSection("Configuration file") {
                 SettingsRow(
                     title: (model.paths.configuration.path as NSString).abbreviatingWithTildeInPath,
-                    detail: "Changes here apply right away. Standalone Paneru settings are left alone.",
+                    detail: "Changes here apply right away. Settings from other tools are not touched.",
                     monospacedTitle: true
                 ) {
                     Button("Show in Finder") {
@@ -76,7 +76,7 @@ struct GeneralSettings: View {
                 tint: Palette.warningTint, faded: true)
         case .failed(let reason):
             Banner(
-                kind: .error, title: "Window management stopped after engine failures", detail: reason,
+                kind: .error, title: model.statusText, detail: reason,
                 accessibilityValue: model.statusText
             ) {
                 Button("Show Logs in Finder") { model.showLogsInFinder() }
@@ -86,7 +86,7 @@ struct GeneralSettings: View {
             }
         case .stopped where !model.startBlockers.isEmpty:
             Banner(
-                kind: .warning, title: "Window management has not started",
+                kind: .warning, title: "Waiting for setup",
                 detail: "Miri starts by itself when the required checks in Setup pass.",
                 accessibilityValue: model.statusText
             ) {
@@ -205,7 +205,7 @@ struct LayoutSettings: View {
     var body: some View {
         SettingsPage(
             title: "Layout",
-            subtitle: "How columns sit on the strip. Changes apply to your windows as soon as you make them."
+            subtitle: "How columns sit on the strip. Changes apply right away."
         ) {
             ConfigurationIssueNotice(model: model)
             SettingsSection("Gaps") {
@@ -396,17 +396,19 @@ struct SetupSettings: View {
         SettingsPage(
             title: "Setup",
             subtitle:
-                "Miri checks your Mac for anything that would stop it from managing windows. It never changes macOS settings for you."
+                "Miri checks your Mac for anything that blocks window management. Open buttons show the System Settings page to change. Miri never changes it for you."
         ) {
             Button("Check Again", systemImage: "arrow.clockwise") { model.refreshSetup() }
         } content: {
             if !model.startBlockers.isEmpty {
                 Banner(
-                    kind: .warning, title: "Window management has not started",
+                    kind: .warning, title: "Waiting for setup",
                     detail: "Miri starts by itself when the required checks pass.")
             }
             let required = model.setupChecks.filter(\.blocksStart)
-            let recommended = model.setupChecks.filter { !$0.blocksStart }
+            // Problems first, so the rows that need attention are not hidden between passing ones.
+            let others = model.setupChecks.filter { !$0.blocksStart }
+            let recommended = others.filter(\.needsAttention) + others.filter { !$0.needsAttention }
             if !required.isEmpty {
                 SettingsSection("Required to start") {
                     ForEach(required) { check in SetupCheckItem(check: check) { page = .gestures } }
@@ -417,9 +419,6 @@ struct SetupSettings: View {
                     ForEach(recommended) { check in SetupCheckItem(check: check) { page = .gestures } }
                 }
             }
-            Text("Open buttons show the System Settings page to change. Miri never changes it for you.")
-                .font(.detail)
-                .foregroundStyle(Palette.secondaryText)
         }
         .onAppear { model.refreshSetup() }
     }
@@ -533,10 +532,10 @@ struct DiagnosticsSettings: View {
     var body: some View {
         SettingsPage(
             title: "Diagnostics",
-            subtitle: "Engine health and local logs. Nothing leaves your Mac unless you copy it yourself."
+            subtitle: "Engine health and local logs. Nothing leaves your Mac unless you copy it."
         ) {
             if case .failed(let reason) = model.engineState {
-                Banner(kind: .error, title: "Window management stopped after engine failures", detail: reason) {
+                Banner(kind: .error, title: model.statusText, detail: reason) {
                     Button("Restart Engine") { model.restart() }
                         .buttonStyle(.borderedProminent)
                         .tint(Palette.accentFill)
@@ -552,7 +551,7 @@ struct DiagnosticsSettings: View {
                 }
                 ScrollView {
                     Text(logTail.isEmpty ? "The log is empty." : logTail.joined(separator: "\n"))
-                        .font(.system(size: 11, design: .monospaced))
+                        .font(.monoSmall)
                         .foregroundStyle(Palette.logText)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
@@ -589,8 +588,13 @@ struct DiagnosticsSettings: View {
                 }
             }
         }
-        .onAppear(perform: readLog)
-        .onChange(of: model.engineState) { readLog() }
+        // The log keeps growing while the engine runs, so the page reads it again every second while it shows.
+        .task {
+            while !Task.isCancelled {
+                readLog()
+                try? await Task.sleep(for: .seconds(1))
+            }
+        }
     }
 
     private var engineFacts: some View {
@@ -627,17 +631,16 @@ struct DiagnosticsSettings: View {
     private var engineWord: String {
         switch model.engineState {
         case .running: "Running"
-        case .restarting: "Restarting"
+        case .restarting(let crashes): "Restarting (crash \(crashes))"
         case .failed: "Failed"
-        case .stopped: model.startBlockers.isEmpty ? "Stopped" : "Waiting"
+        case .stopped: model.startBlockers.isEmpty ? "Stopped" : "Waiting for setup"
         }
     }
 
     private var processText: String {
         switch model.engineState {
         case .running(let pid): "pid \(pid)"
-        case .restarting(let crashes): "crash \(crashes)"
-        case .failed, .stopped: "None"
+        case .restarting, .failed, .stopped: "None"
         }
     }
 

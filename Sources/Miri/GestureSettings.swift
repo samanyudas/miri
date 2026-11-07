@@ -12,7 +12,7 @@ struct GestureSettings: View {
         SettingsPage(
             title: "Gestures",
             subtitle:
-                "Swipe across the trackpad to scroll the strip. Miri turns the swipe on only after you test it and confirm that the strip followed your fingers."
+                "Swipe on the trackpad to scroll the strip. The swipe turns on after you test it and confirm that the strip followed your fingers."
         ) {
             ConfigurationIssueNotice(model: model)
             hero
@@ -70,10 +70,15 @@ struct GestureSettings: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             VStack(alignment: .trailing, spacing: 8) {
-                Button("Test Gesture…") { testing = true }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Palette.accentFill)
-                    .disabled(model.gestureTestBlocker != nil)
+                // A disabled test is an ordinary button, so it does not look like the next step.
+                if model.gestureTestBlocker == nil {
+                    Button("Test Gesture…") { testing = true }
+                        .buttonStyle(.borderedProminent)
+                        .tint(Palette.accentFill)
+                } else {
+                    Button("Test Gesture…") {}
+                        .disabled(true)
+                }
                 if model.gestureVerification != nil {
                     Button("Report a macOS Gesture Change") { confirmingReport = true }
                 }
@@ -91,7 +96,7 @@ struct GestureSettings: View {
     private var eyebrow: (text: String, color: Color) {
         switch model.gestureState {
         case .off: ("Off", Palette.secondaryText)
-        case .enabled: ("On", Palette.green)
+        case .enabled: ("On", Palette.greenText)
         case .needsTest: ("Needs a test", Palette.accentText)
         case .conflict: ("Blocked by macOS", Palette.orange)
         }
@@ -119,7 +124,7 @@ struct GestureSettings: View {
                 model.gestureTestBlocker,
             ].compactMap(\.self).joined(separator: " ")
         case .conflict:
-            "Turn off the macOS swipe below, then test again."
+            "Resolve the macOS conflict below, then test again."
         }
     }
 
@@ -248,6 +253,8 @@ struct GestureTestSheet: View {
         .background(Palette.content)
         .onAppear { test.start() }
         .onDisappear { test.cancel() }
+        // VoiceOver users hear each step, because the focus stays on the buttons while the text changes.
+        .onChange(of: test.phase) { AccessibilityNotification.Announcement(announcement).post() }
         // Closing Settings hides its window without removing this view, so onDisappear alone can miss it.
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { _ in test.cancel() }
     }
@@ -294,6 +301,15 @@ struct GestureTestSheet: View {
         .background(Palette.heroTint, in: .rect(cornerRadius: 10))
     }
 
+    private var announcement: String {
+        switch test.phase {
+        case .idle, .watching(movementSeen: false): title
+        case .watching(movementSeen: true): "The strip moved. Keep swiping left and right."
+        case .passedAwaitingConfirmation: "The strip moved both ways. Did it follow your fingers?"
+        case .failed, .inconclusive: "\(title) \(detail)"
+        }
+    }
+
     private var checkmark: some View {
         Image(systemName: "checkmark")
             .font(.system(size: 9, weight: .heavy))
@@ -309,8 +325,8 @@ struct GestureTestSheet: View {
             Button("Cancel", role: .cancel) { dismiss() }
         case .passedAwaitingConfirmation:
             Button("Cancel", role: .cancel) { dismiss() }
-            Button("It Did Not Work") { test.deny() }
-            Button("The Strip Followed My Fingers") {
+            Button("No, It Did Not") { test.deny() }
+            Button("Yes, It Followed") {
                 test.confirm()
                 dismiss()
             }

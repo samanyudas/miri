@@ -26,7 +26,7 @@ Live runs on 7 November 2026 showed every page in light and dark mode, the runni
 Not yet seen live: Launch at login, and a confirmed gesture test, which needs Sam's trackpad.
 Branch `feat/109-menu-bar-rehaul`, stacked on it, restyles the menu bar menu and the gesture test sheet.
 The menu keeps Restart Engine, Copy Diagnostics, and the failed and restarting menus. Setup Checker opens Settings on Setup.
-The gesture test sheet keeps the app's wording, "The Strip Followed My Fingers" and "It Did Not Work", because Sam has not picked one.
+The gesture test sheet answers its question with "Yes, It Followed" and "No, It Did Not", a UI council change that Sam can revert.
 A live run on 7 November 2026 checked the running, waiting, and failed menus, both Setup entries, and the sheet while it waits and while it asks for confirmation.
 The Set Up Miri window keeps its old look until a later PR.
 

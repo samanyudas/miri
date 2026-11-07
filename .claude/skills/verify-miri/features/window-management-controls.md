@@ -10,8 +10,8 @@ The status line says what the engine does, and Miri remembers a Stop across laun
 - `restart`: `Restart Engine` replaces the engine process.
 - `stop-shortcut`: ⌃⌥Q stops window management from any app. After a Stop, the shortcut does nothing until Start.
 - `saved-stop`: after a Stop, the next launch leaves windows unmanaged until Start.
-- `crash-limit`: after 3 engine crashes within five minutes, the status reads `Stopped after repeated engine failures`, with the reason `The engine stopped unexpectedly 3 times within five minutes. Miri stopped restarting it.`
-- `waiting`: while a setup check blocks start, the status reads `Waiting: <check title>`, and `Cancel Automatic Start` shows where Start would be. It stops Miri as `Stop Window Management` does. [Setup checks](setup-checks.md) drives it.
+- `crash-limit`: after 3 engine crashes within five minutes, the status reads `Stopped after engine failures`, with the reason `The engine stopped unexpectedly 3 times within five minutes. Miri stopped restarting it.`
+- `waiting`: while a setup check blocks start, the status reads `Waiting for setup: <check title>`, and `Cancel Automatic Start` shows where Start would be. It stops Miri as `Stop Window Management` does. [Setup checks](setup-checks.md) drives it.
 
 ## How to get to it (user POV)
 
@@ -36,7 +36,7 @@ Preconditions:
 - **Start.** Run `V ax test press "Start Window Management"`. The status returns to `Managing windows`, the watch log shows a new engine, and `managementStopped` prints `0`.
 - **Stop.** Run `V ax test press "Stop Window Management"`. Within 4 s, `V ax test status` prints `Stopped`, and `managementStopped` prints `1`.
 - **Saved Stop.** While stopped, run `V relaunch`. It logs `relaunched test build pid <n> with no engine`, and `V doctor` shows no engine. Run `V settings`, press `General`, and check that the status reads `Stopped`. Then press `Start Window Management`.
-- **Crash limit.** Kill only the test engine three times, about 3 s apart, with `kill -9 <engine pid>`. Take each process ID from `V doctor`, or from `ps -axo pid=,comm=` where the executable is `<test bundle>/Contents/Helpers/miri-engine`. The status reads `Stopped after repeated engine failures`, the General banner shows the reason with `Restart Engine` and `Show Logs in Finder`, and the sidebar button reads `Restart Miri`.
+- **Crash limit.** Kill only the test engine three times, about 3 s apart, with `kill -9 <engine pid>`. Take each process ID from `V doctor`, or from `ps -axo pid=,comm=` where the executable is `<test bundle>/Contents/Helpers/miri-engine`. The status reads `Stopped after engine failures`, the General banner shows the reason with `Restart Engine` and `Show Logs in Finder`, and the sidebar button reads `Restart Miri`.
 - **Show logs.** In the failed state, press `Show Logs in Finder` in Settings > General or the menu. Finder becomes the frontmost app, with a `Logs` window and `engine.log` selected. Close that Finder window afterwards.
 - **Recover.** Press `Restart Engine`. The status reads `Managing windows`.
 
@@ -47,7 +47,7 @@ Preconditions:
 - Never find the engine by matching a whole command line. A shell whose command holds the engine path matches too, and a `kill` then stops that shell.
 - Quit the test build with `kill -TERM <test pid>` for a timed quit. `osascript quit` arrived 3.8 s late in the #234-#236 run.
 - [#234](https://github.com/samanyudas/miri/issues/234), [#235](https://github.com/samanyudas/miri/issues/235), and [#236](https://github.com/samanyudas/miri/issues/236) closed on 2026-11-01.
-  Stop right after Restart now keeps Miri stopped, Restart clears a saved Stop, and Restart while a setup check blocks start shows `Waiting: <check title>`.
+  Stop right after Restart now keeps Miri stopped, Restart clears a saved Stop, and Restart while a setup check blocks start shows `Waiting for setup: <check title>`.
   Report any of the old results as a regression.
 - Every engine restart re-applies the window session and can move Sam's windows. Keep these rounds short.
 - The guard blocks `defaults write`. Clear a saved Stop with `Start Window Management` before `V end`. Never end a run while stopped: the previous build reads the same saved Stop and starts no engine, so Sam's windows stay unmanaged.

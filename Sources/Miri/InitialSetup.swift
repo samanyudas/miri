@@ -45,7 +45,7 @@ struct InitialSetupView: View {
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 6) {
                 Text("Welcome to Miri")
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.pageTitle)
                     .foregroundStyle(Palette.primaryText)
                     .accessibilityAddTraits(.isHeader)
                 Text("Miri lines up the windows on each display side by side in a strip that you scroll.")
@@ -70,14 +70,20 @@ struct InitialSetupView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if model.engineState == .stopped, model.startBlockers.isEmpty {
+            if canStart {
+                // Starting is the next step here, so it is the prominent button and Return presses it.
                 Button("Start Window Management") { model.start() }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Palette.accentFill)
+                    .keyboardShortcut(.defaultAction)
             }
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .frame(minHeight: 50)
     }
+
+    private var canStart: Bool { model.engineState == .stopped && model.startBlockers.isEmpty }
 
     private var statusDetail: String {
         switch model.engineState {
@@ -106,19 +112,25 @@ struct InitialSetupView: View {
                         .disabled(model.gestureTestBlocker != nil)
                 }
                 if case .conflict(let message) = model.gestureState {
-                    NoticeRow(kind: .warning, text: message)
-                } else if let blocker = model.gestureTestBlocker {
-                    NoticeRow(kind: .warning, text: blocker)
+                    NoticeRow(kind: .warning, text: message) {
+                        if let url = model.settings.stripGesture.fingers.flatMap(model.gestureCheck)?.settingsURL {
+                            Button("Open Trackpad Settings") { NSWorkspace.shared.open(url) }
+                        }
+                    }
                 }
             }
         }
     }
 
+    /// The swipe's state, and why the test is not available yet. Only a macOS conflict gets a warning.
     private var testDetail: String {
         switch model.gestureState {
         case .off: "Off."
         case .enabled(let date): "On. You confirmed it on \(date.formatted(date: .abbreviated, time: .omitted))."
-        case .needsTest: "The swipe stays off until you test it."
+        case .needsTest:
+            model.engineState.isRunning
+                ? "The swipe stays off until you test it."
+                : "Start window management first, then test the swipe. It stays off until you do."
         case .conflict: "Off, because macOS uses this swipe."
         }
     }
@@ -129,10 +141,14 @@ struct InitialSetupView: View {
                 .font(.detail)
                 .foregroundStyle(Palette.secondaryText)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            Button("Done") { presenter?.close(.initialSetup) }
-                .buttonStyle(.borderedProminent)
-                .tint(Palette.accentFill)
-                .keyboardShortcut(.defaultAction)
+            if canStart {
+                Button("Done") { presenter?.close(.initialSetup) }
+            } else {
+                Button("Done") { presenter?.close(.initialSetup) }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Palette.accentFill)
+                    .keyboardShortcut(.defaultAction)
+            }
         }
         .padding(.horizontal, 40)
         .padding(.vertical, 16)
