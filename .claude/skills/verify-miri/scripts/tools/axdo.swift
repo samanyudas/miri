@@ -2,7 +2,7 @@
 // Usage:
 //   axdo <pid> dump                  every element of every window: role, then title | description | value | help
 //   axdo <pid> status                the Settings status text in each window (General or Gestures)
-//   axdo <pid> press <title>...      presses each button, tab, or radio button with that title, description, or help
+//   axdo <pid> press <title>...      presses each button, tab, radio button, or switch with that title, description, or help
 //                                    text, in order. When several match, it presses the first.
 //   axdo <pid> windows               the CoreGraphics window number, layer, bounds, and title of each window
 //   axdo frontmost                   the process ID of the frontmost app
@@ -36,7 +36,9 @@ guard arguments.count >= 3, let pid = Int32(arguments[1]) else { usage() }
 let app = AXUIElementCreateApplication(pid)
 AXUIElementSetMessagingTimeout(app, 2)
 let windows = (attribute(app, kAXWindowsAttribute) as? [AXUIElement]) ?? []
-let pressableRoles: Set<String> = [kAXButtonRole as String, kAXRadioButtonRole as String, "AXTab"]
+let pressableRoles: Set<String> = [
+    kAXButtonRole as String, kAXRadioButtonRole as String, kAXCheckBoxRole as String, "AXTab",
+]
 
 switch arguments[2] {
 case "dump":

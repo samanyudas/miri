@@ -63,10 +63,15 @@ struct GeneralSettings: View {
     }
 
     private var subtitle: String {
-        if case .stopped = model.engineState, model.startBlockers.isEmpty {
-            "Closing this window keeps Miri open. Window management stays paused until you start it."
-        } else {
+        switch model.engineState {
+        case .running, .restarting:
             "Closing this window keeps Miri managing your windows. Use Stop to pause, or Quit from the menu bar."
+        case .failed:
+            "Window management stopped because the engine kept failing. Your windows stay where they are."
+        case .stopped where !model.startBlockers.isEmpty:
+            "Miri waits for setup before it manages windows. Closing this window keeps it waiting."
+        case .stopped:
+            "Closing this window keeps Miri open. Window management stays paused until you start it."
         }
     }
 
@@ -156,14 +161,16 @@ private struct StatusHero: View {
     }
 }
 
-/// A decorative sketch of two strips of columns, one column picked out in the accent color.
+/// A decorative sketch of one strip per display, up to two, with one column picked out in the accent color.
 private struct StripPicture: View {
     let faded: Bool
 
     var body: some View {
         VStack(spacing: 6) {
             display(widths: [28, 62, 44, 44, 40], stacked: 2, highlighted: 1, height: 52)
-            display(widths: [94, 60, 50], stacked: nil, highlighted: nil, height: 40)
+            if NSScreen.screens.count > 1 {
+                display(widths: [94, 60, 50], stacked: nil, highlighted: nil, height: 40)
+            }
         }
         .frame(width: 200)
         .accessibilityHidden(true)
