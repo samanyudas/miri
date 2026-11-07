@@ -24,63 +24,64 @@ struct ShortcutsSettings: View {
     @State private var confirmingReset = false
 
     var body: some View {
-        Form {
-            ConfigurationIssueBanner(model: model)
-            if !model.keptDefaults.isEmpty {
-                Section {
-                    ForEach(model.keptDefaults, id: \.self) { kept in
-                        Label {
-                            Text(notice(for: kept))
-                                .fixedSize(horizontal: false, vertical: true)
-                        } icon: {
-                            Image(systemName: "info.circle.fill").foregroundStyle(.blue)
+        SettingsPage(
+            title: "Shortcuts",
+            subtitle:
+                "Press + to record a new shortcut. Miri won't let two actions share a key, and warns about macOS clashes."
+        ) {
+            ConfigurationIssueNotice(model: model)
+            if let shortcuts = model.shortcuts {
+                HStack(spacing: 10) {
+                    TextField("Filter", text: $filter, prompt: Text("Search actions or shortcuts"))
+                        .labelsHidden()
+                        .textFieldStyle(.roundedBorder)
+                    Button("Reset to Defaults…") { confirmingReset = true }
+                }
+                if !model.keptDefaults.isEmpty {
+                    SettingsSection("Updated default shortcuts") {
+                        ForEach(model.keptDefaults, id: \.self) { kept in keptDefaultRow(kept) }
+                    }
+                }
+                VStack(alignment: .leading, spacing: 8) {
+                    SectionLabel("Actions")
+                    SettingsGroup {
+                        ForEach(ShortcutAction.editable.filter { matches($0, shortcuts) }, id: \.self) { action in
+                            row(action, chords: shortcuts.chords(for: action))
                         }
                     }
-                } header: {
-                    Text("Updated Default Shortcuts")
-                }
-            }
-            if let shortcuts = model.shortcuts {
-                Section {
-                    TextField("Filter", text: $filter, prompt: Text("Filter shortcuts"))
-                        .labelsHidden()
-                }
-                Section {
-                    ForEach(ShortcutAction.editable.filter { matches($0, shortcuts) }, id: \.self) { action in
-                        row(action, chords: shortcuts.chords(for: action))
-                    }
-                } footer: {
-                    HStack(alignment: .firstTextBaseline) {
-                        Text(
-                            "Press Escape to cancel recording. Stop window manager works even while the engine is stopped."
-                        )
-                        .foregroundStyle(.secondary)
-                        Spacer()
-                        Button("Reset to Defaults…") { confirmingReset = true }
-                    }
+                    Text(
+                        "Press Escape to cancel recording. Stop window manager works even while the engine is stopped."
+                    )
+                    .font(.system(size: 12))
+                    .foregroundStyle(Palette.secondaryText)
+                    .padding(.horizontal, 2)
                 }
                 let others = shortcuts.others.filter { matches($0) }
                 if !others.isEmpty {
-                    Section {
-                        ForEach(others, id: \.self) { other in
-                            HStack(spacing: 6) {
-                                Text(other.key).font(.body.monospaced())
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                ForEach(other.chords, id: \.self) { chord in
-                                    ShortcutChip(label: model.keyLayout.label(for: chord))
+                    VStack(alignment: .leading, spacing: 8) {
+                        SettingsSection("Other engine bindings") {
+                            ForEach(others, id: \.self) { other in
+                                HStack(spacing: 6) {
+                                    Text(other.key)
+                                        .font(.system(size: 12, design: .monospaced))
+                                        .foregroundStyle(Palette.primaryText)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    ForEach(other.chords, id: \.self) { chord in
+                                        KeyCap(label: model.keyLayout.label(for: chord))
+                                    }
                                 }
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 9)
                             }
                         }
-                    } header: {
-                        Text("Other Engine Bindings")
-                    } footer: {
                         Text("Miri does not list these engine commands. Edit them in the configuration file.")
-                            .foregroundStyle(.secondary)
+                            .font(.system(size: 12))
+                            .foregroundStyle(Palette.secondaryText)
+                            .padding(.horizontal, 2)
                     }
                 }
             }
         }
-        .formStyle(.grouped)
         .onDisappear(perform: stopRecording)
         .alert(
             conflictTitle,
@@ -104,10 +105,49 @@ struct ShortcutsSettings: View {
         }
     }
 
+    /// A default an upgrade could not move, with one button that moves it when another listed action holds it.
+    private func keptDefaultRow(_ kept: KeptDefault) -> some View {
+        let wanted = model.keyLayout.label(for: kept.wanted)
+        let owner = ShortcutAction.editable.first { $0.title == kept.owner }
+        return HStack(alignment: .center, spacing: 10) {
+            NoticeGlyph(kind: .info)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(notice(for: kept))
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(Palette.primaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+                if owner != nil {
+                    Text("Moving it takes \(wanted) from \(kept.owner).")
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(Palette.secondaryText)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if let owner {
+                Button("Use \(wanted)") {
+                    notice = nil
+                    // The owner can spell the same keys another way, such as `ctrl+alt-[` for `ctrl+alt-leftbracket`.
+                    for chord in model.shortcuts?.chords(for: owner) ?? []
+                    where model.keyLayout.conflicts(chord, kept.wanted) {
+                        model.removeShortcut(chord, from: owner)
+                    }
+                    add(kept.wanted, to: kept.action, allowingSystemConflict: false)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Palette.accent)
+                .help("Move \(wanted) from \(kept.owner) to \(kept.action.title)")
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
+    }
+
     private func row(_ action: ShortcutAction, chords: [Chord]) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
                 Text(action.title)
+                    .font(.system(size: 13, weight: recording == action ? .semibold : .regular))
+                    .foregroundStyle(Palette.primaryText)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 ForEach(chords, id: \.self) { chord in
                     let label = model.keyLayout.label(for: chord)
@@ -123,6 +163,7 @@ struct ShortcutsSettings: View {
                         startRecording(action)
                     } label: {
                         Image(systemName: "plus")
+                            .font(.system(size: 11, weight: .semibold))
                             .frame(width: 22, height: 22)
                             .contentShape(.rect)
                     }
@@ -132,12 +173,19 @@ struct ShortcutsSettings: View {
                 }
             }
             if let notice, notice.action == action {
-                Text(notice.text)
-                    .font(.callout)
-                    .foregroundStyle(.red)
-                    .fixedSize(horizontal: false, vertical: true)
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    NoticeGlyph(kind: .error, size: 14)
+                    Text(notice.text)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Palette.errorText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .frame(minHeight: 40)
+        .background(notice?.action == action ? Palette.errorTint : .clear)
     }
 
     private var conflictTitle: String {
@@ -243,10 +291,13 @@ struct ShortcutChip: View {
                 .accessibilityLabel("Remove \(label)")
             }
         }
+        .font(.system(size: 12, weight: .medium))
+        .foregroundStyle(Palette.primaryText)
         .padding(.leading, 7)
         .padding(.trailing, remove == nil ? 7 : 4)
         .frame(height: 22)
-        .background(.quaternary, in: .rect(cornerRadius: 6))
+        .background(Palette.chip, in: .rect(cornerRadius: 5))
+        .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Palette.groupRing, lineWidth: 0.5))
         .fixedSize()
     }
 }
@@ -272,7 +323,7 @@ struct RecordingChip: View {
         .padding(.leading, 7)
         .padding(.trailing, 4)
         .frame(height: 22)
-        .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.accentColor, lineWidth: 1.5))
+        .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Palette.accent, lineWidth: 1.5))
         .fixedSize()
     }
 }

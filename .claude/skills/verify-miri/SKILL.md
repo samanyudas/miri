@@ -84,7 +84,7 @@ Each drive command logs to `<run>/log.txt` with a timestamp.
 | `V snapshot <label>` | Writes `<label>.json` (the focus record and every fixture's frame, focus, visibility, and floating state) and one PNG per fixture window. |
 | `V settings` | Reopens the test app, which shows Settings, as a user does from Finder or Spotlight. |
 | `V relaunch` | Quits the test build with SIGTERM and opens it again, to check what it keeps across launches, such as a saved Stop. A build that starts no engine is a result, not a failure. |
-| `V ax test press "General"` | Presses Settings tabs and buttons by title, accessibility description, or help text, in order. It looks for each one again after the previous press, so a tab and a button on it work in one call. `dump` lists every element with its help text, `status` prints the text after the `Status` label of the tab that shows, and `windows` lists window numbers. |
+| `V ax test press "General"` | Presses Settings pages and buttons by title, accessibility description, or help text, in order. It looks for each one again after the previous press, so a page and a button on it work in one call. `dump` lists every element with its help text, `status` prints the status text of the page that shows, and `windows` lists window numbers. |
 | `V standin yabai` | Runs a harmless compiled process named `yabai`, so the Setup page reports a competing window manager. |
 | `V watch 12` | Logs every Miri app and engine start and exit for 12 seconds, at 50 ms intervals. Start it in the background before a fast sequence. |
 | `V query active` | Prints engine state. Window titles can be private. Never paste titles other than the fixtures'. |
@@ -94,7 +94,7 @@ Each drive command logs to `<run>/log.txt` with a timestamp.
 Use stable handles:
 
 - Fixtures by name and window ID, never by position or another app's title.
-- Settings controls by title: tabs `General`, `Layout`, `Gestures`, `Shortcuts`, `Setup`, `Diagnostics`, and buttons such as `Start Window Management`, `Stop Window Management`, `Restart Engine`, `Check Again`.
+- Settings controls by title: the sidebar pages `Setup`, `General`, `Layout`, `Shortcuts`, `Gestures`, `Diagnostics`, and buttons such as `Start Window Management`, `Stop Window Management`, `Restart Engine` (on Diagnostics), `Check Again` (on Setup).
   When several buttons share a title, as every row's `Add Shortcut` does, use the help text that `dump` shows, such as `Add a shortcut for Focus column right`.
 - Shortcuts by the chord in `config.toml`, which [Bindings.swift](../../../Sources/MiriCore/Bindings.swift) writes.
 

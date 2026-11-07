@@ -43,10 +43,10 @@ These user-facing surfaces have no recipe yet.
 `axdo press` reaches buttons, tabs, and radio buttons only, so a control marked "config" needs a `config.toml` edit as setup and a `V ax test dump` or `V snapshot` as proof.
 
 - Configuration error: the menu line and the Settings banner with `Show Configuration File in Finder` ([Views.swift](../../../../Sources/Miri/Views.swift), [Settings.swift](../../../../Sources/MiriCore/Settings.swift)). Drivable with a broken `config.toml`.
-- Diagnostics tab and `Copy Diagnostics…` window ([Views.swift](../../../../Sources/Miri/Views.swift)). Drivable with `ax press`.
+- Diagnostics page and `Copy Diagnostics…` window ([SettingsPages.swift](../../../../Sources/Miri/SettingsPages.swift), [Views.swift](../../../../Sources/Miri/Views.swift)). Drivable with `ax press`.
 - Window recovery: windows that management stops leave on screen ([WindowRestorer.swift](../../../../Sources/Miri/WindowRestorer.swift)). Drivable with fixtures and Stop.
-- Layout tab: gaps, width presets, windows per stack, maximized window side, and the shared-edge switch ([Views.swift](../../../../Sources/Miri/Views.swift)). Config. The shared-edge switch also needs Screen Recording permission and two displays.
-- General toggles: `Launch at login` and `Animate window movement` ([Views.swift](../../../../Sources/Miri/Views.swift)). Never drive `Launch at login`, which changes Sam's login items.
-- Gestures tab and `Test Gesture…` ([GestureSettings.swift](../../../../Sources/Miri/GestureSettings.swift)). The test needs Sam's trackpad.
+- Layout page: gaps, width presets, `Animate window movement`, windows per stack, maximized window side, and the shared-edge switch ([SettingsPages.swift](../../../../Sources/Miri/SettingsPages.swift)). Config. The shared-edge switch also needs Screen Recording permission and two displays.
+- General page: `Launch at login` ([SettingsPages.swift](../../../../Sources/Miri/SettingsPages.swift)). Never drive `Launch at login`, which changes Sam's login items.
+- Gestures page and `Test Gesture…` ([GestureSettings.swift](../../../../Sources/Miri/GestureSettings.swift)). The test needs Sam's trackpad.
 - Initial setup, the Set Up Miri window on first launch ([InitialSetup.swift](../../../../Sources/Miri/InitialSetup.swift)). Showing it again needs the launch argument `-initialSetupDone NO`, which `V begin` does not pass.
 - The menu bar menu ([Views.swift](../../../../Sources/Miri/Views.swift)). `axdo` cannot open it. [Start, stop, and restart](window-management-controls.md) has the System Events route.

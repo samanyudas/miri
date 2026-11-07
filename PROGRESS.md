@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-07 on branch `docs/339-closed`, based on `main` at `13cd4aaa`
+Updated: 2026-11-07 on branch `feat/109-settings-rehaul`, based on `main` at `82bd6b7a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,18 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Settings window redesign
+
+Branch `feat/109-settings-rehaul` rebuilds the Settings window from the Paper design for [#109](https://github.com/samanyudas/miri/issues/109).
+The Paper file "miri" holds the design. Its weekly agent quota ran out on 7 November 2026, so only saved readouts and screenshots of it were used.
+The window is 880 by 640 points, with a sidebar of Setup, General, Layout, Shortcuts, Gestures, and Diagnostics, and Miri's colors in light and dark mode.
+Every control and message of the old tabbed window kept its behavior. **Animate window movement** moved to Layout, and **Restart Engine** to Diagnostics and the sidebar button.
+The update settings in the design are left out until [#82](https://github.com/samanyudas/miri/issues/82), and the under-pointer swipe until [#212](https://github.com/samanyudas/miri/issues/212).
+Live runs on 7 November 2026 showed every page in light and dark mode, the running, restarting, failed, and waiting states, every control that writes `config.toml` except Launch at login, shortcut recording, and the kept-default **Use** button.
+`make check` passed on `f149ca2f`.
+Not yet seen live: Launch at login, and a confirmed gesture test, which needs Sam's trackpad.
+The menu bar menu and the Set Up Miri window keep their old look until a later PR.
 
 ## V1 completion audit
 

@@ -42,13 +42,26 @@ final class WindowPresenter {
                 )
             case .initialSetup: ("Set Up Miri", AnyView(InitialSetupView(model: model)))
             }
-        let window = NSWindow(
-            contentViewController: NSHostingController(rootView: content.environment(\.presenter, self)))
+        let host = NSHostingController(rootView: content.environment(\.presenter, self))
+        // Settings draws under its title bar, so its size comes from the design, not from the view plus the title bar.
+        if kind == .settings { host.sizingOptions = [] }
+        let window = NSWindow(contentViewController: host)
         window.title = title
         window.styleMask = [.titled, .closable, .miniaturizable]
         window.isReleasedWhenClosed = false
         window.setFrameAutosaveName("Miri.\(kind)")
         if !window.setFrameUsingName("Miri.\(kind)") { window.center() }
+        if kind == .settings {
+            // The sidebar runs under the title bar, so the window buttons sit on it, as in the design.
+            window.styleMask.insert(.fullSizeContentView)
+            window.titlebarAppearsTransparent = true
+            window.titleVisibility = .hidden
+            // The content covers the whole frame, so the frame is the design's size. Keep the saved top-left corner.
+            var frame = window.frame
+            frame.origin.y += frame.height - 640
+            frame.size = NSSize(width: 880, height: 640)
+            window.setFrame(frame, display: false)
+        }
         if kind == .initialSetup {
             NotificationCenter.default.addObserver(
                 forName: NSWindow.willCloseNotification, object: window, queue: .main
