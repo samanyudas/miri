@@ -80,8 +80,8 @@ struct MenuContent: View {
             Button("Show Logs in Finder") { model.showLogsInFinder() }
         case .stopped where !model.startBlockers.isEmpty:
             Button("Open Setup Checker…") { presenter.showSettings(.setup) }
-            Button("Stop Window Management") { model.stop() }
             Text("Miri starts by itself when setup is done.")
+            Button(AppModel.cancelAutomaticStartTitle) { model.stop() }
         case .stopped:
             Button("Start Window Management") { model.start() }
         }
@@ -119,17 +119,17 @@ struct DiagnosticsView: View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Review the report before you copy it")
-                    .font(.system(size: 17, weight: .bold))
+                    .font(.heroTitle)
                     .foregroundStyle(Palette.primaryText)
                     .accessibilityAddTraits(.isHeader)
                 Text("Miri removes window titles, document paths, user names, and the configuration file.")
-                    .font(.system(size: 12.5))
+                    .font(.detail)
                     .foregroundStyle(Palette.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
             ScrollView {
                 Text(report)
-                    .font(.system(size: 11.5, design: .monospaced))
+                    .font(.system(size: 12, design: .monospaced))
                     .foregroundStyle(Palette.primaryText)
                     .lineSpacing(2)
                     .textSelection(.enabled)
@@ -143,7 +143,7 @@ struct DiagnosticsView: View {
                 Spacer()
                 if copied {
                     Label("Copied", systemImage: "checkmark")
-                        .font(.system(size: 12))
+                        .font(.detail)
                         .foregroundStyle(Palette.secondaryText)
                 }
                 Button("Copy to Clipboard") {
@@ -152,7 +152,7 @@ struct DiagnosticsView: View {
                     copied = true
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(Palette.accent)
+                .tint(Palette.accentFill)
                 .keyboardShortcut(.defaultAction)
             }
         }

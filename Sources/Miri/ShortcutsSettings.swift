@@ -22,6 +22,7 @@ struct ShortcutsSettings: View {
     @State private var notice: Notice?
     @State private var pendingConflict: PendingConflict?
     @State private var confirmingReset = false
+    @State private var hovered: ShortcutAction?
 
     var body: some View {
         SettingsPage(
@@ -32,9 +33,7 @@ struct ShortcutsSettings: View {
             ConfigurationIssueNotice(model: model)
             if let shortcuts = model.shortcuts {
                 HStack(spacing: 10) {
-                    TextField("Filter", text: $filter, prompt: Text("Search actions or shortcuts"))
-                        .labelsHidden()
-                        .textFieldStyle(.roundedBorder)
+                    SearchField(text: $filter, prompt: "Search actions or shortcuts")
                     Button("Reset to Defaults…") { confirmingReset = true }
                 }
                 if !model.keptDefaults.isEmpty {
@@ -42,21 +41,34 @@ struct ShortcutsSettings: View {
                         ForEach(model.keptDefaults, id: \.self) { kept in keptDefaultRow(kept) }
                     }
                 }
-                VStack(alignment: .leading, spacing: 8) {
-                    SectionLabel("Actions")
-                    SettingsGroup {
-                        ForEach(ShortcutAction.editable.filter { matches($0, shortcuts) }, id: \.self) { action in
-                            row(action, chords: shortcuts.chords(for: action))
-                        }
-                    }
-                    Text(
-                        "Press Escape to cancel recording. Stop window manager works even while the engine is stopped."
-                    )
-                    .font(.system(size: 12))
-                    .foregroundStyle(Palette.secondaryText)
-                    .padding(.horizontal, 2)
-                }
+                let actions = ShortcutAction.editable.filter { matches($0, shortcuts) }
                 let others = shortcuts.others.filter { matches($0) }
+                if actions.isEmpty, others.isEmpty {
+                    VStack(spacing: 10) {
+                        Text("No shortcuts match \u{201C}\(filter)\u{201D}.")
+                            .font(.rowTitle)
+                            .foregroundStyle(Palette.secondaryText)
+                        Button("Clear Search") { filter = "" }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 40)
+                }
+                if !actions.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        SectionLabel("Actions")
+                        SettingsGroup {
+                            ForEach(actions, id: \.self) { action in
+                                row(action, chords: shortcuts.chords(for: action))
+                            }
+                        }
+                        Text(
+                            "Press Escape to cancel recording. Stop window manager works even while the engine is stopped."
+                        )
+                        .font(.detail)
+                        .foregroundStyle(Palette.secondaryText)
+                        .padding(.horizontal, 2)
+                    }
+                }
                 if !others.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         SettingsSection("Other engine bindings") {
@@ -71,11 +83,12 @@ struct ShortcutsSettings: View {
                                     }
                                 }
                                 .padding(.horizontal, 14)
-                                .padding(.vertical, 9)
+                                .padding(.vertical, 8)
+                                .frame(minHeight: 44)
                             }
                         }
                         Text("Miri does not list these engine commands. Edit them in the configuration file.")
-                            .font(.system(size: 12))
+                            .font(.detail)
                             .foregroundStyle(Palette.secondaryText)
                             .padding(.horizontal, 2)
                     }
@@ -83,6 +96,7 @@ struct ShortcutsSettings: View {
             }
         }
         .onDisappear(perform: stopRecording)
+        .onChange(of: notice) { if let notice { AccessibilityNotification.Announcement(notice.text).post() } }
         .alert(
             conflictTitle,
             isPresented: Binding(get: { pendingConflict != nil }, set: { if !$0 { pendingConflict = nil } }),
@@ -111,16 +125,15 @@ struct ShortcutsSettings: View {
         let owner = ShortcutAction.editable.first { $0.title == kept.owner }
         return HStack(alignment: .center, spacing: 10) {
             NoticeGlyph(kind: .info)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(notice(for: kept))
-                    .font(.system(size: 12.5))
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(kept.action.title) has a new default, \(wanted), but \(kept.owner) uses it.")
+                    .font(.rowTitle)
                     .foregroundStyle(Palette.primaryText)
                     .fixedSize(horizontal: false, vertical: true)
-                if owner != nil {
-                    Text("Moving it takes \(wanted) from \(kept.owner).")
-                        .font(.system(size: 11.5))
-                        .foregroundStyle(Palette.secondaryText)
-                }
+                Text(keptText(kept))
+                    .font(.detail)
+                    .foregroundStyle(Palette.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             if let owner {
@@ -134,7 +147,7 @@ struct ShortcutsSettings: View {
                     add(kept.wanted, to: kept.action, allowingSystemConflict: false)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(Palette.accent)
+                .tint(Palette.accentFill)
                 .help("Move \(wanted) from \(kept.owner) to \(kept.action.title)")
             }
         }
@@ -144,39 +157,27 @@ struct ShortcutsSettings: View {
 
     private func row(_ action: ShortcutAction, chords: [Chord]) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 6) {
-                Text(action.title)
-                    .font(.system(size: 13, weight: recording == action ? .semibold : .regular))
-                    .foregroundStyle(Palette.primaryText)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                ForEach(chords, id: \.self) { chord in
-                    let label = model.keyLayout.label(for: chord)
-                    ShortcutChip(label: label) {
-                        notice = nil
-                        model.removeShortcut(chord, from: action)
-                    }
+            // One line while the chips fit beside the title, and the chips wrap below it when they do not.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 6) {
+                    actionTitle(action).fixedSize()
+                    Spacer(minLength: 12)
+                    chips(action, chords)
+                    addButton(action)
                 }
-                if recording == action {
-                    RecordingChip(modifiers: heldModifiers, cancel: stopRecording)
-                } else {
-                    Button {
-                        startRecording(action)
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.system(size: 11, weight: .semibold))
-                            .frame(width: 22, height: 22)
-                            .contentShape(.rect)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        actionTitle(action).frame(maxWidth: .infinity, alignment: .leading)
+                        addButton(action)
                     }
-                    .buttonStyle(.borderless)
-                    .help("Add a shortcut for \(action.title)")
-                    .accessibilityLabel("Add Shortcut")
+                    FlowLayout(spacing: 6) { chips(action, chords) }
                 }
             }
             if let notice, notice.action == action {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     NoticeGlyph(kind: .error, size: 14)
                     Text(notice.text)
-                        .font(.system(size: 12))
+                        .font(.detail)
                         .foregroundStyle(Palette.errorText)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -184,8 +185,46 @@ struct ShortcutsSettings: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
-        .frame(minHeight: 40)
+        .frame(minHeight: 44)
         .background(notice?.action == action ? Palette.errorTint : .clear)
+        .contentShape(.rect)
+        .onHover { inside in
+            if inside { hovered = action } else if hovered == action { hovered = nil }
+        }
+    }
+
+    private func actionTitle(_ action: ShortcutAction) -> some View {
+        Text(action.title)
+            .font(.rowTitle.weight(recording == action ? .semibold : .regular))
+            .foregroundStyle(Palette.primaryText)
+    }
+
+    @ViewBuilder private func chips(_ action: ShortcutAction, _ chords: [Chord]) -> some View {
+        ForEach(chords, id: \.self) { chord in
+            let label = model.keyLayout.label(for: chord)
+            ShortcutChip(label: label, action: action.title, showsRemove: hovered == action) {
+                notice = nil
+                model.removeShortcut(chord, from: action)
+            }
+        }
+        if recording == action {
+            RecordingChip(modifiers: heldModifiers, cancel: stopRecording)
+        }
+    }
+
+    @ViewBuilder private func addButton(_ action: ShortcutAction) -> some View {
+        Button {
+            startRecording(action)
+        } label: {
+            Image(systemName: "plus")
+                .font(.system(size: 11, weight: .semibold))
+                .frame(width: 24, height: 24)
+                .contentShape(.rect)
+        }
+        .buttonStyle(.borderless)
+        .help("Add a shortcut for \(action.title)")
+        .accessibilityLabel("Add Shortcut for \(action.title)")
+        .disabled(recording == action)
     }
 
     private var conflictTitle: String {
@@ -194,12 +233,10 @@ struct ShortcutsSettings: View {
             + "\(pendingConflict.shortcut.name)."
     }
 
-    private func notice(for kept: KeptDefault) -> String {
-        let wanted = model.keyLayout.label(for: kept.wanted)
-        let held = "Its new default, \(wanted), is used by \(kept.owner)."
-        guard !kept.kept.isEmpty else { return "\(kept.action.title) has no shortcut. \(held)" }
-        return
-            "\(kept.action.title) kept \(kept.kept.map(model.keyLayout.label(for:)).joined(separator: ", ")). \(held)"
+    private func keptText(_ kept: KeptDefault) -> String {
+        guard !kept.kept.isEmpty else { return "\(kept.action.title) has no shortcut until you move it." }
+        let labels = kept.kept.map(model.keyLayout.label(for:)).formatted(.list(type: .and))
+        return "Miri kept \(labels)."
     }
 
     private func matches(_ action: ShortcutAction, _ shortcuts: Shortcuts) -> Bool {
@@ -218,6 +255,9 @@ struct ShortcutsSettings: View {
         notice = nil
         heldModifiers = []
         recording = action
+        AccessibilityNotification.Announcement(
+            "Recording a shortcut for \(action.title). Press the keys, or Escape to cancel."
+        ).post()
         recorder.start { event in
             handle(event, for: action)
         } onCancel: {
@@ -271,34 +311,39 @@ struct ShortcutsSettings: View {
     }
 }
 
-/// One assigned shortcut, with a remove button when it can be edited.
+/// One assigned shortcut. Its remove button shows while the pointer is on its row or the button has keyboard focus,
+/// and VoiceOver always finds it.
 struct ShortcutChip: View {
     let label: String
-    var remove: (() -> Void)?
+    let action: String
+    let showsRemove: Bool
+    let remove: () -> Void
+    @FocusState private var removeFocused: Bool
 
     var body: some View {
-        HStack(spacing: 2) {
-            Text(label)
-                .lineLimit(1)
-                .frame(minWidth: 40)
-            if let remove {
+        Text(label)
+            .font(.detail.weight(.medium))
+            .foregroundStyle(Palette.primaryText)
+            .lineLimit(1)
+            .padding(.horizontal, 7)
+            .frame(minWidth: 52, minHeight: 22)
+            .background(Palette.chip, in: .rect(cornerRadius: 5))
+            .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Palette.groupRing, lineWidth: 0.5))
+            .overlay(alignment: .topTrailing) {
                 Button(action: remove) {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(.secondary)
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(Palette.group, Palette.secondaryText)
+                        .font(.system(size: 13))
                 }
                 .buttonStyle(.borderless)
+                .focused($removeFocused)
+                .opacity(showsRemove || removeFocused ? 1 : 0)
+                .offset(x: 6, y: -6)
                 .help("Remove \(label)")
-                .accessibilityLabel("Remove \(label)")
+                .accessibilityLabel("Remove \(label) from \(action)")
             }
-        }
-        .font(.system(size: 12, weight: .medium))
-        .foregroundStyle(Palette.primaryText)
-        .padding(.leading, 7)
-        .padding(.trailing, remove == nil ? 7 : 4)
-        .frame(height: 22)
-        .background(Palette.chip, in: .rect(cornerRadius: 5))
-        .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Palette.groupRing, lineWidth: 0.5))
-        .fixedSize()
+            .fixedSize()
     }
 }
 

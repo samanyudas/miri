@@ -95,7 +95,7 @@ Use stable handles:
 
 - Fixtures by name and window ID, never by position or another app's title.
 - Settings controls by title: the sidebar pages `Setup`, `General`, `Layout`, `Shortcuts`, `Gestures`, `Diagnostics`, and buttons such as `Start Window Management`, `Stop Window Management`, `Restart Engine` (on Diagnostics), `Check Again` (on Setup).
-  When several buttons share a title, as every row's `Add Shortcut` does, use the help text that `dump` shows, such as `Add a shortcut for Focus column right`.
+  When several buttons share a title, use the help text that `dump` shows, such as `Add a shortcut for Focus column right`.
 - Shortcuts by the chord in `config.toml`, which [Bindings.swift](../../../Sources/MiriCore/Bindings.swift) writes.
 
 The feature map in [features/README.md](features/README.md) has one recipe per feature.

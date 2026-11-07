@@ -49,7 +49,7 @@ struct InitialSetupView: View {
                     .foregroundStyle(Palette.primaryText)
                     .accessibilityAddTraits(.isHeader)
                 Text("Miri lines up the windows on each display side by side in a strip that you scroll.")
-                    .font(.system(size: 13))
+                    .font(.rowTitle)
                     .foregroundStyle(Palette.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -61,11 +61,11 @@ struct InitialSetupView: View {
             Circle().fill(model.stateColor).frame(width: 8, height: 8).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(model.statusText)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.rowTitle.weight(.semibold))
                     .foregroundStyle(Palette.primaryText)
                     .modifier(StatusValue(value: model.statusText))
                 Text(statusDetail)
-                    .font(.system(size: 11.5))
+                    .font(.detail)
                     .foregroundStyle(Palette.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -101,7 +101,7 @@ struct InitialSetupView: View {
                     options: [("Three", .three), ("Four", .four), ("Off", .off)])
             }
             if model.settings.stripGesture != .off {
-                SettingsRow(title: "Test", detail: model.gestureSummary) {
+                SettingsRow(title: "Swipe test", detail: testDetail) {
                     Button("Test Gesture…") { testing = true }
                         .disabled(model.gestureTestBlocker != nil)
                 }
@@ -114,15 +114,24 @@ struct InitialSetupView: View {
         }
     }
 
+    private var testDetail: String {
+        switch model.gestureState {
+        case .off: "Off."
+        case .enabled(let date): "On. You confirmed it on \(date.formatted(date: .abbreviated, time: .omitted))."
+        case .needsTest: "The swipe stays off until you test it."
+        case .conflict: "Off, because macOS uses this swipe."
+        }
+    }
+
     private var footer: some View {
         HStack(spacing: 12) {
-            Text("The swipe stays off until you test it. Settings has all of this later.")
-                .font(.system(size: 12))
+            Text("You can change all of this later in Settings.")
+                .font(.detail)
                 .foregroundStyle(Palette.secondaryText)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Button("Done") { presenter?.close(.initialSetup) }
                 .buttonStyle(.borderedProminent)
-                .tint(Palette.accent)
+                .tint(Palette.accentFill)
                 .keyboardShortcut(.defaultAction)
         }
         .padding(.horizontal, 40)

@@ -35,12 +35,10 @@ struct GestureSettings: View {
                             Button("Open System Settings") { NSWorkspace.shared.open(url) }
                         }
                     }
-                } else if let blocker = model.gestureTestBlocker, model.settings.stripGesture != .off {
-                    NoticeRow(kind: .warning, text: blocker)
                 }
             }
             Text("Keyboard shortcuts work whether the swipe is on or off. Miri never changes macOS settings.")
-                .font(.system(size: 12))
+                .font(.detail)
                 .foregroundStyle(Palette.secondaryText)
         }
         .onAppear { model.refreshSetup() }
@@ -57,16 +55,16 @@ struct GestureSettings: View {
             TrackpadPicture(fingers: model.settings.stripGesture.fingers, reversed: model.settings.reverseSwipe)
             VStack(alignment: .leading, spacing: 4) {
                 Text(eyebrow.text)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.small.weight(.semibold))
                     .tracking(0.66)
                     .textCase(.uppercase)
                     .foregroundStyle(eyebrow.color)
                 Text(heroTitle)
-                    .font(.system(size: 19, weight: .bold))
+                    .font(.heroTitle)
                     .foregroundStyle(Palette.primaryText)
                     .modifier(StatusValue(value: model.gestureSummary))
                 LiveText(heroDetail)
-                    .font(.system(size: 12.5))
+                    .font(.detail)
                     .foregroundStyle(Palette.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -74,7 +72,7 @@ struct GestureSettings: View {
             VStack(alignment: .trailing, spacing: 8) {
                 Button("Test Gesture…") { testing = true }
                     .buttonStyle(.borderedProminent)
-                    .tint(Palette.accent)
+                    .tint(Palette.accentFill)
                     .disabled(model.gestureTestBlocker != nil)
                 if model.gestureVerification != nil {
                     Button("Report a macOS Gesture Change") { confirmingReport = true }
@@ -83,15 +81,19 @@ struct GestureSettings: View {
             .fixedSize()
         }
         .padding(20)
-        .background(Palette.heroTint, in: .rect(cornerRadius: 12))
+        .background(heroTint, in: .rect(cornerRadius: 12))
+    }
+
+    private var heroTint: Color {
+        if case .conflict = model.gestureState { Palette.warningTint } else { Palette.heroTint }
     }
 
     private var eyebrow: (text: String, color: Color) {
         switch model.gestureState {
         case .off: ("Off", Palette.secondaryText)
         case .enabled: ("On", Palette.green)
-        case .needsTest: ("Off until tested", Palette.orange)
-        case .conflict: ("Off: macOS uses this swipe", Palette.orange)
+        case .needsTest: ("Needs a test", Palette.accentText)
+        case .conflict: ("Blocked by macOS", Palette.orange)
         }
     }
 
@@ -110,11 +112,14 @@ struct GestureSettings: View {
         case .enabled(let date):
             "You confirmed on \(date.formatted(date: .abbreviated, time: .omitted)) that the strip follows your fingers."
         case .needsTest(let reason, let detectionUnavailable):
-            "Test it to turn it on: \(reason.explanation)."
-                + (detectionUnavailable
-                    ? " Miri can't read your macOS gesture settings, so it can't check them for you." : "")
+            [
+                reason.sentence, "Test it to turn it on.",
+                detectionUnavailable
+                    ? "Miri can't read your macOS gesture settings, so the test is the only check." : nil,
+                model.gestureTestBlocker,
+            ].compactMap(\.self).joined(separator: " ")
         case .conflict:
-            "macOS uses this swipe. Turn it off in System Settings, then test again."
+            "Turn off the macOS swipe below, then test again."
         }
     }
 
@@ -180,6 +185,18 @@ extension MiriCore.GestureState.TestReason {
         case .gestureSettingsChanged: "macOS trackpad gestures changed"
         }
     }
+
+    /// The reason as a sentence for the Gestures page, or nothing when the swipe was never tested.
+    var sentence: String? {
+        switch self {
+        case .neverTested: nil
+        case .fingersChanged: "The finger count changed."
+        case .directionChanged: "The direction changed."
+        case .macOSChanged: "macOS was updated."
+        case .engineChanged: "Miri's engine was updated."
+        case .gestureSettingsChanged: "Your macOS trackpad gestures changed."
+        }
+    }
 }
 
 /// Guides one gesture test, from swiping to the user's confirmation.
@@ -196,24 +213,29 @@ struct GestureTestSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Gesture test")
-                .font(.system(size: 11, weight: .semibold))
+                .font(.small.weight(.semibold))
                 .tracking(0.66)
                 .textCase(.uppercase)
                 .foregroundStyle(Palette.secondaryText)
                 .padding(.bottom, 8)
             Text(title)
-                .font(.system(size: 19, weight: .bold))
+                .font(.heroTitle)
                 .foregroundStyle(Palette.primaryText)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
                 .padding(.bottom, 6)
             Text(detail)
-                .font(.system(size: 12.5))
+                .font(.detail)
                 .foregroundStyle(Palette.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.bottom, 18)
-            progress
-                .padding(.bottom, 20)
+            switch test.phase {
+            case .failed, .inconclusive:
+                // The title already says what went wrong, so a status box would only repeat it.
+                EmptyView()
+            case .idle, .watching, .passedAwaitingConfirmation:
+                progress.padding(.bottom, 20)
+            }
             HStack(spacing: 8) {
                 Spacer(minLength: 0)
                 buttons
@@ -261,15 +283,11 @@ struct GestureTestSheet: View {
             case .passedAwaitingConfirmation:
                 checkmark
                 LiveText("The strip moved both ways.")
-            case .failed:
-                NoticeGlyph(kind: .warning, size: 18)
-                LiveText("The test found a problem.")
-            case .inconclusive:
-                NoticeGlyph(kind: .warning, size: 18)
-                LiveText("The test timed out.")
+            case .failed, .inconclusive:
+                EmptyView()
             }
         }
-        .font(.system(size: 12.5))
+        .font(.detail)
         .foregroundStyle(Palette.primaryText)
         .padding(.horizontal, 14)
         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
@@ -279,7 +297,7 @@ struct GestureTestSheet: View {
     private var checkmark: some View {
         Image(systemName: "checkmark")
             .font(.system(size: 9, weight: .heavy))
-            .foregroundStyle(.white)
+            .foregroundStyle(Palette.onStatus)
             .frame(width: 18, height: 18)
             .background(Palette.green, in: .circle)
             .accessibilityHidden(true)
@@ -297,13 +315,13 @@ struct GestureTestSheet: View {
                 dismiss()
             }
             .buttonStyle(.borderedProminent)
-            .tint(Palette.accent)
+            .tint(Palette.accentFill)
             .keyboardShortcut(.defaultAction)
         case .failed, .inconclusive:
             Button("Done", role: .cancel) { dismiss() }
             Button("Try Again") { test.start() }
                 .buttonStyle(.borderedProminent)
-                .tint(Palette.accent)
+                .tint(Palette.accentFill)
                 .keyboardShortcut(.defaultAction)
         }
     }

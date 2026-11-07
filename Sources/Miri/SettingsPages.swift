@@ -27,7 +27,7 @@ struct GeneralSettings: View {
     @Binding var page: SettingsView.Page
 
     var body: some View {
-        SettingsPage(title: "General", subtitle: subtitle) {
+        SettingsPage(title: "General", subtitle: "Closing this window keeps Miri in the menu bar.") {
             ConfigurationIssueNotice(model: model)
             status
             SettingsSection("Startup") {
@@ -62,19 +62,6 @@ struct GeneralSettings: View {
         }
     }
 
-    private var subtitle: String {
-        switch model.engineState {
-        case .running, .restarting:
-            "Closing this window keeps Miri managing your windows. Use Stop to pause, or Quit from the menu bar."
-        case .failed:
-            "Window management stopped because the engine kept failing. Your windows stay where they are."
-        case .stopped where !model.startBlockers.isEmpty:
-            "Miri waits for setup before it manages windows. Closing this window keeps it waiting."
-        case .stopped:
-            "Closing this window keeps Miri open. Window management stays paused until you start it."
-        }
-    }
-
     @ViewBuilder private var status: some View {
         switch model.engineState {
         case .running:
@@ -95,7 +82,7 @@ struct GeneralSettings: View {
                 Button("Show Logs in Finder") { model.showLogsInFinder() }
                 Button("Restart Engine") { model.restart() }
                     .buttonStyle(.borderedProminent)
-                    .tint(Palette.accent)
+                    .tint(Palette.accentFill)
             }
         case .stopped where !model.startBlockers.isEmpty:
             Banner(
@@ -103,18 +90,21 @@ struct GeneralSettings: View {
                 detail: "Miri starts by itself when the required checks in Setup pass.",
                 accessibilityValue: model.statusText
             ) {
+                Button(AppModel.cancelAutomaticStartTitle) { model.stop() }
                 Button("Open Setup") { page = .setup }
-                Button("Stop Window Management") { model.stop() }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Palette.accentFill)
             }
         case .stopped:
             Banner(
-                kind: .warning, title: "Window management is paused",
-                detail: "Your windows stay where they are. Miri stays stopped across launches until you start it.",
+                kind: .neutral, title: "Window management is stopped",
+                detail:
+                    "Your windows stay where they are. Miri stays stopped, even after a restart, until you start it.",
                 accessibilityValue: model.statusText
             ) {
                 Button("Start Window Management") { model.start() }
                     .buttonStyle(.borderedProminent)
-                    .tint(Palette.accent)
+                    .tint(Palette.accentFill)
             }
         }
     }
@@ -141,16 +131,16 @@ private struct StatusHero: View {
             StripPicture(faded: faded)
             VStack(alignment: .leading, spacing: 4) {
                 Text(eyebrow)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.small.weight(.semibold))
                     .tracking(0.66)
                     .textCase(.uppercase)
                     .foregroundStyle(eyebrowColor)
                 Text(title)
-                    .font(.system(size: 19, weight: .bold))
+                    .font(.heroTitle)
                     .foregroundStyle(Palette.primaryText)
                     .modifier(StatusValue(value: title))
                 LiveText(detail)
-                    .font(.system(size: 12.5))
+                    .font(.detail)
                     .foregroundStyle(Palette.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -209,6 +199,7 @@ struct LayoutSettings: View {
     let model: AppModel
     @State private var presetsText = ""
     @State private var presetsError: String?
+    @FocusState private var editingPresets: Bool
     @State private var mainDisplayHeight = LayoutSettings.currentMainDisplayHeight()
 
     var body: some View {
@@ -224,13 +215,15 @@ struct LayoutSettings: View {
             SettingsSection("Column widths and motion") {
                 SettingsRow(
                     title: "Width presets",
-                    detail: "Fractions of the display width, narrowest first. \(cycleShortcutText)"
+                    detail: presetsDetail
                 ) {
                     TextField("Width presets", text: $presetsText, prompt: Text("0.25, 0.5, 0.75"))
                         .labelsHidden()
-                        .multilineTextAlignment(.trailing)
                         .frame(width: 200)
+                        .focused($editingPresets)
                         .onSubmit(applyPresets)
+                        // Leaving the field applies it too, so an edit is never lost by clicking elsewhere.
+                        .onChange(of: editingPresets) { if !editingPresets { applyPresets() } }
                 }
                 if let presetsError {
                     NoticeRow(kind: .error, text: presetsError)
@@ -296,10 +289,24 @@ struct LayoutSettings: View {
         }
         .onAppear(perform: showPresets)
         .onChange(of: model.settings.widthPresets) { showPresets() }
+        .onChange(of: presetsError) {
+            if let presetsError { AccessibilityNotification.Announcement(presetsError).post() }
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didChangeScreenParametersNotification)) {
             _ in
             mainDisplayHeight = Self.currentMainDisplayHeight()
         }
+    }
+
+    private var presetsDetail: String {
+        editingPresets && presetsText != formattedPresets
+            ? "Press Return to apply. Fractions of the display width, narrowest first."
+            : "Fractions of the display width, narrowest first. \(cycleShortcutText)"
+    }
+
+    private var formattedPresets: String {
+        model.settings.widthPresets.map { $0.formatted(.number.precision(.fractionLength(0...4))) }
+            .joined(separator: ", ")
     }
 
     private var motionDetail: String {
@@ -342,7 +349,7 @@ struct LayoutSettings: View {
         SettingsRow(title: title) {
             Stepper(value: gap(key), in: MiriSettings.gapRange) {
                 LiveText("\(model.settings[keyPath: key]) pt")
-                    .font(.system(size: 13))
+                    .font(.rowTitle)
                     .monospacedDigit()
                     .foregroundStyle(Palette.primaryText)
             }
@@ -355,8 +362,7 @@ struct LayoutSettings: View {
     }
 
     private func showPresets() {
-        presetsText = model.settings.widthPresets.map { $0.formatted(.number.precision(.fractionLength(0...4))) }
-            .joined(separator: ", ")
+        presetsText = formattedPresets
     }
 
     private func applyPresets() {
@@ -371,7 +377,9 @@ struct LayoutSettings: View {
             }
             try candidate.validate()
             presetsError = nil
-            model.update { $0.widthPresets = candidate.widthPresets }
+            if candidate.widthPresets != model.settings.widthPresets {
+                model.update { $0.widthPresets = candidate.widthPresets }
+            }
         } catch {
             presetsError = error.description
         }
@@ -409,55 +417,75 @@ struct SetupSettings: View {
                     ForEach(recommended) { check in SetupCheckItem(check: check) { page = .gestures } }
                 }
             }
-            Text("Each Open button shows the System Settings page to change. Miri never changes it for you.")
-                .font(.system(size: 12))
+            Text("Open buttons show the System Settings page to change. Miri never changes it for you.")
+                .font(.detail)
                 .foregroundStyle(Palette.secondaryText)
         }
         .onAppear { model.refreshSetup() }
     }
 }
 
-/// One setup check: its result as a colored symbol, what it found, and a way to fix it.
+/// One setup check: its result as a colored symbol, what it found, and the ways to fix it below that.
 struct SetupCheckItem: View {
     let check: SetupCheck
     /// Opens Settings > Gestures for a gesture check. Set Up Miri lists only start blockers, so it passes nothing.
     var openGestures: (() -> Void)?
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(alignment: .top, spacing: 12) {
             symbol
+                .accessibilityHidden(true)
+                .padding(.top, 1)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 13))
+                    .font(.rowTitle)
                     .foregroundStyle(Palette.primaryText)
+                    .accessibilityValue(result)
                 if let detail {
                     Text(detail)
-                        .font(.system(size: 11.5))
+                        .font(.detail)
                         .foregroundStyle(Palette.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                if check.status != .passed, check.isGestureCheck || check.settingsURL != nil {
+                    HStack(spacing: 8) {
+                        Spacer(minLength: 0)
+                        if check.isGestureCheck, let openGestures {
+                            Button("Open Gestures", action: openGestures)
+                        }
+                        if let url = check.settingsURL {
+                            Button(check.isGestureCheck ? "Open Trackpad Settings" : "Open System Settings") {
+                                NSWorkspace.shared.open(url)
+                            }
+                            .help("Open the System Settings page for \(check.title)")
+                        }
+                    }
+                    .padding(.top, 8)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if check.isGestureCheck, check.status != .passed, let openGestures {
-                Button("Open Gestures", action: openGestures)
-            }
-            if let url = check.settingsURL, check.status != .passed {
-                Button("Open") { NSWorkspace.shared.open(url) }
-                    .help("Open the System Settings page for \(check.title)")
-            }
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .frame(minHeight: 50)
+        .padding(.vertical, 12)
+        .frame(minHeight: 44)
         .accessibilityElement(children: .contain)
     }
 
     private var title: String {
         switch check.status {
-        case .passed: check.title
-        case .problem: check.title
+        case .passed, .problem: check.title
         case .notChecked: "\(check.title): Not checked"
         case .unableToVerify: "\(check.title): Unable to verify"
+        }
+    }
+
+    /// The result VoiceOver reads with the title, because the colored symbol is hidden from it.
+    private var result: String {
+        switch check.status {
+        case .passed: check.isGestureCheck ? "No conflict found" : "Passed"
+        case .problem: check.blocksStart ? "Blocks start" : "Recommended change"
+        case .notChecked: "Not checked"
+        case .unableToVerify: "Unable to verify"
         }
     }
 
@@ -474,26 +502,23 @@ struct SetupCheckItem: View {
         case .passed:
             Image(systemName: "checkmark")
                 .font(.system(size: 9, weight: .heavy))
-                .foregroundStyle(.white)
+                .foregroundStyle(Palette.onStatus)
                 .frame(width: 18, height: 18)
                 .background(Palette.green, in: .circle)
-                .accessibilityLabel("Passed")
         case .problem:
-            NoticeGlyph(kind: .warning, size: 18).accessibilityLabel("Problem")
+            NoticeGlyph(kind: .warning, size: 18)
         case .unableToVerify:
-            Text("?")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(.white)
+            Image(systemName: "questionmark")
+                .font(.system(size: 10, weight: .heavy))
+                .foregroundStyle(Palette.onStatus)
                 .frame(width: 18, height: 18)
                 .background(Palette.orange, in: .circle)
-                .accessibilityLabel("Unable to verify")
         case .notChecked:
             Image(systemName: "minus")
                 .font(.system(size: 9, weight: .bold))
                 .foregroundStyle(Palette.gray)
                 .frame(width: 18, height: 18)
                 .overlay(Circle().strokeBorder(Palette.gray, lineWidth: 1.2))
-                .accessibilityLabel("Not checked")
         }
     }
 }
@@ -511,38 +536,48 @@ struct DiagnosticsSettings: View {
             subtitle: "Engine health and local logs. Nothing leaves your Mac unless you copy it yourself."
         ) {
             if case .failed(let reason) = model.engineState {
-                Banner(kind: .error, title: "Window management stopped after engine failures", detail: reason)
+                Banner(kind: .error, title: "Window management stopped after engine failures", detail: reason) {
+                    Button("Restart Engine") { model.restart() }
+                        .buttonStyle(.borderedProminent)
+                        .tint(Palette.accentFill)
+                }
             }
             engineFacts
             VStack(alignment: .leading, spacing: 8) {
                 SectionLabel(title: "Engine log") {
                     Button("Show Logs in Finder") { model.showLogsInFinder() }
-                        .buttonStyle(.link)
-                        .font(.system(size: 12))
+                        .buttonStyle(.plain)
+                        .font(.detail)
+                        .foregroundStyle(Palette.accentText)
                 }
-                ScrollView([.vertical, .horizontal]) {
+                ScrollView {
                     Text(logTail.isEmpty ? "The log is empty." : logTail.joined(separator: "\n"))
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundStyle(Palette.logText)
                         .lineSpacing(3)
-                        .fixedSize()
+                        .fixedSize(horizontal: false, vertical: true)
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(14)
                 }
-                .defaultScrollAnchor(.bottomLeading)
+                .defaultScrollAnchor(.bottom)
                 .frame(height: 200)
                 .background(Palette.logBackground, in: .rect(cornerRadius: 10))
+                // The log box is dark in both appearances, so its scroll bar is too.
+                .environment(\.colorScheme, .dark)
             }
             HStack(spacing: 10) {
-                if model.engineState != .stopped {
+                // A failed engine has Restart Engine in the banner above.
+                switch model.engineState {
+                case .running, .restarting:
                     Button("Restart Engine") { model.restart() }
                         .buttonStyle(.borderedProminent)
-                        .tint(Palette.accent)
+                        .tint(Palette.accentFill)
+                case .failed, .stopped: EmptyView()
                 }
                 Button("Copy Diagnostics…") { presenter?.show(.diagnostics) }
                 Text("Logs stay on this Mac. Miri sends no telemetry.")
-                    .font(.system(size: 12))
+                    .font(.detail)
                     .foregroundStyle(Palette.secondaryText)
             }
             SettingsSection("Developer") {
@@ -574,12 +609,12 @@ struct DiagnosticsSettings: View {
     private func fact(_ title: String, value: String, dot: Color?) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .font(.system(size: 12))
+                .font(.detail)
                 .foregroundStyle(Palette.secondaryText)
             HStack(spacing: 7) {
                 if let dot { Circle().fill(dot).frame(width: 8, height: 8) }
                 LiveText(value)
-                    .font(.system(size: 19, weight: .bold))
+                    .font(.heroTitle)
                     .foregroundStyle(Palette.primaryText)
             }
         }
@@ -610,6 +645,20 @@ struct DiagnosticsSettings: View {
         logTail = model.log.tail(maximum: 6_000)
             .split(separator: "\n", omittingEmptySubsequences: true)
             .suffix(40)
-            .map(String.init)
+            .map { Self.shortLine(String($0)) }
+    }
+
+    /// Keeps the local time, level, and message of an engine log line, and drops the date and the Rust source location.
+    /// For example `2026-11-07T09:49:05.422397Z  INFO paneru::ecs: src/ecs.rs:17: Message` becomes
+    /// `20:19:05  INFO  Message` in Melbourne. A line in another shape stays as it is.
+    static func shortLine(_ line: String) -> String {
+        guard
+            let match = line.wholeMatch(
+                of: /(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})\S*\s+(\w+)\s+\S+?:\s+(?:\S+\.rs:\d+:\s+)?(.*)/),
+            let date = try? Date(String(match.1) + "Z", strategy: .iso8601)
+        else { return line }
+        let time = date.formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits).second(.twoDigits))
+        let level = String(match.2).padding(toLength: 5, withPad: " ", startingAt: 0)
+        return "\(time)  \(level) \(match.3)"
     }
 }

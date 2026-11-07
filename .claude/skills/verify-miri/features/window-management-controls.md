@@ -11,13 +11,13 @@ The status line says what the engine does, and Miri remembers a Stop across laun
 - `stop-shortcut`: ⌃⌥Q stops window management from any app. After a Stop, the shortcut does nothing until Start.
 - `saved-stop`: after a Stop, the next launch leaves windows unmanaged until Start.
 - `crash-limit`: after 3 engine crashes within five minutes, the status reads `Stopped after repeated engine failures`, with the reason `The engine stopped unexpectedly 3 times within five minutes. Miri stopped restarting it.`
-- `waiting`: while a setup check blocks start, the status reads `Waiting: <check title>`, and `Stop Window Management` shows where Start would be. [Setup checks](setup-checks.md) drives it.
+- `waiting`: while a setup check blocks start, the status reads `Waiting: <check title>`, and `Cancel Automatic Start` shows where Start would be. It stops Miri as `Stop Window Management` does. [Setup checks](setup-checks.md) drives it.
 
 ## How to get to it (user POV)
 
-- The Settings sidebar button, on every page. It reads `Stop Miri`, `Start Miri`, or `Restart Miri`, and its help text is `Stop Window Management`, `Start Window Management`, or `Restart Engine`, which `axdo press` matches.
+- The Settings sidebar button, on every page. It reads `Stop Window Management`, `Start Window Management`, `Cancel Automatic Start`, or `Restart Engine`, the same titles as the page and menu buttons.
 - Settings > General: the banner buttons while management is paused, waiting for setup, or failed.
-- Settings > Diagnostics: `Restart Engine` while the engine runs, restarts, or has failed.
+- Settings > Diagnostics: `Restart Engine` while the engine runs or restarts, and in the failure banner after it failed.
 - The menu bar menu, which Sam's bar manager hides on this Mac.
   It shows the same status and buttons, and a `Configuration error on line N: …` line when `config.toml` has an error.
 - The Stop shortcut, ⌃⌥Q unless `[miri].stop_shortcut` sets another chord.
