@@ -19,6 +19,7 @@ struct InitialSetupView: View {
                     ForEach(model.startBlockers) { check in SetupCheckItem(check: check) }
                 }
                 swipe
+                SettingsSection("Dock") { ShowInDockRow(model: model) }
             }
             .padding(.horizontal, 40)
             .padding(.top, 52)

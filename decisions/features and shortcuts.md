@@ -137,6 +137,8 @@ Preserve Paneru's required copyright and MIT license notices alongside Miri's GP
 ## Expose app controls and automation
 
 Provide menu bar controls and an app icon in the macOS Dock that open Miri's settings.
+The Dock icon is on by default, and Settings > General can hide it.
+Miri follows that setting every time it starts, however it starts, and every time the setting changes.
 Provide start, stop, restart, update, and diagnostic controls.
 
 V1 includes a setup checker and access to the engine log.

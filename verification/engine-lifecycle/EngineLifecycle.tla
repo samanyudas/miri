@@ -113,7 +113,7 @@ Exited(t, ok) ==
 (* AppModel, Sources/Miri/AppModel.swift.                                   *)
 (***************************************************************************)
 
-\* start(), AppModel.swift:348. refreshSetup() reads t.blocked.
+\* start(), AppModel.swift:361. refreshSetup() reads t.blocked.
 \* While blocked, a supervisor that does not run is stopped, which cancels a pending crash restart.
 AppStart(t, ok) ==
   LET u == [t EXCEPT !.stoppedByUser = FALSE, !.blockersShown = t.blocked] IN
@@ -123,17 +123,17 @@ AppStart(t, ok) ==
   ELSE LET w == [u EXCEPT !.polling = FALSE] IN    \* setupPoll?.cancel(); setupPoll = nil
        IF w.engine = "running" THEN w ELSE RestartManually(w, ok)
 
-\* cancelSetupPoll(), AppModel.swift:435.
+\* cancelSetupPoll(), AppModel.swift:448.
 CancelPoll(t) == [t EXCEPT !.polling = FALSE, !.blockersShown = FALSE]
 
-\* stop(), AppModel.swift:365.
+\* stop(), AppModel.swift:378.
 AppStop(t, ok) == SupStop(CancelPoll([t EXCEPT !.stoppedByUser = TRUE]), "none", ok)
 
-\* restart(), AppModel.swift:377.
+\* restart(), AppModel.swift:390.
 AppRestart(t, ok) == LET u == [t EXCEPT !.stoppedByUser = FALSE] IN
   IF u.engine = "running" THEN RestartManually(u, ok) ELSE AppStart(u, ok)
 
-\* prepareToQuit(completion:), AppModel.swift:384, with AppDelegate's reply as the completion.
+\* prepareToQuit(completion:), AppModel.swift:397, with AppDelegate's reply as the completion.
 PrepareToQuit(t, ok) == SupStop(CancelPoll(t), "quitReply", ok)
 
 (***************************************************************************)
@@ -147,29 +147,29 @@ Step(t) == s' = t /\ Len(t.completions) <= MaxPending
 \* Records your command before the code runs, so the rules can compare the result with it.
 You(command) == [s EXCEPT !.wantsStopped = (command = "stop")]
 
-\* applicationDidFinishLaunching -> AppModel.launch(), AppModel.swift:97.
+\* applicationDidFinishLaunching -> AppModel.launch(), AppModel.swift:100.
 AppLaunches == s.app = "launching" /\ \E ok \in BOOLEAN :
   Step(IF s.stoppedByUser THEN [s EXCEPT !.app = "open"] ELSE AppStart([s EXCEPT !.app = "open"], ok))
 
 \* The menu, the Settings sidebar, Settings > General, and Set Up Miri show Start only
 \* while the engine is stopped and nothing blocks start.
-\* Views.swift:88, SettingsWindow.swift:153, SettingsPages.swift:108, InitialSetup.swift:78.
+\* Views.swift:88, SettingsWindow.swift:153, SettingsPages.swift:109, InitialSetup.swift:79.
 YouPressStart == Open /\ s.engine = "stopped" /\ ~s.blockersShown /\ \E ok \in BOOLEAN : Step(AppStart(You("start"), ok))
 
 \* Stop shows while the engine runs or restarts, or while it is stopped and Miri waits for setup.
-\* Views.swift:78, :85, SettingsWindow.swift:147, :151, SettingsPages.swift:94.
+\* Views.swift:78, :85, SettingsWindow.swift:147, :151, SettingsPages.swift:95.
 YouPressStop == Open /\ (s.engine \in {"running", "restarting"} \/ (s.engine = "stopped" /\ s.blockersShown))
                 /\ \E ok \in BOOLEAN : Step(AppStop(You("stop"), ok))
 
 \* Restart is enabled only while the engine runs or has failed. While it restarts after a crash,
 \* the menu and Settings > Diagnostics disable Restart, and the other places hide it.
-\* Views.swift:76, :81, SettingsWindow.swift:149, SettingsPages.swift:83, :568, :602, InitialSetup.swift:83.
+\* Views.swift:76, :81, SettingsWindow.swift:149, SettingsPages.swift:84, :569, :603, InitialSetup.swift:84.
 YouPressRestart == Open /\ s.engine \in {"running", "failed"} /\ \E ok \in BOOLEAN : Step(AppRestart(You("restart"), ok))
 
-\* The Stop window manager shortcut, StopShortcut.swift, calls stopFromShortcut(), AppModel.swift:372.
+\* The Stop window manager shortcut, StopShortcut.swift, calls stopFromShortcut(), AppModel.swift:385.
 YouPressStopShortcut == Open /\ ~s.stoppedByUser /\ \E ok \in BOOLEAN : Step(AppStop(You("stop"), ok))
 
-\* keyboardLayoutChanged(), AppModel.swift:119. The model gives every change a new layout.
+\* keyboardLayoutChanged(), AppModel.swift:122. The model gives every change a new layout.
 LayoutChanges == Open /\ \E ok \in BOOLEAN :
   Step(IF s.engine = "running" /\ ~s.stoppedByUser THEN RestartManually(s, ok) ELSE s)
 
@@ -197,7 +197,7 @@ KillTimerFires == s.app # "quit" /\ s.killArmed /\
 RestartTimerFires == s.app # "quit" /\ s.restartArmed /\ \E ok \in BOOLEAN :
   Step(SupStart([s EXCEPT !.restartArmed = FALSE], ok))
 
-\* pollSetupUntilReady() wakes after setupPollInterval, AppModel.swift:418.
+\* pollSetupUntilReady() wakes after setupPollInterval, AppModel.swift:431.
 PollTick == s.app # "quit" /\ s.polling /\ \E ok \in BOOLEAN :
   Step(IF s.blocked
        THEN [s EXCEPT !.blockersShown = TRUE]
