@@ -30,6 +30,16 @@ class VerifyEngineLifecycleTest(unittest.TestCase):
         self.assertRegex(sync, r"^[0-9a-f]{7,40}$")
         self.assertIn("Sources/MiriCore/Engine.swift", files)
 
+    def test_every_file_with_a_start_stop_or_restart_control_is_covered(self):
+        _, files = verify.coverage()
+        callers = {
+            str(path.relative_to(verify.ROOT))
+            for path in (verify.ROOT / "Sources").rglob("*.swift")
+            if re.search(r"\bmodel\.(start|stop|restart|stopFromShortcut)\(\)", path.read_text(encoding="utf-8"))
+        }
+        self.assertTrue(callers, "found no lifecycle controls, so the pattern no longer matches the code")
+        self.assertLessEqual(callers, set(files), "model these controls in EngineLifecycle.tla, then cover their files")
+
     def test_a_trace_prints_one_line_for_each_step(self):
         output = """Error: Invariant StopStands is violated.
 State 1: <Initial predicate>
