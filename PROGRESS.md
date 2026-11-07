@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-07 on branch `feat/109-ui-polish`, based on `main` at `82bd6b7a`
+Updated: 2026-11-08 on branch `docs/329-closeout`, based on `main` at `bff3ed5b`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -54,6 +54,16 @@ Next: the audit's [Remaining blockers](docs/v1-audit.md#remaining-blockers) tabl
 [#341](https://github.com/samanyudas/miri/pull/341) pinned engine `5f01554`, the merge of paneru#138, and reached `main` at `13cd4aaa`.
 #339 closed on 7 November 2026 after `verify-miri` run `20261107-201447` passed all 5 criteria on a build with the same tree as `13cd4aaa`.
 Starting the engine no longer moves the pointer onto the first focused window.
+
+## Engine CI flake in a slice photo landing test
+
+[#329](https://github.com/samanyudas/miri/issues/329): `slice_photos::the_column_ahead_waits_for_a_slow_window_landing_under_its_photo` failed at random under CI load.
+The defect was in the test only, so the engine Miri ships did not change.
+Each test pass ran about 4 engine frames per 20 ms of real sleep, so the slow app's 40 ms write left only about 10 ms before the 250 ms landing timeout.
+[paneru#135](https://github.com/samanyudas/paneru/pull/135) holds the slow app's writes through each pass and lands them after it, so the result no longer depends on the machine's speed.
+It reached `main` through the engine pin `5f01554` of [#341](https://github.com/samanyudas/miri/pull/341), so [#335](https://github.com/samanyudas/miri/pull/335), which pinned only `762eb7e`, closed as superseded.
+#329 closed on 8 November 2026 after the test passed 50 of 50 runs, 16 at once, at pin `5f01554`, and `main` CI on `bff3ed5b` passed it.
+To force a flaky test of this kind, use the mock's write holds: real-time delays flipped the old test only about half the time.
 
 ## Drops on another display that macOS tiles
 
