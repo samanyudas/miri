@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `docs/345-closed`, based on `main` at `ddcaeb6b`
+Updated: 2026-11-08 on branch `feat/331-command-shift-ends`, based on `main` at `91865afa`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -46,6 +46,17 @@ CI on `6edff137` failed once on the flaky engine test `slice_photos::a_press_whi
 The audit is a snapshot of `6edff137`.
 The owning documents and issues hold the current state.
 Next: the audit's [Remaining blockers](docs/v1-audit.md#remaining-blockers) table, and the stale [known limitations](docs/limitations.md) rows that the audit lists.
+
+## Command-Shift Left and Right stay on their display
+
+[#331](https://github.com/samanyudas/miri/issues/331): Sam decided on 7 November 2026 that ⌃⌥⌘⇧← and ⌃⌥⌘⇧→ move the column to the first or last place on its own display and never cross to another display.
+The defaults now bind those chords, and the H, L, A, and D chords, to `window_swap_first` and `window_swap_last`, at default bindings version 6.
+Settings no longer lists the four actions that moved or focused to an end or else to the next display.
+An upgrade removes those defaults only where the user kept them unchanged, and a custom key on a removed action stays under Other Engine Bindings.
+[paneru#137](https://github.com/samanyudas/paneru/pull/137) makes a swap to the end that the column already holds do nothing, instead of swapping inside its stack, and the branch pins its merge `b5ae4bd`.
+`verify-miri` runs `20261107-013236` on `main` and `20261107-013347` on this change showed the old crossing and the new behavior.
+Next: Sam merges the PR, then a check on the `main` build and closing #331.
+[#332](https://github.com/samanyudas/miri/issues/332), [#333](https://github.com/samanyudas/miri/issues/333), and [#334](https://github.com/samanyudas/miri/issues/334) hold the rest of the 7 November shortcut decisions.
 
 ## Pointer stays after a click
 
