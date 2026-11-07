@@ -43,15 +43,15 @@ final class WindowPresenter {
             case .initialSetup: ("Set Up Miri", AnyView(InitialSetupView(model: model)))
             }
         let host = NSHostingController(rootView: content.environment(\.presenter, self))
-        // Settings and Set Up Miri draw under their title bars, so their sizes come from the design.
+        // Settings and Copy Diagnostics draw under their title bars at the design's size.
+        // Set Up Miri draws under its title bar too, and takes the height of its content.
         let designSize: NSSize? =
             switch kind {
             case .settings: NSSize(width: 880, height: 640)
-            case .initialSetup: NSSize(width: 600, height: 500)
             case .diagnostics: NSSize(width: 640, height: 540)
-            case .permissionExperiment: nil
+            case .initialSetup, .permissionExperiment: nil
             }
-        if designSize != nil { host.sizingOptions = [] }
+        host.sizingOptions = designSize == nil ? [.preferredContentSize] : []
         let window = NSWindow(contentViewController: host)
         window.title = title
         window.styleMask = [.titled, .closable, .miniaturizable]
@@ -59,11 +59,13 @@ final class WindowPresenter {
         window.setFrameAutosaveName("Miri.\(kind)")
         let restored = window.setFrameUsingName("Miri.\(kind)")
         if !restored { window.center() }
-        if let designSize {
+        if designSize != nil || kind == .initialSetup {
             // The content runs under the title bar, so the window buttons sit on it, as in the design.
             window.styleMask.insert(.fullSizeContentView)
             window.titlebarAppearsTransparent = true
             window.titleVisibility = .hidden
+        }
+        if let designSize {
             // The content covers the whole frame, so the frame is the design's size. Keep the saved top-left corner.
             var size = designSize
             if kind == .settings {

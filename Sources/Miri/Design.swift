@@ -431,6 +431,7 @@ struct RowSwitch: View {
 }
 
 /// A keyboard shortcut drawn as a key cap.
+/// VoiceOver reads it in words, such as "Control Option Left Arrow" for ⌃⌥←.
 struct KeyCap: View {
     let label: String
     var minWidth: CGFloat = 40
@@ -442,8 +443,26 @@ struct KeyCap: View {
             .lineLimit(1)
             .padding(.horizontal, 7)
             .frame(minWidth: minWidth, minHeight: 22)
+            .accessibilityLabel(Self.spoken(label))
             .background(Palette.chip, in: .rect(cornerRadius: 5))
             .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Palette.groupRing, lineWidth: 0.5))
+    }
+}
+
+extension KeyCap {
+    /// A shortcut label in words, so VoiceOver does not read modifier and arrow symbols by their glyph names.
+    static func spoken(_ label: String) -> String {
+        let words: [Character: String] = [
+            "⌃": "Control", "⌥": "Option", "⇧": "Shift", "⌘": "Command",
+            "←": "Left Arrow", "→": "Right Arrow", "↑": "Up Arrow", "↓": "Down Arrow",
+        ]
+        var parts: [String] = []
+        var rest = ""
+        for character in label {
+            if let word = words[character] { parts.append(word) } else { rest.append(character) }
+        }
+        if !rest.isEmpty { parts.append(rest) }
+        return parts.joined(separator: " ")
     }
 }
 

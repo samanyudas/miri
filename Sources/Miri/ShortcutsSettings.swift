@@ -342,7 +342,7 @@ struct ShortcutChip: View {
                 .opacity(showsRemove || removeFocused ? 1 : 0)
                 .offset(x: 6, y: -7)
                 .help("Remove \(label)")
-                .accessibilityLabel("Remove \(label) from \(action)")
+                .accessibilityLabel("Remove \(KeyCap.spoken(label)) from \(action)")
             }
             .fixedSize()
     }

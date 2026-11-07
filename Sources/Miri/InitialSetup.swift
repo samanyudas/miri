@@ -11,25 +11,26 @@ struct InitialSetupView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 22) {
-                    header
-                    ConfigurationIssueNotice(model: model)
-                    SettingsSection("Window management") {
-                        status
-                        ForEach(model.startBlockers) { check in SetupCheckItem(check: check) }
-                    }
-                    swipe
+            VStack(alignment: .leading, spacing: 22) {
+                header
+                ConfigurationIssueNotice(model: model)
+                SettingsSection("Window management") {
+                    status
+                    ForEach(model.startBlockers) { check in SetupCheckItem(check: check) }
                 }
-                .padding(.horizontal, 40)
-                .padding(.top, 52)
-                .padding(.bottom, 24)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                swipe
             }
-            .scrollContentBackground(.hidden)
+            .padding(.horizontal, 40)
+            .padding(.top, 52)
+            .padding(.bottom, 24)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            // Any spare height goes above the footer, so the footer always sits on the bottom edge.
+            Spacer(minLength: 0)
             footer
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // The window takes the height of its content, so it fits with or without blocking checks and never scrolls.
+        .frame(width: 600)
+        .frame(maxHeight: .infinity)
         .ignoresSafeArea()
         .background(Palette.content)
         .onAppear { model.refreshSetup() }
@@ -60,7 +61,8 @@ struct InitialSetupView: View {
         HStack(spacing: 12) {
             stateGlyph.accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                Text(model.statusText)
+                // The blocking checks are listed right below, so the title does not repeat the first one.
+                Text(model.startBlockers.isEmpty ? model.statusText : "Waiting for setup")
                     .font(.rowTitle.weight(.semibold))
                     .foregroundStyle(Palette.primaryText)
                     .modifier(StatusValue(value: model.statusText))
@@ -149,11 +151,9 @@ struct InitialSetupView: View {
     private var testDetail: String {
         switch model.gestureState {
         case .off: "Off."
-        case .enabled(let date): "On. You confirmed it on \(date.formatted(date: .abbreviated, time: .omitted))."
-        case .needsTest:
-            model.engineState.isRunning
-                ? "The swipe stays off until you test it."
-                : "Start window management first, then test the swipe. It stays off until you do."
+        case .enabled(let date): AppModel.confirmedSentence(date)
+        // The same reason as on the Gestures page, such as "Start window management to test the swipe."
+        case .needsTest: model.gestureTestBlocker ?? "The swipe stays off until you test it."
         case .conflict: "Off, because macOS uses this swipe."
         }
     }

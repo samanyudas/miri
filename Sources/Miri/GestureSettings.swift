@@ -32,7 +32,7 @@ struct GestureSettings: View {
                 if case .conflict(let message) = model.gestureState {
                     NoticeRow(kind: .warning, text: message) {
                         if let url = conflictCheck?.settingsURL {
-                            Button("Open System Settings") { NSWorkspace.shared.open(url) }
+                            Button("Open Trackpad Settings") { NSWorkspace.shared.open(url) }
                         }
                     }
                 }
@@ -114,8 +114,7 @@ struct GestureSettings: View {
         switch model.gestureState {
         case .off:
             "Choose three or four fingers below to use the swipe."
-        case .enabled(let date):
-            "You confirmed on \(date.formatted(date: .abbreviated, time: .omitted)) that the strip follows your fingers."
+        case .enabled(let date): AppModel.confirmedSentence(date)
         case .needsTest(let reason, let detectionUnavailable):
             [
                 reason.sentence, "Test it to turn it on.",
@@ -168,6 +167,11 @@ private struct TrackpadPicture: View {
 }
 
 extension AppModel {
+    /// Says when the user confirmed the swipe, in the same words on the Gestures page and in Set Up Miri.
+    static func confirmedSentence(_ date: Date) -> String {
+        "You confirmed on \(date.formatted(date: .abbreviated, time: .omitted)) that the strip follows your fingers."
+    }
+
     /// One line about the strip swipe, which Settings and the test tools read as its status.
     var gestureSummary: String {
         switch gestureState {

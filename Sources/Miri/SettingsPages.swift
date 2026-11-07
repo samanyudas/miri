@@ -88,7 +88,7 @@ struct GeneralSettings: View {
             Banner(
                 kind: .warning, title: "Waiting for setup",
                 detail:
-                    "\(model.startBlockers.first?.title ?? "A required check") must pass first. Miri then starts by itself.",
+                    "The \u{201C}\(model.startBlockers.first?.title ?? "required")\u{201D} check must pass first. Miri then starts by itself.",
                 accessibilityValue: model.statusText
             ) {
                 Button(AppModel.cancelAutomaticStartTitle) { model.stop() }
@@ -99,8 +99,10 @@ struct GeneralSettings: View {
         case .stopped:
             Banner(
                 kind: .neutral, title: "Window management is stopped",
-                detail:
-                    "Your windows stay where they are. Miri stays stopped, even after you log in again, until you start it.",
+                // Only a stop the user chose is remembered across log-ins, so only that one promises it.
+                detail: model.stoppedByUser
+                    ? "Your windows stay where they are. Miri stays stopped, even after you log in again, until you start it."
+                    : "Your windows stay where they are.",
                 accessibilityValue: model.statusText
             ) {
                 Button("Start Window Management") { model.start() }
@@ -402,7 +404,13 @@ struct SetupSettings: View {
             subtitle:
                 "Miri checks your Mac for anything that blocks window management. It never changes your settings for you."
         ) {
-            Button("Check Again", systemImage: "arrow.clockwise") { model.refreshSetup() }
+            Button("Check Again", systemImage: "arrow.clockwise") {
+                model.refreshSetup()
+                let count = model.setupReviewCount
+                AccessibilityNotification.Announcement(
+                    count == 0 ? "Checked. Nothing to review." : "Checked. \(count) to review."
+                ).post()
+            }
         } content: {
             if !model.startBlockers.isEmpty {
                 Banner(

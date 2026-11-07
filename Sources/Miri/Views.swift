@@ -73,6 +73,7 @@ struct MenuContent: View {
         switch model.engineState {
         case .running, .restarting:
             Button("Restart Engine") { model.restart() }
+                .disabled(!model.engineState.isRunning)
             Button("Stop Window Management") { model.stop() }
             Text("Your windows stay where they are.")
         case .failed:
