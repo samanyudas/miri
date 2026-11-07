@@ -7,9 +7,9 @@ Miri writes each change to `[bindings]` in `config.toml`, and the engine reloads
 ## Sub-features
 
 - `add`: the + button on a row shows a `Type Shortcut` chip and adds the next key press that holds Control, Option, or Command.
-  Its accessibility label is `Add Shortcut` on every row, and its help text is `Add a shortcut for <action title>`.
+  Its accessibility label is `Add Shortcut for <action title>`, and its help text is `Add a shortcut for <action title>`.
   Escape cancels, and so does switching to another app.
-- `remove`: the × button on a chip, labeled `Remove <chord>` with the chord in menu symbols such as `⌃⌥H`, removes that chord.
+- `remove`: the × button on a chip, labeled `Remove <chord in words> from <action title>`, such as `Remove Control Option H from Focus column left`, with help text `Remove <chord>` in menu symbols such as `Remove ⌃⌥H`, removes that chord. It shows while the pointer is on the row.
 - `conflict`: a chord that another action holds shows the inline notice `<chord> is already used by <action title>.` and changes nothing.
   A chord that macOS holds asks in an alert, with `Use Anyway` and `Cancel`.
 - `filter`: the `Filter shortcuts` field narrows the list.
@@ -31,7 +31,7 @@ Preconditions:
 Below, `CFG` is `~/Library/Application Support/Miri Developer/config.toml`.
 
 - **Record the start.** Save `ls "$CFG.backups"` to a file in the run folder, and count the `Reloading configuration file` lines in `engine.log`.
-- **Show the page.** Run `V ax test press Shortcuts`, then `V ax test dump | rg "Remove|Add Shortcut"`. It lists one `Remove <chord>` button per chord, and one `Add Shortcut` button per row with its help text.
+- **Show the page.** Run `V ax test press Shortcuts`, then `V ax test dump | rg "Remove|Add Shortcut"`. It lists one `Remove <chord in words> from <action>` button per chord, and one `Add Shortcut for <action>` button per row with its help text.
 - **Remove a chord.** Run `V ax test press "Remove ⌃⌥H"`. `diff <run>/backup/config.toml "$CFG"` shows `ctrl+alt-h` gone from `window_focus_west`, and `engine.log` has one more `Reloading configuration file` line.
 - **Prove the engine reloaded it.** Open two new fixtures. With the right one focused, `V key ctrl+alt-h` leaves focus where it is. `V key ctrl+alt-leftarrow` and `V focused --wait-for` the left fixture exit 0.
 - **Add a chord.** Run `V settings`, so Miri is the frontmost app, and press the row's + button by its help text, such as `V ax test press "Add a shortcut for Focus column left"`. The dump shows `Type Shortcut`. Run `V key ctrl+alt-h`. The diff shows the chord added at the end of the row's list.

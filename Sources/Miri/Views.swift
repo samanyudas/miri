@@ -8,10 +8,10 @@ extension AppModel {
         switch engineState {
         case .running: "Managing windows"
         case .restarting: "Restarting the engine…"
-        case .failed: "Stopped after repeated engine failures"
+        case .failed: "Stopped after engine failures"
         case .stopped:
             if let blocker = startBlockers.first {
-                "Waiting: \(blocker.title)"
+                "Waiting for setup: \(blocker.title)"
             } else {
                 "Stopped"
             }
@@ -72,16 +72,17 @@ struct MenuContent: View {
         Divider()
         switch model.engineState {
         case .running, .restarting:
+            Button("Restart Engine") { model.restart() }
+                .disabled(!model.engineState.isRunning)
             Button("Stop Window Management") { model.stop() }
             Text("Your windows stay where they are.")
-            Button("Restart Engine") { model.restart() }
         case .failed:
             Button("Restart Engine") { model.restart() }
             Button("Show Logs in Finder") { model.showLogsInFinder() }
         case .stopped where !model.startBlockers.isEmpty:
-            Button("Open Setup Checker…") { presenter.showSettings(.setup) }
-            Button("Stop Window Management") { model.stop() }
-            Text("Miri starts by itself when setup is done.")
+            Button(setupCheckerTitle) { presenter.showSettings(.setup) }
+            Text(AppModel.startsWhenReadySentence)
+            Button(AppModel.cancelAutomaticStartTitle) { model.stop() }
         case .stopped:
             Button("Start Window Management") { model.start() }
         }
@@ -97,84 +98,19 @@ struct MenuContent: View {
             .keyboardShortcut("q")
     }
 
-    /// Names how many setup checks found a problem, as the Setup badge in Settings does.
+    /// Names how many setup checks to review, with the same count as the Setup badge in Settings.
     private var setupCheckerTitle: String {
-        let problems = model.setupChecks.filter { if case .problem = $0.status { true } else { false } }.count
-        return problems == 0 ? "Setup Checker…" : "Setup Checker… (\(problems) to review)"
-    }
-}
-
-/// Shows a configuration problem above the settings it affects.
-struct ConfigurationIssueBanner: View {
-    let model: AppModel
-
-    var body: some View {
-        if let issue = model.configurationIssue {
-            Section {
-                Label {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(issue.description)
-                        Text("Miri does not change the file until it is fixed.").foregroundStyle(.secondary)
-                    }
-                } icon: {
-                    Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.yellow)
-                }
-                Button("Show Configuration File in Finder") {
-                    NSWorkspace.shared.activateFileViewerSelecting([model.paths.configuration])
-                }
-            }
-        }
-    }
-}
-
-struct SetupCheckRow: View {
-    let check: SetupCheck
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
-            symbol.frame(width: 18)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(check.title)
-                if let detail {
-                    Text(detail).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            Spacer(minLength: 12)
-            Text(label).foregroundStyle(.secondary)
-            if let url = check.settingsURL, check.status != .passed {
-                Button("Open") { NSWorkspace.shared.open(url) }
-            }
-        }
-    }
-
-    private var label: String {
-        switch check.status {
-        case .passed: check.isGestureCheck ? "No conflict found" : "Passed"
-        case .problem: check.blocksStart ? "Blocks start" : "Problem"
-        case .notChecked: "Not checked"
-        case .unableToVerify: "Unable to verify"
-        }
-    }
-
-    private var detail: String? {
-        switch check.status {
-        case .passed: nil
-        case .problem(let text), .notChecked(let text), .unableToVerify(let text): text
-        }
-    }
-
-    @ViewBuilder private var symbol: some View {
-        switch check.status {
-        case .passed: Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-        case .problem: Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.yellow)
-        case .notChecked, .unableToVerify: Image(systemName: "questionmark.circle").foregroundStyle(.secondary)
-        }
+        let count = model.setupReviewCount
+        return count == 0 ? "Setup Checker…" : "Setup Checker… (\(count) to review)"
     }
 }
 
 extension SetupCheck {
     /// A gesture check only looks for conflicts. Only a gesture test turns the swipe on, so it never says Passed.
     var isGestureCheck: Bool { id == .fourFingerGesture || id == .threeFingerGesture }
+
+    /// Whether the check found something the user should look at.
+    var needsAttention: Bool { status != .passed }
 }
 
 /// Previews the redacted report before anything reaches the clipboard.
@@ -184,33 +120,54 @@ struct DiagnosticsView: View {
     @State private var copied = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Review the report before copying it.")
-                .font(.headline)
-            Text("Window titles, document paths, user names, and the configuration file are removed.")
-                .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Review the report before you copy it")
+                    .font(.heroTitle)
+                    .foregroundStyle(Palette.primaryText)
+                    .accessibilityAddTraits(.isHeader)
+                Text("Miri removes window titles, document paths, user names, and the configuration file.")
+                    .font(.detail)
+                    .foregroundStyle(Palette.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             ScrollView {
                 Text(report)
-                    .font(.system(.body, design: .monospaced))
+                    .font(.mono)
+                    .foregroundStyle(Palette.primaryText)
+                    .lineSpacing(2)
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(8)
+                    .padding(14)
             }
-            .background(.background.secondary, in: .rect(cornerRadius: 6))
-            HStack {
+            .background(Palette.group, in: .rect(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Palette.groupRing, lineWidth: 1))
+            HStack(spacing: 10) {
                 Button("Refresh") { refresh() }
                 Spacer()
-                if copied { Text("Copied").foregroundStyle(.secondary) }
+                if copied {
+                    Label("Copied", systemImage: "checkmark")
+                        .font(.detail)
+                        .foregroundStyle(Palette.secondaryText)
+                }
                 Button("Copy to Clipboard") {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(report, forType: .string)
                     copied = true
+                    AccessibilityNotification.Announcement("Copied to the clipboard").post()
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(Palette.accentFill)
                 .keyboardShortcut(.defaultAction)
             }
         }
-        .padding(20)
-        .frame(width: 640, height: 520)
+        .padding(.horizontal, 32)
+        .padding(.top, 44)
+        .padding(.bottom, 20)
+        // The window presenter sets the size, and the content runs under the title bar.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea()
+        .background(Palette.content)
         .onAppear(perform: refresh)
     }
 

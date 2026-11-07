@@ -43,23 +43,54 @@ final class WindowPresenter {
             case .initialSetup: ("Set Up Miri", AnyView(InitialSetupView(model: model)))
             }
         let host = NSHostingController(rootView: content.environment(\.presenter, self))
-        // Settings draws under its title bar, so its size comes from the design, not from the view plus the title bar.
-        if kind == .settings { host.sizingOptions = [] }
+        // Settings and Copy Diagnostics draw under their title bars at the design's size.
+        // Set Up Miri draws under its title bar too, and takes the height of its content.
+        let designSize: NSSize? =
+            switch kind {
+            case .settings: NSSize(width: 880, height: 640)
+            case .diagnostics: NSSize(width: 640, height: 540)
+            case .initialSetup, .permissionExperiment: nil
+            }
+        host.sizingOptions = designSize == nil ? [.preferredContentSize] : []
         let window = NSWindow(contentViewController: host)
         window.title = title
         window.styleMask = [.titled, .closable, .miniaturizable]
         window.isReleasedWhenClosed = false
         window.setFrameAutosaveName("Miri.\(kind)")
-        if !window.setFrameUsingName("Miri.\(kind)") { window.center() }
-        if kind == .settings {
-            // The sidebar runs under the title bar, so the window buttons sit on it, as in the design.
+        let restored = window.setFrameUsingName("Miri.\(kind)")
+        if !restored { window.center() }
+        if designSize != nil || kind == .initialSetup {
+            // The content runs under the title bar, so the window buttons sit on it, as in the design.
             window.styleMask.insert(.fullSizeContentView)
             window.titlebarAppearsTransparent = true
             window.titleVisibility = .hidden
+        }
+        if let designSize {
             // The content covers the whole frame, so the frame is the design's size. Keep the saved top-left corner.
+            var size = designSize
+            if kind == .settings {
+                // Settings grows for long pages such as Shortcuts, and a little wider for larger text.
+                window.styleMask.insert(.resizable)
+                window.contentMinSize = NSSize(width: designSize.width, height: 560)
+                window.contentMaxSize = NSSize(width: 1100, height: CGFloat.greatestFiniteMagnitude)
+                // It opens at least the design's size, and keeps a larger size the user chose.
+                if restored {
+                    size.width = min(max(window.frame.width, designSize.width), 1100)
+                    size.height = max(window.frame.height, designSize.height)
+                }
+            }
+            if kind == .diagnostics {
+                // The report is long, so Copy Diagnostics can grow to show more of it.
+                window.styleMask.insert(.resizable)
+                window.contentMinSize = designSize
+                if restored {
+                    size.width = max(window.frame.width, designSize.width)
+                    size.height = max(window.frame.height, designSize.height)
+                }
+            }
             var frame = window.frame
-            frame.origin.y += frame.height - 640
-            frame.size = NSSize(width: 880, height: 640)
+            frame.origin.y += frame.height - size.height
+            frame.size = size
             window.setFrame(frame, display: false)
         }
         if kind == .initialSetup {

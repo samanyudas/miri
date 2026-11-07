@@ -60,7 +60,7 @@ When a new finding appears, list its rule there, so it prints as `finding` and d
 3. `QuitLeavesNoEngine`: you press Restart, then quit within 3 seconds. `stopCompletions` holds `start` and then the quit reply. The engine exits, the queued `start` launches a new engine, and then the app quits with that engine running.
    Reproduced in part: the engine log showed Miri launching an engine after SIGTERM, but that engine was gone within 50 ms of the app's exit. It has no issue of its own, because it has the same cause as #234.
    Fixed by the fix for #234: the quit's `stop(completion:)` clears `restartAfterStop`.
-4. `WaitingIsShown`: the engine is `.failed`, a setup check blocks start, and you press Restart. `AppModel.start()` begins the setup poll, but `engineState` stays `.failed`, so `statusText` says "Stopped after repeated engine failures" and the menu shows no Stop button to cancel the wait.
+4. `WaitingIsShown`: the engine is `.failed`, a setup check blocks start, and you press Restart. `AppModel.start()` begins the setup poll, but `engineState` stays `.failed`, so `statusText` says "Stopped after engine failures" and the menu shows no Stop button to cancel the wait.
    Reproduced live: [#236](https://github.com/samanyudas/miri/issues/236).
    Fixed in [#241](https://github.com/samanyudas/miri/pull/241): `start()` stops a supervisor that does not run before it polls, and Start becomes Stop while a check blocks start, so the rule holds.
 

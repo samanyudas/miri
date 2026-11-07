@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-07 on branch `feat/109-settings-rehaul`, based on `main` at `82bd6b7a`
+Updated: 2026-11-07 on branch `feat/109-ui-polish`, based on `main` at `82bd6b7a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -26,9 +26,14 @@ Live runs on 7 November 2026 showed every page in light and dark mode, the runni
 Not yet seen live: Launch at login, and a confirmed gesture test, which needs Sam's trackpad.
 Branch `feat/109-menu-bar-rehaul`, stacked on it, restyles the menu bar menu and the gesture test sheet.
 The menu keeps Restart Engine, Copy Diagnostics, and the failed and restarting menus. Setup Checker opens Settings on Setup.
-The gesture test sheet keeps the app's wording, "The Strip Followed My Fingers" and "It Did Not Work", because Sam has not picked one.
+The gesture test sheet answers its question "Did the strip follow your fingers?" with Yes and No, a UI council change that Sam can revert.
 A live run on 7 November 2026 checked the running, waiting, and failed menus, both Setup entries, and the sheet while it waits and while it asks for confirmation.
-The Set Up Miri window keeps its old look until a later PR.
+Branch `feat/109-ui-polish` ([#343](https://github.com/samanyudas/miri/pull/343)), stacked on the menu branch, polishes the whole UI through eight rounds of a design council (GPT Sol and Claude Sonnet).
+Both rated every aspect 9 out of 10 on `531c9ac9`.
+It rebuilds Set Up Miri and Copy Diagnostics in the Settings design, and changes contrast, state names, the type scale, keyboard and VoiceOver support, and copy across Settings and the menu.
+Captures came from the real app with `-managementStopped YES`, and the waiting state with a stand-in process named `yabai`; the running, restarting, and failed states and the gesture sheet were not recaptured on this branch.
+`make check` was not run on this branch; `swift test` and `make lint` pass.
+Optional council nits left for Sam: the waiting menu caption order, "Stopped by you" in the status line, the Check Again timer on a second press, the LiveText workaround, a red glyph for blocking checks, a hint on the disabled Test Gesture button, a stronger field border, and a spoken shortcut in the recording announcement.
 
 ## V1 completion audit
 
