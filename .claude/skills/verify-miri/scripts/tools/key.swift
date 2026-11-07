@@ -17,4 +17,10 @@ for down in [true, false] {
     event.post(tap: .cghidEventTap)
     usleep(30_000)
 }
+// Release the modifiers, as a keyboard does when the keys come up. Without this, the HID state keeps reporting
+// them as held, and the next synthetic click inherits them: a leftover Command and Option made a click Hide Others.
+guard let release = CGEvent(keyboardEventSource: source, virtualKey: 55, keyDown: false) else { exit(1) }
+release.type = .flagsChanged
+release.flags = []
+release.post(tap: .cghidEventTap)
 print("posted key \(code) flags 0x\(String(flags, radix: 16)) at \(Date().timeIntervalSince1970)")

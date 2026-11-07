@@ -148,6 +148,8 @@ The layout check in step 6 is the proof.
   `osascript quit` reached the app 3.8 s late in one run, and missed a 2-second race.
 - Compile a stand-in process, as `V standin` does. macOS kills a copy of an Apple binary, such as `/bin/sleep` renamed `yabai`, at launch with exit status 137.
 - Synthetic shortcuts match only when the event flags carry the left-side modifier bits. Arrow keys also need the numeric-pad and Fn flags that a real keyboard sets. `V key` sets both.
+- A synthetic event built from the HID system state inherits any modifier that state still reports as held.
+  `V key` therefore releases its modifiers after each press. Set the flags of your own synthetic clicks to none, because a click with a leftover Command and Option hides every other app.
 - A process started from a background shell cannot become the frontmost app. Open a window through `open` on an app bundle, as `V fixture` does.
 - The engine floats every window that cannot resize, and column shortcuts skip floating windows.
 - Find processes by executable path, never by name or by a match anywhere in the command line. A shell whose command line contains a Miri path matches `pgrep -f`. In a 2026-11-05 run, such a match most likely killed the run's own shell. Compare the executable column of `ps -axo pid=,comm=` with the full path.
