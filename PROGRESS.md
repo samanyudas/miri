@@ -18,6 +18,7 @@ The public release path and the complete acceptance runs follow.
 
 [#349](https://github.com/samanyudas/miri/issues/349): Settings > General has a **Show in Dock** switch, on by default, stored as `[miri].show_in_dock`.
 The bundle sets `LSUIElement`, so Miri starts with no Dock icon and becomes a regular app only when the setting is on.
+The Welcome to Miri window offers the same switch in a **Dock** section ([#358](https://github.com/samanyudas/miri/issues/358)).
 `AppModel.settings` applies the policy on every new value, so launch, the switch, and a `config.toml` edit all take the same path.
 `verify-miri` runs `20261108-014936` (main `91865afa`, before) and `20261108-015020` (feature build, after) passed every criterion except the login-item launch, which needs Sam to log out and log in.
 An Accessibility press on the switch lets Settings drop behind, while a real mouse click keeps it in front. A prototype showed that only the deprecated `activate(ignoringOtherApps:)` keeps the front after an Accessibility press, so VoiceOver users may see Settings drop behind.

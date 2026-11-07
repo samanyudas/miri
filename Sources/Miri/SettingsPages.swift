@@ -47,12 +47,7 @@ struct GeneralSettings: View {
                         }
                     }
                 }
-                SettingsRow(title: "Show in Dock", detail: "When off, open Miri from its menu bar icon.") {
-                    RowSwitch(
-                        label: "Show in Dock",
-                        isOn: Binding(
-                            get: { model.settings.showInDock }, set: { on in model.update { $0.showInDock = on } }))
-                }
+                ShowInDockRow(model: model)
             }
             SettingsSection("Configuration file") {
                 SettingsRow(
@@ -718,5 +713,18 @@ struct DiagnosticsSettings: View {
         let time = date.formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits).second(.twoDigits))
         let level = String(match.2).padding(toLength: 5, withPad: " ", startingAt: 0)
         return "\(time)  \(level) \(match.3)"
+    }
+}
+
+/// The Show in Dock switch, in Settings > General and in the first-launch window.
+struct ShowInDockRow: View {
+    let model: AppModel
+
+    var body: some View {
+        SettingsRow(title: "Show in Dock", detail: "When off, open Miri from its menu bar icon.") {
+            RowSwitch(
+                label: "Show in Dock",
+                isOn: Binding(get: { model.settings.showInDock }, set: { on in model.update { $0.showInDock = on } }))
+        }
     }
 }
