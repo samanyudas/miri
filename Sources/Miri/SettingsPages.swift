@@ -47,6 +47,12 @@ struct GeneralSettings: View {
                         }
                     }
                 }
+                SettingsRow(title: "Show in Dock", detail: "When off, open Miri from its menu bar icon.") {
+                    RowSwitch(
+                        label: "Show in Dock",
+                        isOn: Binding(
+                            get: { model.settings.showInDock }, set: { on in model.update { $0.showInDock = on } }))
+                }
             }
             SettingsSection("Configuration file") {
                 SettingsRow(
