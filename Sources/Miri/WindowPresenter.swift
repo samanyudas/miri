@@ -47,7 +47,7 @@ final class WindowPresenter {
         let designSize: NSSize? =
             switch kind {
             case .settings: NSSize(width: 880, height: 640)
-            case .initialSetup: NSSize(width: 600, height: 540)
+            case .initialSetup: NSSize(width: 600, height: 500)
             case .diagnostics: NSSize(width: 640, height: 540)
             case .permissionExperiment: nil
             }
@@ -71,8 +71,20 @@ final class WindowPresenter {
                 window.styleMask.insert(.resizable)
                 window.contentMinSize = NSSize(width: designSize.width, height: 560)
                 window.contentMaxSize = NSSize(width: 1100, height: CGFloat.greatestFiniteMagnitude)
-                // It opens at least as tall as the design, and keeps a taller height the user chose.
-                if restored { size.height = max(window.frame.height, designSize.height) }
+                // It opens at least the design's size, and keeps a larger size the user chose.
+                if restored {
+                    size.width = min(max(window.frame.width, designSize.width), 1100)
+                    size.height = max(window.frame.height, designSize.height)
+                }
+            }
+            if kind == .diagnostics {
+                // The report is long, so Copy Diagnostics can grow to show more of it.
+                window.styleMask.insert(.resizable)
+                window.contentMinSize = designSize
+                if restored {
+                    size.width = max(window.frame.width, designSize.width)
+                    size.height = max(window.frame.height, designSize.height)
+                }
             }
             var frame = window.frame
             frame.origin.y += frame.height - size.height

@@ -87,7 +87,8 @@ struct GeneralSettings: View {
         case .stopped where !model.startBlockers.isEmpty:
             Banner(
                 kind: .warning, title: "Waiting for setup",
-                detail: "Miri starts by itself when the required checks in Setup pass.",
+                detail:
+                    "\(model.startBlockers.first?.title ?? "A required check") must pass first. Miri then starts by itself.",
                 accessibilityValue: model.statusText
             ) {
                 Button(AppModel.cancelAutomaticStartTitle) { model.stop() }
@@ -562,6 +563,7 @@ struct DiagnosticsSettings: View {
                     .padding(14)
                 }
                 .defaultScrollAnchor(.bottom)
+                .accessibilityLabel("Engine log")
                 .frame(height: 200)
                 .background(Palette.logBackground, in: .rect(cornerRadius: 10))
                 // The log box is dark in both appearances, so its scroll bar is too.
@@ -570,10 +572,11 @@ struct DiagnosticsSettings: View {
             HStack(spacing: 10) {
                 // A failed engine has Restart Engine in the banner above.
                 switch model.engineState {
-                case .running, .restarting:
+                // A healthy engine needs no next step, so Restart Engine is a plain button here.
+                case .running:
                     Button("Restart Engine") { model.restart() }
-                        .buttonStyle(.borderedProminent)
-                        .tint(Palette.accentFill)
+                case .restarting:
+                    Button("Restart Engine") {}.disabled(true)
                 case .failed, .stopped: EmptyView()
                 }
                 Button("Copy Diagnostics…") { presenter?.show(.diagnostics) }
@@ -656,6 +659,8 @@ struct DiagnosticsSettings: View {
                 Text(match.1).fixedSize()
                 Text(match.2).fixedSize(horizontal: false, vertical: true)
             }
+            // VoiceOver reads the time and the message as one line.
+            .accessibilityElement(children: .combine)
         } else {
             Text(line).fixedSize(horizontal: false, vertical: true)
         }

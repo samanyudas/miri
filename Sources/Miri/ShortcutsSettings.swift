@@ -80,7 +80,7 @@ struct ShortcutsSettings: View {
                                         .foregroundStyle(Palette.primaryText)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                     ForEach(other.chords, id: \.self) { chord in
-                                        KeyCap(label: model.keyLayout.label(for: chord))
+                                        KeyCap(label: model.keyLayout.label(for: chord), minWidth: 52)
                                     }
                                 }
                                 .padding(.horizontal, 14)
@@ -340,7 +340,7 @@ struct ShortcutChip: View {
                 .buttonStyle(.borderless)
                 .focused($removeFocused)
                 .opacity(showsRemove || removeFocused ? 1 : 0)
-                .offset(x: 9, y: -9)
+                .offset(x: 6, y: -7)
                 .help("Remove \(label)")
                 .accessibilityLabel("Remove \(label) from \(action)")
             }

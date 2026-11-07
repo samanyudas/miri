@@ -174,10 +174,7 @@ struct SettingsSidebar: View {
     }
 
     private func badge(for page: SettingsView.Page) -> Int {
-        guard page == .setup else { return 0 }
-        return model.setupChecks.filter {
-            if case .problem = $0.status { true } else { false }
-        }.count
+        page == .setup ? model.setupReviewCount : 0
     }
 }
 
@@ -221,6 +218,13 @@ private struct SidebarRow: View {
 }
 
 extension AppModel {
+    /// How many setup checks to review: only the blockers while Miri waits for setup, otherwise every problem.
+    /// The Setup badge and the menu use this count, so they never disagree with the waiting banner.
+    var setupReviewCount: Int {
+        if !startBlockers.isEmpty { return startBlockers.count }
+        return setupChecks.filter { if case .problem = $0.status { true } else { false } }.count
+    }
+
     /// The action that keeps Miri stopped while it waits for setup, which would otherwise start it by itself.
     static let cancelAutomaticStartTitle = "Cancel Automatic Start"
 

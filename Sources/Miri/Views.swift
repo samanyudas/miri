@@ -97,10 +97,10 @@ struct MenuContent: View {
             .keyboardShortcut("q")
     }
 
-    /// Names how many setup checks found a problem, as the Setup badge in Settings does.
+    /// Names how many setup checks to review, with the same count as the Setup badge in Settings.
     private var setupCheckerTitle: String {
-        let problems = model.setupChecks.filter { if case .problem = $0.status { true } else { false } }.count
-        return problems == 0 ? "Setup Checker…" : "Setup Checker… (\(problems) to review)"
+        let count = model.setupReviewCount
+        return count == 0 ? "Setup Checker…" : "Setup Checker… (\(count) to review)"
     }
 }
 
@@ -160,7 +160,7 @@ struct DiagnosticsView: View {
                 .keyboardShortcut(.defaultAction)
             }
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 32)
         .padding(.top, 44)
         .padding(.bottom, 20)
         // The window presenter sets the size, and the content runs under the title bar.

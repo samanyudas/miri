@@ -295,7 +295,9 @@ enum NoticeKind {
         case .neutral: "pause.fill"
         case .success: "checkmark"
         case .info: "info"
-        case .warning, .error: "exclamationmark"
+        case .warning: "exclamationmark"
+        // A different shape from the warning, so the two never differ by color alone.
+        case .error: "xmark"
         }
     }
 
