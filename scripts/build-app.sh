@@ -76,6 +76,7 @@ cat > "$bundle/Contents/Info.plist" <<'PLIST'
 <key>CFBundleShortVersionString</key><string>0.0.1</string>
 <key>LSMinimumSystemVersion</key><string>27.0</string>
 <key>NSHighResolutionCapable</key><true/>
+<key>LSUIElement</key><true/>
 </dict></plist>
 PLIST
 # A stable identity keeps the Accessibility grant across rebuilds. Without one, ad-hoc signing still works.

@@ -40,13 +40,14 @@ Read the index, then use the matching feature file as the recipe.
 ## Surfaces without a map entry
 
 These user-facing surfaces have no recipe yet.
-`axdo press` reaches buttons, tabs, and radio buttons only, so a control marked "config" needs a `config.toml` edit as setup and a `V ax test dump` or `V snapshot` as proof.
+`axdo press` reaches buttons, tabs, radio buttons, and switches only, so a control marked "config" needs a `config.toml` edit as setup and a `V ax test dump` or `V snapshot` as proof.
 
 - Configuration error: the menu line and the Settings banner with `Show Configuration File in Finder` ([Views.swift](../../../../Sources/Miri/Views.swift), [Settings.swift](../../../../Sources/MiriCore/Settings.swift)). Drivable with a broken `config.toml`.
 - Diagnostics page and `Copy Diagnostics…` window ([SettingsPages.swift](../../../../Sources/Miri/SettingsPages.swift), [Views.swift](../../../../Sources/Miri/Views.swift)). Drivable with `ax press`.
 - Window recovery: windows that management stops leave on screen ([WindowRestorer.swift](../../../../Sources/Miri/WindowRestorer.swift)). Drivable with fixtures and Stop.
 - Layout page: gaps, width presets, `Animate window movement`, windows per stack, maximized window side, and the shared-edge switch ([SettingsPages.swift](../../../../Sources/Miri/SettingsPages.swift)). Config. The shared-edge switch also needs Screen Recording permission and two displays.
-- General page: `Launch at login` ([SettingsPages.swift](../../../../Sources/Miri/SettingsPages.swift)). Never drive `Launch at login`, which changes Sam's login items.
+- General page: `Launch at login` and `Show in Dock` ([SettingsPages.swift](../../../../Sources/Miri/SettingsPages.swift)). Never drive `Launch at login`, which changes Sam's login items.
+  `Show in Dock` is drivable with `ax press "Show in Dock"`, and each press writes `show_in_dock` to `config.toml`.
 - Gestures page and `Test Gesture…` ([GestureSettings.swift](../../../../Sources/Miri/GestureSettings.swift)). The test needs Sam's trackpad.
 - Initial setup, the Set Up Miri window on first launch ([InitialSetup.swift](../../../../Sources/Miri/InitialSetup.swift)). Showing it again needs the launch argument `-initialSetupDone NO`, which `V begin` does not pass.
 - The menu bar menu ([Views.swift](../../../../Sources/Miri/Views.swift)). `axdo` cannot open it. [Start, stop, and restart](window-management-controls.md) has the System Events route.

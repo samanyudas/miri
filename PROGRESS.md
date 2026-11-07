@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `fix/issue-323`, based on `main` at `91865afa`
+Updated: 2026-11-08 on branch `feat/349-show-in-dock`, based on `main` at `7c2b9a28`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,15 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Show in Dock
+
+[#349](https://github.com/samanyudas/miri/issues/349): Settings > General has a **Show in Dock** switch, on by default, stored as `[miri].show_in_dock`.
+The bundle sets `LSUIElement`, so Miri starts with no Dock icon and becomes a regular app only when the setting is on.
+`AppModel.settings` applies the policy on every new value, so launch, the switch, and a `config.toml` edit all take the same path.
+`verify-miri` runs `20261108-014936` (main `91865afa`, before) and `20261108-015020` (feature build, after) passed every criterion except the login-item launch, which needs Sam to log out and log in.
+An Accessibility press on the switch lets Settings drop behind, while a real mouse click keeps it in front. A prototype showed that only the deprecated `activate(ignoringOtherApps:)` keeps the front after an Accessibility press, so VoiceOver users may see Settings drop behind.
+Next: Sam merges the PR, then an agent verifies on `main` and Sam checks the login-item launch.
 
 ## Settings window redesign
 
