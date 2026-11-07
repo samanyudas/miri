@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `docs/345-closed`, based on `main` at `ddcaeb6b`
+Updated: 2026-11-08 on branch `fix/issue-323`, based on `main` at `91865afa`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -46,6 +46,14 @@ CI on `6edff137` failed once on the flaky engine test `slice_photos::a_press_whi
 The audit is a snapshot of `6edff137`.
 The owning documents and issues hold the current state.
 Next: the audit's [Remaining blockers](docs/v1-audit.md#remaining-blockers) table, and the stale [known limitations](docs/limitations.md) rows that the audit lists.
+
+## Reopened windows stay on the desktop in use
+
+[#323](https://github.com/samanyudas/miri/issues/323): reopening Settings or Copy Diagnostics switched the display back to the desktop where that window was last open, and a saved frame kept it on its old display.
+Branch `fix/issue-323` gives each `WindowPresenter` window `.moveToActiveSpace` and centers a hidden window on `NSScreen.main` when its frame is on another screen, which is triage option 1.
+`verify-miri` runs `20261108-012140` and `20261108-014840` failed all 3 criteria on `main` `91865afa`, and run `20261108-014458` passed all 3 on the fix.
+Next: Sam merges the PR, then an agent rechecks the criteria on `main` and closes #323.
+Set Up Miri was not driven, because it shares `show` with the two windows that were.
 
 ## Pointer stays after a click
 
