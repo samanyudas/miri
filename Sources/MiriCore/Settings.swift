@@ -24,6 +24,9 @@ public struct MiriSettings: Equatable, Sendable {
     /// Lets the engine show the contents of a hidden window on an edge next to another display. It needs Screen
     /// Recording permission.
     public var sharedEdgeSlices = false
+    /// Moves the pointer to the centre of a window that a Miri command focuses. A click, Cmd-Tab, or an app that
+    /// brings its own window forward leaves the pointer in place.
+    public var mouseFollowsFocus = false
 
     public init() {}
 
@@ -77,6 +80,9 @@ public struct MiriSettings: Equatable, Sendable {
         }
         if let value = document.value(at: ["options", "shared_edge_slices"]) {
             sharedEdgeSlices = try Self.boolean(value, key: "options.shared_edge_slices")
+        }
+        if let value = document.value(at: ["options", "mouse_follows_focus"]) {
+            mouseFollowsFocus = try Self.boolean(value, key: "options.mouse_follows_focus")
         }
         try validate()
     }
@@ -143,6 +149,7 @@ public struct MiriSettings: Equatable, Sendable {
         try set(stackLimit.tomlValue, ["options"], "stack_limit")
         try set(.string(maximizedWindowSide.rawValue), ["options"], "maximized_window_side")
         try set(.boolean(sharedEdgeSlices), ["options"], "shared_edge_slices")
+        try set(.boolean(mouseFollowsFocus), ["options"], "mouse_follows_focus")
         if animations && !reduceMotion {
             if result.value(at: ["options", "animation_speed"]) == nil {
                 try set(.float(Self.animationSpeed), ["options"], "animation_speed")

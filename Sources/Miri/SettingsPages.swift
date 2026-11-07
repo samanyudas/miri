@@ -49,6 +49,19 @@ struct GeneralSettings: View {
                 }
                 ShowInDockRow(model: model)
             }
+            SettingsSection("Pointer") {
+                SettingsRow(
+                    title: "Move the pointer to windows that Miri focuses",
+                    detail:
+                        "Focus shortcuts, display focus, and workspace switches move it to the window's centre. Clicks and Cmd-Tab leave it in place."
+                ) {
+                    RowSwitch(
+                        label: "Move the pointer to windows that Miri focuses",
+                        isOn: Binding(
+                            get: { model.settings.mouseFollowsFocus },
+                            set: { value in model.update { $0.mouseFollowsFocus = value } }))
+                }
+            }
             SettingsSection("Configuration file") {
                 SettingsRow(
                     title: (model.paths.configuration.path as NSString).abbreviatingWithTildeInPath,

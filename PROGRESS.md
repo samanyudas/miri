@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `docs/323-closed`, based on `main` at `68122acc`
+Updated: 2026-11-08 on branch `feat/mff-setting`, based on `main` at `6338594c`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -73,6 +73,11 @@ Set Up Miri was not driven, because it shares `show` with the two windows that w
 [#341](https://github.com/samanyudas/miri/pull/341) pinned engine `5f01554`, the merge of paneru#138, and reached `main` at `13cd4aaa`.
 #339 closed on 7 November 2026 after `verify-miri` run `20261107-201447` passed all 5 criteria on a build with the same tree as `13cd4aaa`.
 Starting the engine no longer moves the pointer onto the first focused window.
+
+[#360](https://github.com/samanyudas/miri/issues/360): Sam moved the switch for this key into v1 on 8 November 2026.
+Branch `feat/mff-setting` adds **Move the pointer to windows that Miri focuses** to Settings > General, off by default, writing `[options].mouse_follows_focus`.
+`verify-miri` run `20261108-025335` on that branch passed all 6 criteria.
+Next: Sam merges the PR, then an agent rechecks the switch on `main` and closes #360.
 
 ## Engine CI flake in a slice photo landing test
 
