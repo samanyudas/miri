@@ -63,7 +63,7 @@ struct GestureSettings: View {
                     .font(.heroTitle)
                     .foregroundStyle(Palette.primaryText)
                     .modifier(StatusValue(value: model.gestureSummary))
-                LiveText(heroDetail)
+                Text(heroDetail)
                     .font(.detail)
                     .foregroundStyle(Palette.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
@@ -76,8 +76,13 @@ struct GestureSettings: View {
                         .buttonStyle(.borderedProminent)
                         .tint(Palette.accentFill)
                 } else {
+                    // macOS shows no tooltip on a disabled button, so the help sits on a wrapper around it.
                     Button("Test Gesture…") {}
                         .disabled(true)
+                        .accessibilityHint(model.gestureTestBlocker ?? "")
+                        .padding(1)
+                        .contentShape(.rect)
+                        .help(model.gestureTestBlocker ?? "")
                 }
                 if model.gestureVerification != nil {
                     Button("Report a macOS Gesture Change") { confirmingReport = true }
@@ -288,13 +293,13 @@ struct GestureTestSheet: View {
             switch test.phase {
             case .idle, .watching(movementSeen: false):
                 ProgressView().controlSize(.small)
-                LiveText("Waiting for the strip to move…")
+                Text("Waiting for the strip to move…")
             case .watching(movementSeen: true):
                 checkmark
-                LiveText("The strip moved. Keep swiping left and right.")
+                Text("The strip moved. Keep swiping left and right.")
             case .passedAwaitingConfirmation:
                 checkmark
-                LiveText("The strip moved both ways.")
+                Text("The strip moved both ways.")
             case .failed, .inconclusive:
                 EmptyView()
             }

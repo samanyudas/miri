@@ -115,7 +115,7 @@ struct SettingsSidebar: View {
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Circle().fill(model.stateColor).frame(width: 7, height: 7)
                     // A longer state, such as Stopped after engine failures, wraps to a second line.
-                    LiveText(model.sidebarStatus)
+                    Text(model.sidebarStatus)
                         .font(.small)
                         .foregroundStyle(Palette.secondaryText)
                         .lineLimit(2)

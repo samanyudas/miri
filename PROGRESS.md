@@ -33,7 +33,7 @@ Both rated every aspect 9 out of 10 on `531c9ac9`.
 It rebuilds Set Up Miri and Copy Diagnostics in the Settings design, and changes contrast, state names, the type scale, keyboard and VoiceOver support, and copy across Settings and the menu.
 Captures came from the real app with `-managementStopped YES`, and the waiting state with a stand-in process named `yabai`; the running, restarting, and failed states and the gesture sheet were not recaptured on this branch.
 `make check` was not run on this branch; `swift test` and `make lint` pass.
-Optional council nits left for Sam: the waiting menu caption order, "Stopped by you" in the status line, the Check Again timer on a second press, the LiveText workaround, a red glyph for blocking checks, a hint on the disabled Test Gesture button, a stronger field border, and a spoken shortcut in the recording announcement.
+The eight optional round 8 nits are done too: menu caption order, "Stopped by you" in the status line, the Check Again timer, plain text instead of `LiveText` outside the gap steppers, red glyphs for blocking checks, help on the disabled Test Gesture button, a stronger field border, and a spoken shortcut in the recording announcement.
 
 ## V1 completion audit
 

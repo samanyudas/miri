@@ -307,7 +307,7 @@ struct ShortcutsSettings: View {
         switch model.addShortcut(chord, to: action, allowingSystemConflict: allowingSystemConflict) {
         case .added:
             notice = nil
-            AccessibilityNotification.Announcement("\(label) added for \(action.title).").post()
+            AccessibilityNotification.Announcement("\(KeyCap.spoken(label)) added for \(action.title).").post()
         case .failed:
             notice = nil
         case .rejected(.usedBy(let owner)):
@@ -342,7 +342,9 @@ struct ShortcutChip: View {
                 }
                 .buttonStyle(.borderless)
                 .focused($removeFocused)
-                .opacity(showsRemove || removeFocused ? 1 : 0)
+                // Not 0: SwiftUI drops a fully transparent view from accessibility and keyboard focus,
+                // and VoiceOver, Full Keyboard Access, and the test tools must still reach this button.
+                .opacity(showsRemove || removeFocused ? 1 : 0.01)
                 .offset(x: 6, y: -7)
                 .help("Remove \(label)")
                 .accessibilityLabel("Remove \(KeyCap.spoken(label)) from \(action)")

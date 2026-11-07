@@ -142,7 +142,7 @@ private struct StatusHero: View {
                     .font(.heroTitle)
                     .foregroundStyle(Palette.primaryText)
                     .modifier(StatusValue(value: title))
-                LiveText(detail)
+                Text(detail)
                     .font(.detail)
                     .foregroundStyle(Palette.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
@@ -399,6 +399,7 @@ struct SetupSettings: View {
     let model: AppModel
     @Binding var page: SettingsView.Page
     @State private var checked = false
+    @State private var resetChecked: Task<Void, Never>?
 
     var body: some View {
         SettingsPage(
@@ -414,9 +415,11 @@ struct SetupSettings: View {
                 ).post()
                 // The button says Checked for a moment, so a check that changed nothing still shows it ran.
                 checked = true
-                Task {
+                // A second press restarts the two seconds instead of ending them early.
+                resetChecked?.cancel()
+                resetChecked = Task {
                     try? await Task.sleep(for: .seconds(2))
-                    checked = false
+                    if !Task.isCancelled { checked = false }
                 }
             }
         } content: {
@@ -524,8 +527,9 @@ struct SetupCheckItem: View {
         switch check.status {
         case .passed:
             NoticeGlyph(kind: .success, size: 18)
+        // A check that blocks start is an error, so it reads apart from a recommended change by color and shape.
         case .problem:
-            NoticeGlyph(kind: .warning, size: 18)
+            NoticeGlyph(kind: check.blocksStart ? .error : .warning, size: 18)
         case .unableToVerify:
             Image(systemName: "questionmark")
                 .font(.system(size: 10, weight: .heavy))
@@ -639,7 +643,7 @@ struct DiagnosticsSettings: View {
                 .foregroundStyle(Palette.secondaryText)
             HStack(spacing: 7) {
                 if let dot { Circle().fill(dot).frame(width: 8, height: 8) }
-                LiveText(value)
+                Text(value)
                     .font(.heroTitle)
                     .foregroundStyle(muted ? Palette.secondaryText : Palette.primaryText)
                     .lineLimit(1)

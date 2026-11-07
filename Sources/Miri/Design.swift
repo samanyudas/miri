@@ -19,6 +19,8 @@ enum Palette {
     static let content = dynamic(0xFFFFFF, 0x1E1E20)
     static let group = dynamic(0xFFFFFF, 0x2A2A2D)
     static let groupRing = dynamic(0xE5E5EA, 0x3A3A3E, contrast: (0xA8A8AF, 0x6A6A70))
+    /// The border of a text field, stronger than a group ring so the field reads as a place to type.
+    static let fieldRing = dynamic(0xC4C4CA, 0x56565C, contrast: (0x8E8E95, 0x86868C))
     static let divider = dynamic(0xEFEFF2, 0x353538, contrast: (0xC4C4CA, 0x58585E))
     static let chip = dynamic(0xF2F2F5, 0x3A3A3D)
     /// The fill of a neutral notice. Darker than `chip` in dark mode so secondary text on it reaches 4.5:1.
@@ -227,7 +229,7 @@ struct SettingsRow<Control: View>: View {
                     .font(monospacedTitle ? .mono : .rowTitle)
                     .foregroundStyle(Palette.primaryText)
                 if let detail {
-                    LiveText(detail)
+                    Text(detail)
                         .font(.detail)
                         .foregroundStyle(Palette.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
@@ -377,7 +379,7 @@ struct Banner<Actions: View>: View {
                         .foregroundStyle(Palette.primaryText)
                         .accessibilityLabel(kind.spokenPrefix + title)
                         .modifier(StatusValue(value: accessibilityValue))
-                    LiveText(detail)
+                    Text(detail)
                         .font(.detail)
                         .foregroundStyle(Palette.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
@@ -592,7 +594,7 @@ extension View {
             .background(Palette.group, in: .rect(cornerRadius: 7))
             .overlay(
                 RoundedRectangle(cornerRadius: 7)
-                    .strokeBorder(focused ? Palette.accent : Palette.groupRing, lineWidth: focused ? 2 : 1))
+                    .strokeBorder(focused ? Palette.accent : Palette.fieldRing, lineWidth: focused ? 2 : 1))
     }
 }
 

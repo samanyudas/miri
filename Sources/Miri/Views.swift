@@ -13,7 +13,7 @@ extension AppModel {
             if let blocker = startBlockers.first {
                 "Waiting for setup: \(blocker.title)"
             } else {
-                "Stopped"
+                stoppedByUser ? "Stopped by you" : "Stopped"
             }
         }
     }
@@ -44,8 +44,9 @@ extension Image {
     }
 }
 
-/// Text that keeps VoiceOver current inside a `LabeledContent`.
-/// On macOS 27, `LabeledContent` keeps the first accessibility value of its content, so this text restates its string as its value.
+/// Text that keeps VoiceOver current inside a control's label, such as a `Stepper` or a `LabeledContent`.
+/// On macOS 27, such a control keeps the first accessibility value of its label, so this text restates its string as its value.
+/// Use plain `Text` elsewhere: it updates by itself, and a restated value makes VoiceOver read the text twice.
 struct LiveText: View {
     let string: String
 
@@ -81,8 +82,8 @@ struct MenuContent: View {
             Button("Show Logs in Finder") { model.showLogsInFinder() }
         case .stopped where !model.startBlockers.isEmpty:
             Button(setupCheckerTitle) { presenter.showSettings(.setup) }
-            Text(AppModel.startsWhenReadySentence)
             Button(AppModel.cancelAutomaticStartTitle) { model.stop() }
+            Text(AppModel.startsWhenReadySentence)
         case .stopped:
             Button("Start Window Management") { model.start() }
         }

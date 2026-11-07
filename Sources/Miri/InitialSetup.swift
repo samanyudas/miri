@@ -137,6 +137,10 @@ struct InitialSetupView: View {
                 SettingsRow(title: "Swipe test", detail: testDetail) {
                     Button("Test Gesture…") { testing = true }
                         .disabled(model.gestureTestBlocker != nil)
+                        .accessibilityHint(model.gestureTestBlocker ?? "")
+                        .padding(1)
+                        .contentShape(.rect)
+                        .help(model.gestureTestBlocker ?? "")
                 }
                 if case .conflict(let message) = model.gestureState {
                     NoticeRow(kind: .warning, text: message) {

@@ -5,7 +5,7 @@ The status line says what the engine does, and Miri remembers a Stop across laun
 
 ## Sub-features
 
-- `stop`: `Stop Window Management` stops the engine, and the status reads `Stopped`.
+- `stop`: `Stop Window Management` stops the engine, and the status reads `Stopped by you`.
 - `start`: `Start Window Management` starts it, and the status reads `Managing windows`.
 - `restart`: `Restart Engine` replaces the engine process.
 - `stop-shortcut`: ⌃⌥Q stops window management from any app. After a Stop, the shortcut does nothing until Start.
@@ -32,9 +32,9 @@ Preconditions:
 - **Show General.** Run `V ax test press General`. Then `V ax test status` prints `Managing windows`.
 - **Watch.** Start `V watch 90` in the background, with its output in a file, so it logs every engine `start` and `exit` during the steps below.
 - **Restart.** Run `V ax test press Diagnostics "Restart Engine"`. The watch log shows the old engine's `exit` and a new engine's `start`.
-- **Stop shortcut.** Run `V key ctrl+alt-q`. The status reads `Stopped`, the watch log shows the engine's `exit`, and `defaults read io.github.samanyudas.miri.dev managementStopped` prints `1`. Only `Start Window Management` shows. Press ⌃⌥Q again: nothing changes, and no engine starts.
+- **Stop shortcut.** Run `V key ctrl+alt-q`. The status reads `Stopped by you`, the watch log shows the engine's `exit`, and `defaults read io.github.samanyudas.miri.dev managementStopped` prints `1`. Only `Start Window Management` shows. Press ⌃⌥Q again: nothing changes, and no engine starts.
 - **Start.** Run `V ax test press "Start Window Management"`. The status returns to `Managing windows`, the watch log shows a new engine, and `managementStopped` prints `0`.
-- **Stop.** Run `V ax test press "Stop Window Management"`. Within 4 s, `V ax test status` prints `Stopped`, and `managementStopped` prints `1`.
+- **Stop.** Run `V ax test press "Stop Window Management"`. Within 4 s, `V ax test status` prints `Stopped by you`, and `managementStopped` prints `1`.
 - **Saved Stop.** While stopped, run `V relaunch`. It logs `relaunched test build pid <n> with no engine`, and `V doctor` shows no engine. Run `V settings`, press `General`, and check that the status reads `Stopped`. Then press `Start Window Management`.
 - **Crash limit.** Kill only the test engine three times, about 3 s apart, with `kill -9 <engine pid>`. Take each process ID from `V doctor`, or from `ps -axo pid=,comm=` where the executable is `<test bundle>/Contents/Helpers/miri-engine`. The status reads `Stopped after engine failures`, the General banner shows the reason with `Restart Engine` and `Show Logs in Finder`, and the sidebar button reads `Restart Miri`.
 - **Show logs.** In the failed state, press `Show Logs in Finder` in Settings > General or the menu. Finder becomes the frontmost app, with a `Logs` window and `engine.log` selected. Close that Finder window afterwards.
