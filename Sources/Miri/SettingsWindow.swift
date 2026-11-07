@@ -30,8 +30,11 @@ struct SettingsView: View {
         }
     }
 
+    /// The user defaults key that remembers the page, so Settings reopens where it was left.
+    static let pageKey = "settingsTab"
+
     let model: AppModel
-    @AppStorage("settingsTab") private var page = Page.general
+    @AppStorage(SettingsView.pageKey) private var page = Page.general
 
     var body: some View {
         HStack(spacing: 0) {
@@ -231,5 +234,13 @@ extension AppModel {
         case .failed: Palette.red
         case .stopped: startBlockers.isEmpty ? Palette.gray : Palette.orange
         }
+    }
+}
+
+extension WindowPresenter {
+    /// Opens Settings on `page`, such as Setup from the menu bar menu.
+    func showSettings(_ page: SettingsView.Page) {
+        UserDefaults.standard.set(page.rawValue, forKey: SettingsView.pageKey)
+        show(.settings)
     }
 }

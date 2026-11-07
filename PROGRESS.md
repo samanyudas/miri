@@ -24,7 +24,11 @@ The update settings in the design are left out until [#82](https://github.com/sa
 Live runs on 7 November 2026 showed every page in light and dark mode, the running, restarting, failed, and waiting states, every control that writes `config.toml` except Launch at login, shortcut recording, and the kept-default **Use** button.
 `make check` passed on `f149ca2f`.
 Not yet seen live: Launch at login, and a confirmed gesture test, which needs Sam's trackpad.
-The menu bar menu and the Set Up Miri window keep their old look until a later PR.
+Branch `feat/109-menu-bar-rehaul`, stacked on it, restyles the menu bar menu and the gesture test sheet.
+The menu keeps Restart Engine, Copy Diagnostics, and the failed and restarting menus. Setup Checker opens Settings on Setup.
+The gesture test sheet keeps the app's wording, "The Strip Followed My Fingers" and "It Did Not Work", because Sam has not picked one.
+A live run on 7 November 2026 checked the running, waiting, and failed menus, both Setup entries, and the sheet while it waits and while it asks for confirmation.
+The Set Up Miri window keeps its old look until a later PR.
 
 ## V1 completion audit
 

@@ -280,70 +280,117 @@ struct GestureTestSheet: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("Test the Strip Swipe").font(.headline)
-            content
+        VStack(alignment: .leading, spacing: 0) {
+            Text("Gesture test")
+                .font(.system(size: 11, weight: .semibold))
+                .tracking(0.66)
+                .textCase(.uppercase)
+                .foregroundStyle(Palette.secondaryText)
+                .padding(.bottom, 8)
+            Text(title)
+                .font(.system(size: 19, weight: .bold))
+                .foregroundStyle(Palette.primaryText)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isHeader)
+                .padding(.bottom, 6)
+            Text(detail)
+                .font(.system(size: 12.5))
+                .foregroundStyle(Palette.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.bottom, 18)
+            progress
+                .padding(.bottom, 20)
+            HStack(spacing: 8) {
+                Spacer(minLength: 0)
+                buttons
+            }
         }
-        .padding(20)
-        .frame(width: 420, alignment: .leading)
+        .padding(.horizontal, 28)
+        .padding(.top, 26)
+        .padding(.bottom, 22)
+        .frame(width: 480, alignment: .leading)
+        .background(Palette.content)
         .onAppear { test.start() }
         .onDisappear { test.cancel() }
         // Closing Settings hides its window without removing this view, so onDisappear alone can miss it.
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { _ in test.cancel() }
     }
 
-    @ViewBuilder private var content: some View {
+    private var title: String {
+        switch test.phase {
+        case .idle, .watching: "Swipe left and right with \(fingerWord) fingers on the trackpad."
+        case .passedAwaitingConfirmation: "Did the strip follow your fingers?"
+        case .failed(let reason): reason
+        case .inconclusive: "Miri did not see the strip move both ways within 20 seconds."
+        }
+    }
+
+    private var detail: String {
+        switch test.phase {
+        case .idle, .watching: "Keep at least two windows on this display so the strip can move."
+        case .passedAwaitingConfirmation:
+            "Miri saw the strip move both ways and no macOS action. Only your answer turns the swipe on."
+        case .failed, .inconclusive: "The swipe stays off. Keyboard shortcuts keep working."
+        }
+    }
+
+    /// What Miri has seen so far, in a tinted box like the status cards in Settings.
+    private var progress: some View {
+        HStack(spacing: 10) {
+            switch test.phase {
+            case .idle, .watching(movementSeen: false):
+                ProgressView().controlSize(.small)
+                LiveText("Waiting for the strip to move…")
+            case .watching(movementSeen: true):
+                checkmark
+                LiveText("The strip moved. Keep swiping left and right.")
+            case .passedAwaitingConfirmation:
+                checkmark
+                LiveText("The strip moved both ways.")
+            case .failed:
+                NoticeGlyph(kind: .warning, size: 18)
+                LiveText("The test found a problem.")
+            case .inconclusive:
+                NoticeGlyph(kind: .warning, size: 18)
+                LiveText("The test timed out.")
+            }
+        }
+        .font(.system(size: 12.5))
+        .foregroundStyle(Palette.primaryText)
+        .padding(.horizontal, 14)
+        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+        .background(Palette.heroTint, in: .rect(cornerRadius: 10))
+    }
+
+    private var checkmark: some View {
+        Image(systemName: "checkmark")
+            .font(.system(size: 9, weight: .heavy))
+            .foregroundStyle(.white)
+            .frame(width: 18, height: 18)
+            .background(Palette.green, in: .circle)
+            .accessibilityHidden(true)
+    }
+
+    @ViewBuilder private var buttons: some View {
         switch test.phase {
         case .idle, .watching:
-            Text("Swipe left and right with \(fingerWord) fingers on the trackpad.")
-            Text("Keep at least two windows on this display so the strip can move.")
-                .foregroundStyle(.secondary)
-            HStack(spacing: 8) {
-                if case .watching(movementSeen: true) = test.phase {
-                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-                    Text("The strip moved. Keep swiping left and right.")
-                } else {
-                    ProgressView().controlSize(.small)
-                    Text("Waiting for the strip to move…")
-                }
-            }
-            buttons { Button("Cancel", role: .cancel) { dismiss() } }
+            Button("Cancel", role: .cancel) { dismiss() }
         case .passedAwaitingConfirmation:
-            Text("Did the strip follow your fingers?")
-            Text("Miri saw the strip move both ways and no macOS action. Only your answer turns the swipe on.")
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            buttons {
-                Button("Cancel", role: .cancel) { dismiss() }
-                Button("It Did Not Work") { test.deny() }
-                Button("The Strip Followed My Fingers") {
-                    test.confirm()
-                    dismiss()
-                }
-                .keyboardShortcut(.defaultAction)
+            Button("Cancel", role: .cancel) { dismiss() }
+            Button("It Did Not Work") { test.deny() }
+            Button("The Strip Followed My Fingers") {
+                test.confirm()
+                dismiss()
             }
-        case .failed(let reason):
-            Label(reason, systemImage: "exclamationmark.triangle.fill")
-            Text("The swipe stays off. Keyboard shortcuts keep working.").foregroundStyle(.secondary)
-            retryButtons
-        case .inconclusive:
-            Label("Miri did not see the strip move both ways within 20 seconds.", systemImage: "questionmark.circle")
-            Text("The swipe stays off. Keyboard shortcuts keep working.").foregroundStyle(.secondary)
-            retryButtons
-        }
-    }
-
-    private var retryButtons: some View {
-        buttons {
+            .buttonStyle(.borderedProminent)
+            .tint(Palette.accent)
+            .keyboardShortcut(.defaultAction)
+        case .failed, .inconclusive:
             Button("Done", role: .cancel) { dismiss() }
-            Button("Try Again") { test.start() }.keyboardShortcut(.defaultAction)
-        }
-    }
-
-    private func buttons(@ViewBuilder _ content: () -> some View) -> some View {
-        HStack {
-            Spacer()
-            content()
+            Button("Try Again") { test.start() }
+                .buttonStyle(.borderedProminent)
+                .tint(Palette.accent)
+                .keyboardShortcut(.defaultAction)
         }
     }
 
