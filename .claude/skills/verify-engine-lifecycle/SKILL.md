@@ -101,13 +101,16 @@ A change that touches a covered file but no lifecycle step, such as a new label 
 ### Coverage
 
 ```text
-sync-commit: f9d4ab38
+sync-commit: f62b273b
 covers: Sources/MiriCore/Engine.swift
 covers: Sources/MiriCore/EngineProcess.swift
 covers: Sources/Miri/AppModel.swift
 covers: Sources/Miri/App.swift
 covers: Sources/Miri/Views.swift
 covers: Sources/Miri/StopShortcut.swift
+covers: Sources/Miri/SettingsWindow.swift
+covers: Sources/Miri/SettingsPages.swift
+covers: Sources/Miri/InitialSetup.swift
 ```
 
 The script reads these lines.
@@ -117,9 +120,14 @@ The model describes these parts of the files:
 - `EngineProcess.swift`: `ProcessEngineLauncher.launch(onExit:)`, whose termination handler sends the exit to the main actor, and `RunningEngine.kill()`.
 - `AppModel.swift`: `launch()`, `keyboardLayoutChanged()`, `start()`, `stop()`, `stopFromShortcut()`, `restart()`, `prepareToQuit(completion:)`, `pollSetupUntilReady()`, and `cancelSetupPoll()`.
 - `App.swift`: `applicationDidFinishLaunching`, `applicationShouldTerminate`, and `quitOnTerminationSignal()`.
-- `Views.swift`: `MenuContent` and `GeneralSettings`, which decide when Start, Stop, and Restart show, and `statusText`.
+- `Views.swift`: `statusText`, and `MenuContent`, which decides when the menu shows Start, Stop, and Restart.
 - `StopShortcut.swift`: the hot key handler that calls `stopFromShortcut()`.
-- The Settings window's Start, Stop, and Restart buttons are in `GeneralSettings` in `Views.swift`. `WindowPresenter.swift` opens that window and calls no lifecycle function, so it is not covered. A control that moves to another file, or a new file that calls `start()`, `stop()`, or `restart()`, must join this list.
+- `SettingsWindow.swift`: the sidebar's `managementButton`, which shows Start, Stop, or Restart on every Settings page.
+- `SettingsPages.swift`: the status banner of Settings > General, and the Restart buttons of Settings > Diagnostics.
+- `InitialSetup.swift`: the Start and Restart buttons in the status row of Set Up Miri.
+
+A control that moves to another file, or a new file with a control that calls `model.start()`, `model.stop()`, `model.restart()`, or `model.stopFromShortcut()`, must join this list.
+`scripts/tests/test_verify_engine_lifecycle.py`, which `make lint` runs, fails until it does.
 
 ## What the check does not cover
 

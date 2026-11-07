@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `fix/issue-314`, based on `main` at `1dfed270`
+Updated: 2026-11-08 on branch `fix/issue-314`, based on `main` at `2ec9aad4`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -386,7 +386,9 @@ The model found four lifecycle bugs on 2026-11-01.
 [#242](https://github.com/samanyudas/miri/pull/242), [#240](https://github.com/samanyudas/miri/pull/240), and [#241](https://github.com/samanyudas/miri/pull/241) fixed them, and all seven rules now hold on `main`.
 A live run on Miri Developer built from `main` at f37f425b passed every acceptance criterion on 2 November 2026, and #234, #235, and #236 are closed.
 [#243](https://github.com/samanyudas/miri/pull/243) makes `verify-miri end` and `renew` refuse a run that another thread owns, after one agent's `end` closed another agent's live run.
-Nothing is in flight here.
+On `main` at 1dfed270 the check exited 3, because the #109 rehaul moved the Start, Stop, and Restart buttons into files the model did not cover.
+[#345](https://github.com/samanyudas/miri/issues/345) models those buttons, covers their files, and adds a `make lint` test that fails when a file with a lifecycle control is not covered.
+Its PR awaits Sam's merge.
 
 ## Scroll position after a restart
 
