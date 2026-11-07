@@ -21,8 +21,9 @@ The Paper file "miri" holds the design. Its weekly agent quota ran out on 7 Nove
 The window is 880 by 640 points, with a sidebar of Setup, General, Layout, Shortcuts, Gestures, and Diagnostics, and Miri's colors in light and dark mode.
 Every control and message of the old tabbed window kept its behavior. **Animate window movement** moved to Layout, and **Restart Engine** to Diagnostics and the sidebar button.
 The update settings in the design are left out until [#82](https://github.com/samanyudas/miri/issues/82), and the under-pointer swipe until [#212](https://github.com/samanyudas/miri/issues/212).
-A live run on 7 November 2026 showed every page in light and dark mode, with management stopped and no engine running.
-Not yet seen live: the running, restarting, failed, and waiting states, a kept-default shortcut notice, and changes that write `config.toml`.
+Live runs on 7 November 2026 showed every page in light and dark mode, the running, restarting, failed, and waiting states, every control that writes `config.toml` except Launch at login, shortcut recording, and the kept-default **Use** button.
+`make check` passed on `f149ca2f`.
+Not yet seen live: Launch at login, and a confirmed gesture test, which needs Sam's trackpad.
 The menu bar menu and the Set Up Miri window keep their old look until a later PR.
 
 ## V1 completion audit
