@@ -57,8 +57,8 @@ struct InitialSetupView: View {
     }
 
     private var status: some View {
-        HStack(spacing: 10) {
-            Circle().fill(model.stateColor).frame(width: 8, height: 8).accessibilityHidden(true)
+        HStack(spacing: 12) {
+            stateGlyph.accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(model.statusText)
                     .font(.rowTitle.weight(.semibold))
@@ -76,6 +76,10 @@ struct InitialSetupView: View {
                     .buttonStyle(.borderedProminent)
                     .tint(Palette.accentFill)
                     .keyboardShortcut(.defaultAction)
+            } else if case .failed = model.engineState {
+                Button("Restart Engine") { model.restart() }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Palette.accentFill)
             }
         }
         .padding(.horizontal, 14)
@@ -83,12 +87,28 @@ struct InitialSetupView: View {
         .frame(minHeight: 50)
     }
 
+    /// The same symbols as the Settings notices: a check while running, and the notice glyph of each other state.
+    @ViewBuilder private var stateGlyph: some View {
+        switch model.engineState {
+        case .running:
+            Image(systemName: "checkmark")
+                .font(.system(size: 9, weight: .heavy))
+                .foregroundStyle(Palette.onStatus)
+                .frame(width: 18, height: 18)
+                .background(Palette.green, in: .circle)
+        case .restarting: NoticeGlyph(kind: .warning, size: 18)
+        case .failed: NoticeGlyph(kind: .error, size: 18)
+        case .stopped: NoticeGlyph(kind: model.startBlockers.isEmpty ? .neutral : .warning, size: 18)
+        }
+    }
+
     private var canStart: Bool { model.engineState == .stopped && model.startBlockers.isEmpty }
 
     private var statusDetail: String {
         switch model.engineState {
-        case .running, .restarting: "Keyboard shortcuts work now."
-        case .failed: "Restart the engine from the menu bar, or see Settings > Diagnostics."
+        case .running: "Keyboard shortcuts work now."
+        case .restarting: "The engine is restarting. Keyboard shortcuts resume when it is ready."
+        case .failed: "Restart the engine to manage windows again. Settings > Diagnostics has the log."
         case .stopped where !model.startBlockers.isEmpty: "Miri starts by itself when the checks below pass."
         case .stopped: "Keyboard shortcuts work once Miri starts."
         }

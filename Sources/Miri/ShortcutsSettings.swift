@@ -302,7 +302,10 @@ struct ShortcutsSettings: View {
     private func add(_ chord: Chord, to action: ShortcutAction, allowingSystemConflict: Bool) {
         let label = model.keyLayout.label(for: chord)
         switch model.addShortcut(chord, to: action, allowingSystemConflict: allowingSystemConflict) {
-        case .added, .failed:
+        case .added:
+            notice = nil
+            AccessibilityNotification.Announcement("\(label) added for \(action.title).").post()
+        case .failed:
             notice = nil
         case .rejected(.usedBy(let owner)):
             notice = Notice(action: action, text: "\(label) is already used by \(owner).")

@@ -112,12 +112,14 @@ struct SettingsSidebar: View {
                     .font(.sidebarName)
                     .tracking(-0.15)
                     .foregroundStyle(Palette.primaryText)
-                HStack(spacing: 5) {
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Circle().fill(model.stateColor).frame(width: 7, height: 7)
+                    // A longer state, such as Stopped after engine failures, wraps to a second line.
                     LiveText(model.sidebarStatus)
                         .font(.small)
                         .foregroundStyle(Palette.secondaryText)
-                        .lineLimit(1)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
@@ -207,7 +209,7 @@ private struct SidebarRow: View {
                 }
             }
             .padding(.horizontal, 8)
-            .frame(height: 30)
+            .frame(minHeight: 30)
             .background(selected ? Palette.accentTint : .clear, in: .rect(cornerRadius: 7))
             .contentShape(.rect)
         }

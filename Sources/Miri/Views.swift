@@ -79,7 +79,7 @@ struct MenuContent: View {
             Button("Restart Engine") { model.restart() }
             Button("Show Logs in Finder") { model.showLogsInFinder() }
         case .stopped where !model.startBlockers.isEmpty:
-            Button("Open Setup Checker…") { presenter.showSettings(.setup) }
+            Button(setupCheckerTitle) { presenter.showSettings(.setup) }
             Text("Miri starts by itself when setup is done.")
             Button(AppModel.cancelAutomaticStartTitle) { model.stop() }
         case .stopped:

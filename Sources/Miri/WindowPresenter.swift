@@ -47,7 +47,7 @@ final class WindowPresenter {
         let designSize: NSSize? =
             switch kind {
             case .settings: NSSize(width: 880, height: 640)
-            case .initialSetup: NSSize(width: 600, height: 580)
+            case .initialSetup: NSSize(width: 600, height: 540)
             case .diagnostics: NSSize(width: 640, height: 540)
             case .permissionExperiment: nil
             }

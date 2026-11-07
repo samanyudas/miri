@@ -99,7 +99,7 @@ struct GeneralSettings: View {
             Banner(
                 kind: .neutral, title: "Window management is stopped",
                 detail:
-                    "Your windows stay where they are. Miri stays stopped, even after a restart, until you start it.",
+                    "Your windows stay where they are. Miri stays stopped, even after you log in again, until you start it.",
                 accessibilityValue: model.statusText
             ) {
                 Button("Start Window Management") { model.start() }
@@ -219,6 +219,9 @@ struct LayoutSettings: View {
                 ) {
                     TextField("Width presets", text: $presetsText, prompt: Text("0.25, 0.5, 0.75"))
                         .labelsHidden()
+                        .textFieldStyle(.plain)
+                        .font(.rowTitle)
+                        .fieldBox()
                         .frame(width: 200)
                         .focused($editingPresets)
                         .onSubmit(applyPresets)
@@ -396,7 +399,7 @@ struct SetupSettings: View {
         SettingsPage(
             title: "Setup",
             subtitle:
-                "Miri checks your Mac for anything that blocks window management. Open buttons show the System Settings page to change. Miri never changes it for you."
+                "Miri checks your Mac for anything that blocks window management. It never changes your settings for you."
         ) {
             Button("Check Again", systemImage: "arrow.clockwise") { model.refreshSetup() }
         } content: {
@@ -411,7 +414,9 @@ struct SetupSettings: View {
             let recommended = others.filter(\.needsAttention) + others.filter { !$0.needsAttention }
             if !required.isEmpty {
                 SettingsSection("Required to start") {
-                    ForEach(required) { check in SetupCheckItem(check: check) { page = .gestures } }
+                    ForEach(required) { check in
+                        SetupCheckItem(check: check, openGestures: { page = .gestures }, inRequiredSection: true)
+                    }
                 }
             }
             if !recommended.isEmpty {
@@ -429,6 +434,8 @@ struct SetupCheckItem: View {
     let check: SetupCheck
     /// Opens Settings > Gestures for a gesture check. Set Up Miri lists only start blockers, so it passes nothing.
     var openGestures: (() -> Void)?
+    /// Whether the row sits under a "Required to start" label, which already says that it blocks start.
+    var inRequiredSection = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -491,7 +498,7 @@ struct SetupCheckItem: View {
     private var detail: String? {
         switch check.status {
         case .passed: check.isGestureCheck ? "No conflict found." : nil
-        case .problem(let text): check.blocksStart ? "Blocks start. \(text)" : text
+        case .problem(let text): check.blocksStart && !inRequiredSection ? "Blocks start. \(text)" : text
         case .notChecked(let text), .unableToVerify(let text): text
         }
     }
@@ -545,9 +552,7 @@ struct DiagnosticsSettings: View {
             VStack(alignment: .leading, spacing: 8) {
                 SectionLabel(title: "Engine log") {
                     Button("Show Logs in Finder") { model.showLogsInFinder() }
-                        .buttonStyle(.plain)
-                        .font(.detail)
-                        .foregroundStyle(Palette.accentText)
+                        .controlSize(.small)
                 }
                 ScrollView {
                     Text(logTail.isEmpty ? "The log is empty." : logTail.joined(separator: "\n"))
@@ -620,6 +625,8 @@ struct DiagnosticsSettings: View {
                 LiveText(value)
                     .font(.heroTitle)
                     .foregroundStyle(Palette.primaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
             }
         }
         .padding(.horizontal, 16)
@@ -631,7 +638,7 @@ struct DiagnosticsSettings: View {
     private var engineWord: String {
         switch model.engineState {
         case .running: "Running"
-        case .restarting(let crashes): "Restarting (crash \(crashes))"
+        case .restarting: "Restarting"
         case .failed: "Failed"
         case .stopped: model.startBlockers.isEmpty ? "Stopped" : "Waiting for setup"
         }
@@ -645,10 +652,12 @@ struct DiagnosticsSettings: View {
     }
 
     private func readLog() {
-        logTail = model.log.tail(maximum: 6_000)
+        // Only a changed log replaces the text, so a selection in it survives the refresh.
+        let lines = model.log.tail(maximum: 6_000)
             .split(separator: "\n", omittingEmptySubsequences: true)
             .suffix(40)
             .map { Self.shortLine(String($0)) }
+        if Array(lines) != logTail { logTail = Array(lines) }
     }
 
     /// Keeps the local time, level, and message of an engine log line, and drops the date and the Rust source location.

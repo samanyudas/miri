@@ -84,23 +84,24 @@ extension NSColor {
 }
 
 /// The type scale. Every text in Miri's windows uses one of these.
+/// Each is a macOS text style of the same size, so the text follows the system text size where macOS offers one.
 extension Font {
-    /// The page title, such as "General".
-    static let pageTitle = Font.system(size: 22, weight: .bold)
-    /// The big line of a status card or sheet.
+    /// The page title, such as "General": 22 points.
+    static let pageTitle = Font.title.bold()
+    /// The big line of a status card or sheet: 19 points, between the title and title2 styles.
     static let heroTitle = Font.system(size: 19, weight: .bold)
-    /// Row titles and ordinary text.
-    static let rowTitle = Font.system(size: 13)
-    /// Explanations under a title, notices, and footnotes.
-    static let detail = Font.system(size: 12)
-    /// Small labels, such as section labels and the version line.
-    static let small = Font.system(size: 11)
-    /// The app name in the Settings sidebar.
-    static let sidebarName = Font.system(size: 15, weight: .bold)
-    /// File paths, engine binding names, and reports.
-    static let mono = Font.system(size: 12, design: .monospaced)
-    /// The engine log.
-    static let monoSmall = Font.system(size: 11, design: .monospaced)
+    /// Row titles and ordinary text: 13 points.
+    static let rowTitle = Font.body
+    /// Explanations under a title, notices, and footnotes: 12 points.
+    static let detail = Font.callout
+    /// Small labels, such as section labels and the version line: 11 points.
+    static let small = Font.subheadline
+    /// The app name in the Settings sidebar: 15 points.
+    static let sidebarName = Font.title3.bold()
+    /// File paths, engine binding names, and reports: 12 points.
+    static let mono = Font.callout.monospaced()
+    /// The engine log: 11 points.
+    static let monoSmall = Font.subheadline.monospaced()
 }
 
 /// A scrolling Settings page: a title, a short description, and its sections.
@@ -445,6 +446,7 @@ struct SegmentedChoice<Value: Hashable>: View {
     let label: String
     @Binding var selection: Value
     let options: [(title: String, value: Value)]
+    @Environment(\.colorSchemeContrast) private var contrast
     @FocusState private var focused: Bool
     /// Whether the focus came from the keyboard. A window that opens with the focus here shows no ring.
     @State private var showsFocusRing = false
@@ -468,6 +470,13 @@ struct SegmentedChoice<Value: Hashable>: View {
                                 RoundedRectangle(cornerRadius: 6)
                                     .fill(Palette.segment)
                                     .shadow(color: .black.opacity(0.14), radius: 0.75, y: 0.5)
+                                    // With Increase Contrast, an outline marks the choice, not only the fill.
+                                    .overlay {
+                                        if contrast == .increased {
+                                            RoundedRectangle(cornerRadius: 6)
+                                                .strokeBorder(Palette.primaryText, lineWidth: 1.5)
+                                        }
+                                    }
                             }
                         }
                         .contentShape(.rect)
@@ -540,10 +549,17 @@ struct SearchField: View {
                 .accessibilityLabel("Clear Search")
             }
         }
-        .padding(.horizontal, 8)
-        .frame(height: 28)
-        .background(Palette.group, in: .rect(cornerRadius: 7))
-        .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(Palette.groupRing, lineWidth: 1))
+        .fieldBox()
+    }
+}
+
+extension View {
+    /// The box of a text field in the design's colors: a group fill, a ring, and at least 28 points of height.
+    func fieldBox() -> some View {
+        padding(.horizontal, 8)
+            .frame(minHeight: 28)
+            .background(Palette.group, in: .rect(cornerRadius: 7))
+            .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(Palette.groupRing, lineWidth: 1))
     }
 }
 
