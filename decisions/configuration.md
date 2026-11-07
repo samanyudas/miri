@@ -211,6 +211,7 @@ The proposed `window_tabbed`, `window_wider`, `window_narrower`, `window_taller`
 
 Store app-only settings, including launch at login and updates, in `[miri]`.
 Launch at login is enabled by default.
+`[miri].show_in_dock` stores the Show in Dock switch, and it is `true` by default.
 An explicit stopped state persists across launches.
 Window recovery after management ends follows [App controls and window recovery](release-scope.md#app-controls-and-window-recovery).
 
