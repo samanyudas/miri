@@ -205,7 +205,7 @@ public enum SetupChecker {
         case (0?, _), (2?, 2?): .passed
         case (2?, _?):
             .problem(
-                "Four-finger swipes switch full-screen apps. Set Swipe between full-screen applications to three fingers in System Settings > Trackpad > More Gestures. Turning it off also stops swiping between desktops."
+                "Four-finger swipes switch full-screen apps. Set Swipe between full-screen applications to three fingers in System Settings > Trackpad > More Gestures, which keeps swiping between desktops. Turning it off also stops swiping between desktops."
             )
         default: gestureUnverified(fingers: "four")
         }
