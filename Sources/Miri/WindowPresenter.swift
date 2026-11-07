@@ -22,6 +22,12 @@ final class WindowPresenter {
     func show(_ kind: Kind) {
         let window = windows[kind] ?? makeWindow(kind)
         windows[kind] = window
+        // A closed window keeps its frame on the display it was last on, so open it on the display in use.
+        if !window.isVisible, let screen = NSScreen.main, window.screen != screen {
+            let area = screen.visibleFrame
+            window.setFrameOrigin(
+                NSPoint(x: area.midX - window.frame.width / 2, y: area.midY - window.frame.height / 2))
+        }
         NSApp.activate()
         window.makeKeyAndOrderFront(nil)
     }
@@ -58,6 +64,8 @@ final class WindowPresenter {
         // AppKit restores a saved size only on a resizable window, so these become resizable before the restore.
         if kind == .settings || kind == .diagnostics { window.styleMask.insert(.resizable) }
         window.isReleasedWhenClosed = false
+        // macOS keeps a closed window on its last desktop, and showing it again would switch the display back there.
+        window.collectionBehavior.insert(.moveToActiveSpace)
         window.setFrameAutosaveName("Miri.\(kind)")
         let restored = window.setFrameUsingName("Miri.\(kind)")
         if !restored { window.center() }
