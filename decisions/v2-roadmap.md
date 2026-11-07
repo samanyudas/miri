@@ -34,8 +34,9 @@ Sam accepted the Miri dock for v2 and deferred the other work below during the i
   A 3x3 grid needs nine displays and therefore exceeds that limit.
 - Five-finger strip gestures are deferred from v1.
   The pinned engine's acceptance of the finger count does not establish usable hardware behavior.
-- Focus borders, pointer-following controls, display exclusions, fixed-pixel presets, animation tuning, and Hyper-key recording are excluded from v1.
+- Focus borders, a focus-follows-mouse control, display exclusions, fixed-pixel presets, animation tuning, and Hyper-key recording are excluded from v1.
   Sam accepted these deferrals in the subsequent design-tree interview on 14 October 2026.
+  On 8 November 2026 Sam moved the switch that moves the pointer to windows that Miri focuses into v1 ([#360](https://github.com/samanyudas/miri/issues/360)).
   Their deferral does not commit to implementing every proposal in v2.
 
 ## Dropped ideas

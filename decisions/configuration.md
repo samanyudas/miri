@@ -80,9 +80,10 @@ The engine also accepts `mouse_follows_focus = true`, which moves the pointer on
 Such commands include focus shortcuts, Centre column, display focus, display moves, and virtual workspace switches.
 A click, Cmd-Tab, an app bringing its own window forward, focus-follows-mouse, a new or closed window, and engine startup leave the pointer in place.
 Sam chose this rule, niri's, on 7 November 2026 in [#339](https://github.com/samanyudas/miri/issues/339).
-Miri does not offer that key as a setting.
+Settings > General offers the key as the switch **Move the pointer to windows that Miri focuses**, which is off by default.
+Sam moved this switch into v1 on 8 November 2026 in [#360](https://github.com/samanyudas/miri/issues/360).
 
-Focus borders and pointer-following controls are deferred to v2.
+Focus borders and a focus-follows-mouse control are deferred to v2.
 The following option names and defaults remain proposals for that future work, pending verification against the pinned engine.
 
 | Proposed option | Proposed default | Behavior |

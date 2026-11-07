@@ -252,7 +252,8 @@ Adding Shift moves the focused column the same way.
 [Keybinding reference](keybinding%20reference.md) records these bindings.
 Shortcut recording follows [Binding customization](keybinding%20reference.md#binding-customization).
 Tabbed columns, the minimap, inactive-window dimming, and advanced window rules are deferred to v2.
-Focus borders, pointer-following controls, display exclusions, fixed-pixel presets, animation tuning, and Hyper-key recording are also deferred to v2.
+Focus borders, a focus-follows-mouse control, display exclusions, fixed-pixel presets, animation tuning, and Hyper-key recording are also deferred to v2.
+The switch that moves the pointer to windows that Miri focuses is v1 work, as Sam decided on 8 November 2026 in [#360](https://github.com/samanyudas/miri/issues/360).
 Deferral excludes these proposals from v1 without committing to their inclusion in v2.
 
 Miri uses the GNU General Public License version 3 or any later version at the recipient's option.
