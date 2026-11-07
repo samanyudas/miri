@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-07 on branch `fix/339-pin`, based on `fix/177-front-switch` at `5a93bf50`
+Updated: 2026-11-07 on branch `docs/339-closed`, based on `main` at `13cd4aaa`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -30,8 +30,9 @@ Next: the audit's [Remaining blockers](docs/v1-audit.md#remaining-blockers) tabl
 
 [#339](https://github.com/samanyudas/miri/issues/339): with `mouse_follows_focus = true`, a click on a window moved the pointer to the window's centre.
 [paneru#138](https://github.com/samanyudas/paneru/pull/138) moves the pointer only when a Miri command changes focus, as Sam chose on 7 November 2026.
-This branch pins engine `5f01554`, the merge of paneru#138, on top of [#336](https://github.com/samanyudas/miri/pull/336).
-Next: Sam merges #336 and this PR, then a `verify-miri` run on `main` checks each acceptance criterion before #339 closes.
+[#341](https://github.com/samanyudas/miri/pull/341) pinned engine `5f01554`, the merge of paneru#138, and reached `main` at `13cd4aaa`.
+#339 closed on 7 November 2026 after `verify-miri` run `20261107-201447` passed all 5 criteria on a build with the same tree as `13cd4aaa`.
+Starting the engine no longer moves the pointer onto the first focused window.
 
 ## Drops on another display that macOS tiles
 
