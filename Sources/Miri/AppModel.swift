@@ -438,11 +438,16 @@ import ServiceManagement
         startBlockers = []
     }
 
+    /// Whether this copy of Miri runs from an Applications folder, where macOS can register it as a login item.
+    static var isInApplicationsFolder: Bool {
+        let applications = FileManager.default.urls(for: .applicationDirectory, in: .allDomainsMask)
+        return applications.contains { Bundle.main.bundleURL.path.hasPrefix($0.path + "/") }
+    }
+
     /// Registers the login item only from an Applications folder, so a build in a work folder never adds one.
     private func syncLoginItem() {
         let service = SMAppService.mainApp
-        let applications = FileManager.default.urls(for: .applicationDirectory, in: .allDomainsMask)
-        guard applications.contains(where: { Bundle.main.bundleURL.path.hasPrefix($0.path + "/") }) else {
+        guard Self.isInApplicationsFolder else {
             loginItemError = "Launch at login takes effect after you move Miri to the Applications folder."
             return
         }

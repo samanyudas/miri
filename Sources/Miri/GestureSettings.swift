@@ -2,29 +2,49 @@ import AppKit
 import MiriCore
 import SwiftUI
 
-/// Settings > Gestures adds the reverse toggle and the gesture change report to the shared strip swipe controls.
+/// Settings > Gestures: the strip swipe's state and test, its finger count and direction, and the change report.
 struct GestureSettings: View {
     let model: AppModel
+    @State private var testing = false
     @State private var confirmingReport = false
 
     var body: some View {
-        Form {
-            ConfigurationIssueBanner(model: model)
-            StripSwipeSections(
-                model: model,
-                choiceFooter:
-                    "Swipe left or right on the trackpad to slide the windows. The strip follows your fingers unless you reverse it.",
-                testFooter:
-                    "Miri turns the swipe on only after you test it and confirm that the strip followed your fingers. Keyboard shortcuts work either way. Miri never changes macOS settings."
-            ) {
-                Toggle("Reverse swipe direction", isOn: setting(\.reverseSwipe))
-            } testAccessory: {
-                Button("Report a macOS Gesture Change") { confirmingReport = true }
-                    .disabled(model.gestureVerification == nil)
+        SettingsPage(
+            title: "Gestures",
+            subtitle:
+                "Swipe across the trackpad to scroll the strip. Miri turns the swipe on only after you test it and confirm that the strip followed your fingers."
+        ) {
+            ConfigurationIssueNotice(model: model)
+            hero
+            SettingsSection("Strip swipe") {
+                SettingsRow(
+                    title: "Fingers", detail: "Four is recommended. Three fingers can clash with Three Finger Drag."
+                ) {
+                    SegmentedChoice(
+                        label: "Fingers", selection: setting(\.stripGesture),
+                        options: [("Three", .three), ("Four", .four), ("Off", .off)])
+                }
+                SettingsRow(title: "Direction", detail: "Changing fingers or direction needs a new test.") {
+                    SegmentedChoice(
+                        label: "Direction", selection: setting(\.reverseSwipe),
+                        options: [("Follow fingers", false), ("Reversed", true)])
+                }
+                if case .conflict(let message) = model.gestureState {
+                    NoticeRow(kind: .warning, text: message) {
+                        if let url = conflictCheck?.settingsURL {
+                            Button("Open System Settings") { NSWorkspace.shared.open(url) }
+                        }
+                    }
+                } else if let blocker = model.gestureTestBlocker, model.settings.stripGesture != .off {
+                    NoticeRow(kind: .warning, text: blocker)
+                }
             }
+            Text("Keyboard shortcuts work whether the swipe is on or off. Miri never changes macOS settings.")
+                .font(.system(size: 12))
+                .foregroundStyle(Palette.secondaryText)
         }
-        .formStyle(.grouped)
         .onAppear { model.refreshSetup() }
+        .sheet(isPresented: $testing) { GestureTestSheet(model: model) }
         .confirmationDialog("Report a macOS gesture change?", isPresented: $confirmingReport) {
             Button("Report Change") { model.reportGestureChange() }
         } message: {
@@ -32,8 +52,120 @@ struct GestureSettings: View {
         }
     }
 
+    private var hero: some View {
+        HStack(spacing: 22) {
+            TrackpadPicture(fingers: model.settings.stripGesture.fingers, reversed: model.settings.reverseSwipe)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(eyebrow.text)
+                    .font(.system(size: 11, weight: .semibold))
+                    .tracking(0.66)
+                    .textCase(.uppercase)
+                    .foregroundStyle(eyebrow.color)
+                Text(heroTitle)
+                    .font(.system(size: 19, weight: .bold))
+                    .foregroundStyle(Palette.primaryText)
+                    .modifier(StatusValue(value: model.gestureSummary))
+                LiveText(heroDetail)
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(Palette.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: .trailing, spacing: 8) {
+                Button("Test Gesture…") { testing = true }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Palette.accent)
+                    .disabled(model.gestureTestBlocker != nil)
+                if model.gestureVerification != nil {
+                    Button("Report a macOS Gesture Change") { confirmingReport = true }
+                }
+            }
+            .fixedSize()
+        }
+        .padding(20)
+        .background(Palette.heroTint, in: .rect(cornerRadius: 12))
+    }
+
+    private var eyebrow: (text: String, color: Color) {
+        switch model.gestureState {
+        case .off: ("Off", Palette.secondaryText)
+        case .enabled: ("On", Palette.green)
+        case .needsTest: ("Off until tested", Palette.orange)
+        case .conflict: ("Off: macOS uses this swipe", Palette.orange)
+        }
+    }
+
+    private var heroTitle: String {
+        switch model.settings.stripGesture {
+        case .three: "Three-finger swipe"
+        case .four: "Four-finger swipe"
+        case .off: "Strip swipe is off"
+        }
+    }
+
+    private var heroDetail: String {
+        switch model.gestureState {
+        case .off:
+            "Choose three or four fingers below to use the swipe."
+        case .enabled(let date):
+            "You confirmed on \(date.formatted(date: .abbreviated, time: .omitted)) that the strip follows your fingers."
+        case .needsTest(let reason, let detectionUnavailable):
+            "Test it to turn it on: \(reason.explanation)."
+                + (detectionUnavailable
+                    ? " Miri can't read your macOS gesture settings, so it can't check them for you." : "")
+        case .conflict:
+            "macOS uses this swipe. Turn it off in System Settings, then test again."
+        }
+    }
+
+    private var conflictCheck: SetupCheck? {
+        model.settings.stripGesture.fingers.flatMap(model.gestureCheck)
+    }
+
     private func setting<Value>(_ key: WritableKeyPath<MiriSettings, Value>) -> Binding<Value> {
         Binding(get: { model.settings[keyPath: key] }, set: { value in model.update { $0[keyPath: key] = value } })
+    }
+}
+
+/// A sketch of a trackpad with one dot per finger and an arrow for the direction the strip moves.
+private struct TrackpadPicture: View {
+    let fingers: GestureFingers?
+    let reversed: Bool
+
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 8) {
+                ForEach(0..<count, id: \.self) { _ in
+                    Circle().fill(fingers == nil ? Palette.gray : Palette.accent).frame(width: 13, height: 13)
+                }
+            }
+            Image(systemName: reversed ? "arrow.left" : "arrow.right")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(fingers == nil ? Palette.gray : Palette.accent)
+        }
+        .frame(width: 132, height: 92)
+        .background(Palette.group, in: .rect(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Palette.heroTileBorder, lineWidth: 1))
+        .accessibilityHidden(true)
+    }
+
+    private var count: Int {
+        switch fingers {
+        case .three?: 3
+        case .four?, nil: 4
+        }
+    }
+}
+
+extension AppModel {
+    /// One line about the strip swipe, which Settings and the test tools read as its status.
+    var gestureSummary: String {
+        switch gestureState {
+        case .off: "Off"
+        case .enabled(let date): "On, verified by user test on \(date.formatted(date: .abbreviated, time: .omitted))"
+        case .needsTest(let reason, _): "Off until tested: \(reason.explanation)"
+        case .conflict: "Off: macOS uses this swipe"
+        }
     }
 }
 
@@ -116,14 +248,7 @@ struct GestureStatusRow: View {
         }
     }
 
-    private var summary: String {
-        switch model.gestureState {
-        case .off: "Off"
-        case .enabled(let date): "On, verified by user test on \(date.formatted(date: .abbreviated, time: .omitted))"
-        case .needsTest(let reason, _): "Off until tested: \(reason.explanation)"
-        case .conflict: "Off: macOS uses this swipe"
-        }
-    }
+    private var summary: String { model.gestureSummary }
 
     private var conflictCheck: SetupCheck? {
         model.settings.stripGesture.fingers.flatMap(model.gestureCheck)
