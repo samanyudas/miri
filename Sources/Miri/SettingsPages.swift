@@ -401,12 +401,12 @@ struct SetupSettings: View {
             let recommended = model.setupChecks.filter { !$0.blocksStart }
             if !required.isEmpty {
                 SettingsSection("Required to start") {
-                    ForEach(required) { check in SetupCheckItem(check: check, page: $page) }
+                    ForEach(required) { check in SetupCheckItem(check: check) { page = .gestures } }
                 }
             }
             if !recommended.isEmpty {
                 SettingsSection("Recommended") {
-                    ForEach(recommended) { check in SetupCheckItem(check: check, page: $page) }
+                    ForEach(recommended) { check in SetupCheckItem(check: check) { page = .gestures } }
                 }
             }
             Text("Each Open button shows the System Settings page to change. Miri never changes it for you.")
@@ -418,9 +418,10 @@ struct SetupSettings: View {
 }
 
 /// One setup check: its result as a colored symbol, what it found, and a way to fix it.
-private struct SetupCheckItem: View {
+struct SetupCheckItem: View {
     let check: SetupCheck
-    @Binding var page: SettingsView.Page
+    /// Opens Settings > Gestures for a gesture check. Set Up Miri lists only start blockers, so it passes nothing.
+    var openGestures: (() -> Void)?
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
@@ -437,8 +438,8 @@ private struct SetupCheckItem: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if check.isGestureCheck, check.status != .passed {
-                Button("Open Gestures") { page = .gestures }
+            if check.isGestureCheck, check.status != .passed, let openGestures {
+                Button("Open Gestures", action: openGestures)
             }
             if let url = check.settingsURL, check.status != .passed {
                 Button("Open") { NSWorkspace.shared.open(url) }

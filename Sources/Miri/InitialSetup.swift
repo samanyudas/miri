@@ -1,3 +1,5 @@
+import AppKit
+import MiriCore
 import SwiftUI
 
 /// The window Miri opens on first launch. It shows what blocks window management and recommends the strip swipe.
@@ -5,41 +7,126 @@ import SwiftUI
 struct InitialSetupView: View {
     let model: AppModel
     @Environment(\.presenter) private var presenter
+    @State private var testing = false
 
     var body: some View {
         VStack(spacing: 0) {
-            Form {
-                ConfigurationIssueBanner(model: model)
-                Section {
-                    Text("Welcome to Miri").font(.title2.bold())
-                    Text(
-                        "Miri arranges the windows on each display side by side in a scrolling strip. Keyboard shortcuts work as soon as Miri is managing windows."
-                    )
-                    .fixedSize(horizontal: false, vertical: true)
-                }
-                Section("Window Management") {
-                    LabeledContent("Status") { LiveText(model.statusText) }
-                    ForEach(model.startBlockers) { check in
-                        SetupCheckRow(check: check)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    header
+                    ConfigurationIssueNotice(model: model)
+                    SettingsSection("Window management") {
+                        status
+                        ForEach(model.startBlockers) { check in SetupCheckItem(check: check) }
                     }
+                    swipe
                 }
-                StripSwipeSections(
-                    model: model,
-                    header: "Strip Swipe",
-                    choiceFooter: "Swipe left or right on the trackpad to slide the windows.",
-                    testFooter:
-                        "The swipe stays off until you test it and confirm that the strip followed your fingers. Settings > Gestures has the same controls later."
-                )
+                .padding(.horizontal, 40)
+                .padding(.top, 52)
+                .padding(.bottom, 24)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .formStyle(.grouped)
-            HStack {
-                Spacer()
-                Button("Done") { presenter?.close(.initialSetup) }
-                    .keyboardShortcut(.defaultAction)
-            }
-            .padding([.horizontal, .bottom], 20)
+            .scrollContentBackground(.hidden)
+            footer
         }
-        .frame(width: 520, height: 720)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea()
+        .background(Palette.content)
         .onAppear { model.refreshSetup() }
+        .sheet(isPresented: $testing) { GestureTestSheet(model: model) }
+    }
+
+    private var header: some View {
+        HStack(alignment: .center, spacing: 16) {
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .frame(width: 64, height: 64)
+                .padding(-4)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Welcome to Miri")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(Palette.primaryText)
+                    .accessibilityAddTraits(.isHeader)
+                Text("Miri lines up the windows on each display side by side in a strip that you scroll.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Palette.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private var status: some View {
+        HStack(spacing: 10) {
+            Circle().fill(model.stateColor).frame(width: 8, height: 8).accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(model.statusText)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Palette.primaryText)
+                    .modifier(StatusValue(value: model.statusText))
+                Text(statusDetail)
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(Palette.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if model.engineState == .stopped, model.startBlockers.isEmpty {
+                Button("Start Window Management") { model.start() }
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .frame(minHeight: 50)
+    }
+
+    private var statusDetail: String {
+        switch model.engineState {
+        case .running, .restarting: "Keyboard shortcuts work now."
+        case .failed: "Restart the engine from the menu bar, or see Settings > Diagnostics."
+        case .stopped where !model.startBlockers.isEmpty: "Miri starts by itself when the checks below pass."
+        case .stopped: "Keyboard shortcuts work once Miri starts."
+        }
+    }
+
+    private var swipe: some View {
+        SettingsSection("Strip swipe") {
+            SettingsRow(
+                title: "Fingers", detail: "Four is recommended. Three fingers can clash with Three Finger Drag."
+            ) {
+                SegmentedChoice(
+                    label: "Fingers",
+                    selection: Binding(
+                        get: { model.settings.stripGesture },
+                        set: { value in model.update { $0.stripGesture = value } }),
+                    options: [("Three", .three), ("Four", .four), ("Off", .off)])
+            }
+            if model.settings.stripGesture != .off {
+                SettingsRow(title: "Test", detail: model.gestureSummary) {
+                    Button("Test Gesture…") { testing = true }
+                        .disabled(model.gestureTestBlocker != nil)
+                }
+                if case .conflict(let message) = model.gestureState {
+                    NoticeRow(kind: .warning, text: message)
+                } else if let blocker = model.gestureTestBlocker {
+                    NoticeRow(kind: .warning, text: blocker)
+                }
+            }
+        }
+    }
+
+    private var footer: some View {
+        HStack(spacing: 12) {
+            Text("The swipe stays off until you test it. Settings has all of this later.")
+                .font(.system(size: 12))
+                .foregroundStyle(Palette.secondaryText)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Button("Done") { presenter?.close(.initialSetup) }
+                .buttonStyle(.borderedProminent)
+                .tint(Palette.accent)
+                .keyboardShortcut(.defaultAction)
+        }
+        .padding(.horizontal, 40)
+        .padding(.vertical, 16)
+        .overlay(alignment: .top) { Rectangle().fill(Palette.divider).frame(height: 1) }
     }
 }

@@ -43,23 +43,29 @@ final class WindowPresenter {
             case .initialSetup: ("Set Up Miri", AnyView(InitialSetupView(model: model)))
             }
         let host = NSHostingController(rootView: content.environment(\.presenter, self))
-        // Settings draws under its title bar, so its size comes from the design, not from the view plus the title bar.
-        if kind == .settings { host.sizingOptions = [] }
+        // Settings and Set Up Miri draw under their title bars, so their sizes come from the design.
+        let designSize: NSSize? =
+            switch kind {
+            case .settings: NSSize(width: 880, height: 640)
+            case .initialSetup: NSSize(width: 600, height: 580)
+            case .diagnostics, .permissionExperiment: nil
+            }
+        if designSize != nil { host.sizingOptions = [] }
         let window = NSWindow(contentViewController: host)
         window.title = title
         window.styleMask = [.titled, .closable, .miniaturizable]
         window.isReleasedWhenClosed = false
         window.setFrameAutosaveName("Miri.\(kind)")
         if !window.setFrameUsingName("Miri.\(kind)") { window.center() }
-        if kind == .settings {
-            // The sidebar runs under the title bar, so the window buttons sit on it, as in the design.
+        if let designSize {
+            // The content runs under the title bar, so the window buttons sit on it, as in the design.
             window.styleMask.insert(.fullSizeContentView)
             window.titlebarAppearsTransparent = true
             window.titleVisibility = .hidden
             // The content covers the whole frame, so the frame is the design's size. Keep the saved top-left corner.
             var frame = window.frame
-            frame.origin.y += frame.height - 640
-            frame.size = NSSize(width: 880, height: 640)
+            frame.origin.y += frame.height - designSize.height
+            frame.size = designSize
             window.setFrame(frame, display: false)
         }
         if kind == .initialSetup {

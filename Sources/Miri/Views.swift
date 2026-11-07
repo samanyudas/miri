@@ -104,74 +104,6 @@ struct MenuContent: View {
     }
 }
 
-/// Shows a configuration problem above the settings it affects.
-struct ConfigurationIssueBanner: View {
-    let model: AppModel
-
-    var body: some View {
-        if let issue = model.configurationIssue {
-            Section {
-                Label {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(issue.description)
-                        Text("Miri does not change the file until it is fixed.").foregroundStyle(.secondary)
-                    }
-                } icon: {
-                    Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.yellow)
-                }
-                Button("Show Configuration File in Finder") {
-                    NSWorkspace.shared.activateFileViewerSelecting([model.paths.configuration])
-                }
-            }
-        }
-    }
-}
-
-struct SetupCheckRow: View {
-    let check: SetupCheck
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
-            symbol.frame(width: 18)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(check.title)
-                if let detail {
-                    Text(detail).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            Spacer(minLength: 12)
-            Text(label).foregroundStyle(.secondary)
-            if let url = check.settingsURL, check.status != .passed {
-                Button("Open") { NSWorkspace.shared.open(url) }
-            }
-        }
-    }
-
-    private var label: String {
-        switch check.status {
-        case .passed: check.isGestureCheck ? "No conflict found" : "Passed"
-        case .problem: check.blocksStart ? "Blocks start" : "Problem"
-        case .notChecked: "Not checked"
-        case .unableToVerify: "Unable to verify"
-        }
-    }
-
-    private var detail: String? {
-        switch check.status {
-        case .passed: nil
-        case .problem(let text), .notChecked(let text), .unableToVerify(let text): text
-        }
-    }
-
-    @ViewBuilder private var symbol: some View {
-        switch check.status {
-        case .passed: Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-        case .problem: Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.yellow)
-        case .notChecked, .unableToVerify: Image(systemName: "questionmark.circle").foregroundStyle(.secondary)
-        }
-    }
-}
-
 extension SetupCheck {
     /// A gesture check only looks for conflicts. Only a gesture test turns the swipe on, so it never says Passed.
     var isGestureCheck: Bool { id == .fourFingerGesture || id == .threeFingerGesture }
@@ -184,33 +116,49 @@ struct DiagnosticsView: View {
     @State private var copied = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Review the report before copying it.")
-                .font(.headline)
-            Text("Window titles, document paths, user names, and the configuration file are removed.")
-                .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Review the report before you copy it")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(Palette.primaryText)
+                    .accessibilityAddTraits(.isHeader)
+                Text("Miri removes window titles, document paths, user names, and the configuration file.")
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(Palette.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             ScrollView {
                 Text(report)
-                    .font(.system(.body, design: .monospaced))
+                    .font(.system(size: 11.5, design: .monospaced))
+                    .foregroundStyle(Palette.primaryText)
+                    .lineSpacing(2)
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(8)
+                    .padding(14)
             }
-            .background(.background.secondary, in: .rect(cornerRadius: 6))
-            HStack {
+            .background(Palette.group, in: .rect(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Palette.groupRing, lineWidth: 1))
+            HStack(spacing: 10) {
                 Button("Refresh") { refresh() }
                 Spacer()
-                if copied { Text("Copied").foregroundStyle(.secondary) }
+                if copied {
+                    Label("Copied", systemImage: "checkmark")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Palette.secondaryText)
+                }
                 Button("Copy to Clipboard") {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(report, forType: .string)
                     copied = true
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(Palette.accent)
                 .keyboardShortcut(.defaultAction)
             }
         }
-        .padding(20)
+        .padding(24)
         .frame(width: 640, height: 520)
+        .background(Palette.content)
         .onAppear(perform: refresh)
     }
 
