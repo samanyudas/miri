@@ -61,6 +61,7 @@ struct SettingsView: View {
 struct SettingsSidebar: View {
     let model: AppModel
     @Binding var page: SettingsView.Page
+    @FocusState private var focusedPage: SettingsView.Page?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -70,6 +71,9 @@ struct SettingsSidebar: View {
             VStack(spacing: 2) {
                 ForEach(SettingsView.Page.allCases, id: \.self) { item in
                     SidebarRow(page: item, selected: page == item, badge: badge(for: item)) { page = item }
+                        .focused($focusedPage, equals: item)
+                        // The up and down arrows change the page, as in a macOS sidebar, and take the focus along.
+                        .onMoveCommand(perform: movePage)
                 }
             }
             Spacer(minLength: 16)
@@ -85,6 +89,18 @@ struct SettingsSidebar: View {
         }
     }
 
+    private func movePage(_ direction: MoveCommandDirection) {
+        let pages = SettingsView.Page.allCases
+        // Move from the row that has the keyboard focus, which Tab can put on a row other than the selected one.
+        guard let index = pages.firstIndex(of: focusedPage ?? page) else { return }
+        switch direction {
+        case .up where index > 0: page = pages[index - 1]
+        case .down where index < pages.count - 1: page = pages[index + 1]
+        default: return
+        }
+        focusedPage = page
+    }
+
     private var identity: some View {
         HStack(spacing: 10) {
             Image(nsImage: NSApp.applicationIconImage)
@@ -94,15 +110,17 @@ struct SettingsSidebar: View {
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
                 Text("Miri")
-                    .font(.system(size: 15, weight: .bold))
+                    .font(.sidebarName)
                     .tracking(-0.15)
                     .foregroundStyle(Palette.primaryText)
-                HStack(spacing: 5) {
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Circle().fill(model.stateColor).frame(width: 7, height: 7)
-                    LiveText(model.sidebarStatus)
-                        .font(.system(size: 11))
+                    // A longer state, such as Stopped after engine failures, wraps to a second line.
+                    Text(model.sidebarStatus)
+                        .font(.small)
                         .foregroundStyle(Palette.secondaryText)
-                        .lineLimit(1)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
@@ -114,7 +132,7 @@ struct SettingsSidebar: View {
         VStack(spacing: 8) {
             managementButton
             Text(versionLine)
-                .font(.system(size: 11))
+                .font(.small)
                 .foregroundStyle(Palette.tertiaryText)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
@@ -126,27 +144,28 @@ struct SettingsSidebar: View {
     @ViewBuilder private var managementButton: some View {
         switch model.engineState {
         case .running, .restarting:
-            sidebarButton("Stop Miri", glyph: "stop.fill", help: "Stop Window Management") { model.stop() }
+            sidebarButton("Stop Window Management") { model.stop() }
         case .failed:
-            sidebarButton("Restart Miri", glyph: "arrow.clockwise", help: "Restart Engine") { model.restart() }
+            sidebarButton("Restart Engine") { model.restart() }
         case .stopped where !model.startBlockers.isEmpty:
-            sidebarButton("Stop Miri", glyph: "stop.fill", help: "Stop Window Management") { model.stop() }
+            sidebarButton(AppModel.cancelAutomaticStartTitle) { model.stop() }
         case .stopped:
-            sidebarButton("Start Miri", glyph: "play.fill", help: "Start Window Management") { model.start() }
+            sidebarButton("Start Window Management") { model.start() }
         }
     }
 
-    private func sidebarButton(
-        _ title: String, glyph: String, help: String, action: @escaping () -> Void
-    ) -> some View {
+    /// Uses the same title as the page and menu buttons, so the action has one name everywhere.
+    private func sidebarButton(_ title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Label(title, systemImage: glyph)
-                .labelStyle(SidebarButtonLabelStyle())
+            Text(title)
+                .font(.detail.weight(.medium))
+                .lineLimit(1)
+                .minimumScaleFactor(0.9)
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.bordered)
         .controlSize(.large)
-        .help(help)
+        .buttonBorderShape(.roundedRectangle)
     }
 
     private var versionLine: String {
@@ -157,19 +176,7 @@ struct SettingsSidebar: View {
     }
 
     private func badge(for page: SettingsView.Page) -> Int {
-        guard page == .setup else { return 0 }
-        return model.setupChecks.filter {
-            if case .problem = $0.status { true } else { false }
-        }.count
-    }
-}
-
-private struct SidebarButtonLabelStyle: LabelStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        HStack(spacing: 6) {
-            configuration.icon.font(.system(size: 9, weight: .bold))
-            configuration.title.font(.system(size: 13, weight: .medium))
-        }
+        page == .setup ? model.setupReviewCount : 0
     }
 }
 
@@ -186,43 +193,56 @@ private struct SidebarRow: View {
                     .font(.system(size: 10.5, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 20, height: 20)
-                    .background(selected ? Palette.accent : Palette.iconTile, in: .rect(cornerRadius: 5))
+                    .background(selected ? Palette.accentFill : Palette.iconTile, in: .rect(cornerRadius: 5))
                 Text(page.title)
-                    .font(.system(size: 13, weight: selected ? .semibold : .regular))
-                    .foregroundStyle(selected ? Palette.accentText : Palette.primaryText)
+                    .font(.rowTitle.weight(selected ? .semibold : .regular))
+                    .foregroundStyle(Palette.primaryText)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if badge > 0 {
                     Text("\(badge)")
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.small.weight(.semibold))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 1)
-                        .background(Palette.orange, in: .capsule)
-                        .accessibilityLabel("\(badge) to review")
+                        .background(Palette.badge, in: .capsule)
                 }
             }
             .padding(.horizontal, 8)
-            .frame(height: 30)
+            .frame(minHeight: 30)
             .background(selected ? Palette.accentTint : .clear, in: .rect(cornerRadius: 7))
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(page.title)
+        .accessibilityValue(badge > 0 ? "\(badge) to review" : "")
         .accessibilityAddTraits(selected ? [.isSelected] : [])
     }
 }
 
 extension AppModel {
+    /// How many setup checks to review: only the blockers while Miri waits for setup, otherwise every problem.
+    /// The Setup badge and the menu use this count, so they never disagree with the waiting banner.
+    var setupReviewCount: Int {
+        if !startBlockers.isEmpty { return startBlockers.count }
+        return setupChecks.filter { if case .problem = $0.status { true } else { false } }.count
+    }
+
+    /// What happens while Miri waits for setup, in the same words in Settings, Set Up Miri, and the menu.
+    static let startsWhenReadySentence = "Miri starts by itself when the required checks pass."
+
+    /// The action that keeps Miri stopped while it waits for setup, which would otherwise start it by itself.
+    static let cancelAutomaticStartTitle = "Cancel Automatic Start"
+
     /// A few words for the sidebar about whether Miri is managing windows.
     var sidebarStatus: String {
         switch engineState {
         case .running:
             let count = NSScreen.screens.count
             return "Running · \(count) \(count == 1 ? "display" : "displays")"
-        case .restarting(let crashes): return "Restarting · crash \(crashes)"
-        case .failed: return "Stopped after failures"
+        case .restarting: return "Restarting the engine"
+        case .failed: return "Stopped after engine failures"
         case .stopped:
-            if !startBlockers.isEmpty { return "Setup required" }
+            if !startBlockers.isEmpty { return "Waiting for setup" }
             return stoppedByUser ? "Stopped by you" : "Stopped"
         }
     }
