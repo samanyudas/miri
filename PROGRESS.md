@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `feat/331-command-shift-ends`, based on `main` at `91865afa`
+Updated: 2026-11-08 on branch `feat/331-command-shift-ends`, based on `main` at `7c2b9a28`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -47,6 +47,14 @@ The audit is a snapshot of `6edff137`.
 The owning documents and issues hold the current state.
 Next: the audit's [Remaining blockers](docs/v1-audit.md#remaining-blockers) table, and the stale [known limitations](docs/limitations.md) rows that the audit lists.
 
+## Reopened windows stay on the desktop in use
+
+[#323](https://github.com/samanyudas/miri/issues/323): reopening Settings or Copy Diagnostics switched the display back to the desktop where that window was last open, and a saved frame kept it on its old display.
+Branch `fix/issue-323` gives each `WindowPresenter` window `.moveToActiveSpace` and centers a hidden window on `NSScreen.main` when its frame is on another screen, which is triage option 1.
+`verify-miri` runs `20261108-012140` and `20261108-014840` failed all 3 criteria on `main` `91865afa`, and run `20261108-014458` passed all 3 on the fix.
+Next: Sam merges the PR, then an agent rechecks the criteria on `main` and closes #323.
+Set Up Miri was not driven, because it shares `show` with the two windows that were.
+
 ## Command-Shift Left and Right stay on their display
 
 [#331](https://github.com/samanyudas/miri/issues/331): Sam decided on 7 November 2026 that ⌃⌥⌘⇧← and ⌃⌥⌘⇧→ move the column to the first or last place on its own display and never cross to another display.
@@ -54,7 +62,7 @@ The defaults now bind those chords, and the H, L, A, and D chords, to `window_sw
 Settings no longer lists the four actions that moved or focused to an end or else to the next display.
 An upgrade removes those defaults only where the user kept them unchanged, and a custom key on a removed action stays under Other Engine Bindings.
 [paneru#137](https://github.com/samanyudas/paneru/pull/137) makes a swap to the end that the column already holds do nothing, instead of swapping inside its stack, and the branch pins its merge `b5ae4bd`.
-`verify-miri` runs `20261107-013236` on `main` and `20261107-013347` on this change showed the old crossing and the new behavior.
+`verify-miri` runs `20261107-013236` on `main`, and `20261107-013347` and `20261108-020209` on this change, showed the old crossing and the new behavior.
 Next: Sam merges the PR, then a check on the `main` build and closing #331.
 [#332](https://github.com/samanyudas/miri/issues/332), [#333](https://github.com/samanyudas/miri/issues/333), and [#334](https://github.com/samanyudas/miri/issues/334) hold the rest of the 7 November shortcut decisions.
 
