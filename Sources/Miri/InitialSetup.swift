@@ -80,6 +80,7 @@ struct InitialSetupView: View {
                 Button("Restart Engine") { model.restart() }
                     .buttonStyle(.borderedProminent)
                     .tint(Palette.accentFill)
+                    .keyboardShortcut(.defaultAction)
             }
         }
         .padding(.horizontal, 14)
@@ -91,11 +92,7 @@ struct InitialSetupView: View {
     @ViewBuilder private var stateGlyph: some View {
         switch model.engineState {
         case .running:
-            Image(systemName: "checkmark")
-                .font(.system(size: 9, weight: .heavy))
-                .foregroundStyle(Palette.onStatus)
-                .frame(width: 18, height: 18)
-                .background(Palette.green, in: .circle)
+            NoticeGlyph(kind: .success, size: 18)
         case .restarting: NoticeGlyph(kind: .warning, size: 18)
         case .failed: NoticeGlyph(kind: .error, size: 18)
         case .stopped: NoticeGlyph(kind: model.startBlockers.isEmpty ? .neutral : .warning, size: 18)
@@ -103,6 +100,12 @@ struct InitialSetupView: View {
     }
 
     private var canStart: Bool { model.engineState == .stopped && model.startBlockers.isEmpty }
+
+    /// Whether the status row holds the main action, Start or Restart, so Done steps back to a plain button.
+    private var statusHasMainAction: Bool {
+        if case .failed = model.engineState { return true }
+        return canStart
+    }
 
     private var statusDetail: String {
         switch model.engineState {
@@ -161,7 +164,7 @@ struct InitialSetupView: View {
                 .font(.detail)
                 .foregroundStyle(Palette.secondaryText)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            if canStart {
+            if statusHasMainAction {
                 Button("Done") { presenter?.close(.initialSetup) }
             } else {
                 Button("Done") { presenter?.close(.initialSetup) }

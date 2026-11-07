@@ -63,7 +63,7 @@ struct ShortcutsSettings: View {
                             }
                         }
                         Text(
-                            "Press Escape to cancel recording. Stop window manager works even while the engine is stopped."
+                            "Point at a shortcut to remove it. Press Escape to cancel recording. Stop window manager works even while the engine is stopped."
                         )
                         .font(.detail)
                         .foregroundStyle(Palette.secondaryText)
@@ -88,7 +88,7 @@ struct ShortcutsSettings: View {
                                 .frame(minHeight: 44)
                             }
                         }
-                        Text("Miri does not list these engine commands. Edit them in the configuration file.")
+                        Text("Edit these bindings in the configuration file.")
                             .font(.detail)
                             .foregroundStyle(Palette.secondaryText)
                             .padding(.horizontal, 2)
@@ -327,14 +327,7 @@ struct ShortcutChip: View {
     @FocusState private var removeFocused: Bool
 
     var body: some View {
-        Text(label)
-            .font(.detail.weight(.medium))
-            .foregroundStyle(Palette.primaryText)
-            .lineLimit(1)
-            .padding(.horizontal, 7)
-            .frame(minWidth: 52, minHeight: 22)
-            .background(Palette.chip, in: .rect(cornerRadius: 5))
-            .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Palette.groupRing, lineWidth: 0.5))
+        KeyCap(label: label, minWidth: 52)
             .overlay(alignment: .topTrailing) {
                 Button(action: remove) {
                     Image(systemName: "xmark.circle.fill")

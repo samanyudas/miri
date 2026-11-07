@@ -147,7 +147,7 @@ private struct StatusHero: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(20)
-        .background(tint, in: .rect(cornerRadius: 12))
+        .background(tint, in: .rect(cornerRadius: 10))
     }
 }
 
@@ -221,7 +221,7 @@ struct LayoutSettings: View {
                         .labelsHidden()
                         .textFieldStyle(.plain)
                         .font(.rowTitle)
-                        .fieldBox()
+                        .fieldBox(focused: editingPresets)
                         .frame(width: 200)
                         .focused($editingPresets)
                         .onSubmit(applyPresets)
@@ -506,11 +506,7 @@ struct SetupCheckItem: View {
     @ViewBuilder private var symbol: some View {
         switch check.status {
         case .passed:
-            Image(systemName: "checkmark")
-                .font(.system(size: 9, weight: .heavy))
-                .foregroundStyle(Palette.onStatus)
-                .frame(width: 18, height: 18)
-                .background(Palette.green, in: .circle)
+            NoticeGlyph(kind: .success, size: 18)
         case .problem:
             NoticeGlyph(kind: .warning, size: 18)
         case .unableToVerify:
@@ -539,7 +535,7 @@ struct DiagnosticsSettings: View {
     var body: some View {
         SettingsPage(
             title: "Diagnostics",
-            subtitle: "Engine health and local logs. Nothing leaves your Mac unless you copy it."
+            subtitle: "Engine health and local logs."
         ) {
             if case .failed(let reason) = model.engineState {
                 Banner(kind: .error, title: model.statusText, detail: reason) {
@@ -555,14 +551,15 @@ struct DiagnosticsSettings: View {
                         .controlSize(.small)
                 }
                 ScrollView {
-                    Text(logTail.isEmpty ? "The log is empty." : logTail.joined(separator: "\n"))
-                        .font(.monoSmall)
-                        .foregroundStyle(Palette.logText)
-                        .lineSpacing(3)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(14)
+                    VStack(alignment: .leading, spacing: 3) {
+                        if logTail.isEmpty { Text("The log is empty.") }
+                        ForEach(logTail.indices, id: \.self) { index in logLine(logTail[index]) }
+                    }
+                    .font(.monoSmall)
+                    .foregroundStyle(Palette.logText)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(14)
                 }
                 .defaultScrollAnchor(.bottom)
                 .frame(height: 200)
@@ -606,7 +603,7 @@ struct DiagnosticsSettings: View {
         HStack(spacing: 0) {
             fact("Engine", value: engineWord, dot: model.stateColor)
             Rectangle().fill(Palette.divider).frame(width: 1)
-            fact("Process", value: processText, dot: nil)
+            fact("Process", value: processText, dot: nil, muted: processText == "None")
             Rectangle().fill(Palette.divider).frame(width: 1)
             fact("Displays", value: "\(NSScreen.screens.count)", dot: nil)
         }
@@ -615,7 +612,8 @@ struct DiagnosticsSettings: View {
         .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Palette.groupRing, lineWidth: 1))
     }
 
-    private func fact(_ title: String, value: String, dot: Color?) -> some View {
+    /// One fact. A missing value, such as no engine process, is drawn quieter than real data.
+    private func fact(_ title: String, value: String, dot: Color?, muted: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.detail)
@@ -624,7 +622,7 @@ struct DiagnosticsSettings: View {
                 if let dot { Circle().fill(dot).frame(width: 8, height: 8) }
                 LiveText(value)
                     .font(.heroTitle)
-                    .foregroundStyle(Palette.primaryText)
+                    .foregroundStyle(muted ? Palette.secondaryText : Palette.primaryText)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
             }
@@ -648,6 +646,18 @@ struct DiagnosticsSettings: View {
         switch model.engineState {
         case .running(let pid): "pid \(pid)"
         case .restarting, .failed, .stopped: "None"
+        }
+    }
+
+    /// One log line. A wrapped message stays indented under its own text, so it never reads as a new entry.
+    @ViewBuilder private func logLine(_ line: String) -> some View {
+        if let match = line.wholeMatch(of: /(\d{2}:\d{2}:\d{2}  \S+\s+)(.*)/) {
+            HStack(alignment: .firstTextBaseline, spacing: 0) {
+                Text(match.1).fixedSize()
+                Text(match.2).fixedSize(horizontal: false, vertical: true)
+            }
+        } else {
+            Text(line).fixedSize(horizontal: false, vertical: true)
         }
     }
 

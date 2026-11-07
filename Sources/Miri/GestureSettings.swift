@@ -12,7 +12,7 @@ struct GestureSettings: View {
         SettingsPage(
             title: "Gestures",
             subtitle:
-                "Swipe on the trackpad to scroll the strip. The swipe turns on after you test it and confirm that the strip followed your fingers."
+                "Scroll the strip with a swipe on the trackpad."
         ) {
             ConfigurationIssueNotice(model: model)
             hero
@@ -86,7 +86,7 @@ struct GestureSettings: View {
             .fixedSize()
         }
         .padding(20)
-        .background(heroTint, in: .rect(cornerRadius: 12))
+        .background(heroTint, in: .rect(cornerRadius: 10))
     }
 
     private var heroTint: Color {
@@ -154,8 +154,8 @@ private struct TrackpadPicture: View {
                 .foregroundStyle(fingers == nil ? Palette.gray : Palette.accent)
         }
         .frame(width: 132, height: 92)
-        .background(Palette.group, in: .rect(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Palette.heroTileBorder, lineWidth: 1))
+        .background(Palette.group, in: .rect(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Palette.heroTileBorder, lineWidth: 1))
         .accessibilityHidden(true)
     }
 
@@ -264,7 +264,8 @@ struct GestureTestSheet: View {
         case .idle, .watching: "Swipe left and right with \(fingerWord) fingers on the trackpad."
         case .passedAwaitingConfirmation: "Did the strip follow your fingers?"
         case .failed(let reason): reason
-        case .inconclusive: "Miri did not see the strip move both ways within 20 seconds."
+        case .inconclusive:
+            "Miri did not see the strip move both ways within \(GestureTest.timeout.components.seconds) seconds."
         }
     }
 
@@ -311,11 +312,7 @@ struct GestureTestSheet: View {
     }
 
     private var checkmark: some View {
-        Image(systemName: "checkmark")
-            .font(.system(size: 9, weight: .heavy))
-            .foregroundStyle(Palette.onStatus)
-            .frame(width: 18, height: 18)
-            .background(Palette.green, in: .circle)
+        NoticeGlyph(kind: .success, size: 18)
             .accessibilityHidden(true)
     }
 
@@ -325,8 +322,8 @@ struct GestureTestSheet: View {
             Button("Cancel", role: .cancel) { dismiss() }
         case .passedAwaitingConfirmation:
             Button("Cancel", role: .cancel) { dismiss() }
-            Button("No, It Did Not") { test.deny() }
-            Button("Yes, It Followed") {
+            Button("No") { test.deny() }
+            Button("Yes") {
                 test.confirm()
                 dismiss()
             }

@@ -67,10 +67,10 @@ final class WindowPresenter {
             // The content covers the whole frame, so the frame is the design's size. Keep the saved top-left corner.
             var size = designSize
             if kind == .settings {
-                // Settings grows taller for long pages such as Shortcuts, and keeps the design's width.
+                // Settings grows for long pages such as Shortcuts, and a little wider for larger text.
                 window.styleMask.insert(.resizable)
                 window.contentMinSize = NSSize(width: designSize.width, height: 560)
-                window.contentMaxSize = NSSize(width: designSize.width, height: .greatestFiniteMagnitude)
+                window.contentMaxSize = NSSize(width: 1100, height: CGFloat.greatestFiniteMagnitude)
                 // It opens at least as tall as the design, and keeps a taller height the user chose.
                 if restored { size.height = max(window.frame.height, designSize.height) }
             }

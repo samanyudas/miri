@@ -250,11 +250,14 @@ extension SettingsRow where Control == EmptyView {
 enum NoticeKind {
     /// A state the user chose, such as a stop. It needs no attention.
     case neutral
+    /// A passed check or a running engine.
+    case success
     case info, warning, error
 
     var color: Color {
         switch self {
         case .neutral: Palette.gray
+        case .success: Palette.green
         case .info: Palette.accent
         case .warning: Palette.orange
         case .error: Palette.red
@@ -263,7 +266,7 @@ enum NoticeKind {
 
     var tint: Color {
         switch self {
-        case .neutral: Palette.chip
+        case .neutral, .success: Palette.chip
         case .info: Palette.heroTint
         case .warning: Palette.warningTint
         case .error: Palette.errorTint
@@ -272,7 +275,7 @@ enum NoticeKind {
 
     var border: Color {
         switch self {
-        case .neutral: Palette.groupRing
+        case .neutral, .success: Palette.groupRing
         case .info: Palette.heroTileBorder
         case .warning: Palette.warningBorder
         case .error: Palette.errorBorder
@@ -281,7 +284,7 @@ enum NoticeKind {
 
     var text: Color {
         switch self {
-        case .neutral, .info: Palette.primaryText
+        case .neutral, .success, .info: Palette.primaryText
         case .warning: Palette.warningText
         case .error: Palette.errorText
         }
@@ -290,6 +293,7 @@ enum NoticeKind {
     var symbol: String {
         switch self {
         case .neutral: "pause.fill"
+        case .success: "checkmark"
         case .info: "info"
         case .warning, .error: "exclamationmark"
         }
@@ -298,7 +302,7 @@ enum NoticeKind {
     /// The word VoiceOver reads before a notice, because the colored glyph is hidden from it.
     var spokenPrefix: String {
         switch self {
-        case .neutral: ""
+        case .neutral, .success: ""
         case .info: "Note: "
         case .warning: "Warning: "
         case .error: "Error: "
@@ -427,6 +431,7 @@ struct RowSwitch: View {
 /// A keyboard shortcut drawn as a key cap.
 struct KeyCap: View {
     let label: String
+    var minWidth: CGFloat = 40
 
     var body: some View {
         Text(label)
@@ -434,7 +439,7 @@ struct KeyCap: View {
             .foregroundStyle(Palette.primaryText)
             .lineLimit(1)
             .padding(.horizontal, 7)
-            .frame(minWidth: 40, minHeight: 22)
+            .frame(minWidth: minWidth, minHeight: 22)
             .background(Palette.chip, in: .rect(cornerRadius: 5))
             .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Palette.groupRing, lineWidth: 0.5))
     }
@@ -527,6 +532,7 @@ struct SegmentedChoice<Value: Hashable>: View {
 struct SearchField: View {
     @Binding var text: String
     let prompt: String
+    @FocusState private var focused: Bool
 
     var body: some View {
         HStack(spacing: 6) {
@@ -538,6 +544,7 @@ struct SearchField: View {
                 .labelsHidden()
                 .textFieldStyle(.plain)
                 .font(.rowTitle)
+                .focused($focused)
             if !text.isEmpty {
                 Button {
                     text = ""
@@ -549,17 +556,20 @@ struct SearchField: View {
                 .accessibilityLabel("Clear Search")
             }
         }
-        .fieldBox()
+        .fieldBox(focused: focused)
     }
 }
 
 extension View {
     /// The box of a text field in the design's colors: a group fill, a ring, and at least 28 points of height.
-    func fieldBox() -> some View {
+    /// While the field has focus, the ring is the accent color, like the focus ring of the segmented control.
+    func fieldBox(focused: Bool) -> some View {
         padding(.horizontal, 8)
             .frame(minHeight: 28)
             .background(Palette.group, in: .rect(cornerRadius: 7))
-            .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(Palette.groupRing, lineWidth: 1))
+            .overlay(
+                RoundedRectangle(cornerRadius: 7)
+                    .strokeBorder(focused ? Palette.accent : Palette.groupRing, lineWidth: focused ? 2 : 1))
     }
 }
 
