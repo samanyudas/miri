@@ -55,6 +55,8 @@ final class WindowPresenter {
         let window = NSWindow(contentViewController: host)
         window.title = title
         window.styleMask = [.titled, .closable, .miniaturizable]
+        // AppKit restores a saved size only on a resizable window, so these become resizable before the restore.
+        if kind == .settings || kind == .diagnostics { window.styleMask.insert(.resizable) }
         window.isReleasedWhenClosed = false
         window.setFrameAutosaveName("Miri.\(kind)")
         let restored = window.setFrameUsingName("Miri.\(kind)")
@@ -70,7 +72,6 @@ final class WindowPresenter {
             var size = designSize
             if kind == .settings {
                 // Settings grows for long pages such as Shortcuts, and a little wider for larger text.
-                window.styleMask.insert(.resizable)
                 window.contentMinSize = NSSize(width: designSize.width, height: 560)
                 window.contentMaxSize = NSSize(width: 1100, height: CGFloat.greatestFiniteMagnitude)
                 // It opens at least the design's size, and keeps a larger size the user chose.
@@ -81,7 +82,6 @@ final class WindowPresenter {
             }
             if kind == .diagnostics {
                 // The report is long, so Copy Diagnostics can grow to show more of it.
-                window.styleMask.insert(.resizable)
                 window.contentMinSize = designSize
                 if restored {
                     size.width = max(window.frame.width, designSize.width)

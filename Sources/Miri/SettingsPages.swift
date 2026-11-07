@@ -373,6 +373,11 @@ struct LayoutSettings: View {
     }
 
     private func applyPresets() {
+        // Unedited text shows the presets rounded to four places, so applying it would rewrite them.
+        guard presetsText != formattedPresets else {
+            presetsError = nil
+            return
+        }
         let values = presetsText.split(separator: ",").map {
             Double($0.trimmingCharacters(in: .whitespaces))
         }

@@ -91,7 +91,8 @@ struct SettingsSidebar: View {
 
     private func movePage(_ direction: MoveCommandDirection) {
         let pages = SettingsView.Page.allCases
-        guard let index = pages.firstIndex(of: page) else { return }
+        // Move from the row that has the keyboard focus, which Tab can put on a row other than the selected one.
+        guard let index = pages.firstIndex(of: focusedPage ?? page) else { return }
         switch direction {
         case .up where index > 0: page = pages[index - 1]
         case .down where index < pages.count - 1: page = pages[index + 1]
