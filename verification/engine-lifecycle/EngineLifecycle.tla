@@ -153,17 +153,17 @@ AppLaunches == s.app = "launching" /\ \E ok \in BOOLEAN :
 
 \* The menu, the Settings sidebar, Settings > General, and Set Up Miri show Start only
 \* while the engine is stopped and nothing blocks start.
-\* Views.swift:88, SettingsWindow.swift:153, SettingsPages.swift:114, InitialSetup.swift:78.
+\* Views.swift:88, SettingsWindow.swift:153, SettingsPages.swift:109, InitialSetup.swift:79.
 YouPressStart == Open /\ s.engine = "stopped" /\ ~s.blockersShown /\ \E ok \in BOOLEAN : Step(AppStart(You("start"), ok))
 
 \* Stop shows while the engine runs or restarts, or while it is stopped and Miri waits for setup.
-\* Views.swift:78, :85, SettingsWindow.swift:147, :151, SettingsPages.swift:100.
+\* Views.swift:78, :85, SettingsWindow.swift:147, :151, SettingsPages.swift:95.
 YouPressStop == Open /\ (s.engine \in {"running", "restarting"} \/ (s.engine = "stopped" /\ s.blockersShown))
                 /\ \E ok \in BOOLEAN : Step(AppStop(You("stop"), ok))
 
 \* Restart is enabled only while the engine runs or has failed. While it restarts after a crash,
 \* the menu and Settings > Diagnostics disable Restart, and the other places hide it.
-\* Views.swift:76, :81, SettingsWindow.swift:149, SettingsPages.swift:89, :574, :608, InitialSetup.swift:83.
+\* Views.swift:76, :81, SettingsWindow.swift:149, SettingsPages.swift:84, :569, :603, InitialSetup.swift:84.
 YouPressRestart == Open /\ s.engine \in {"running", "failed"} /\ \E ok \in BOOLEAN : Step(AppRestart(You("restart"), ok))
 
 \* The Stop window manager shortcut, StopShortcut.swift, calls stopFromShortcut(), AppModel.swift:385.
