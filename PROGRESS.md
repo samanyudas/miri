@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-07 on branch `feat/109-settings-rehaul`, based on `main` at `54e4e5f4`
+Updated: 2026-11-07 on branch `feat/109-settings-rehaul`, based on `main` at `82bd6b7a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -37,6 +37,14 @@ CI on `6edff137` failed once on the flaky engine test `slice_photos::a_press_whi
 The audit is a snapshot of `6edff137`.
 The owning documents and issues hold the current state.
 Next: the audit's [Remaining blockers](docs/v1-audit.md#remaining-blockers) table, and the stale [known limitations](docs/limitations.md) rows that the audit lists.
+
+## Pointer stays after a click
+
+[#339](https://github.com/samanyudas/miri/issues/339): with `mouse_follows_focus = true`, a click on a window moved the pointer to the window's centre.
+[paneru#138](https://github.com/samanyudas/paneru/pull/138) moves the pointer only when a Miri command changes focus, as Sam chose on 7 November 2026.
+[#341](https://github.com/samanyudas/miri/pull/341) pinned engine `5f01554`, the merge of paneru#138, and reached `main` at `13cd4aaa`.
+#339 closed on 7 November 2026 after `verify-miri` run `20261107-201447` passed all 5 criteria on a build with the same tree as `13cd4aaa`.
+Starting the engine no longer moves the pointer onto the first focused window.
 
 ## Drops on another display that macOS tiles
 
