@@ -88,7 +88,7 @@ struct GeneralSettings: View {
             Banner(
                 kind: .warning, title: "Waiting for setup",
                 detail:
-                    "The \u{201C}\(model.startBlockers.first?.title ?? "required")\u{201D} check must pass first. Miri then starts by itself.",
+                    "Waiting for the \u{201C}\(model.startBlockers.first?.title ?? "required")\u{201D} check. \(AppModel.startsWhenReadySentence)",
                 accessibilityValue: model.statusText
             ) {
                 Button(AppModel.cancelAutomaticStartTitle) { model.stop() }
@@ -101,7 +101,7 @@ struct GeneralSettings: View {
                 kind: .neutral, title: "Window management is stopped",
                 // Only a stop the user chose is remembered across log-ins, so only that one promises it.
                 detail: model.stoppedByUser
-                    ? "Your windows stay where they are. Miri stays stopped, even after you log in again, until you start it."
+                    ? "Your windows stay where they are. Miri stays stopped until you start it."
                     : "Your windows stay where they are.",
                 accessibilityValue: model.statusText
             ) {
@@ -328,7 +328,8 @@ struct LayoutSettings: View {
         let labels = shortcuts.chords(for: action).map(model.keyLayout.label(for:))
         return labels.isEmpty
             ? "\(action.title) has no shortcut. Add one in Shortcuts."
-            : "\(labels.formatted(.list(type: .or))) cycles through them."
+            // A no-break space keeps the shortcut on the same line as its verb.
+            : "\(labels.formatted(.list(type: .or)))\u{00A0}cycles through them."
     }
 
     private var stackLimit: Binding<StackLimit> {
@@ -397,6 +398,7 @@ struct LayoutSettings: View {
 struct SetupSettings: View {
     let model: AppModel
     @Binding var page: SettingsView.Page
+    @State private var checked = false
 
     var body: some View {
         SettingsPage(
@@ -404,18 +406,24 @@ struct SetupSettings: View {
             subtitle:
                 "Miri checks your Mac for anything that blocks window management. It never changes your settings for you."
         ) {
-            Button("Check Again", systemImage: "arrow.clockwise") {
+            Button(checked ? "Checked" : "Check Again", systemImage: checked ? "checkmark" : "arrow.clockwise") {
                 model.refreshSetup()
                 let count = model.setupReviewCount
                 AccessibilityNotification.Announcement(
                     count == 0 ? "Checked. Nothing to review." : "Checked. \(count) to review."
                 ).post()
+                // The button says Checked for a moment, so a check that changed nothing still shows it ran.
+                checked = true
+                Task {
+                    try? await Task.sleep(for: .seconds(2))
+                    checked = false
+                }
             }
         } content: {
             if !model.startBlockers.isEmpty {
                 Banner(
                     kind: .warning, title: "Waiting for setup",
-                    detail: "Miri starts by itself when the required checks pass.")
+                    detail: AppModel.startsWhenReadySentence)
             }
             let required = model.setupChecks.filter(\.blocksStart)
             // Problems first, so the rows that need attention are not hidden between passing ones.

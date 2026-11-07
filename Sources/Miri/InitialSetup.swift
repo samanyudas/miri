@@ -22,7 +22,7 @@ struct InitialSetupView: View {
             }
             .padding(.horizontal, 40)
             .padding(.top, 52)
-            .padding(.bottom, 24)
+            .padding(.bottom, 0)
             .frame(maxWidth: .infinity, alignment: .leading)
             // Any spare height goes above the footer, so the footer always sits on the bottom edge.
             Spacer(minLength: 0)
@@ -59,11 +59,12 @@ struct InitialSetupView: View {
 
     private var status: some View {
         HStack(spacing: 12) {
-            stateGlyph.accessibilityHidden(true)
+            NoticeGlyph(kind: stateKind, size: 18)
             VStack(alignment: .leading, spacing: 2) {
                 // The blocking checks are listed right below, so the title does not repeat the first one.
-                Text(model.startBlockers.isEmpty ? model.statusText : "Waiting for setup")
+                Text(statusTitle)
                     .font(.rowTitle.weight(.semibold))
+                    .accessibilityLabel(stateKind.spokenPrefix + statusTitle)
                     .foregroundStyle(Palette.primaryText)
                     .modifier(StatusValue(value: model.statusText))
                 Text(statusDetail)
@@ -90,16 +91,17 @@ struct InitialSetupView: View {
         .frame(minHeight: 50)
     }
 
-    /// The same symbols as the Settings notices: a check while running, and the notice glyph of each other state.
-    @ViewBuilder private var stateGlyph: some View {
+    /// The notice kind of the state, so its glyph and spoken prefix match the Settings banners.
+    private var stateKind: NoticeKind {
         switch model.engineState {
-        case .running:
-            NoticeGlyph(kind: .success, size: 18)
-        case .restarting: NoticeGlyph(kind: .warning, size: 18)
-        case .failed: NoticeGlyph(kind: .error, size: 18)
-        case .stopped: NoticeGlyph(kind: model.startBlockers.isEmpty ? .neutral : .warning, size: 18)
+        case .running: .success
+        case .restarting: .warning
+        case .failed: .error
+        case .stopped: model.startBlockers.isEmpty ? .neutral : .warning
         }
     }
+
+    private var statusTitle: String { model.startBlockers.isEmpty ? model.statusText : "Waiting for setup" }
 
     private var canStart: Bool { model.engineState == .stopped && model.startBlockers.isEmpty }
 
@@ -114,7 +116,7 @@ struct InitialSetupView: View {
         case .running: "Keyboard shortcuts work now."
         case .restarting: "The engine is restarting. Keyboard shortcuts resume when it is ready."
         case .failed: "Restart the engine to manage windows again. Settings > Diagnostics has the log."
-        case .stopped where !model.startBlockers.isEmpty: "Miri starts by itself when the checks below pass."
+        case .stopped where !model.startBlockers.isEmpty: AppModel.startsWhenReadySentence
         case .stopped: "Keyboard shortcuts work once Miri starts."
         }
     }

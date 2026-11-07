@@ -21,6 +21,8 @@ enum Palette {
     static let groupRing = dynamic(0xE5E5EA, 0x3A3A3E, contrast: (0xA8A8AF, 0x6A6A70))
     static let divider = dynamic(0xEFEFF2, 0x353538, contrast: (0xC4C4CA, 0x58585E))
     static let chip = dynamic(0xF2F2F5, 0x3A3A3D)
+    /// The fill of a neutral notice. Darker than `chip` in dark mode so secondary text on it reaches 4.5:1.
+    static let neutralTint = dynamic(0xF2F2F5, 0x333336)
     static let track = dynamic(0xEEEEF1, 0x3A3A3D, contrast: (0xDADADF, 0x4A4A4E))
     static let segment = dynamic(0xFFFFFF, 0x636366)
     static let iconTile = dynamic(0x8E8E93, 0x5A5A5F)
@@ -266,7 +268,7 @@ enum NoticeKind {
 
     var tint: Color {
         switch self {
-        case .neutral, .success: Palette.chip
+        case .neutral, .success: Palette.neutralTint
         case .info: Palette.heroTint
         case .warning: Palette.warningTint
         case .error: Palette.errorTint

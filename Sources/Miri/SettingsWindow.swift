@@ -164,6 +164,7 @@ struct SettingsSidebar: View {
         }
         .buttonStyle(.bordered)
         .controlSize(.large)
+        .buttonBorderShape(.roundedRectangle)
     }
 
     private var versionLine: String {
@@ -224,6 +225,9 @@ extension AppModel {
         if !startBlockers.isEmpty { return startBlockers.count }
         return setupChecks.filter { if case .problem = $0.status { true } else { false } }.count
     }
+
+    /// What happens while Miri waits for setup, in the same words in Settings, Set Up Miri, and the menu.
+    static let startsWhenReadySentence = "Miri starts by itself when the required checks pass."
 
     /// The action that keeps Miri stopped while it waits for setup, which would otherwise start it by itself.
     static let cancelAutomaticStartTitle = "Cancel Automatic Start"

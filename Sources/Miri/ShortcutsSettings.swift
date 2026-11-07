@@ -36,6 +36,7 @@ struct ShortcutsSettings: View {
                     SearchField(text: $filter, prompt: "Search actions or shortcuts")
                     Button("Reset to Defaults…") { confirmingReset = true }
                         .controlSize(.large)
+                        .buttonBorderShape(.roundedRectangle)
                 }
                 if !model.keptDefaults.isEmpty {
                     SettingsSection("Updated default shortcuts") {
@@ -150,6 +151,7 @@ struct ShortcutsSettings: View {
                 .buttonStyle(.borderedProminent)
                 .tint(Palette.accentFill)
                 .help("Move \(wanted) from \(kept.owner) to \(kept.action.title)")
+                .accessibilityLabel("Use \(KeyCap.spoken(wanted)) for \(kept.action.title)")
             }
         }
         .padding(.horizontal, 14)
@@ -218,6 +220,7 @@ struct ShortcutsSettings: View {
             startRecording(action)
         } label: {
             Image(systemName: "plus")
+                .foregroundStyle(Palette.secondaryText)
                 .font(.system(size: 11, weight: .semibold))
                 .frame(width: 24, height: 24)
                 .contentShape(.rect)
