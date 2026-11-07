@@ -126,7 +126,11 @@ struct ShortcutsSettings: View {
             if let owner {
                 Button("Use \(wanted)") {
                     notice = nil
-                    model.removeShortcut(kept.wanted, from: owner)
+                    // The owner can spell the same keys another way, such as `ctrl+alt-[` for `ctrl+alt-leftbracket`.
+                    for chord in model.shortcuts?.chords(for: owner) ?? []
+                    where model.keyLayout.conflicts(chord, kept.wanted) {
+                        model.removeShortcut(chord, from: owner)
+                    }
                     add(kept.wanted, to: kept.action, allowingSystemConflict: false)
                 }
                 .buttonStyle(.borderedProminent)
