@@ -14,6 +14,16 @@ The current milestone is the open v1 work, which the [`v1 blocker` label](https:
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
 
+## Bug reports, shortcut illustrations, and localization
+
+Sam chose to build [#352](https://github.com/samanyudas/miri/issues/352), [#351](https://github.com/samanyudas/miri/issues/351), and [#350](https://github.com/samanyudas/miri/issues/350) on 8 November 2026, with every design choice decided before implementation.
+Branch `design/350-351-352` holds groundwork with no design content, and no PR is open.
+`IssueForm` in `MiriCore` builds the new-issue address for each issue form, and `IssueFormTests` checks that each form file exists.
+`scripts/check-strings.py` lists the literals that read like interface text, 557 of them on `3dc50c83`.
+Its `--check` option fails on text that no string catalog holds, so `make lint` does not run it yet.
+A probe showed that `swift build` compiles a `.xcstrings` catalog, and that the app's `Info.plist` must list `CFBundleLocalizations` before macOS uses a translation.
+Next: Sam answers the design questions for the three issues, then building starts.
+
 ## Desktop at the shared edge while columns slide back in
 
 [#316](https://github.com/samanyudas/miri/issues/316) has a fix in [paneru#146](https://github.com/samanyudas/paneru/pull/146), merged into `miri/v0.5.2` as `c61a547`, which this branch pins.
