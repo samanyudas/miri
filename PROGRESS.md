@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `fix/316-edge-photo`, based on `main` at `95c6aa09`
+Updated: 2026-11-08 on branch `fix/332-crossing-focus-edge`, based on `main` at `3dc50c83`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,7 +16,7 @@ The public release path and the complete acceptance runs follow.
 
 ## Desktop at the shared edge while columns slide back in
 
-[#316](https://github.com/samanyudas/miri/issues/316) has a fix in [paneru#146](https://github.com/samanyudas/paneru/pull/146), merged into `miri/v0.5.2` as `c61a547`, which this branch pins.
+[#316](https://github.com/samanyudas/miri/issues/316) has a fix in [paneru#146](https://github.com/samanyudas/paneru/pull/146), merged into `miri/v0.5.2` as `c61a547`, which this branch's pin `4cda257` includes.
 The next hidden column out now shows its photo behind the nearest hidden column and behind each sliding photo, so its panel exists before the nearer photo leaves the edge.
 macOS shows a new panel a frame late, which left the edge bare for that frame.
 A live check of 24 rounds found 9 edge exposures over 8 pt on `main` at `1417553f`, 4 of them over 30 pt, and 0 on the fix on the same engine base.
@@ -98,6 +98,15 @@ Next: the audit's [Remaining blockers](docs/v1-audit.md#remaining-blockers) tabl
 `verify-miri` runs `20261108-012140` and `20261108-014840` failed all 3 criteria on `main` `91865afa`, and run `20261108-014458` passed all 3 on the fix.
 #323 closed on 8 November 2026 after `verify-miri` run `20261108-020409` passed all 3 criteria on a build of `7c2b9a28`.
 Set Up Miri was not driven, because it shares `show` with the two windows that were.
+
+## Where a crossing focus lands
+
+[#332](https://github.com/samanyudas/miri/issues/332): a plain ⌃⌥← or ⌃⌥→ that crosses to a touching display now focuses the destination's column nearest the crossed edge, so the opposite press returns.
+When that column is a stack, the window that last had focus in it gets focus, as Sam decided on 8 November 2026.
+Before, the crossing focused the destination's last-focused window, which could sit in the middle of its strip.
+[paneru#150](https://github.com/samanyudas/paneru/pull/150) holds the engine change, with its failing tests in the commit before the fix.
+This branch pins its head until Sam merges it, and then pins the merge commit.
+[#333](https://github.com/samanyudas/miri/issues/333), the ⌃⌥N screen order in [paneru#149](https://github.com/samanyudas/paneru/pull/149), is held until its three-display check can run, so this pin leaves it out.
 
 ## Command-Shift Left and Right stay on their display
 

@@ -30,6 +30,7 @@ The native app is implemented, but no complete acceptance run has passed.
   Each direction also accepts H, J, K, and L, and W, A, S, and D, and adding Shift moves the focused column the same way.
 - Plain horizontal focus and move cross only a touching display when a fresh key press starts at the strip's end ([#104](https://github.com/samanyudas/miri/issues/104)).
   Plain moves arrive at the crossed destination edge, so the opposite press returns them to the source end.
+  Plain focus lands on the destination column nearest the crossed edge, so the opposite press returns to the column it left ([#332](https://github.com/samanyudas/miri/issues/332)).
   Command-layer moves retain arrival after the active column.
 - V1 uses clicking and macOS window switching to access floating windows without a dedicated floating-to-tiled focus shortcut.
 - Fixed-size windows and Miri's settings float automatically.
