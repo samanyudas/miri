@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `docs/364-closed`, based on `main` at `a482ada3`
+Updated: 2026-11-08 on branch `docs/367-empty-display`, based on `main` at `4d025a30`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -21,7 +21,10 @@ The engine keeps one strip per macOS Space: [paneru#139](https://github.com/sama
 [#366](https://github.com/samanyudas/miri/pull/366) pinned that engine.
 On Sam's Mac, display rearrangement, a display unplug, display sleep, and system sleep each left one strip per Space and no hidden window.
 macOS gives the built-in display's Space a new number after sleep or a replug, and the engine follows it.
-Next: [#367](https://github.com/samanyudas/miri/issues/367) documents in verify-miri how to empty a display without virtual workspaces.
+[#367](https://github.com/samanyudas/miri/issues/367): `verify-miri empty-display` hides each app with a managed window on the built-in display, and `end` shows those apps again.
+Three live runs on `main` at `4d025a30` (`20261108-153724`, `20261108-160203`, `20261108-160426`) found and then passed the cases in its PR.
+The engine tiles the windows of an app that was hidden before the engine started, because it learns of a hide only from the hide event. This is not filed yet.
+Next: Sam merges the #367 PR, then an agent rechecks it on `main` and closes #367.
 
 ## Show in Dock
 
