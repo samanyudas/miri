@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `fix/314-cross-display`, based on `main` at `43975990`
+Updated: 2026-11-08 on branch `fix/316-edge-photo`, based on `main` at `70dbc3b6`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,16 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Desktop at the shared edge while columns slide back in
+
+[#316](https://github.com/samanyudas/miri/issues/316) has a fix in [paneru#146](https://github.com/samanyudas/paneru/pull/146), merged into `miri/v0.5.2` as `c61a547`, which this branch pins.
+The next hidden column out now shows its photo behind the nearest hidden column and behind each sliding photo, so its panel exists before the nearer photo leaves the edge.
+macOS shows a new panel a frame late, which left the edge bare for that frame.
+A live check of 24 rounds found 9 edge exposures over 8 pt on `main` at `1417553f`, 4 of them over 30 pt, and 0 on the fix on the same engine base.
+On the merged engine `c61a547`, 24 rounds showed 0 edge exposures and 0 gaps between columns.
+Criterion 2 is not yet proven: across 4 runs of the fix, 1 round showed a gap of 166 pt for 7 ms between a sliding photo and the window ahead of it, in the frame that a new panel was made, and `main` showed 1 gap of 438 pt in 24 rounds.
+The live scripts are in `/tmp/miri316/tools2`, and the runs in `/tmp/miri316/live2`, outside the repository.
 
 ## macOS 15 support
 
@@ -897,7 +907,7 @@ A live check needs a reliable app that shows each move about 60 ms late.
 A fast window next to the shared edge also went missing for a few frames, about 110 ms over 24 rounds on both builds, for a cause not yet found.
 [Engine PR #125](https://github.com/samanyudas/paneru/pull/125) fixed a slice photo test that failed about 1 run in 100 under load.
 [#163](https://github.com/samanyudas/miri/issues/163) closed on 6 November after a live check on `main` at `159d9419`: in 24 rounds, desktop showed beside the slow window 0 times, against 5 on the build before.
-A photo that shows a frame late at the shared edge remains, as [#316](https://github.com/samanyudas/miri/issues/316).
+A photo that shows a frame late at the shared edge remained, as [#316](https://github.com/samanyudas/miri/issues/316), which [paneru#146](https://github.com/samanyudas/paneru/pull/146) fixes at the edge.
 [Engine PR #129](https://github.com/samanyudas/paneru/pull/129), merged at `6c15fd6`, fixes the engine test `the_command_and_a_double_click_toggle_one_state`, which had failed since engine PR #126.
 The maximize command and the system that ends width runs had no order, and #126 changed the order Bevy picked, so the command's restore lost its anchor.
 Quick apps pause a little more often mid-motion: Spotify paused 4 times over 40 ms per burst instead of 2.
