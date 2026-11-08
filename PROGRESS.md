@@ -77,7 +77,8 @@ Starting the engine no longer moves the pointer onto the first focused window.
 [#360](https://github.com/samanyudas/miri/issues/360): Sam moved the switch for this key into v1 on 8 November 2026.
 [#361](https://github.com/samanyudas/miri/pull/361) adds **Move the pointer to windows that Miri focuses** to Settings > General, off by default, writing `[options].mouse_follows_focus`. It reached `main` at `14d500e0`.
 #360 closed on 8 November 2026 after `verify-miri` run `20261108-031207` passed all 6 criteria with real clicks on the switch, on a build with the same tree as `14d500e0`.
-VoiceOver finds the switch and toggles it with VO-Space. Whether Miri's ⌃⌥ arrow shortcuts block VoiceOver's arrow navigation still needs a check on a real keyboard.
+VoiceOver finds the switch and toggles it with VO-Space.
+On 8 November 2026 Sam pressed VoiceOver's ⌃⌥→ on a real keyboard with a `main` build at `ab3ca230` running, in Settings and in a managed window, and reported no conflict with Miri's ⌃⌥ arrow shortcuts.
 
 ## Engine CI flake in a slice photo landing test
 
