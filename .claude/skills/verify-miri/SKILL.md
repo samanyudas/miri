@@ -120,8 +120,8 @@ Hide the apps that have windows there instead:
 
 A hidden app hides its windows on every display, so the other display can lose windows too.
 The engine takes hidden windows out of their strips and returns each one to its old slot when the app shows again.
-In run `20261108-160426`, the engine still tiled Beeper's window after Beeper was hidden and Miri relaunched.
-A hidden fixture app did not show this in run `20261108-162330`, so the cause is unknown.
+Engines before `4b640f7` tile the windows of an app that was hidden before the engine started, when the app still lists them over Accessibility, as Beeper does ([#374](https://github.com/samanyudas/miri/issues/374)).
+A hidden fixture app is not affected, because Accessibility lists no window for it.
 For an app that is already hidden, `empty-display` shows it for a moment and hides it again, and `end` leaves it hidden.
 Do not move windows to another display to empty one: the session restore keeps each window on the display that macOS reports, so `end` then reports `MOVED:` lines.
 
