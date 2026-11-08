@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `docs/367-closed`, based on `main` at `be4d2615`
+Updated: 2026-11-08 on branch `docs/verify-miri-hidden-app-claim`, based on `main` at `ed440f64`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -23,8 +23,8 @@ On Sam's Mac, display rearrangement, a display unplug, display sleep, and system
 macOS gives the built-in display's Space a new number after sleep or a replug, and the engine follows it.
 [#367](https://github.com/samanyudas/miri/issues/367): `verify-miri empty-display` hides each app with a managed window on the built-in display, and `end` shows those apps again.
 [#371](https://github.com/samanyudas/miri/pull/371) merged, and #367 closed on 8 November 2026 after a recheck on `main` at `be4d2615` (run `20261108-161750`).
-The engine tiles the windows of an app that was hidden before the engine started, because it learns of a hide only from the hide event. This is not filed yet.
-Next: Sam decides whether to file the hidden-before engine gap as a bug.
+In one run the engine still tiled Beeper's window after Beeper was hidden and Miri relaunched. A hidden fixture app did not reproduce it, so it is not filed.
+Next: if a hidden app's window shows up tiled again, reproduce it with that app and file a bug.
 
 ## Show in Dock
 
