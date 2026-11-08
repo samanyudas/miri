@@ -85,6 +85,7 @@ Each drive command logs to `<run>/log.txt` with a timestamp.
 | `V settings` | Reopens the test app, which shows Settings, as a user does from Finder or Spotlight. |
 | `V relaunch` | Quits the test build with SIGTERM and opens it again, to check what it keeps across launches, such as a saved Stop. A build that starts no engine is a result, not a failure. |
 | `V ax test press "General"` | Presses Settings pages and buttons by title, accessibility description, or help text, in order. It looks for each one again after the previous press, so a page and a button on it work in one call. `dump` lists every element with its help text, `status` prints the status text of the page that shows, and `windows` lists window numbers. |
+| `V empty-display` | Hides each app with a managed window on the built-in display, so the display has none. `end` shows the apps again. [Empty a display](#empty-a-display) has the steps. |
 | `V standin yabai` | Runs a harmless compiled process named `yabai`, so the Setup page reports a competing window manager. |
 | `V watch 12` | Logs every Miri app and engine start and exit for 12 seconds, at 50 ms intervals. Start it in the background before a fast sequence. |
 | `V query active` | Prints engine state. Window titles can be private. Never paste titles other than the fixtures'. |
@@ -99,6 +100,29 @@ Use stable handles:
 - Shortcuts by the chord in `config.toml`, which [Bindings.swift](../../../Sources/MiriCore/Bindings.swift) writes.
 
 The feature map in [features/README.md](features/README.md) has one recipe per feature.
+
+### Empty a display
+
+Some tests need a display that has only the run's fixtures.
+Since [#364](https://github.com/samanyudas/miri/issues/364), the engine keeps one strip per native Space and has no command that switches to an empty strip.
+Hide the apps that have windows there instead:
+
+1. Run `V empty-display` after `begin` and before `V fixture`.
+   It hides, as Command-H does, each app that has a managed window on the built-in display, in any Space.
+   Pass `--display <id>` for another display, with an ID from `V query state`.
+   It then waits until `query state` shows no window on that display other than the run's fixtures, and exits 1 if one stays.
+2. A new fixture opens on the display that has focus, which is now the other display.
+   After each `V fixture`, move it with `V send-cmd window movedisplay <direction>`, such as `south` for the built-in display under Sam's external display.
+   Check with `V query state` that each fixture names the emptied display.
+3. Run the test.
+4. Run `V end`. Its first step shows the hidden apps again, before it puts back the session and Sam's build.
+   The layout check then proves that every window is back in the strip, display, and position it had at `begin`.
+
+A hidden app hides its windows on every display, so the other display can lose windows too.
+The engine takes hidden windows out of their strips and returns each one to its old slot when the app shows again.
+The engine learns of a hide only from the hide event, so it still tiles the windows of an app that was hidden before it started.
+`empty-display` shows such an app for a moment and hides it again, and `end` leaves it hidden.
+Do not move windows to another display to empty one: the session restore keeps each window on the display that macOS reports, so `end` then reports `MOVED:` lines.
 
 ## Evidence
 
@@ -117,7 +141,7 @@ Report that as a failure. Do not wait longer or retry until it passes.
 
 `V end --owner "<thread name and id>"` does these steps, and continues past a failed step:
 
-1. Stops the fixtures and stand-ins this run started, by recorded process ID.
+1. Stops the fixtures and stand-ins this run started, by recorded process ID, and shows the apps that `empty-display` hid.
 2. Quits the test build with SIGTERM and waits for its engine to exit.
    If a Miri app or engine from the run still runs, `end` stops here, keeps the lock and the run record, and exits 1, because that engine can overwrite the session when it exits. Stop that process by its ID, then run `end` again.
 3. Copies the session backup back to `state.json`.
@@ -161,7 +185,7 @@ The layout check in step 6 is the proof.
 | File | Role |
 | --- | --- |
 | [scripts/verify-miri](scripts/verify-miri) | The command above. `V --help` and `V <command> --help` list every option. |
-| [scripts/tools/axdo.swift](scripts/tools/axdo.swift) | Reads and presses Accessibility elements, and lists window numbers. |
+| [scripts/tools/axdo.swift](scripts/tools/axdo.swift) | Reads and presses Accessibility elements, lists window numbers, finds the built-in display, and hides and shows apps. |
 | [scripts/tools/key.swift](scripts/tools/key.swift) | Posts one key press with given flags at the HID event tap. |
 | [scripts/tools/standin.c](scripts/tools/standin.c) | The sleeping stand-in process. |
 

@@ -5,7 +5,8 @@ A run swaps the running Miri Developer for a test build, drives it, and puts eve
 
   verify-miri doctor                         read-only health check, safe at any time
   verify-miri begin --owner "<thread>"       take the live-test lock, back up the window session, launch the test build
-  verify-miri <drive commands>               fixture, key, snapshot, focused, ax, settings, relaunch, standin, watch, query, send-cmd
+  verify-miri <drive commands>               fixture, empty-display, key, snapshot, focused, ax, settings, relaunch, standin,
+                                             watch, query, send-cmd
   verify-miri end --owner "<thread>"         quit the test build, restore the session, relaunch the previous build, release the lock
   verify-miri end --keep-test-build ...      stop the fixtures, keep the test build running for Sam, release the lock
 
@@ -274,6 +275,21 @@ def layout(state: dict) -> list[dict]:
     return records
 
 
+def display_windows(state: dict, display: int) -> list[dict]:
+    """The windows the engine manages on `display`, in any Space, as window ID, app name, and bundle ID.
+    A window scrolled off screen names no display, so it counts on the display of its row."""
+    found = {}
+    for workspace in state.get("virtual_workspaces", []):
+        windows = workspace.get("windows", [])
+        displays = Counter(w["display_id"] for w in windows if w.get("display_id") is not None)
+        row_display = displays.most_common(1)[0][0] if displays else None
+        for window in windows:
+            if (window.get("display_id") if window.get("display_id") is not None else row_display) == display:
+                found[window["window_id"]] = {"window_id": window["window_id"], "app": window.get("app_name"),
+                                              "bundle_id": window.get("bundle_id") or ""}
+    return list(found.values())
+
+
 def layout_differences(before: list[dict], after: list[dict]) -> list[str]:
     """Each window from `before` that is now in another strip, tiles or floats differently, or sits in another order
     among the windows that stayed in its strip. Closed and new windows do not count, and do not shift the others."""
@@ -525,6 +541,10 @@ def cmd_end(args) -> int:
             if not wait(lambda: not alive(pid), 3):
                 os.kill(pid, signal.SIGKILL)
             log(run, f"stopped {item['name']} pid {pid}")
+    hidden = [app for app in run.get("hidden_apps", []) if alive(app["pid"]) and not app.get("hidden_before")]
+    if hidden:
+        tool("axdo", "unhide", *(str(app["pid"]) for app in hidden), check=False)
+        log(run, f"showed the apps that empty-display hid: {', '.join(app['name'] for app in hidden)}")
     pid = run.get("test_pid")
     if args.keep_test_build:
         return keep_test_build(run, pid)
@@ -797,6 +817,41 @@ def cmd_standin(args) -> int:
     return 0
 
 
+def cmd_empty_display(args) -> int:
+    run = load_run()
+    display = args.display or int(tool("axdo", "builtin-display").strip() or 0)
+    if not display:
+        raise Failure("No built-in display is active. Pass --display with a display ID from `verify-miri query state`.")
+    fixtures = {f["window_id"] for f in run.get("fixtures", [])}
+
+    def others() -> list[dict]:
+        return [w for w in display_windows(query("state", test_pid(run)), display) if w["window_id"] not in fixtures]
+
+    windows = others()
+    unnamed = sorted({w["app"] for w in windows if not w["bundle_id"]})
+    if unnamed:
+        raise Failure(f"These apps have no bundle ID, so empty-display cannot hide them: {', '.join(unnamed)}.")
+    run.setdefault("hidden_apps", [])
+    for bundle_id in sorted({w["bundle_id"] for w in windows}):
+        for line in tool("axdo", "hide", bundle_id).splitlines():
+            pid, before, name = line.split(" ", 2)
+            # Save after each app, so `end` shows it again even when a later step fails.
+            run["hidden_apps"].append({"pid": int(pid), "name": name, "bundle_id": bundle_id,
+                                       "hidden_before": before == "hidden-before"})
+            save_run(run)
+            log(run, f"hid {name} pid {pid}" + (", which was hidden before, so `end` leaves it hidden"
+                                                  if before == "hidden-before" else ""))
+    left = [] if wait(lambda: not others(), 5) else others()
+    if left:
+        names = ", ".join(f"{w['app']} window {w['window_id']}" for w in left)
+        raise Failure(f"Display {display} still has managed windows: {names}. "
+                      "Run `verify-miri end --owner` with this run's owner to show the hidden apps again.")
+    shown = [app["name"] for app in run["hidden_apps"] if not app["hidden_before"]]
+    log(run, f"display {display} has no managed windows besides this run's fixtures. "
+             f"`end` shows these apps again: {', '.join(shown) or 'none'}")
+    return 0
+
+
 def cmd_watch(args) -> int:
     run = load_run(required=False)
     seen: dict[int, str] = {}
@@ -892,11 +947,15 @@ def main() -> int:
     p.add_argument("name")
     p.add_argument("--seconds", type=int, default=900)
     p.set_defaults(func=cmd_standin)
+    p = sub.add_parser("empty-display", help="hide each app with a managed window on a display, so the display has "
+                                             "none. `end` shows the apps again")
+    p.add_argument("--display", type=int, help="display ID from `query state`. The built-in display by default")
+    p.set_defaults(func=cmd_empty_display)
     p = sub.add_parser("watch", help="log every Miri app and engine start and exit for N seconds")
     p.add_argument("seconds", type=float)
     p.set_defaults(func=cmd_watch)
     p = sub.add_parser("query", help="print engine state. Window titles can be private: never paste them")
-    p.add_argument("kind", nargs="?", default="state", choices=["state", "active", "on-screen", "virtual-workspaces"])
+    p.add_argument("kind", nargs="?", default="state", choices=["state", "active", "on-screen"])
     p.set_defaults(func=cmd_query)
     p = sub.add_parser("send-cmd", help="send an engine command to set up state. Never use it as the proof")
     p.add_argument("rest", nargs=argparse.REMAINDER)

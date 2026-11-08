@@ -147,6 +147,33 @@ class VerifyMiriTest(unittest.TestCase):
         self.assertEqual(len(differences), 1, differences)
         self.assertIn("window 11 was tiled, now floating", differences[0])
 
+    def test_display_windows_covers_every_space_and_off_screen_columns(self):
+        state = self.state((6, 1, [(10, 1, False), (11, None, False), (12, 1, True)]),
+                           (7, 1, [(13, 1, False)]), (3773, 1, [(20, 3, False), (21, None, False)]))
+        self.assertEqual([w["window_id"] for w in self.vm.display_windows(state, 1)], [10, 11, 12, 13])
+        self.assertEqual([w["window_id"] for w in self.vm.display_windows(state, 3)], [20, 21])
+        self.assertNotIn("private", json.dumps(self.vm.display_windows(state, 1)))
+
+    def test_end_shows_the_apps_that_empty_display_hid(self):
+        vm = self.vm
+        calls, logs = [], []
+        saved = {n: getattr(vm, n) for n in ("alive", "tool", "log", "load_own_run", "keep_test_build")}
+        vm.alive = lambda pid: pid != 8
+        vm.tool = lambda *a, **k: calls.append(a) or ""
+        vm.log = lambda run, line: logs.append(line)
+        run = {"owner": "t", "dir": "/nonexistent", "test_pid": None, "fixtures": [], "standins": [],
+               "hidden_apps": [{"pid": 7, "name": "Notes"}, {"pid": 8, "name": "Quit"},
+                               {"pid": 9, "name": "Sam hid it", "hidden_before": True}]}
+        vm.load_own_run = lambda owner: run
+        vm.keep_test_build = lambda run, pid: 0
+        try:
+            self.assertEqual(vm.cmd_end(type("Args", (), {"owner": "t", "keep_test_build": True})()), 0)
+        finally:
+            for n, v in saved.items():
+                setattr(vm, n, v)
+        self.assertEqual(calls, [("axdo", "unhide", "7")])
+        self.assertTrue(any("Notes" in line for line in logs), logs)
+
     def test_end_refuses_a_run_that_another_thread_owns(self):
         with tempfile.TemporaryDirectory() as home:
             current = Path(home, "current.json")
