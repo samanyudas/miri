@@ -17,8 +17,6 @@ import sys
 from pathlib import Path
 
 ROOTS = ("Sources/Miri", "Sources/MiriCore")
-# Copy Diagnostics stays in English so maintainers can read reports (#350).
-SKIPPED_FILES = {"Sources/MiriCore/Diagnostics.swift"}
 SKIPPED_LINE = re.compile(r"\b(Logger|logger|log\.|print\(|NSLog|fatalError|precondition|assert|#expect|#require)")
 CODE_WORD = re.compile(r"^[a-z0-9_.+\-/:]*$|^[A-Z]{1,3}[a-z]+[A-Z]\w*$")
 ESCAPE = re.compile(r"\\(u\{[0-9A-Fa-f]+\}|.)")
@@ -108,8 +106,6 @@ def candidates(root: Path):
     for folder in ROOTS:
         for path in sorted((root / folder).glob("**/*.swift")):
             relative = path.relative_to(root).as_posix()
-            if relative in SKIPPED_FILES:
-                continue
             source = path.read_text(encoding="utf-8")
             lines = source.splitlines()
             for number, text in literals(source):

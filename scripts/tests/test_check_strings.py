@@ -51,9 +51,8 @@ class CheckStringsTest(unittest.TestCase):
             "Sources/Miri/V.swift:15: Two lines of text",
         ])
 
-    def test_skips_the_diagnostics_report_and_other_folders(self):
+    def test_scans_only_the_app_folders(self):
         code, lines = self.run_checker({
-            "Sources/MiriCore/Diagnostics.swift": 'let a = "Setup checks:"\n',
             "Sources/AXFixture/F.swift": 'let b = "Fixture window"\n',
             "Sources/MiriCore/Checks.swift": 'let c = "Stage Manager"\n',
         })
