@@ -7,7 +7,7 @@ struct SetupCheckerTests {
         accessibilityTrusted: true, spansDisplays: false, stageManager: false, threeFingerSwipe: 0,
         fourFingerSwipe: 0, threeFingerDrag: false, edgeTiling: false, menuBarTiling: false,
         optionDragTiling: false, runningBundleIdentifiers: ["com.apple.finder"],
-        runningProcessNames: ["Finder"])
+        runningProcessNames: ["Finder"], macOSMajorVersion: 27)
 
     private func status(_ kind: SetupCheck.Kind, _ observation: SetupObservation) -> SetupStatus? {
         SetupChecker.evaluate(observation).first { $0.id == kind }?.status
@@ -54,21 +54,23 @@ struct SetupCheckerTests {
         #expect(status(.snappingApps, observation) == .passed)
     }
 
-    @Test func namesTheMacOS27PermissionPane() {
+    @Test(arguments: [(15, "Accessibility"), (26, "Accessibility"), (27, "Device Control and Data Access")])
+    func namesThePermissionPaneOfEachMacOSVersion(version: Int, pane: String) {
         var observation = ready
         observation.accessibilityTrusted = false
+        observation.macOSMajorVersion = version
         guard case .problem(let message) = status(.accessibility, observation) else {
             Issue.record("Expected an Accessibility problem")
             return
         }
-        #expect(message.contains("System Settings > Privacy & Security > Device Control and Data Access"))
+        #expect(message.contains("System Settings > Privacy & Security > \(pane). Miri"))
     }
 
     @Test func neverReportsAnUnreadableSettingAsPassed() {
         let unknown = SetupObservation(
             accessibilityTrusted: true, spansDisplays: nil, stageManager: nil, threeFingerSwipe: nil,
             fourFingerSwipe: nil, threeFingerDrag: nil, edgeTiling: nil, menuBarTiling: nil, optionDragTiling: nil,
-            runningBundleIdentifiers: [], runningProcessNames: [])
+            runningBundleIdentifiers: [], runningProcessNames: [], macOSMajorVersion: 27)
         let checks = SetupChecker.evaluate(unknown)
         for kind in [SetupCheck.Kind.separateSpaces, .stageManager, .macOSTiling] {
             guard case .notChecked = checks.first(where: { $0.id == kind })?.status else {

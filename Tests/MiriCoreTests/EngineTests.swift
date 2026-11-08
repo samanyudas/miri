@@ -290,19 +290,22 @@ struct RotatingLogTests {
     }
 }
 
-/// Runs copies of `sleep` under a test name, the way an engine runs either as Miri's child or after Miri dies.
+/// Runs a sleeping process under a test name, the way an engine runs either as Miri's child or after Miri dies.
 struct OrphanedEnginesTests {
     private let name = "fake-engine-\(UUID().uuidString.prefix(8))"
 
+    /// Compiles the sleeper, because macOS 15 kills a copy of `/bin/sleep` at launch even after it is signed again.
     private func executable() throws -> URL {
         let directory = FileManager.default.temporaryDirectory.appending(path: "miri-orphan-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let source = directory.appending(path: "sleeper.c")
+        try Data("#include <stdlib.h>\n#include <unistd.h>\nint main(int c, char **v) { sleep(atoi(v[1])); }\n".utf8)
+            .write(to: source)
         let executable = directory.appending(path: name)
-        try FileManager.default.copyItem(at: URL(filePath: "/bin/sleep"), to: executable)
-        // macOS kills a copied platform binary at launch unless it is signed again.
-        let sign = try Process.run(URL(filePath: "/usr/bin/codesign"), arguments: ["-f", "-s", "-", executable.path])
-        sign.waitUntilExit()
-        try #require(sign.terminationStatus == 0)
+        let compile = try Process.run(
+            URL(filePath: "/usr/bin/xcrun"), arguments: ["clang", "-o", executable.path, source.path])
+        compile.waitUntilExit()
+        try #require(compile.terminationStatus == 0)
         return executable
     }
 

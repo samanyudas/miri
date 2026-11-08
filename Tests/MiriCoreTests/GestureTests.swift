@@ -112,7 +112,8 @@ struct GestureStateTests {
         let observation = SetupObservation(
             accessibilityTrusted: true, spansDisplays: false, stageManager: false, threeFingerSwipe: 1,
             fourFingerSwipe: 0, threeFingerDrag: false, edgeTiling: false, menuBarTiling: false,
-            optionDragTiling: false, runningBundleIdentifiers: [], runningProcessNames: [])
+            optionDragTiling: false, runningBundleIdentifiers: [], runningProcessNames: [],
+            macOSMajorVersion: 27)
         let checks = SetupChecker.evaluate(observation)
         let three = checks.first { $0.id == GestureFingers.three.setupCheck }?.status
         let four = checks.first { $0.id == GestureFingers.four.setupCheck }?.status

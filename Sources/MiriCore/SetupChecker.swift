@@ -20,11 +20,14 @@ public struct SetupObservation: Equatable, Sendable {
     public var optionDragTiling: Bool?
     public var runningBundleIdentifiers: Set<String>
     public var runningProcessNames: Set<String>
+    /// The major macOS version, such as 15 or 27. System Settings names the Accessibility pane differently by version.
+    public var macOSMajorVersion: Int
 
     public init(
         accessibilityTrusted: Bool, spansDisplays: Bool?, stageManager: Bool?, threeFingerSwipe: Int?,
         fourFingerSwipe: Int?, threeFingerDrag: Bool?, edgeTiling: Bool?, menuBarTiling: Bool?,
-        optionDragTiling: Bool?, runningBundleIdentifiers: Set<String>, runningProcessNames: Set<String>
+        optionDragTiling: Bool?, runningBundleIdentifiers: Set<String>, runningProcessNames: Set<String>,
+        macOSMajorVersion: Int
     ) {
         self.accessibilityTrusted = accessibilityTrusted
         self.spansDisplays = spansDisplays
@@ -37,6 +40,7 @@ public struct SetupObservation: Equatable, Sendable {
         self.optionDragTiling = optionDragTiling
         self.runningBundleIdentifiers = runningBundleIdentifiers
         self.runningProcessNames = runningProcessNames
+        self.macOSMajorVersion = macOSMajorVersion
     }
 }
 
@@ -90,6 +94,11 @@ public enum SetupChecker {
     static let desktopURL = URL(string: "x-apple.systempreferences:com.apple.Desktop-Settings.extension")
     static let trackpadURL = URL(string: "x-apple.systempreferences:com.apple.Trackpad-Settings.extension")
 
+    /// The pane under Privacy & Security that holds the Accessibility permission. macOS 27 renamed it.
+    static func accessibilityPane(_ observation: SetupObservation) -> String {
+        observation.macOSMajorVersion >= 27 ? "Device Control and Data Access" : "Accessibility"
+    }
+
     public static func evaluate(_ observation: SetupObservation) -> [SetupCheck] {
         [
             SetupCheck(
@@ -97,7 +106,7 @@ public enum SetupChecker {
                 status: observation.accessibilityTrusted
                     ? .passed
                     : .problem(
-                        "Turn on Miri in System Settings > Privacy & Security > Device Control and Data Access. Miri needs this Accessibility permission to move windows."
+                        "Turn on Miri in System Settings > Privacy & Security > \(accessibilityPane(observation)). Miri needs this Accessibility permission to move windows."
                     ),
                 blocksStart: true, settingsURL: accessibilityURL),
             SetupCheck(

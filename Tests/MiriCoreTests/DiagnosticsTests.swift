@@ -47,7 +47,8 @@ struct DiagnosticsReportTests {
                 SetupObservation(
                     accessibilityTrusted: true, spansDisplays: false, stageManager: nil, threeFingerSwipe: 0,
                     fourFingerSwipe: 2, threeFingerDrag: false, edgeTiling: false, menuBarTiling: false,
-                    optionDragTiling: false, runningBundleIdentifiers: [], runningProcessNames: [])),
+                    optionDragTiling: false, runningBundleIdentifiers: [], runningProcessNames: [],
+                    macOSMajorVersion: 27)),
             configurationIssue: .invalidTOML(TOMLError(line: 4, message: "Expected a value.")),
             log: "open /Users/sam/Documents/secret.txt\n")
         let text = report.rendered(with: Redactor(homeDirectory: "/Users/sam", userNames: ["sam"]))

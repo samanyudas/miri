@@ -123,9 +123,11 @@ If a migration cannot preserve those values, Miri leaves the file untouched and 
 
 ### Supported platforms
 
-Initial validation targets Sam's Apple silicon Mac running macOS 27.0.
-V1 provisionally supports macOS 27 and later.
-Sam revisits the minimum version later, and older versions are added only after community testing.
+V1 supports Apple silicon Macs running macOS 15.0 or later.
+Sam chose this minimum on 8 November 2026 in [#369](https://github.com/samanyudas/miri/issues/369), after Miri ran in a macOS 15.7.7 virtual machine.
+Day-to-day validation runs on Sam's Mac with macOS 27.
+A virtual machine cannot check trackpad gestures, multiple displays, display changes, or sleep and wake, so those stay unverified on macOS 15 until someone runs them on a real macOS 15 Mac.
+No one has run Miri on macOS 26.
 Intel support is deferred unless Sam needs it.
 
 ### Multiple monitors
