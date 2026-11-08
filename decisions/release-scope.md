@@ -248,10 +248,10 @@ Moving the pointer alone does not change focus, and Miri keyboard commands do no
 Clicks, keyboard commands, and macOS window switching still change focus.
 Sam confirmed this rule in [issue #90](https://github.com/samanyudas/miri/issues/90).
 
-Control-Option-Command with Up Arrow or Down Arrow focuses the display above or below.
-With Left Arrow or Right Arrow, it focuses the strip's first or last column, and a press there focuses the display on that side.
+Control-Option-Command with an arrow focuses the neighboring display in that direction at once, from any column of the strip.
+Adding Shift with Up Arrow or Down Arrow moves the focused column to the display above or below.
+Adding Shift with Left Arrow or Right Arrow moves the focused column to the first or last position on its own display, and never crosses to another display ([#331](https://github.com/samanyudas/miri/issues/331)).
 Each direction also accepts H, J, K, and L, and W, A, S, and D.
-Adding Shift moves the focused column the same way.
 [Keybinding reference](keybinding%20reference.md) records these bindings.
 Shortcut recording follows [Binding customization](keybinding%20reference.md#binding-customization).
 Tabbed columns, the minimap, inactive-window dimming, and advanced window rules are deferred to v2.
