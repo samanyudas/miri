@@ -30,6 +30,7 @@ The PNG files are in a separate commit that waits for Sam's approval under the m
 | `350-2-arabic-layout.png` | Mirror the window for Arabic, or right-align the text only | A, mirror, with real directions kept |
 | `350-3-action-names.png` | Translated, English, or both names in the Shortcuts list | A, translated, and search also matches English |
 | `350-4-monitor-or-display.png` | "Monitor" or "display" in the English names, before translation | B, "display" everywhere |
+| `350-5-diagnostics-language.png` | Whether the Copy Diagnostics report stays in English or follows the Mac's language | A, English |
 
 The `mocks/` folder holds the first-round mocks from the same session, which the sheets replace.
 
@@ -45,11 +46,12 @@ The `mocks/` folder holds the first-round mocks from the same session, which the
 
 ## Settled without Sam
 
-T3 Tots settled these technical choices for Sam on 8 November 2026, so they have no sheet:
+T3 Tots settled these technical choices for Sam on 8 November 2026, so they have no sheet.
+On the same day, T3 Tots moved the language of the Copy Diagnostics report back to Sam as a product choice, which `350-5-diagnostics-language.png` shows.
+Until Sam picks, Copy Diagnostics keeps its current behavior.
 
 - The order is #352, then the #350 groundwork with an English copy pass, then #351, then the translations.
 - The illustration scenes live in code, with one test for a missing scene and one test against the keybinding reference.
-- `MiriCore` returns translatable text, and Copy Diagnostics writes it in English.
 - `scripts/check-strings.py` lists interface text, and its `--check` option joins `make lint` once a string catalog exists.
 
 ## Acceptance criteria that a recommendation would change
@@ -74,7 +76,10 @@ Each one applies only if Sam picks the option named.
 ### #350
 
 - Criterion 1 covers every user-facing string in `Sources/Miri`.
-  The settled choice for `MiriCore` widens it to `Sources/MiriCore` as well, except the Copy Diagnostics report.
+  Setup checks, action names, and configuration errors come from `Sources/MiriCore`, so criterion 2 needs the criterion to cover `Sources/MiriCore` too.
+- Criterion 7 says that Copy Diagnostics output stays in English.
+  With diagnostics language A, it stays as written.
+  With diagnostics language B, the report follows the Mac's language, and the criterion and its Swift test change to match.
 - Criteria 2, 4, and 5 set the Mac's primary language.
   The proposal is to launch Miri with `-AppleLanguages` instead, because agents must not change the Mac's language, and to keep a change of the system language as a hand check for Sam only.
 - Criterion 3 asks for a complete translation of all 22 languages.
