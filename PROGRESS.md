@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `feat/331-command-shift-ends`, based on `main` at `7c2b9a28`
+Updated: 2026-11-08 on branch `feat/331-command-shift-ends`, based on `main` at `70740923`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,17 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Show in Dock
+
+[#349](https://github.com/samanyudas/miri/issues/349): Settings > General has a **Show in Dock** switch, on by default, stored as `[miri].show_in_dock`.
+The bundle sets `LSUIElement`, so Miri starts with no Dock icon and becomes a regular app only when the setting is on.
+The Welcome to Miri window offers the same switch in a **Dock** section ([#358](https://github.com/samanyudas/miri/issues/358)).
+`AppModel.settings` applies the policy on every new value, so launch, the switch, and a `config.toml` edit all take the same path.
+[#355](https://github.com/samanyudas/miri/pull/355) reached `main` at `1b2dd8b9`.
+`verify-miri` run `20261108-021834` on that commit passed criteria 1, 2, 3, 4, 6, and 7, and the issue records the results.
+An Accessibility press on the switch lets Settings drop behind, while a real mouse click keeps it in front. A prototype showed that only the deprecated `activate(ignoringOtherApps:)` keeps the front after an Accessibility press, so VoiceOver users may see Settings drop behind.
+Next: Sam turns the switch off, logs out, and logs back in, which checks criterion 5. When the Dock icon stays hidden, an agent closes #349.
 
 ## Settings window redesign
 
@@ -50,9 +61,9 @@ Next: the audit's [Remaining blockers](docs/v1-audit.md#remaining-blockers) tabl
 ## Reopened windows stay on the desktop in use
 
 [#323](https://github.com/samanyudas/miri/issues/323): reopening Settings or Copy Diagnostics switched the display back to the desktop where that window was last open, and a saved frame kept it on its old display.
-Branch `fix/issue-323` gives each `WindowPresenter` window `.moveToActiveSpace` and centers a hidden window on `NSScreen.main` when its frame is on another screen, which is triage option 1.
+[#353](https://github.com/samanyudas/miri/pull/353) gives each `WindowPresenter` window `.moveToActiveSpace` and centers a hidden window on `NSScreen.main` when its frame is on another screen, which is triage option 1, and reached `main` at `7c2b9a28`.
 `verify-miri` runs `20261108-012140` and `20261108-014840` failed all 3 criteria on `main` `91865afa`, and run `20261108-014458` passed all 3 on the fix.
-Next: Sam merges the PR, then an agent rechecks the criteria on `main` and closes #323.
+#323 closed on 8 November 2026 after `verify-miri` run `20261108-020409` passed all 3 criteria on a build of `7c2b9a28`.
 Set Up Miri was not driven, because it shares `show` with the two windows that were.
 
 ## Command-Shift Left and Right stay on their display
@@ -73,6 +84,12 @@ Next: Sam merges the PR, then a check on the `main` build and closing #331.
 [#341](https://github.com/samanyudas/miri/pull/341) pinned engine `5f01554`, the merge of paneru#138, and reached `main` at `13cd4aaa`.
 #339 closed on 7 November 2026 after `verify-miri` run `20261107-201447` passed all 5 criteria on a build with the same tree as `13cd4aaa`.
 Starting the engine no longer moves the pointer onto the first focused window.
+
+[#360](https://github.com/samanyudas/miri/issues/360): Sam moved the switch for this key into v1 on 8 November 2026.
+[#361](https://github.com/samanyudas/miri/pull/361) adds **Move the pointer to windows that Miri focuses** to Settings > General, off by default, writing `[options].mouse_follows_focus`. It reached `main` at `14d500e0`.
+#360 closed on 8 November 2026 after `verify-miri` run `20261108-031207` passed all 6 criteria with real clicks on the switch, on a build with the same tree as `14d500e0`.
+VoiceOver finds the switch and toggles it with VO-Space.
+On 8 November 2026 Sam pressed VoiceOver's ⌃⌥→ on a real keyboard with a `main` build at `ab3ca230` running, in Settings and in a managed window, and reported no conflict with Miri's ⌃⌥ arrow shortcuts.
 
 ## Engine CI flake in a slice photo landing test
 

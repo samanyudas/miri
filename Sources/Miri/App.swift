@@ -73,7 +73,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         else {
             exit(2)
         }
-        NSApplication.shared.setActivationPolicy(.accessory)
         let destination = URL(fileURLWithPath: arguments[1])
         if arguments[0] == "--recovery-selftest" {
             do {

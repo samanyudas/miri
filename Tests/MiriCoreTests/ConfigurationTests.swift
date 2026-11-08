@@ -344,6 +344,51 @@ struct SharedEdgeSlicesConfigurationTests {
     }
 }
 
+struct ShowInDockConfigurationTests {
+    private let directory = FileManager.default.temporaryDirectory.appending(path: "miri-dock-\(UUID().uuidString)")
+    private var url: URL { directory.appending(path: "config.toml") }
+
+    private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
+
+    private func store(_ text: String) throws -> ConfigurationStore {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try text.write(to: url, atomically: true, encoding: .utf8)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
+        store.load(reduceMotion: false)
+        return store
+    }
+
+    @Test func isOnWhenTheKeyIsAbsent() throws {
+        let store = try store("")
+        #expect(store.issue == nil)
+        #expect(store.settings.showInDock)
+        #expect(try TOMLDocument(contents()).value(at: ["miri", "show_in_dock"]) == .boolean(true))
+    }
+
+    @Test func readsTheKey() throws {
+        #expect(try store("[miri]\nshow_in_dock = false\n").settings.showInDock == false)
+        #expect(try store("[miri]\nshow_in_dock = true\n").settings.showInDock)
+    }
+
+    @Test func writesTheSwitchToTheMiriSection() throws {
+        let store = try store("")
+        try store.update(reduceMotion: false) { $0.showInDock = false }
+        #expect(try TOMLDocument(contents()).value(at: ["miri", "show_in_dock"]) == .boolean(false))
+        try store.update(reduceMotion: false) { $0.showInDock = true }
+        #expect(try TOMLDocument(contents()).value(at: ["miri", "show_in_dock"]) == .boolean(true))
+    }
+
+    @Test func rejectsAValueThatIsNotTrueOrFalse() throws {
+        let text = "[miri]\nshow_in_dock = 0\n"
+        let store = try store(text)
+        #expect(
+            store.issue
+                == .invalidValue(key: "miri.show_in_dock", message: "miri.show_in_dock must be true or false."))
+        #expect(store.settings.showInDock)
+        #expect(try contents() == text)
+    }
+}
+
 struct GestureConfigurationTests {
     private let directory = FileManager.default.temporaryDirectory.appending(path: "miri-gesture-\(UUID().uuidString)")
     private var url: URL { directory.appending(path: "config.toml") }
@@ -455,5 +500,56 @@ struct GapMappingTests {
         settings.outerGap = outer
         #expect(settings.windowPadding == window)
         #expect(settings.edgePadding == edge)
+    }
+}
+
+struct MouseFollowsFocusConfigurationTests {
+    private let directory = FileManager.default.temporaryDirectory.appending(
+        path: "miri-mouse-follows-focus-\(UUID().uuidString)")
+    private var url: URL { directory.appending(path: "config.toml") }
+
+    private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
+
+    private func store(_ text: String) throws -> ConfigurationStore {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try text.write(to: url, atomically: true, encoding: .utf8)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
+        store.load(reduceMotion: false)
+        return store
+    }
+
+    @Test func isOffWhenTheKeyIsAbsent() throws {
+        let store = try store("")
+        #expect(store.settings.mouseFollowsFocus == false)
+        #expect(try TOMLDocument(contents()).value(at: ["options", "mouse_follows_focus"]) == .boolean(false))
+    }
+
+    @Test func readsTheEngineKey() throws {
+        #expect(try store("[options]\nmouse_follows_focus = true\n").settings.mouseFollowsFocus)
+        #expect(try store("[options]\nmouse_follows_focus = false\n").settings.mouseFollowsFocus == false)
+    }
+
+    @Test func writesTheSwitchAsTheEngineKeyAndChangesNothingElse() throws {
+        let store = try store("")
+        let before = try TOMLDocument(contents())
+        try store.update(reduceMotion: false) { $0.mouseFollowsFocus = true }
+        let on = try TOMLDocument(contents())
+        #expect(on.value(at: ["options", "mouse_follows_focus"]) == .boolean(true))
+        #expect(
+            on.text
+                == before.text.replacingOccurrences(
+                    of: "mouse_follows_focus = false", with: "mouse_follows_focus = true"))
+        try store.update(reduceMotion: false) { $0.mouseFollowsFocus = false }
+        #expect(try contents() == before.text)
+    }
+
+    @Test func rejectsAValueThatIsNotTrueOrFalse() throws {
+        let text = "[options]\nmouse_follows_focus = 1\n"
+        let store = try store(text)
+        #expect(
+            store.issue
+                == .invalidValue(
+                    key: "options.mouse_follows_focus", message: "options.mouse_follows_focus must be true or false."))
+        #expect(try contents() == text)
     }
 }

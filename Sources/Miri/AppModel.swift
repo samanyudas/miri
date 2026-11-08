@@ -16,7 +16,10 @@ import ServiceManagement
     let paths: EnginePaths
     let log: RotatingLog
     private(set) var engineState: EngineState = .stopped
-    private(set) var settings = MiriSettings()
+    /// The Dock icon follows every new value, from launch, a file edit, or Settings, so a login launch follows it too.
+    private(set) var settings = MiriSettings() {
+        didSet { showDockIcon(settings.showInDock) }
+    }
     private(set) var configurationIssue: ConfigurationIssue?
     /// The file's shortcuts, or `nil` while the file cannot be read correctly.
     private(set) var shortcuts: Shortcuts?
@@ -185,6 +188,16 @@ import ServiceManagement
             reloadConfiguration()
             configurationIssue = configurationIssue ?? error
         }
+    }
+
+    /// The app starts without a Dock icon, from `LSUIElement`, so a hidden icon never shows during a launch.
+    private func showDockIcon(_ shown: Bool) {
+        let policy: NSApplication.ActivationPolicy = shown ? .regular : .accessory
+        guard NSApp.activationPolicy() != policy else { return }
+        let wasActive = NSApp.isActive
+        NSApp.setActivationPolicy(policy)
+        // Hiding the icon from Settings must keep Settings in front. A file edit made in another app must not take focus.
+        if wasActive { NSApp.activate() }
     }
 
     func setLaunchAtLogin(_ enabled: Bool) {

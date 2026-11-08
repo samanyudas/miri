@@ -629,7 +629,7 @@ An accepted deferral does not commit every candidate to a future implementation.
   Miri's ordinary icon in the macOS Dock remains part of v1.
 - Tabbed columns and the Control-Option-Shift-T tabbed-column command.
 - The minimap and inactive-window dimming.
-- Focus borders, focus-follows-mouse, and mouse-follows-keyboard-focus controls.
+- Focus borders and a focus-follows-mouse control.
 - A dedicated shortcut to switch focus between floating and tiled windows.
   Clicking and macOS app or window switching provide access to floating windows in v1.
 - Advanced per-app window rules, title regular expressions, strip-placement rules, and an app-picker rules interface.

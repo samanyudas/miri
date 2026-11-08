@@ -16,12 +16,17 @@ public struct MiriSettings: Equatable, Sendable {
     public var maximizedWindowSide = MaximizedWindowSide.right
     public var animations = true
     public var launchAtLogin = true
+    /// Shows Miri's icon in the Dock and the Command-Tab switcher. Off leaves only the menu bar icon.
+    public var showInDock = true
     public var stripGesture = StripGesture.off
     /// Reverses the strip swipe. Off means the strip follows the fingers.
     public var reverseSwipe = false
     /// Lets the engine show the contents of a hidden window on an edge next to another display. It needs Screen
     /// Recording permission.
     public var sharedEdgeSlices = false
+    /// Moves the pointer to the centre of a window that a Miri command focuses. A click, Cmd-Tab, or an app that
+    /// brings its own window forward leaves the pointer in place.
+    public var mouseFollowsFocus = false
 
     public init() {}
 
@@ -34,6 +39,9 @@ public struct MiriSettings: Equatable, Sendable {
         }
         if let value = document.value(at: ["miri", "launch_at_login"]) {
             launchAtLogin = try Self.boolean(value, key: "miri.launch_at_login")
+        }
+        if let value = document.value(at: ["miri", "show_in_dock"]) {
+            showInDock = try Self.boolean(value, key: "miri.show_in_dock")
         }
         if let value = document.value(at: ["miri", "strip_gesture"]) {
             guard case .string(let name) = value, let gesture = StripGesture(rawValue: name) else {
@@ -72,6 +80,9 @@ public struct MiriSettings: Equatable, Sendable {
         }
         if let value = document.value(at: ["options", "shared_edge_slices"]) {
             sharedEdgeSlices = try Self.boolean(value, key: "options.shared_edge_slices")
+        }
+        if let value = document.value(at: ["options", "mouse_follows_focus"]) {
+            mouseFollowsFocus = try Self.boolean(value, key: "options.mouse_follows_focus")
         }
         try validate()
     }
@@ -131,12 +142,14 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.integer(Int64(outerGap)), ["miri"], "outer_gap")
         try set(.boolean(animations), ["miri"], "animations")
         try set(.boolean(launchAtLogin), ["miri"], "launch_at_login")
+        try set(.boolean(showInDock), ["miri"], "show_in_dock")
         try set(.string(stripGesture.rawValue), ["miri"], "strip_gesture")
         try set(.boolean(reverseSwipe), ["miri"], "reverse_swipe")
         try set(.array(widthPresets.map(TOMLValue.float)), ["options"], "preset_column_widths")
         try set(stackLimit.tomlValue, ["options"], "stack_limit")
         try set(.string(maximizedWindowSide.rawValue), ["options"], "maximized_window_side")
         try set(.boolean(sharedEdgeSlices), ["options"], "shared_edge_slices")
+        try set(.boolean(mouseFollowsFocus), ["options"], "mouse_follows_focus")
         if animations && !reduceMotion {
             if result.value(at: ["options", "animation_speed"]) == nil {
                 try set(.float(Self.animationSpeed), ["options"], "animation_speed")

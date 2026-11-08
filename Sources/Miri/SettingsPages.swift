@@ -47,6 +47,20 @@ struct GeneralSettings: View {
                         }
                     }
                 }
+                ShowInDockRow(model: model)
+            }
+            SettingsSection("Pointer") {
+                SettingsRow(
+                    title: "Move the pointer to windows that Miri focuses",
+                    detail:
+                        "Focus shortcuts, display focus, and workspace switches move it to the window's centre. Clicks and Cmd-Tab leave it in place."
+                ) {
+                    RowSwitch(
+                        label: "Move the pointer to windows that Miri focuses",
+                        isOn: Binding(
+                            get: { model.settings.mouseFollowsFocus },
+                            set: { value in model.update { $0.mouseFollowsFocus = value } }))
+                }
             }
             SettingsSection("Configuration file") {
                 SettingsRow(
@@ -712,5 +726,18 @@ struct DiagnosticsSettings: View {
         let time = date.formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits).second(.twoDigits))
         let level = String(match.2).padding(toLength: 5, withPad: " ", startingAt: 0)
         return "\(time)  \(level) \(match.3)"
+    }
+}
+
+/// The Show in Dock switch, in Settings > General and in the first-launch window.
+struct ShowInDockRow: View {
+    let model: AppModel
+
+    var body: some View {
+        SettingsRow(title: "Show in Dock", detail: "When off, open Miri from its menu bar icon.") {
+            RowSwitch(
+                label: "Show in Dock",
+                isOn: Binding(get: { model.settings.showInDock }, set: { on in model.update { $0.showInDock = on } }))
+        }
     }
 }

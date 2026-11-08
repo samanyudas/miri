@@ -58,8 +58,8 @@ The strip follows the fingers and settles at the nearest column on release.
 Clicking a window changes focus.
 Dragging a window follows [Dragging windows](release-scope.md#dragging-windows).
 
-Focus follows mouse and mouse follows keyboard focus are deferred to v2.
-Their proposed defaults are both off.
+Focus follows mouse is deferred to v2, and its proposed default is off.
+Settings > General has a switch, off by default, that moves the pointer to windows that Miri focuses ([#360](https://github.com/samanyudas/miri/issues/360)).
 
 The selected default bindings are in [Keybinding reference](keybinding%20reference.md).
 Directional monitor navigation is required in v1, with accepted bindings in the keybinding reference.
@@ -137,6 +137,8 @@ Preserve Paneru's required copyright and MIT license notices alongside Miri's GP
 ## Expose app controls and automation
 
 Provide menu bar controls and an app icon in the macOS Dock that open Miri's settings.
+The Dock icon is on by default, and Settings > General can hide it.
+Miri follows that setting every time it starts, however it starts, and every time the setting changes.
 Provide start, stop, restart, update, and diagnostic controls.
 
 V1 includes a setup checker and access to the engine log.
