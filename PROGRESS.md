@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `feat/369-macos-15`, based on `main` at `762e2a2b`
+Updated: 2026-11-08 on branch `fix/314-reassert`, based on `main` at `1f4f565c`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -153,7 +153,14 @@ The fix is [paneru#134](https://github.com/samanyudas/paneru/pull/134), merged o
 A size change after a drop now counts as a snapping app's tile, and frames an app reports while Miri moves the window count as the app catching up.
 In `verify-miri` run `20261107-010533`, drops with Magnet's own shortcuts returned in 0.34 to 0.60 s at the column's full size.
 On the merged engine `ec85ffc` (run `20261108-ec85ffc`), 11 of 12 drops returned in 0.14 to 0.80 s, and 1 stalled for 5 s off its slot and then kept Magnet's 1280 width, as [#347](https://github.com/samanyudas/miri/pull/347) describes.
-Next: Sam decides how to fix that stall, then drops onto Magnet are checked on `main` before #314 closes.
+[paneru#141](https://github.com/samanyudas/paneru/pull/141) fixes that stall in two ways, and [paneru#143](https://github.com/samanyudas/paneru/pull/143), merged as `d0b532f`, fixes two cases its review found.
+Once Miri is done writing and the app has held a frame for 200 ms, Miri writes its frame once more, and a write the app leaves unanswered (`kAXErrorCannotComplete`) is sent once more with every part of it.
+On the re-assert commit `8011f0e` (run `20261108-reassert3`), the first 28 of 41 drops returned to the exact slot in 0.4 to 2.3 s with no 5 s stall.
+The 29th stopped partway home, and a traced run (`20261108-trace2`) showed two causes: lost last writes, which the retry covers, and a move that stops sending frames, which is [#377](https://github.com/samanyudas/miri/issues/377).
+On `d0b532f` with trace lines (run `20261108-guarded`, load average 7 to 9), 5 drops returned to the exact slot in 0.9 to 1.6 s, two of them after the retry resent a write T3 Code left unanswered.
+In the 6th, Magnet put its third on the built-in display, and Miri kept T3 Code there at Magnet's width.
+Under a load average of 19 or more, Magnet applied its shortcut more than 1 s after release, and Miri kept its width as the app's own.
+Next: Sam decides what Miri does when a snapping app moves a dropped window to another display, then drops onto Magnet are checked on `main` before #314 closes.
 #277 closed on 6 November 2026 after `verify-miri` run `20261106-131827` on `main` at `5eb9366f`: the row named Rectangle and Magnet, management still started, and the row passed after both quit.
 
 ## Picture-in-Picture resizing
