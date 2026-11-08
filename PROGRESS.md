@@ -21,6 +21,7 @@ Branch `feat/369-macos-15` lowers the minimum, fixes the SDK version that `build
 A Tart virtual machine named `sequoia15` on macOS 15.7.7 ran the Swift and engine tests, `make e2e`, the disk image install, and every `verify-miri` recipe.
 Trackpad gestures, multiple displays, display changes other than a resolution change, and sleep and wake need a real macOS 15 Mac.
 No one has run Miri on macOS 26.
+[#376](https://github.com/samanyudas/miri/issues/376) tracks those hardware checks and a `make e2e` run on Sam's Mac.
 
 ## Hidden extra strips
 
