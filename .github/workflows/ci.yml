@@ -25,11 +25,20 @@ jobs:
           submodules: true
           fetch-depth: 0
       # Versions must match scripts/doctor.sh, which rejects any other version.
-      # GitHub release downloads answered 504 in four CI runs on 8 November 2026. curl retries a 504.
+      # The release assets come through the REST API: on 8 November 2026 the github.com release
+      # download links answered 504 for over an hour while the API served the same files.
+      # Asset 384924896 is actionlint_1.7.12_linux_amd64.tar.gz, 279056942 is
+      # shellcheck-v0.11.0.linux.x86_64.tar.xz. The checksums below pin the files.
       - name: Install actionlint 1.7.12 and ShellCheck 0.11.0
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          curl -fsSL --retry 5 --retry-delay 10 -o actionlint.tar.gz https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
-          curl -fsSL --retry 5 --retry-delay 10 -o shellcheck.tar.xz https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz
+          asset() {
+            curl -fsSL --retry 5 --retry-delay 10 -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/octet-stream" -o "$3" "https://api.github.com/repos/$1/releases/assets/$2"
+          }
+          asset rhysd/actionlint 384924896 actionlint.tar.gz
+          asset koalaman/shellcheck 279056942 shellcheck.tar.xz
           sha256sum --check <<'SUMS'
           8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  actionlint.tar.gz
           8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198  shellcheck.tar.xz
