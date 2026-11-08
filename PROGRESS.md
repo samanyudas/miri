@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `docs/364-closed`, based on `main` at `a482ada3`
+Updated: 2026-11-08 on branch `feat/369-macos-15`, based on `main` at `4d025a30`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,14 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## macOS 15 support
+
+Sam chose a macOS 15.0 minimum on 8 November 2026 in [#369](https://github.com/samanyudas/miri/issues/369).
+Branch `feat/369-macos-15` lowers the minimum, fixes the SDK version that `build-app.sh` records, names the Accessibility pane of each macOS version, and records what stays unverified.
+A Tart virtual machine named `sequoia15` on macOS 15.7.7 ran the Swift and engine tests, `make e2e`, the disk image install, and every `verify-miri` recipe.
+Trackpad gestures, multiple displays, display changes other than a resolution change, and sleep and wake need a real macOS 15 Mac.
+No one has run Miri on macOS 26.
 
 ## Hidden extra strips
 
