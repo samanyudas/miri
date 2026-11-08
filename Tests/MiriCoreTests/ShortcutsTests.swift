@@ -221,7 +221,7 @@ import Testing
             \(defaults)# Custom set.
 
             [miri]
-            default_bindings_version = 5
+            default_bindings_version = 6
             inner_gap = 12
             """
         #expect(result.text == expected)

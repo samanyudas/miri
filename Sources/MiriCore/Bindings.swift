@@ -153,13 +153,11 @@ public struct DefaultBinding: Sendable {
                 "Move window down within column", "window_swap_south", ctrlAlt("downarrow", .shift),
                 ctrlAlt("j", .shift), ctrlAlt("s", .shift)),
             DefaultBinding(
-                "Move column to first position or monitor left", "window_moveedge_west",
-                ctrlAlt("leftarrow", .command, .shift), ctrlAlt("h", .command, .shift),
-                ctrlAlt("a", .command, .shift), version: 4),
+                "Move column to first position", "window_swap_first", ctrlAlt("leftarrow", .command, .shift),
+                ctrlAlt("h", .command, .shift), ctrlAlt("a", .command, .shift), version: 6),
             DefaultBinding(
-                "Move column to last position or monitor right", "window_moveedge_east",
-                ctrlAlt("rightarrow", .command, .shift), ctrlAlt("l", .command, .shift),
-                ctrlAlt("d", .command, .shift), version: 4),
+                "Move column to last position", "window_swap_last", ctrlAlt("rightarrow", .command, .shift),
+                ctrlAlt("l", .command, .shift), ctrlAlt("d", .command, .shift), version: 6),
             DefaultBinding(
                 "Move column to monitor above", "window_movedisplay_north", ctrlAlt("uparrow", .command, .shift),
                 ctrlAlt("k", .command, .shift), ctrlAlt("w", .command, .shift), version: 2),
@@ -183,10 +181,6 @@ public struct DefaultBinding: Sendable {
             DefaultBinding("Float or unfloat focused window", "window_manage", ctrlAlt("t")),
             DefaultBinding("Focus first column", "window_focus_first"),
             DefaultBinding("Focus last column", "window_focus_last"),
-            DefaultBinding("Move column to first position", "window_swap_first"),
-            DefaultBinding("Move column to last position", "window_swap_last"),
-            DefaultBinding("Focus first column or monitor left", "window_focusedge_west", version: 5),
-            DefaultBinding("Focus last column or monitor right", "window_focusedge_east", version: 5),
             DefaultBinding("Move column to monitor left", "window_movedisplay_west", version: 2),
             DefaultBinding("Move column to monitor right", "window_movedisplay_east", version: 2),
         ]
@@ -194,8 +188,9 @@ public struct DefaultBinding: Sendable {
     /// The newest version in the table or in `changed`. Miri records it after offering the defaults.
     public static let currentVersion = (table.map(\.version) + changed.map(\.version)).max() ?? 0
 
-    /// Defaults that `version` removed, with the command that replaces each one. `offered` is the version that first
-    /// wrote the retired default, so Miri can tell a binding the user deleted from one it never wrote.
+    /// Defaults that `version` removed, with the command whose current default replaces each one. `offered` is the
+    /// version that first wrote the retired default, so Miri can tell a binding the user deleted from one it never
+    /// wrote.
     static let retired: [(command: String, replacement: String, chords: [Chord], offered: Int, version: Int)] = [
         ("window_grow", "window_step_grow", [ctrlAlt("equal")], 1, 2),
         ("window_shrink", "window_step_shrink", [ctrlAlt("minus")], 1, 2),
@@ -205,10 +200,10 @@ public struct DefaultBinding: Sendable {
         ("window_focusdisplay_west", "window_focusdisplay_west", [ctrlAlt("a", .command)], 2, 4),
         ("window_focus_last", "window_focusdisplay_east", [ctrlAlt("rightarrow", .command)], 1, 4),
         ("window_focusdisplay_east", "window_focusdisplay_east", [ctrlAlt("d", .command)], 2, 4),
-        ("window_swap_first", "window_moveedge_west", [ctrlAlt("leftarrow", .command, .shift)], 1, 4),
-        ("window_movedisplay_west", "window_moveedge_west", [ctrlAlt("a", .command, .shift)], 2, 4),
-        ("window_swap_last", "window_moveedge_east", [ctrlAlt("rightarrow", .command, .shift)], 1, 4),
-        ("window_movedisplay_east", "window_moveedge_east", [ctrlAlt("d", .command, .shift)], 2, 4),
+        ("window_swap_first", "window_swap_first", [ctrlAlt("leftarrow", .command, .shift)], 1, 4),
+        ("window_movedisplay_west", "window_swap_first", [ctrlAlt("a", .command, .shift)], 2, 4),
+        ("window_swap_last", "window_swap_last", [ctrlAlt("rightarrow", .command, .shift)], 1, 4),
+        ("window_movedisplay_east", "window_swap_last", [ctrlAlt("d", .command, .shift)], 2, 4),
         (
             "window_focusedge_west", "window_focusdisplay_west",
             [ctrlAlt("leftarrow", .command), ctrlAlt("h", .command), ctrlAlt("a", .command)], 4, 5
@@ -217,6 +212,19 @@ public struct DefaultBinding: Sendable {
             "window_focusedge_east", "window_focusdisplay_east",
             [ctrlAlt("rightarrow", .command), ctrlAlt("l", .command), ctrlAlt("d", .command)], 4, 5
         ),
+        (
+            "window_moveedge_west", "window_swap_first",
+            [ctrlAlt("leftarrow", .command, .shift), ctrlAlt("h", .command, .shift), ctrlAlt("a", .command, .shift)],
+            4, 6
+        ),
+        (
+            "window_moveedge_east", "window_swap_last",
+            [ctrlAlt("rightarrow", .command, .shift), ctrlAlt("l", .command, .shift), ctrlAlt("d", .command, .shift)],
+            4, 6
+        ),
+        // Version 5 left each edge-focus action listed with an empty value. Version 6 stops listing the action.
+        ("window_focusedge_west", "window_focusdisplay_west", [], 5, 6),
+        ("window_focusedge_east", "window_focusdisplay_east", [], 5, 6),
     ]
 
     /// Defaults whose chords changed in `version`. Version 3 makes `[` mean left and `]` mean right (miri#92).
@@ -252,7 +260,8 @@ public struct DefaultBinding: Sendable {
     /// Adds each default newer than the recorded version whose engine command has no binding, with its free chords.
     ///
     /// A user binding is never changed. Miri changes only a retired or changed default that still has the exact value
-    /// Miri wrote. A default is offered once, so a binding the user deletes stays deleted.
+    /// Miri wrote, and keeps a retired default whose replacement the file already binds. A default is offered once, so
+    /// a binding the user deletes stays deleted.
     /// When the file defines `[bindings]` or `[miri]` in a form Miri does not rewrite, such as an inline table, Miri
     /// leaves the file as it is and records no version, so it offers the defaults again if the user converts the table.
     static func adding(to document: TOMLDocument, layout: KeyLayout = .positional) throws -> TOMLDocument {
@@ -277,20 +286,15 @@ public struct DefaultBinding: Sendable {
 
         var result = document
         let unwanted = replacementsToSkip(in: document, offered: offered)
-        for old in retired where offered >= old.offered && old.version > offered {
-            guard document.value(at: ["bindings", old.command]) == encoded(old.chords) else { continue }
-            let leavesUnbound = table.contains {
-                $0.command == old.command && $0.version == old.version && $0.chords.isEmpty
-            }
-            if leavesUnbound {
-                guard
-                    !boundCommands(in: document.value(at: ["bindings"])).contains(
-                        EngineCommand.canonical(old.replacement)!)
-                else { continue }
-                result = try result.setting(.array([]), table: ["bindings"], key: old.command)
-            } else {
-                result = try result.removing(table: ["bindings"], key: old.command)
-            }
+        let retiring = retired.filter { old in
+            offered >= old.offered && old.version > offered
+                && document.value(at: ["bindings", old.command]) == encoded(old.chords)
+        }
+        // A replacement that the file still binds gets no default, so the retired default keeps its chords working.
+        let staying = Set(
+            boundCommands(in: document.value(at: ["bindings"]), excluding: Set(retiring.map(\.command))))
+        for old in retiring where old.chords.isEmpty || !staying.contains(EngineCommand.canonical(old.replacement)!) {
+            result = try result.removing(table: ["bindings"], key: old.command)
         }
         result = try changing(in: result, offered: offered, layout: layout)
         let existing = result.value(at: ["bindings"])
@@ -383,9 +387,9 @@ public struct DefaultBinding: Sendable {
 
     /// Each bound command in the engine's own spelling, so that an alias such as `window_resize` counts as
     /// `window_grow`. A key the engine rejects keeps its own spelling.
-    private static func boundCommands(in bindings: TOMLValue?) -> [String] {
+    private static func boundCommands(in bindings: TOMLValue?, excluding keys: Set<String> = []) -> [String] {
         guard case .table(let entries) = bindings else { return [] }
-        return entries.keys.map { EngineCommand.canonical($0) ?? $0 }
+        return entries.keys.filter { !keys.contains($0) }.map { EngineCommand.canonical($0) ?? $0 }
     }
 
     static func inspect(in document: TOMLDocument, layout: KeyLayout = .positional) -> BindingInspection {
