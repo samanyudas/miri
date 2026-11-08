@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `feat/331-command-shift-ends`, based on `main` at `70740923`
+Updated: 2026-11-08 on branch `docs/331-closed`, based on `main` at `a35bb5f4`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -72,9 +72,9 @@ Set Up Miri was not driven, because it shares `show` with the two windows that w
 The defaults now bind those chords, and the H, L, A, and D chords, to `window_swap_first` and `window_swap_last`, at default bindings version 6.
 Settings no longer lists the four actions that moved or focused to an end or else to the next display.
 An upgrade removes those defaults only where the user kept them unchanged, and a custom key on a removed action stays under Other Engine Bindings.
-[paneru#137](https://github.com/samanyudas/paneru/pull/137) makes a swap to the end that the column already holds do nothing, instead of swapping inside its stack, and the branch pins its merge `b5ae4bd`.
-`verify-miri` runs `20261107-013236` on `main`, and `20261107-013347` and `20261108-020209` on this change, showed the old crossing and the new behavior.
-Next: Sam merges the PR, then a check on the `main` build and closing #331.
+[paneru#137](https://github.com/samanyudas/paneru/pull/137) makes a swap to the end that the column already holds do nothing, instead of swapping inside its stack.
+[#354](https://github.com/samanyudas/miri/pull/354) pinned its merge `b5ae4bd` and reached `main` at `a35bb5f4`.
+#331 closed on 8 November 2026 after `verify-miri` run `20261108-140758` on `a35bb5f4` passed both directions and the Settings check, against run `20261107-013236` on `main` `54e4e5f4`, which crossed.
 [#332](https://github.com/samanyudas/miri/issues/332), [#333](https://github.com/samanyudas/miri/issues/333), and [#334](https://github.com/samanyudas/miri/issues/334) hold the rest of the 7 November shortcut decisions.
 
 ## Pointer stays after a click
