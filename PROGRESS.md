@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `docs/374-closed`, based on `main` at `021d26a7`
+Updated: 2026-11-08 on branch `fix/380-hidden-rules`, based on `main` at `1417553f`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -34,7 +34,8 @@ macOS gives the built-in display's Space a new number after sleep or a replug, a
 [#371](https://github.com/samanyudas/miri/pull/371) merged, and #367 closed on 8 November 2026 after a recheck on `main` at `be4d2615` (run `20261108-161750`).
 [#374](https://github.com/samanyudas/miri/issues/374): an app hidden before the engine started, such as Beeper, had its windows tiled as invisible columns, and focusing one showed the app again.
 [paneru#142](https://github.com/samanyudas/paneru/pull/142) marks a window hidden when it spawns if its app is hidden, and [#378](https://github.com/samanyudas/miri/pull/378) pins it at `4b640f7`. #374 closed on 8 November 2026 after a recheck on `main` at `021d26a7` (run `20261108-175327`).
-Follow-up, not filed: a window of an app hidden at spawn skips float and minimize rules, so showing the app tiles it even when a float rule matches.
+[#380](https://github.com/samanyudas/miri/issues/380): the #374 fix skipped float rules and minimized state for a window that spawned while its app was hidden, so showing the app tiled it.
+[paneru#144](https://github.com/samanyudas/paneru/pull/144) sorts each hidden window into minimized, floating, or tiled when the app shows. This branch pins it at `983bb91`. Runs `20261108-185051` (before) and `20261108-185205` (after) show the change with Beeper.
 
 ## Show in Dock
 
