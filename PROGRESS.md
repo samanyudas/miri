@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `feat/369-macos-15`, based on `main` at `4d025a30`
+Updated: 2026-11-08 on branch `feat/369-macos-15`, based on `main` at `762e2a2b`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -29,7 +29,10 @@ The engine keeps one strip per macOS Space: [paneru#139](https://github.com/sama
 [#366](https://github.com/samanyudas/miri/pull/366) pinned that engine.
 On Sam's Mac, display rearrangement, a display unplug, display sleep, and system sleep each left one strip per Space and no hidden window.
 macOS gives the built-in display's Space a new number after sleep or a replug, and the engine follows it.
-Next: [#367](https://github.com/samanyudas/miri/issues/367) documents in verify-miri how to empty a display without virtual workspaces.
+[#367](https://github.com/samanyudas/miri/issues/367): `verify-miri empty-display` hides each app with a managed window on the built-in display, and `end` shows those apps again.
+[#371](https://github.com/samanyudas/miri/pull/371) merged, and #367 closed on 8 November 2026 after a recheck on `main` at `be4d2615` (run `20261108-161750`).
+In one run the engine still tiled Beeper's window after Beeper was hidden and Miri relaunched. A hidden fixture app did not reproduce it, so it is not filed.
+Next: if a hidden app's window shows up tiled again, reproduce it with that app and file a bug.
 
 ## Show in Dock
 

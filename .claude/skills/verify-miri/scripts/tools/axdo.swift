@@ -6,6 +6,10 @@
 //                                    text, in order. When several match, it presses the first.
 //   axdo <pid> windows               the CoreGraphics window number, layer, bounds, and title of each window
 //   axdo frontmost                   the process ID of the frontmost app
+//   axdo builtin-display             the display ID of the built-in display, or nothing when none is active
+//   axdo hide <bundle id>            hides each running app with that bundle ID, as Command-H does, and prints one
+//                                    "<pid> hidden-before|shown-before <name>" line for each
+//   axdo unhide <pid>...             shows each app again
 // Exit status: 0 on success, 1 when a title has no element or a press fails, 2 on a usage error.
 import AppKit
 import ApplicationServices
@@ -23,13 +27,44 @@ func walk(_ element: AXUIElement, _ depth: Int = 0, _ visit: (AXUIElement, Int) 
 }
 
 func usage() -> Never {
-    FileHandle.standardError.write(Data("usage: axdo <pid> dump|status|press <title>...|windows, or axdo frontmost\n".utf8))
+    FileHandle.standardError.write(Data(
+        "usage: axdo <pid> dump|status|press <title>...|windows, or axdo frontmost|builtin-display|hide <bundle id>|unhide <pid>...\n".utf8))
     exit(2)
 }
 
 let arguments = CommandLine.arguments
 if arguments.count == 2, arguments[1] == "frontmost" {
     print(NSWorkspace.shared.frontmostApplication?.processIdentifier ?? -1)
+    exit(0)
+}
+if arguments.count == 2, arguments[1] == "builtin-display" {
+    var ids = [CGDirectDisplayID](repeating: 0, count: 16)
+    var count: UInt32 = 0
+    CGGetActiveDisplayList(16, &ids, &count)
+    if let id = ids.prefix(Int(count)).first(where: { CGDisplayIsBuiltin($0) != 0 }) { print(id) }
+    exit(0)
+}
+if arguments.count == 3, arguments[1] == "hide" {
+    for app in NSRunningApplication.runningApplications(withBundleIdentifier: arguments[2]) {
+        // After Miri relaunched, the engine once still tiled the window of an app that was already hidden.
+        // Showing such an app first makes the next hide send a fresh hide event.
+        let wasHidden = app.isHidden
+        if wasHidden {
+            _ = app.unhide()
+            let deadline = Date().addingTimeInterval(2)
+            while app.isHidden, Date() < deadline { RunLoop.current.run(until: Date().addingTimeInterval(0.05)) }
+        }
+        // hide() returns false on macOS 27 even when the app hides, so its result says nothing.
+        _ = app.hide()
+        print("\(app.processIdentifier) \(wasHidden ? "hidden-before" : "shown-before") \(app.localizedName ?? arguments[2])")
+    }
+    exit(0)
+}
+if arguments.count >= 3, arguments[1] == "unhide" {
+    for pid in arguments.dropFirst(2) {
+        guard let pid = Int32(pid), let app = NSRunningApplication(processIdentifier: pid) else { continue }
+        _ = app.unhide()
+    }
     exit(0)
 }
 guard arguments.count >= 3, let pid = Int32(arguments[1]) else { usage() }
