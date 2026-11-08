@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `docs/380-closed`, based on `main` at `43975990`
+Updated: 2026-11-08 on branch `docs/380-closed`, based on `main` at `70dbc3b6`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -162,7 +162,9 @@ The 29th stopped partway home, and a traced run (`20261108-trace2`) showed two c
 On `d0b532f` with trace lines (run `20261108-guarded`, load average 7 to 9), 5 drops returned to the exact slot in 0.9 to 1.6 s, two of them after the retry resent a write T3 Code left unanswered.
 In the 6th, Magnet put its third on the built-in display, and Miri kept T3 Code there at Magnet's width.
 Under a load average of 19 or more, Magnet applied its shortcut more than 1 s after release, and Miri kept its width as the app's own.
-Next: Sam decides what Miri does when a snapping app moves a dropped window to another display, then drops onto Magnet are checked on `main` before #314 closes.
+[paneru#145](https://github.com/samanyudas/paneru/pull/145), merged as `31be78d`, is Sam's choice for that case: while Miri resizes a window it just dropped, a size outside the sizes between its size before the drop and Miri's new size counts as a snapping app's tile, so the window returns to the drop's place.
+In `verify-miri` run `20261108-xdisplay` (load average 4 to 8), 20 of 20 drops returned to the exact slot on the 27-inch display in 0.33 to 1.44 s, 19 of them after macOS had moved the window to the built-in display during the drag.
+Next: drops onto Magnet are checked on `main` before #314 closes.
 #277 closed on 6 November 2026 after `verify-miri` run `20261106-131827` on `main` at `5eb9366f`: the row named Rectangle and Magnet, management still started, and the row passed after both quit.
 
 ## Picture-in-Picture resizing
