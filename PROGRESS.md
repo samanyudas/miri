@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `fix/316-edge-photo`, based on `main` at `70dbc3b6`
+Updated: 2026-11-08 on branch `fix/316-edge-photo`, based on `main` at `95c6aa09`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -44,8 +44,8 @@ macOS gives the built-in display's Space a new number after sleep or a replug, a
 [#371](https://github.com/samanyudas/miri/pull/371) merged, and #367 closed on 8 November 2026 after a recheck on `main` at `be4d2615` (run `20261108-161750`).
 [#374](https://github.com/samanyudas/miri/issues/374): an app hidden before the engine started, such as Beeper, had its windows tiled as invisible columns, and focusing one showed the app again.
 [paneru#142](https://github.com/samanyudas/paneru/pull/142) marks a window hidden when it spawns if its app is hidden, and [#378](https://github.com/samanyudas/miri/pull/378) pins it at `4b640f7`. #374 closed on 8 November 2026 after a recheck on `main` at `021d26a7` (run `20261108-175327`).
-[#380](https://github.com/samanyudas/miri/issues/380): the #374 fix skipped float rules and minimized state for a window that spawned while its app was hidden, so showing the app tiled it.
-[paneru#144](https://github.com/samanyudas/paneru/pull/144) sorts each hidden window into minimized, floating, or tiled when the app shows. This branch pins `981f93c`, the paneru#144 merge commit, which also carries the #314 engine work that `main` already pins. Runs `20261108-185051` (before) and `20261108-185205` (after) show the change with Beeper.
+[#380](https://github.com/samanyudas/miri/issues/380): the #374 fix skipped float rules and minimized state for a window that spawned while its app was hidden.
+[paneru#144](https://github.com/samanyudas/paneru/pull/144) sorts each hidden window into minimized, floating, or tiled when the app shows. [#382](https://github.com/samanyudas/miri/pull/382) pins `981f93c`, which also carries the #314 engine work. #380 closed on 8 November 2026 after a recheck on `main` at `43975990` (runs `20261108-191820` and `20261108-191906`).
 
 ## Show in Dock
 
