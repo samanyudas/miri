@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `docs/331-closed`, based on `main` at `a35bb5f4`
+Updated: 2026-11-08 on branch `fix/364-single-strip`, based on `main` at `81462211`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,19 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## One strip per native Space
+
+[#364](https://github.com/samanyudas/miri/issues/364): the engine could still hold a second strip inside one macOS Space, although Sam dropped virtual workspaces on 1 November 2026.
+Session restore brought that strip back on every launch, parked in the display's bottom-right corner, so its windows were hidden.
+On 8 November 2026, T3 Code sat in such a strip on Sam's 27-inch display.
+Sam chose to enforce the rule in the engine.
+[paneru#139](https://github.com/samanyudas/paneru/pull/139) makes the virtual workspace commands do nothing and merges any second strip of a Space into its first, at restore and at runtime.
+It also fixes the restore path that made T3 Code's strip, when a saved Space followed its window onto another restored Space.
+[paneru#140](https://github.com/samanyudas/paneru/pull/140), from a review after the merge, lays the kept strip out again after a runtime merge, so windows that arrive parked come back on screen.
+Branch `fix/364-single-strip` pins the engine at `de88217`, the merge of both.
+An agent verified the restore merge and the refused commands in a macOS 15.7.7 VM.
+Next: an agent checks on Sam's Mac that T3 Code rejoins the strip after launch, then checks the verify-miri criterion.
 
 ## Show in Dock
 
