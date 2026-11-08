@@ -46,8 +46,8 @@ if arguments.count == 2, arguments[1] == "builtin-display" {
 }
 if arguments.count == 3, arguments[1] == "hide" {
     for app in NSRunningApplication.runningApplications(withBundleIdentifier: arguments[2]) {
-        // The engine learns of a hide only from the hide event, so it still tiles an app that was hidden before it
-        // started. Showing such an app first makes the next hide send that event.
+        // After Miri relaunched, the engine once still tiled the window of an app that was already hidden.
+        // Showing such an app first makes the next hide send a fresh hide event.
         let wasHidden = app.isHidden
         if wasHidden {
             _ = app.unhide()
