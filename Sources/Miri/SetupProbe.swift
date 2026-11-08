@@ -23,7 +23,8 @@ enum SetupProbe {
             menuBarTiling: tilingPreference("EnableTopTilingByEdgeDrag"),
             optionDragTiling: tilingPreference("EnableTilingOptionAccelerator"),
             runningBundleIdentifiers: Set(workspace.runningApplications.compactMap(\.bundleIdentifier)),
-            runningProcessNames: processNames())
+            runningProcessNames: processNames(),
+            macOSMajorVersion: ProcessInfo.processInfo.operatingSystemVersion.majorVersion)
     }
 
     private static func preference(_ key: String, domain: String) -> NSNumber? {

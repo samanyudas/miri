@@ -38,8 +38,7 @@ It restarts an isolated engine crash and stops automatic retries after three cra
 Window recovery must also work when the engine cannot execute its clean-shutdown handler.
 
 Public distribution uses a Developer ID signed, notarized disk image, a Homebrew cask, and Sparkle updates that deliver the app and engine together.
-Initial validation targets Sam's Apple silicon Mac on macOS 27.0.
-V1 provisionally supports macOS 27 and later, subject to the recorded validation limits.
+V1 supports Apple silicon Macs on macOS 15.0 and later, subject to the recorded validation limits.
 The custom Miri dock and other deferred features remain outside v1.
 
 ## User Stories
@@ -56,7 +55,7 @@ Broader feature proposals are not promoted into accepted requirements.
 2. As a Miri user, I want the window engine bundled with the app, so that I do not need a standalone Paneru installation.
 3. As a Miri user, I want a signed and notarized disk image, so that I can install the public release through macOS.
 4. As a Miri user, I want a Homebrew cask, so that I can install the same product through Homebrew.
-5. As an Apple silicon Mac user, I want a documented provisional macOS 27-or-later support boundary, so that I understand the initial platform limits.
+5. As an Apple silicon Mac user, I want a documented macOS 15-or-later support boundary, so that I understand the platform limits.
 6. As a Miri recipient, I want GPL-3.0-or-later source and preserved Paneru MIT notices, so that I can exercise the supplied software freedoms.
 7. As a Miri recipient, I want public source available when binaries are distributed, so that I can inspect the distributed software.
 8. As a Miri user, I want window management to require only Accessibility permission, so that additional permission grants are unnecessary.
@@ -451,8 +450,7 @@ The following table records the selected v1 defaults without claiming tested act
 
 ### Release delivery and diagnostics
 
-- Provisionally target Apple silicon Macs on macOS 27 and later, with initial validation on Sam's macOS 27.0 Mac.
-  Revisit the minimum version later and add older versions only after community testing.
+- Target Apple silicon Macs on macOS 15.0 and later, as [Supported platforms](../../decisions/release-scope.md#supported-platforms) records.
   Intel support remains deferred unless Sam needs it.
 - Sign development builds with the Miri Developer Local Signing identity when it exists, and ad-hoc otherwise.
   Enroll in the Apple Developer Program before the first public release.

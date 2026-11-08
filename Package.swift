@@ -7,7 +7,7 @@ let isolation: [SwiftSetting] = strict + [.defaultIsolation(MainActor.self)]
 
 let package = Package(
     name: "Miri",
-    platforms: [.macOS("27.0")],
+    platforms: [.macOS("15.0")],
     products: [
         .executable(name: "Miri", targets: ["Miri"]),
         .executable(name: "AXFixture", targets: ["AXFixture"]),

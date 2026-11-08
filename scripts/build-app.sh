@@ -20,7 +20,10 @@ if [[ -n "$(git -C vendor/paneru status --porcelain)" ]]; then
     $development || { echo "The engine checkout is dirty. Commit and pin the patch first." >&2; exit 1; }
     revision="${revision}-dirty"
 fi
-swift build
+# The linker reads the SDK version only from -isysroot or SDKROOT, and swift build passes neither to it.
+# Without -isysroot it records the minimum macOS version as the SDK, and newer macOS then runs Miri in a compatibility mode.
+sdk=$(xcrun --sdk macosx --show-sdk-path)
+swift build -Xswiftc -Xclang-linker -Xswiftc -isysroot -Xswiftc -Xclang-linker -Xswiftc "$sdk"
 env -u CARGO_BUILD_TARGET cargo build --manifest-path vendor/paneru/Cargo.toml \
     --target-dir "$PWD/vendor/paneru/target" --locked --bin paneru --no-default-features --features miri-developer
 bin=$(swift build --show-bin-path)
@@ -59,6 +62,11 @@ cp "$bin/Miri" "$bundle/Contents/MacOS/Miri"
 cp vendor/paneru/target/debug/paneru "$bundle/Contents/Helpers/miri-engine"
 [[ "$(lipo -archs "$bundle/Contents/MacOS/Miri")" == arm64 ]]
 [[ "$(lipo -archs "$bundle/Contents/Helpers/miri-engine")" == arm64 ]]
+linked_sdk=$(vtool -show-build "$bundle/Contents/MacOS/Miri" | awk '$1 == "sdk" {print $2}')
+[[ "$linked_sdk" == "$(xcrun --sdk macosx --show-sdk-version)" ]] || {
+    echo "Miri records SDK $linked_sdk, not the installed SDK. Check the -isysroot linker flag above." >&2
+    exit 1
+}
 cp LICENSE "$bundle/Contents/Resources/Miri-GPL-3.0.txt"
 cp vendor/paneru/LICENSE.txt "$bundle/Contents/Resources/Paneru-MIT.txt"
 printf '%s\n' "$revision" > "$bundle/Contents/Resources/engine-revision.txt"
@@ -74,7 +82,7 @@ cat > "$bundle/Contents/Info.plist" <<'PLIST'
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleVersion</key><string>1</string>
 <key>CFBundleShortVersionString</key><string>0.0.1</string>
-<key>LSMinimumSystemVersion</key><string>27.0</string>
+<key>LSMinimumSystemVersion</key><string>15.0</string>
 <key>NSHighResolutionCapable</key><true/>
 <key>LSUIElement</key><true/>
 </dict></plist>

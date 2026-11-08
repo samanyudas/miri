@@ -6,8 +6,7 @@ The steps below describe the intended Miri setup experience.
 
 ## Check the requirements
 
-V1 provisionally supports Apple silicon Macs running macOS 27 or later.
-Older macOS versions require community testing before adoption.
+V1 supports Apple silicon Macs running macOS 15.0 or later, as [Supported platforms](release-scope.md#supported-platforms) records.
 Intel support is deferred unless Sam needs it.
 
 Multi-finger strip gestures require a built-in trackpad or Magic Trackpad.
@@ -52,8 +51,8 @@ Keep action descriptions available after the settings window closes.
 ## Grant Accessibility permission
 
 Explain why Miri needs permission to move windows.
-Direct users to **System Settings > Privacy & Security > Device Control and Data Access**.
-On macOS 27, this pane holds the Accessibility permission.
+Direct users to the pane under **System Settings > Privacy & Security** that holds the Accessibility permission.
+macOS 27 names it **Device Control and Data Access**, and macOS 15 names it **Accessibility**.
 
 On 14 October 2026, the [permission prototype](../docs/prototypes/helper-permission.md) used an ad-hoc development bundle with the release identifiers and showed that turning on Miri alone grants both the app and its engine helper.
 Miri Developer and the Developer ID signed, notarized bundle need the same check before the permission instructions are final.
