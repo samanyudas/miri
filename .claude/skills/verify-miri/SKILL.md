@@ -116,7 +116,7 @@ Hide the apps that have windows there instead:
    Check with `V query state` that each fixture names the emptied display.
 3. Run the test.
 4. Run `V end`. Its first step shows the hidden apps again, before it puts back the session and Sam's build.
-   The layout check then proves that every window is back in the strip, display, and position it had at `begin`.
+   The layout check then proves that every window is back in the strip, display, and position it had at `begin`, and within 2 points of its width then.
 
 A hidden app hides its windows on every display, so the other display can lose windows too.
 The engine takes hidden windows out of their strips and returns each one to its old slot when the app shows again.
