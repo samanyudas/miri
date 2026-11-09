@@ -1,8 +1,22 @@
 # Agent instructions
 
 Miri is a native macOS scrolling window manager with a bundled Paneru-based engine.
-Today the repository holds the product design and a menu bar app that supervises the engine.
 Read this map first, then the linked document for the area you touch.
+
+## A note from Sam
+
+I like ambitious ideas, simple systems, and software that feels obvious.
+Do not preserve complexity just because it already exists.
+Do not introduce machinery because it looks architecturally impressive.
+Understand the real constraint, then fight for the smallest model that makes the correct behavior unsurprising.
+
+Channel both "measure twice, cut once" and "yagni".
+Fight scope creep.
+Try to honor the dev's intent in both a minimal and realistic fashion.
+
+The rest of this document is meant to help you navigate the codebase and make changes effectively.
+Think of these instructions less as "hard rules", more as "good defaults".
+The developer's preferences should be able to override anything here.
 
 ## Start and end every session
 
@@ -16,12 +30,10 @@ Read this map first, then the linked document for the area you touch.
 | --- | --- |
 | `Sources/Miri/` | SwiftUI and AppKit app. Builds as Miri Developer, `io.github.samanyudas.miri.dev`. |
 | `Sources/MiriCore/` | Testable logic: TOML editing, settings, engine supervision, window recovery, setup checks, diagnostics. |
-| `Tests/MiriCoreTests/` | Swift Testing suites for `MiriCore`. |
 | `Sources/AXFixture/` | Harmless window that the selftests read and move. |
 | `vendor/paneru/` | Engine submodule, pinned to a commit on `samanyudas/paneru` branch `miri/v0.5.2`. |
 | `scripts/` | Build, packaging, selftest, and repository checks, with tests in `scripts/tests/`. |
 | `.claude/` | Project hooks: the command guard and the session-start handoff. |
-| `.github/` | CI and issue and PR templates. |
 | `decisions/` | Accepted product direction and open questions. |
 | `docs/adr/` | Architecture decisions. |
 | `verification/` | TLA+ models that a project skill in `.claude/skills/` checks, such as the engine lifecycle. |
@@ -93,20 +105,16 @@ Do not work around the guard with another command.
 
 The pre-push hook rejects new commits that add a screen recording anywhere, or an image outside `assets/` and `Sources/`.
 Only a commit with a `Media-approved-by: Sam` trailer passes, and only after Sam viewed and approved those exact files.
-Share window evidence as [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#capture-evidence) describes.
 
 ## Writing rules
 
 - Never use the em dash character. `make docs` rejects it.
 - In Markdown, put each sentence on its own line.
-- In PRs, reference an issue the PR delivers with `Refs #N`, rather than closing keywords such as `Closes`, `Fixes`, or `Resolves`.
-  The [issue lifecycle](CONTRIBUTING.md#issue-lifecycle) explains why.
-- Use `Part of #N` for a PR that only records decisions, changes docs, or delivers part of the issue.
 - Never edit `CHANGELOG.md` or generated files by hand.
 
 ## Deeper docs
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) covers the workflow, review and merge, and the issue lifecycle.
+- [CONTRIBUTING.md](CONTRIBUTING.md) covers the workflow, [pull requests](CONTRIBUTING.md#open-a-pull-request) (title, body, evidence, issue references, when to split), review and merge, and the issue lifecycle.
 - [docs/AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md) covers evidence standards for agent work.
 - [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md), [triage labels](docs/agents/triage-labels.md), and [domain docs](docs/agents/domain.md) cover the tracker and vocabulary.
 - [docs/prototypes/helper-permission.md](docs/prototypes/helper-permission.md) covers the permission selftest and its manual procedure.
