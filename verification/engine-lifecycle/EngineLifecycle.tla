@@ -113,7 +113,7 @@ Exited(t, ok) ==
 (* AppModel, Sources/Miri/AppModel.swift.                                   *)
 (***************************************************************************)
 
-\* start(), AppModel.swift:361. refreshSetup() reads t.blocked.
+\* start(), AppModel.swift:365. refreshSetup() reads t.blocked.
 \* While blocked, a supervisor that does not run is stopped, which cancels a pending crash restart.
 AppStart(t, ok) ==
   LET u == [t EXCEPT !.stoppedByUser = FALSE, !.blockersShown = t.blocked] IN
@@ -123,17 +123,17 @@ AppStart(t, ok) ==
   ELSE LET w == [u EXCEPT !.polling = FALSE] IN    \* setupPoll?.cancel(); setupPoll = nil
        IF w.engine = "running" THEN w ELSE RestartManually(w, ok)
 
-\* cancelSetupPoll(), AppModel.swift:448.
+\* cancelSetupPoll(), AppModel.swift:452.
 CancelPoll(t) == [t EXCEPT !.polling = FALSE, !.blockersShown = FALSE]
 
-\* stop(), AppModel.swift:378.
+\* stop(), AppModel.swift:382.
 AppStop(t, ok) == SupStop(CancelPoll([t EXCEPT !.stoppedByUser = TRUE]), "none", ok)
 
-\* restart(), AppModel.swift:390.
+\* restart(), AppModel.swift:394.
 AppRestart(t, ok) == LET u == [t EXCEPT !.stoppedByUser = FALSE] IN
   IF u.engine = "running" THEN RestartManually(u, ok) ELSE AppStart(u, ok)
 
-\* prepareToQuit(completion:), AppModel.swift:397, with AppDelegate's reply as the completion.
+\* prepareToQuit(completion:), AppModel.swift:401, with AppDelegate's reply as the completion.
 PrepareToQuit(t, ok) == SupStop(CancelPoll(t), "quitReply", ok)
 
 (***************************************************************************)
@@ -153,20 +153,20 @@ AppLaunches == s.app = "launching" /\ \E ok \in BOOLEAN :
 
 \* The menu, the Settings sidebar, Settings > General, and Set Up Miri show Start only
 \* while the engine is stopped and nothing blocks start.
-\* Views.swift:88, SettingsWindow.swift:153, SettingsPages.swift:109, InitialSetup.swift:79.
+\* Views.swift:88, SettingsWindow.swift:153, SettingsPages.swift:136, InitialSetup.swift:79.
 YouPressStart == Open /\ s.engine = "stopped" /\ ~s.blockersShown /\ \E ok \in BOOLEAN : Step(AppStart(You("start"), ok))
 
 \* Stop shows while the engine runs or restarts, or while it is stopped and Miri waits for setup.
-\* Views.swift:78, :85, SettingsWindow.swift:147, :151, SettingsPages.swift:95.
+\* Views.swift:78, :85, SettingsWindow.swift:147, :151, SettingsPages.swift:122.
 YouPressStop == Open /\ (s.engine \in {"running", "restarting"} \/ (s.engine = "stopped" /\ s.blockersShown))
                 /\ \E ok \in BOOLEAN : Step(AppStop(You("stop"), ok))
 
 \* Restart is enabled only while the engine runs or has failed. While it restarts after a crash,
 \* the menu and Settings > Diagnostics disable Restart, and the other places hide it.
-\* Views.swift:76, :81, SettingsWindow.swift:149, SettingsPages.swift:84, :569, :603, InitialSetup.swift:84.
+\* Views.swift:76, :81, SettingsWindow.swift:149, SettingsPages.swift:108, :615, :649, InitialSetup.swift:84.
 YouPressRestart == Open /\ s.engine \in {"running", "failed"} /\ \E ok \in BOOLEAN : Step(AppRestart(You("restart"), ok))
 
-\* The Stop window manager shortcut, StopShortcut.swift, calls stopFromShortcut(), AppModel.swift:385.
+\* The Stop window manager shortcut, StopShortcut.swift, calls stopFromShortcut(), AppModel.swift:389.
 YouPressStopShortcut == Open /\ ~s.stoppedByUser /\ \E ok \in BOOLEAN : Step(AppStop(You("stop"), ok))
 
 \* keyboardLayoutChanged(), AppModel.swift:122. The model gives every change a new layout.
@@ -193,11 +193,11 @@ KillTimerFires == s.app # "quit" /\ s.killArmed /\
        THEN [s EXCEPT !.killArmed = FALSE, !.alive = @ \ {s.proc}, !.exitQueued = @ \cup {s.proc}]
        ELSE [s EXCEPT !.killArmed = FALSE])
 
-\* pendingRestart wakes after restartDelay, Engine.swift:144.
+\* pendingRestart wakes after restartDelay, Engine.swift:147.
 RestartTimerFires == s.app # "quit" /\ s.restartArmed /\ \E ok \in BOOLEAN :
   Step(SupStart([s EXCEPT !.restartArmed = FALSE], ok))
 
-\* pollSetupUntilReady() wakes after setupPollInterval, AppModel.swift:431.
+\* pollSetupUntilReady() wakes after setupPollInterval, AppModel.swift:435.
 PollTick == s.app # "quit" /\ s.polling /\ \E ok \in BOOLEAN :
   Step(IF s.blocked
        THEN [s EXCEPT !.blockersShown = TRUE]
