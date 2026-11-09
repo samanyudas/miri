@@ -83,7 +83,7 @@ State which displays and arrangement you tested, and state what remains untested
 ## Open a pull request
 
 Use the [template](.github/PULL_REQUEST_TEMPLATE.md).
-Name the title `type(scope): imperative summary`, for example `fix(engine): keep stacked windows reachable`.
+Write the title as a conventional commit in plain language, for example `fix(engine): stacked windows no longer go out of reach`.
 Open unfinished work as a draft and name what is missing.
 Leave version bumps and release notes to the maintainer.
 

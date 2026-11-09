@@ -60,12 +60,12 @@ class CheckDocsTest(unittest.TestCase):
 
     def test_requires_short_agent_map_and_complete_progress(self):
         code, problems = self.run_checker({
-            "AGENTS.md": "line\n" * 121,
+            "AGENTS.md": "line\n" * 141,
             "PROGRESS.md": "# Progress\n\n## Objective\n## Done\n## Next\n## Last verification\n",
         })
         self.assertEqual(code, 1)
         self.assertEqual(problems, [
-            "AGENTS.md: longer than 120 lines; move detail into docs/",
+            "AGENTS.md: longer than 140 lines; move detail into docs/",
             "PROGRESS.md: missing '## Blockers' section",
             "PROGRESS.md: missing 'Updated: YYYY-MM-DD' line",
         ])
