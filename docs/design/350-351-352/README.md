@@ -93,6 +93,8 @@ Sam's picks on 9 November 2026 approve these changes, and each issue body carrie
 - Criteria 2, 4, and 5 launch Miri with `-AppleLanguages`, because agents must not change the Mac's language.
   Sam keeps a change of the system language as a hand check.
 - Criterion 3 keeps all 22 languages, because a missing native reviewer does not hold a language back.
+- Criterion 3 names `make strings`, and new or changed interface text counts as missing until it is translated.
+  A new criterion asks `CONTRIBUTING.md` and `TRANSLATION.md` to say that a change to interface text also adds its translations, which Sam asked for on 10 November 2026.
 - Criterion 4 names the exceptions to the mirrored layout: key caps, illustrations, and display directions keep the screen's real left and right.
 - Criterion 6 gains an automatic check with longer test text, next to the manual check, because labels wrap instead of being cut off.
 
