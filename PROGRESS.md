@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `feat/351-shortcut-illustrations`, based on `main` at `f520e5f2`
+Updated: 2026-11-10 on branch `fix/351-preview-focus`, based on `main` at `95114845`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -26,7 +26,9 @@ The 8 actions named "monitor" now say "display".
 Branch `feat/351-shortcut-illustrations` adds a preview panel to Settings > Shortcuts, pinned above the list as Sam chose on 10 November 2026.
 It draws a before and after sketch of the action under the pointer or keyboard focus, plays the move once, and shows a caption that VoiceOver reads.
 The scenes live in `Sources/MiriCore/ShortcutSceneCatalog.swift`, and `ShortcutSceneTests` checks them against `decisions/keybinding reference.md`.
-Next: Sam's hand checks of #351, then the #350 translations.
+[#401](https://github.com/samanyudas/miri/pull/401) merged as `3454d61d`, and Sam confirmed the pictures and Reduce Motion on 10 November 2026.
+Branch `fix/351-preview-focus` makes the panel follow keyboard focus on key chips and the VoiceOver cursor, adds each caption as the row title's VoiceOver hint, and corrects 25 scenes that a Sol review found inaccurate against the engine.
+Next: Sam rechecks VoiceOver and keyboard navigation, then the #350 translations.
 
 ## Desktop at the shared edge while columns slide back in
 

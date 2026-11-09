@@ -26,6 +26,8 @@ struct ShortcutsSettings: View {
     /// The action the preview panel shows: the last row the pointer entered or the keyboard moved to.
     @State private var previewed: ShortcutAction?
     @FocusState private var focusedAction: ShortcutAction?
+    /// The action whose title the VoiceOver cursor is on, which the preview panel follows too.
+    @AccessibilityFocusState private var voiceOverAction: ShortcutAction?
 
     var body: some View {
         SettingsPage(
@@ -116,6 +118,7 @@ struct ShortcutsSettings: View {
         }
         .onDisappear(perform: stopRecording)
         .onChange(of: focusedAction) { if let focusedAction { previewed = focusedAction } }
+        .onChange(of: voiceOverAction) { if let voiceOverAction { previewed = voiceOverAction } }
         .onChange(of: notice) { if let notice { AccessibilityNotification.Announcement(notice.text).post() } }
         .alert(
             conflictTitle,
@@ -223,15 +226,20 @@ struct ShortcutsSettings: View {
         Text(action.title)
             .font(.rowTitle.weight(recording == action ? .semibold : .regular))
             .foregroundStyle(Palette.primaryText)
+            // VoiceOver reads the preview's caption with the action, so people who do not see the panel hear it too.
+            .accessibilityHint(action.scene?.caption ?? "")
+            .accessibilityFocused($voiceOverAction, equals: action)
     }
 
     @ViewBuilder private func chips(_ action: ShortcutAction, _ chords: [Chord]) -> some View {
         ForEach(chords, id: \.self) { chord in
             let label = model.keyLayout.label(for: chord)
-            ShortcutChip(label: label, action: action.title, showsRemove: hovered == action) {
-                notice = nil
-                model.removeShortcut(chord, from: action)
-            }
+            ShortcutChip(
+                label: label, action: action.title, showsRemove: hovered == action,
+                remove: {
+                    notice = nil
+                    model.removeShortcut(chord, from: action)
+                }, focused: { previewed = action })
         }
         if recording == action {
             RecordingChip(modifiers: heldModifiers, cancel: stopRecording)
@@ -356,6 +364,8 @@ struct ShortcutChip: View {
     let action: String
     let showsRemove: Bool
     let remove: () -> Void
+    /// Runs when the remove button gets keyboard focus, so the preview panel can follow the keyboard.
+    var focused: () -> Void = {}
     @FocusState private var removeFocused: Bool
 
     var body: some View {
@@ -377,6 +387,7 @@ struct ShortcutChip: View {
                 .offset(x: 6, y: -7)
                 .help("Remove \(label)")
                 .accessibilityLabel("Remove \(KeyCap.spoken(label)) from \(action)")
+                .onChange(of: removeFocused) { if removeFocused { focused() } }
             }
             .fixedSize()
     }
