@@ -145,6 +145,7 @@ struct InitialSetupView: View {
                     Button("Test Gesture…") { testing = true }
                         .disabled(model.gestureTestBlocker != nil)
                         .accessibilityHint(model.gestureTestBlocker ?? "")
+                        .fixedSize()
                         .padding(1)
                         .contentShape(.rect)
                         .help(model.gestureTestBlocker ?? "")

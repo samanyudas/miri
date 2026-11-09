@@ -79,6 +79,7 @@ struct GeneralSettings: View {
                     Button("Show in Finder") {
                         NSWorkspace.shared.activateFileViewerSelecting([model.paths.configuration])
                     }
+                    .fixedSize()
                 }
             }
         }
@@ -659,6 +660,8 @@ struct DiagnosticsSettings: View {
                     detail: String(localized: "Opens GitHub, where you pick a bug report or a feature request.")
                 ) {
                     Button("Send Feedback…") { NSWorkspace.shared.open(Feedback.formList) }
+                        // A long translated title stays whole, and the row's text wraps instead.
+                        .fixedSize()
                 }
             }
             SettingsSection(String(localized: "Developer")) {
@@ -667,7 +670,7 @@ struct DiagnosticsSettings: View {
                     detail: String(
                         localized: "Checks which process macOS credits with Miri's Accessibility permission.")
                 ) {
-                    Button("Permission Experiment…") { presenter?.show(.permissionExperiment) }
+                    Button("Permission Experiment…") { presenter?.show(.permissionExperiment) }.fixedSize()
                 }
             }
         }

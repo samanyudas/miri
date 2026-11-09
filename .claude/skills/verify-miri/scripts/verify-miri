@@ -371,7 +371,7 @@ RIGHT_TO_LEFT = {"ar"}
 
 
 def launch_app(bundle: str, run: dict, label: str, record: bool = False, language: str | None = None,
-               double_length: bool = False) -> int:
+               double_length: bool = False, initial_setup: bool = False) -> int:
     """Launch a Miri Developer bundle and wait until its engine answers and session restore has run.
     With `record`, saves the app's process ID in the run before waiting, so `end` can stop it after a failure.
     With `language`, such as `de`, the app shows that language through `-AppleLanguages`, and the Mac keeps its own.
@@ -381,7 +381,9 @@ def launch_app(bundle: str, run: dict, label: str, record: bool = False, languag
         # This Mac's /Library/Preferences/.GlobalPreferences sets AppleTextDirection to 0, which keeps every app
         # left to right whatever its language. YES lifts that for the test build only, as a Mac in Arabic would.
         ["-AppleTextDirection", "YES"] if language and language.split("-")[0] in RIGHT_TO_LEFT else []) + (
-        ["-NSDoubleLocalizedStrings", "YES"] if double_length else [])
+        ["-NSDoubleLocalizedStrings", "YES"] if double_length else []) + (
+        # Launch arguments win over the saved default, so Set Up Miri shows again and the saved value stays.
+        ["-initialSetupDone", "NO"] if initial_setup else [])
     options = ["--args", *options] if options else []
     # `open` can exit 1 for a moment after the same bundle quit, as it did in two `relaunch` runs on 10 November 2026.
     for attempt in range(3):
@@ -821,11 +823,12 @@ def cmd_relaunch(args) -> int:
     old = test_pid(run)
     if not quit_app(old, run, "test build"):
         raise Failure("The test build or its engine did not exit. Run `verify-miri doctor`.")
+    # Saved first, so `cutoff` measures in this language also when the build starts no engine.
+    run["language"] = args.language
+    save_run(run)
     try:
         launch_app(run["test_app"], run, "test build", record=True, language=args.language,
-                   double_length=args.double_length)
-        run["language"] = args.language
-        save_run(run)
+                   double_length=args.double_length, initial_setup=args.initial_setup)
         if args.language or args.double_length:
             log(run, f"relaunched test build in language {args.language or 'of the Mac'}"
                      f"{' with double-length text' if args.double_length else ''}")
@@ -1015,6 +1018,7 @@ def main() -> int:
     sub.add_parser("settings", help="open the test build's Settings window").set_defaults(func=cmd_settings)
     p = sub.add_parser("relaunch", help="quit the test build and open it again, to check what it keeps across launches")
     p.add_argument("--language", help="start the build in this language, such as de, without changing the Mac's")
+    p.add_argument("--initial-setup", action="store_true", help="show Set Up Miri, as on the first launch")
     p.add_argument("--double-length", action="store_true",
                    help="show every interface text twice, to check that long text wraps instead of being cut off")
     p.set_defaults(func=cmd_relaunch)

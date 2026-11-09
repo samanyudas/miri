@@ -197,23 +197,24 @@ case "frame":
     if arguments.count == 7, let numbers = Optional(arguments[3...6].compactMap(Double.init)), numbers.count == 4 {
         var size = CGSize(width: numbers[2], height: numbers[3])
         var origin = CGPoint(x: numbers[0], y: numbers[1])
-        AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, AXValueCreate(.cgSize, &size)!)
+        // Move first: macOS keeps a window on its screen, so a taller size set low on the screen is cut to fit.
         AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, AXValueCreate(.cgPoint, &origin)!)
+        AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, AXValueCreate(.cgSize, &size)!)
     } else if arguments.count != 3 {
         usage()
     }
     let box = frame(window) ?? .zero
     print("\(Int(box.minX)) \(Int(box.minY)) \(Int(box.width)) \(Int(box.height))")
 case "cutoff":
-    var problems = 0
-    for window in windows {
-        guard let bounds = frame(window) else { continue }
+    // Settings pages scroll, so the check walks each scroll area from top to bottom by setting its scroll bar,
+    // which also makes lazy lists create their lower rows. A text reports once, wherever it showed.
+    var reports: [String] = []
+    func check(_ window: AXUIElement, _ bounds: CGRect) {
         walk(window) { element, _ in
             let role = text(element, kAXRoleAttribute) ?? ""
             // Miri's segmented controls report frames up to 69 points away from where they draw, so skip them.
             guard role != kAXWindowRole as String, role != kAXRadioButtonRole as String,
-                let box = frame(element), box.width > 0, box.height > 0,
-                box.maxY > bounds.minY, box.minY < bounds.maxY  // in view, not scrolled away
+                let box = frame(element), box.width > 0, box.height > 0
             else { return }
             let label = [text(element, kAXValueAttribute), text(element, kAXTitleAttribute), text(element, kAXDescriptionAttribute)]
                 .compactMap { $0 }.first { !$0.isEmpty } ?? ""
@@ -240,13 +241,34 @@ case "cutoff":
                 if needed > box.width + 2 { problem = "needs \(Int(needed)) pt on one line, has \(Int(box.width)) pt" }
             }
             if let problem {
-                problems += 1
-                print("CUT \(role) \(Int(box.minX)),\(Int(box.minY)) \(Int(box.width))x\(Int(box.height)): \(problem): \(label.prefix(80))")
+                let report = "CUT \(role) \(Int(box.width))x\(Int(box.height)): \(problem): \(label.prefix(80))"
+                if !reports.contains(report) { reports.append(report) }
             }
         }
     }
-    print("\(problems) cut off")
-    exit(problems == 0 ? 0 : 1)
+    for window in windows {
+        guard let bounds = frame(window) else { continue }
+        var bars: [AXUIElement] = []
+        walk(window) { element, _ in
+            if text(element, kAXRoleAttribute) == kAXScrollAreaRole as String,
+                let bar = attribute(element, kAXVerticalScrollBarAttribute)
+            {
+                bars.append(bar as! AXUIElement)
+            }
+        }
+        check(window, bounds)
+        for bar in bars {
+            for step in 1...10 {
+                AXUIElementSetAttributeValue(bar, kAXValueAttribute as CFString, NSNumber(value: Double(step) / 10))
+                Thread.sleep(forTimeInterval: 0.15)
+                check(window, bounds)
+            }
+            AXUIElementSetAttributeValue(bar, kAXValueAttribute as CFString, NSNumber(value: 0))
+        }
+    }
+    reports.forEach { print($0) }
+    print("\(reports.count) cut off")
+    exit(reports.isEmpty ? 0 : 1)
 default:
     usage()
 }
