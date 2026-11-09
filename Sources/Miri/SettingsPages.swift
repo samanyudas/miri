@@ -623,6 +623,14 @@ struct DiagnosticsSettings: View {
                     .font(.detail)
                     .foregroundStyle(Palette.secondaryText)
             }
+            SettingsSection("Feedback") {
+                SettingsRow(
+                    title: "Send feedback",
+                    detail: "Opens GitHub, where you pick a bug report or a feature request."
+                ) {
+                    Button("Send Feedback…") { NSWorkspace.shared.open(Feedback.formList) }
+                }
+            }
             SettingsSection("Developer") {
                 SettingsRow(
                     title: "Accessibility permission experiment",
