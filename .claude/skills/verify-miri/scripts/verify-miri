@@ -366,13 +366,24 @@ def quit_app(pid: int, run: dict | None = None, label: str = "app") -> bool:
     return bool(app_gone and engine_gone)
 
 
-def launch_app(bundle: str, run: dict, label: str, record: bool = False, language: str | None = None) -> int:
+def launch_app(bundle: str, run: dict, label: str, record: bool = False, language: str | None = None,
+               double_length: bool = False) -> int:
     """Launch a Miri Developer bundle and wait until its engine answers and session restore has run.
     With `record`, saves the app's process ID in the run before waiting, so `end` can stop it after a failure.
-    With `language`, such as `de`, the app shows that language through `-AppleLanguages`, and the Mac keeps its own."""
+    With `language`, such as `de`, the app shows that language through `-AppleLanguages`, and the Mac keeps its own.
+    With `double_length`, Foundation shows every translated text twice, as Xcode's double-length pseudolanguage does."""
     started = time.time()
-    options = ["--args", "-AppleLanguages", f"({language})"] if language else []
-    subprocess.run(["open", bundle, *options], check=True)
+    options = (["-AppleLanguages", f"({language})"] if language else []) + (
+        ["-NSDoubleLocalizedStrings", "YES"] if double_length else [])
+    options = ["--args", *options] if options else []
+    # `open` can exit 1 for a moment after the same bundle quit, as it did in two `relaunch` runs on 10 November 2026.
+    for attempt in range(3):
+        opened = subprocess.run(["open", bundle, *options], capture_output=True, text=True)
+        if opened.returncode == 0:
+            break
+        time.sleep(1)
+    else:
+        raise Failure(f"open {bundle} failed 3 times: {opened.stderr.strip()}")
     app = wait(lambda: next((p for p in running_apps() if p["bundle"] == normal(bundle)), None), 15)
     if not app:
         raise Failure(f"{bundle} did not start within 15 s.")
@@ -797,21 +808,56 @@ def cmd_settings(_args) -> int:
 def cmd_relaunch(args) -> int:
     """Quit the test build and open it again, as a person does, to check what it keeps across launches.
     A build with a saved Stop starts no engine. That is a result to read, not a failure.
-    With `--language`, the build starts in that language. A later `relaunch` without it starts in the Mac's language."""
+    With `--language`, the build starts in that language. A later `relaunch` without it starts in the Mac's language.
+    With `--double-length`, every interface text shows twice, to check that long text wraps instead of being cut off."""
     run = load_run()
     old = test_pid(run)
     if not quit_app(old, run, "test build"):
         raise Failure("The test build or its engine did not exit. Run `verify-miri doctor`.")
     try:
-        launch_app(run["test_app"], run, "test build", record=True, language=args.language)
-        if args.language:
-            log(run, f"relaunched test build in language {args.language}")
+        launch_app(run["test_app"], run, "test build", record=True, language=args.language,
+                   double_length=args.double_length)
+        if args.language or args.double_length:
+            log(run, f"relaunched test build in language {args.language or 'of the Mac'}"
+                     f"{' with double-length text' if args.double_length else ''}")
     except Failure as error:
         new = run.get("test_pid")
         if new == old or not new or not alive(new):
             raise
         log(run, f"relaunched test build pid {new} with no engine: {error}")
     return 0
+
+
+# Each Settings page by its accessibility identifier, which is the same in every language.
+SETTINGS_PAGES = ("setup", "general", "layout", "shortcuts", "gestures", "diagnostics")
+# The Settings window's size when it first opens, from WindowPresenter.swift. It is also its narrowest width.
+SETTINGS_DEFAULT_SIZE = ("880", "640")
+
+
+def cmd_cutoff(args) -> int:
+    """Show each Settings page at the window's default size and list text that is cut off, then put the size back.
+    Run it after `relaunch --double-length` to check that long text wraps (#350)."""
+    run = load_run()
+    pid = str(test_pid(run))
+    if not tool("axdo", pid, "frame", check=False).strip()[:1].isdigit():
+        cmd_settings(args)
+    x, y, width, height = tool("axdo", pid, "frame").split()
+    tool("axdo", pid, "frame", x, y, *SETTINGS_DEFAULT_SIZE)
+    total = 0
+    try:
+        for page in SETTINGS_PAGES:
+            tool("axdo", pid, "press", f"miri.page.{page}")
+            time.sleep(0.6)
+            result = tool("axdo", pid, "cutoff", check=False)
+            cut = [line for line in result.splitlines() if line.startswith("CUT ")]
+            total += len(cut)
+            log(run, f"cutoff {page}: {len(cut)} cut off" + "".join(f"\n  {line}" for line in cut))
+    finally:
+        tool("axdo", pid, "press", "miri.page.general")
+        tool("axdo", pid, "frame", x, y, width, height)
+    log(run, f"cutoff: {total} cut off on {len(SETTINGS_PAGES)} pages at {'x'.join(SETTINGS_DEFAULT_SIZE)}, "
+             f"then put the window back at {width}x{height}")
+    return 1 if total else 0
 
 
 def cmd_standin(args) -> int:
@@ -958,7 +1004,11 @@ def main() -> int:
     sub.add_parser("settings", help="open the test build's Settings window").set_defaults(func=cmd_settings)
     p = sub.add_parser("relaunch", help="quit the test build and open it again, to check what it keeps across launches")
     p.add_argument("--language", help="start the build in this language, such as de, without changing the Mac's")
+    p.add_argument("--double-length", action="store_true",
+                   help="show every interface text twice, to check that long text wraps instead of being cut off")
     p.set_defaults(func=cmd_relaunch)
+    sub.add_parser("cutoff", help="list cut-off text on every Settings page at the default window size"
+                   ).set_defaults(func=cmd_cutoff)
     p = sub.add_parser("standin", help="run a harmless process with another app's name, such as yabai")
     p.add_argument("name")
     p.add_argument("--seconds", type=int, default=900)

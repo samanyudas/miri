@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 
 @testable import MiriCore
@@ -62,5 +63,47 @@ struct DiagnosticsReportTests {
         #expect(text.contains("- Four-finger strip swipe: problem: "))
         #expect(text.contains("```\nopen <path>\n```\n"))
         #expect(!text.contains("secret") && !text.contains("sam"))
+    }
+
+    /// The app compiles the catalog into one .lproj folder per language, and macOS picks the folder for the Mac's
+    /// language. This test compiles the catalog the same way and renders the report from the German folder.
+    @Test func followsTheLanguageThatItsBundlePicks() throws {
+        let catalog = URL(filePath: #filePath).deletingLastPathComponent()
+            .appending(path: "../../Localization/Localizable.xcstrings").standardized
+        let folder = FileManager.default.temporaryDirectory.appending(path: "miri-strings-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let compile = Process()
+        compile.executableURL = URL(filePath: "/usr/bin/xcrun")
+        compile.arguments = ["xcstringstool", "compile", catalog.path, "--output-directory", folder.path]
+        try compile.run()
+        compile.waitUntilExit()
+        try #require(compile.terminationStatus == 0)
+        let german = try #require(Bundle(url: folder.appending(path: "de.lproj")))
+
+        let strings = try #require(
+            try JSONSerialization.jsonObject(with: Data(contentsOf: catalog)) as? [String: Any])["strings"]
+        func translation(_ key: String) throws -> String {
+            let entry = try #require((strings as? [String: Any])?[key] as? [String: Any])
+            let unit = try #require(
+                ((entry["localizations"] as? [String: Any])?["de"] as? [String: Any])?["stringUnit"] as? [String: Any])
+            return try #require(unit["value"] as? String)
+        }
+
+        let report = DiagnosticsReport(
+            appVersion: "0.0.1 (1)", engineRevision: "9ca903c", macOSVersion: "27.0", architecture: "arm64",
+            displays: [], engineState: .running(pid: 42),
+            setupChecks: [
+                SetupCheck(
+                    id: .stageManager, title: "Stage Manager", status: .passed, blocksStart: false, settingsURL: nil)
+            ],
+            configurationIssue: nil, log: "")
+        let text = report.rendered(with: Redactor(homeDirectory: "/Users/sam", userNames: []), bundle: german)
+        let heading = try translation("## Miri diagnostics")
+        let status = try translation("- Engine status: %@").replacing("%@", with: translation("running"))
+        #expect(heading != "## Miri diagnostics")
+        #expect(text.hasPrefix(heading + "\n"))
+        #expect(text.contains(status + "\n"))
+        #expect(text.contains("- Stage Manager: \(try translation("passed"))\n"))
+        #expect(text.contains(try translation("### Engine log (redacted)")))
     }
 }

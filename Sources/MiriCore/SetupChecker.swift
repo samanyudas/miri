@@ -243,7 +243,13 @@ public enum SetupChecker {
                         "Four-finger swipes switch full-screen apps. Set Swipe between full-screen applications to three fingers in System Settings > Trackpad > More Gestures, which keeps swiping between desktops. Turning it off also stops swiping between desktops."
                 )
             )
-        default: gestureUnverified(fingers: "four")
+        default:
+            .unableToVerify(
+                String(
+                    localized:
+                        "Miri could not read the macOS four-finger swipe settings. Use Test Gesture on the Gestures page to check the swipe."
+                )
+            )
         }
     }
 
@@ -272,16 +278,14 @@ public enum SetupChecker {
                         "Three-finger swipes switch full-screen apps. Set Swipe between full-screen applications to four fingers in System Settings > Trackpad > More Gestures."
                 )
             )
-        default: return gestureUnverified(fingers: "three")
-        }
-    }
-
-    private static func gestureUnverified(fingers: String) -> SetupStatus {
-        .unableToVerify(
-            String(
-                localized:
-                    "Miri could not read the macOS \(fingers)-finger swipe settings. Use Test Gesture on the Gestures page to check the swipe."
+        default:
+            // Each finger count is a whole sentence, so a translation never shows an English number word.
+            return .unableToVerify(
+                String(
+                    localized:
+                        "Miri could not read the macOS three-finger swipe settings. Use Test Gesture on the Gestures page to check the swipe."
+                )
             )
-        )
+        }
     }
 }

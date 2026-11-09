@@ -346,7 +346,8 @@ struct NoticeRow<Action: View>: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .accessibilityLabel(kind.spokenPrefix + text)
-            action
+            // The text wraps, so a long button title is never cut off.
+            action.fixedSize()
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
@@ -387,17 +388,33 @@ struct Banner<Actions: View>: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             Group(subviews: actions) { subviews in
-                if !subviews.isEmpty {
-                    HStack(spacing: 8) {
-                        Spacer(minLength: 0)
-                        subviews
-                    }
-                }
+                if !subviews.isEmpty { ButtonRow { subviews } }
             }
         }
         .padding(14)
         .background(kind.tint, in: .rect(cornerRadius: 10))
         .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(kind.border, lineWidth: 1))
+    }
+}
+
+/// Buttons at the trailing end of a row. When their titles are too long for one row, as in some translations,
+/// they stack at the trailing edge instead of being cut off.
+struct ButtonRow<Content: View>: View {
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        Group(subviews: content) { buttons in
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) {
+                    Spacer(minLength: 0)
+                    ForEach(buttons) { $0.fixedSize() }
+                }
+                VStack(alignment: .trailing, spacing: 8) {
+                    ForEach(buttons) { $0.fixedSize() }
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+        }
     }
 }
 

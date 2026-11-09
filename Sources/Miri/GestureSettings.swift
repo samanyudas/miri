@@ -282,7 +282,7 @@ struct GestureTestSheet: View {
 
     private var title: String {
         switch test.phase {
-        case .idle, .watching: String(localized: "Swipe left and right with \(fingerWord) fingers on the trackpad.")
+        case .idle, .watching: swipeInstruction
         case .passedAwaitingConfirmation: String(localized: "Did the strip follow your fingers?")
         case .failed(let reason): reason
         case .inconclusive:
@@ -365,10 +365,11 @@ struct GestureTestSheet: View {
         }
     }
 
-    private var fingerWord: String {
+    /// A whole sentence for each finger count, so a translation never shows an English number word.
+    private var swipeInstruction: String {
         switch test.fingers ?? model.settings.stripGesture.fingers {
-        case .three?: "three"
-        case .four?, nil: "four"
+        case .three?: String(localized: "Swipe left and right with three fingers on the trackpad.")
+        case .four?, nil: String(localized: "Swipe left and right with four fingers on the trackpad.")
         }
     }
 }

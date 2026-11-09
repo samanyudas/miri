@@ -525,8 +525,7 @@ struct SetupCheckItem: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if check.status != .passed, check.isGestureCheck || check.settingsURL != nil {
-                    HStack(spacing: 8) {
-                        Spacer(minLength: 0)
+                    ButtonRow {
                         if check.isGestureCheck, let openGestures {
                             Button("Open Gestures", action: openGestures)
                         }
@@ -641,20 +640,16 @@ struct DiagnosticsSettings: View {
                 // The log box is dark in both appearances, so its scroll bar is too.
                 .environment(\.colorScheme, .dark)
             }
-            HStack(spacing: 10) {
-                // A failed engine has Restart Engine in the banner above.
-                switch model.engineState {
-                // A healthy engine needs no next step, so Restart Engine is a plain button here.
-                case .running:
-                    Button("Restart Engine") { model.restart() }
-                case .restarting:
-                    Button("Restart Engine") {}.disabled(true)
-                case .failed, .stopped: EmptyView()
+            // When a translation makes the row too long, the note moves under the buttons instead of cutting them off.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) {
+                    logButtons
+                    privacyNote
                 }
-                Button("Copy Diagnostics…") { presenter?.show(.diagnostics) }
-                Text("Logs stay on this Mac. Miri sends no telemetry.")
-                    .font(.detail)
-                    .foregroundStyle(Palette.secondaryText)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 10) { logButtons }
+                    privacyNote
+                }
             }
             SettingsSection(String(localized: "Feedback")) {
                 SettingsRow(
@@ -681,6 +676,26 @@ struct DiagnosticsSettings: View {
                 try? await Task.sleep(for: .seconds(1))
             }
         }
+    }
+
+    @ViewBuilder private var logButtons: some View {
+        // A failed engine has Restart Engine in the banner above.
+        switch model.engineState {
+        // A healthy engine needs no next step, so Restart Engine is a plain button here.
+        case .running:
+            Button("Restart Engine") { model.restart() }.fixedSize()
+        case .restarting:
+            Button("Restart Engine") {}.disabled(true).fixedSize()
+        case .failed, .stopped: EmptyView()
+        }
+        Button("Copy Diagnostics…") { presenter?.show(.diagnostics) }.fixedSize()
+    }
+
+    private var privacyNote: some View {
+        Text("Logs stay on this Mac. Miri sends no telemetry.")
+            .font(.detail)
+            .foregroundStyle(Palette.secondaryText)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private var engineFacts: some View {

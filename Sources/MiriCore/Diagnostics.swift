@@ -67,19 +67,20 @@ public struct DiagnosticsReport: Sendable {
         self.log = log
     }
 
-    /// Markdown for a GitHub issue. Everything that could carry personal text goes through the redactor.
-    public func rendered(with redactor: Redactor) -> String {
+    /// Markdown for a GitHub issue, in the language that `bundle` picks for the Mac.
+    /// Everything that could carry personal text goes through the redactor.
+    public func rendered(with redactor: Redactor, bundle: Bundle = .main) -> String {
         var lines = [
-            String(localized: "## Miri diagnostics"), "",
-            String(localized: "- Miri: \(appVersion)"),
-            String(localized: "- Engine: \(engineRevision)"),
-            String(localized: "- macOS: \(macOSVersion) (\(architecture))"),
-            String(localized: "- Engine status: \(Self.describe(engineState))"),
+            String(localized: "## Miri diagnostics", bundle: bundle), "",
+            String(localized: "- Miri: \(appVersion)", bundle: bundle),
+            String(localized: "- Engine: \(engineRevision)", bundle: bundle),
+            String(localized: "- macOS: \(macOSVersion) (\(architecture))", bundle: bundle),
+            String(localized: "- Engine status: \(Self.describe(engineState, bundle: bundle))", bundle: bundle),
             String(
                 localized:
-                    "- Configuration: \(configurationIssue.map { redactor.redact($0.description) } ?? String(localized: "valid"))"
-            ),
-            "", String(localized: "### Displays"), "",
+                    "- Configuration: \(configurationIssue.map { redactor.redact($0.description) } ?? String(localized: "valid", bundle: bundle))",
+                bundle: bundle),
+            "", String(localized: "### Displays", bundle: bundle), "",
         ]
         for (index, display) in displays.enumerated() {
             // Plain digits, without the grouping separators of a localized number, so reports compare across languages.
@@ -89,35 +90,37 @@ public struct DiagnosticsReport: Sendable {
                 display.isMain
                     ? String(
                         localized:
-                            "- Display \(number) (main): \(width) x \(height) points at \(scale)x, origin (\(x), \(y))")
+                            "- Display \(number) (main): \(width) x \(height) points at \(scale)x, origin (\(x), \(y))",
+                        bundle: bundle)
                     : String(
-                        localized: "- Display \(number): \(width) x \(height) points at \(scale)x, origin (\(x), \(y))")
+                        localized: "- Display \(number): \(width) x \(height) points at \(scale)x, origin (\(x), \(y))",
+                        bundle: bundle)
             )
         }
-        lines += ["", String(localized: "### Setup checks"), ""]
-        for check in setupChecks { lines.append("- \(check.title): \(Self.describe(check.status))") }
+        lines += ["", String(localized: "### Setup checks", bundle: bundle), ""]
+        for check in setupChecks { lines.append("- \(check.title): \(Self.describe(check.status, bundle: bundle))") }
         lines += [
-            "", String(localized: "### Engine log (redacted)"), "", "```",
+            "", String(localized: "### Engine log (redacted)", bundle: bundle), "", "```",
             redactor.redact(log).trimmingCharacters(in: .newlines), "```",
         ]
         return lines.joined(separator: "\n") + "\n"
     }
 
-    static func describe(_ state: EngineState) -> String {
+    static func describe(_ state: EngineState, bundle: Bundle) -> String {
         switch state {
-        case .stopped: String(localized: "stopped")
-        case .running: String(localized: "running")
-        case .restarting(let crashes): String(localized: "restarting after \(crashes) crashes")
-        case .failed(let reason): String(localized: "failed: \(reason)")
+        case .stopped: String(localized: "stopped", bundle: bundle)
+        case .running: String(localized: "running", bundle: bundle)
+        case .restarting(let crashes): String(localized: "restarting after \(crashes) crashes", bundle: bundle)
+        case .failed(let reason): String(localized: "failed: \(reason)", bundle: bundle)
         }
     }
 
-    static func describe(_ status: SetupStatus) -> String {
+    static func describe(_ status: SetupStatus, bundle: Bundle) -> String {
         switch status {
-        case .passed: String(localized: "passed")
-        case .problem(let message): String(localized: "problem: \(message)")
-        case .notChecked: String(localized: "not checked")
-        case .unableToVerify: String(localized: "unable to verify")
+        case .passed: String(localized: "passed", bundle: bundle)
+        case .problem(let message): String(localized: "problem: \(message)", bundle: bundle)
+        case .notChecked: String(localized: "not checked", bundle: bundle)
+        case .unableToVerify: String(localized: "unable to verify", bundle: bundle)
         }
     }
 }
