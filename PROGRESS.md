@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `feat/351-shortcut-illustrations`, based on `main` at `015bfd0d`
+Updated: 2026-11-10 on branch `feat/351-shortcut-illustrations`, based on `main` at `f520e5f2`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -120,9 +120,13 @@ Set Up Miri was not driven, because it shares `show` with the two windows that w
 [#332](https://github.com/samanyudas/miri/issues/332): a plain ⌃⌥← or ⌃⌥→ that crosses to a touching display now focuses the destination's column nearest the crossed edge, so the opposite press returns.
 When that column is a stack, the window that last had focus in it gets focus, as Sam decided on 8 November 2026.
 Before, the crossing focused the destination's last-focused window, which could sit in the middle of its strip.
-[paneru#150](https://github.com/samanyudas/paneru/pull/150) holds the engine change, with its failing tests in the commit before the fix.
-It merged into `miri/v0.5.2` as `7be4df9`, which this branch pins.
-[#333](https://github.com/samanyudas/miri/issues/333), the ⌃⌥N screen order in [paneru#149](https://github.com/samanyudas/paneru/pull/149), is held until its three-display check can run, so this pin leaves it out.
+[paneru#150](https://github.com/samanyudas/paneru/pull/150) holds the engine change and merged into `miri/v0.5.2` as `7be4df9`.
+[#396](https://github.com/samanyudas/miri/pull/396) pinned it and reached `main` at `632efc42`.
+#332 closed on 10 November 2026 after `verify-miri` run `20261110-004217` on `632efc42`, with the displays side by side, focused X on ⌃⌥→ and returned to C on ⌃⌥←.
+Run `20261108-225330` on `main` `3dc50c83` focused Y on ⌃⌥→ instead.
+Sam also hand-checked both directions on the #396 build.
+A stacked edge column was not checked on hardware, and an engine test covers it.
+[#333](https://github.com/samanyudas/miri/issues/333), the ⌃⌥N screen order in [paneru#149](https://github.com/samanyudas/paneru/pull/149), is held until its three-display check can run, so `main` leaves it out.
 
 ## Command-Shift Left and Right stay on their display
 
@@ -133,7 +137,7 @@ An upgrade removes those defaults only where the user kept them unchanged, and a
 [paneru#137](https://github.com/samanyudas/paneru/pull/137) makes a swap to the end that the column already holds do nothing, instead of swapping inside its stack.
 [#354](https://github.com/samanyudas/miri/pull/354) pinned its merge `b5ae4bd` and reached `main` at `a35bb5f4`.
 #331 closed on 8 November 2026 after `verify-miri` run `20261108-140758` on `a35bb5f4` passed both directions and the Settings check, against run `20261107-013236` on `main` `54e4e5f4`, which crossed.
-[#332](https://github.com/samanyudas/miri/issues/332), [#333](https://github.com/samanyudas/miri/issues/333), and [#334](https://github.com/samanyudas/miri/issues/334) hold the rest of the 7 November shortcut decisions.
+Of the rest of the 7 November shortcut decisions, [#332](https://github.com/samanyudas/miri/issues/332) and [#334](https://github.com/samanyudas/miri/issues/334) are closed, and [#333](https://github.com/samanyudas/miri/issues/333) is held.
 
 ## Pointer stays after a click
 
