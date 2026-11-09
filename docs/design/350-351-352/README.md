@@ -86,6 +86,8 @@ Sam's picks on 9 November 2026 approve these changes, and each issue body carrie
 ### #350
 
 - Criterion 1 covers `Sources/MiriCore` as well as `Sources/Miri`, because setup checks, action names, and configuration errors live there.
+- Criterion 1 names `make strings`, which `make native` and CI run, instead of `make lint` or a Swift test.
+  Sam chose this on 10 November 2026, because the check needs the Swift compiler and `make lint` also runs on Linux.
 - Criterion 7 changes: the Copy Diagnostics report follows the Mac's language, and its Swift test checks that the report uses the translation.
 - Criteria 2, 4, and 5 launch Miri with `-AppleLanguages`, because agents must not change the Mac's language.
   Sam keeps a change of the system language as a hand check.
