@@ -79,6 +79,7 @@ Sam's picks on 9 November 2026 approve these changes, and each issue body carrie
 ### #351
 
 - The illustration shows in one preview panel above the list, for the row under the pointer or with keyboard focus, not inside each row.
+  On 10 November 2026 Sam chose to pin the panel at the top while the list scrolls, because a panel that scrolls away is off screen for lower rows.
 - Each illustration is a before and after pair of strip sketches.
 - The preview plays the move once on hover or focus, and Reduce Motion shows the still pair.
 - VoiceOver reads the visible caption, which says what moves, where, and what stays, and the drawing itself is hidden from VoiceOver.
