@@ -76,7 +76,8 @@ struct MenuContent: View {
             Button("Restart Engine") { model.restart() }
                 .disabled(!model.engineState.isRunning)
             Button("Stop Window Management") { model.stop() }
-            Text("Your windows stay where they are.")
+            // When the engine exits, it moves each window it arranged back to its frame from before it started.
+            Text("Windows open before Miri started go back to where they were.")
         case .failed:
             Button("Restart Engine") { model.restart() }
             Button("Show Logs in Finder") { model.showLogsInFinder() }
