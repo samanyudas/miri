@@ -26,8 +26,10 @@ The native app is implemented, but no complete acceptance run has passed.
   In the first or last column, the command does nothing.
 - New windows start at 50% of display width, while existing windows retain their widths.
 - Resize commands change size by five percentage points of the display's corresponding dimension, subject to window size constraints.
-- Control-Option-Command with Up or Down focuses the display above or below, and with Left or Right it focuses the strip's first or last column, then the display on that side.
-  Each direction also accepts H, J, K, and L, and W, A, S, and D, and adding Shift moves the focused column the same way.
+- Control-Option-Command with an arrow focuses the neighboring display in that direction at once, from any column of the strip.
+  Adding Shift with Up or Down moves the focused column to the display above or below.
+  Adding Shift with Left or Right moves the focused column to the first or last position on its own display, and never crosses to another display ([#331](https://github.com/samanyudas/miri/issues/331)).
+  Each direction also accepts H, J, K, and L, and W, A, S, and D.
 - Plain horizontal focus and move cross only a touching display when a fresh key press starts at the strip's end ([#104](https://github.com/samanyudas/miri/issues/104)).
   Plain moves arrive at the crossed destination edge, so the opposite press returns them to the source end.
   Plain focus lands on the destination column nearest the crossed edge, so the opposite press returns to the column it left ([#332](https://github.com/samanyudas/miri/issues/332)).

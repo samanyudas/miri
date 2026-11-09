@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-08 on branch `fix/332-crossing-focus-edge`, based on `main` at `3dc50c83`
+Updated: 2026-11-09 on branch `fix/332-crossing-focus-edge`, based on `main` at `604b8551`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,13 +16,15 @@ The public release path and the complete acceptance runs follow.
 
 ## Desktop at the shared edge while columns slide back in
 
-[#316](https://github.com/samanyudas/miri/issues/316) has a fix in [paneru#146](https://github.com/samanyudas/paneru/pull/146), merged into `miri/v0.5.2` as `c61a547`, which this branch's pin `4cda257` includes.
-The next hidden column out now shows its photo behind the nearest hidden column and behind each sliding photo, so its panel exists before the nearer photo leaves the edge.
-macOS shows a new panel a frame late, which left the edge bare for that frame.
-A live check of 24 rounds found 9 edge exposures over 8 pt on `main` at `1417553f`, 4 of them over 30 pt, and 0 on the fix on the same engine base.
-On the merged engine `c61a547`, 24 rounds showed 0 edge exposures and 0 gaps between columns.
-Criterion 2 is not yet proven: across 4 runs of the fix, 1 round showed a gap of 166 pt for 7 ms between a sliding photo and the window ahead of it, in the frame that a new panel was made, and `main` showed 1 gap of 438 pt in 24 rounds.
-The live scripts are in `/tmp/miri316/tools2`, and the runs in `/tmp/miri316/live2`, outside the repository.
+[#316](https://github.com/samanyudas/miri/issues/316) closed on 9 November 2026 after `verify-miri` run `20261109-144222` on `main` at `62bfb3d9`, engine `0f4affb`.
+macOS shows a new photo panel a frame late, so a panel made while photos slid left the shared edge, or the space between columns, bare for that frame.
+[paneru#146](https://github.com/samanyudas/paneru/pull/146), pinned by [#385](https://github.com/samanyudas/miri/pull/385), shows the next hidden column out behind the nearest hidden column and behind each sliding photo.
+[paneru#148](https://github.com/samanyudas/paneru/pull/148), pinned by [#392](https://github.com/samanyudas/miri/pull/392), shows every hidden column at a shared edge at rest, so no panel is made while photos move.
+Behind a hidden stack, whose slices have gaps, the farther columns still show only while they slide.
+In 24 rounds, `main` at `1417553f` showed 9 edge exposures over 8 pt and 1 gap of 438 pt between columns, and `main` at `62bfb3d9` showed none of either.
+Across 72 rounds of engine `0f4affb` or its identical PR head, one sample showed 24 pt between columns for 7 ms, when an existing photo panel moved one sample after the window ahead of it.
+Sam accepted that lag on 9 November 2026.
+The real Helium window case from the issue report was not rechecked.
 
 ## macOS 15 support
 
