@@ -2,7 +2,7 @@
 
 Sam chose to build [#352](https://github.com/samanyudas/miri/issues/352), [#351](https://github.com/samanyudas/miri/issues/351), and [#350](https://github.com/samanyudas/miri/issues/350) on 8 November 2026, and every design choice goes to Sam before implementation.
 This folder holds one decision sheet for each choice that Sam makes, with the options side by side and the recommendation marked.
-Nothing here is implemented, and no option is accepted until Sam picks it.
+Sam picked an option for every sheet on 9 November 2026, and the **Sam picked** column records it.
 
 ## How the pictures were made
 
@@ -17,80 +17,81 @@ A changed or new picture needs a new approval.
 
 ## Sheets
 
-| File in `sheets/` | Decision | Recommended |
-| --- | --- | --- |
-| `352-1-menu-position.png` | Where the two items go in the menu bar menu | A, under Copy Diagnostics |
-| `352-2-settings-placement.png` | Where the two actions go in Settings | A, a Feedback section on Diagnostics |
-| `352-3-item-wording.png` | What the items are called | A, Report a Bug… and Request a Feature… |
-| `352-4-bug-flow.png` | Browser directly, or the Diagnostics preview first | B, the Diagnostics preview first |
-| `351-1-illustration-style.png` | Strip sketch, glyph, or before and after pair | A, strip sketch |
-| `351-2-size-and-placement.png` | Inline, popover, or preview panel on the Shortcuts page | C, preview panel above the list |
-| `351-3-motion.png` | Still, animated on hover or focus, or looping, and what Reduce Motion shows | B, animated only in the preview |
-| `351-4-voiceover-wording.png` | What VoiceOver reads for an illustration | A, what moves, where, and what stays |
-| `350-1-clipping.png` | Wrap, shorter translations, or a wider window | A, wrap and never cut off |
-| `350-2-arabic-layout.png` | Mirror the window for Arabic, or right-align the text only | A, mirror, with real directions kept |
-| `350-3-action-names.png` | Translated, English, or both names in the Shortcuts list | A, translated, and search also matches English |
-| `350-4-monitor-or-display.png` | "Monitor" or "display" in the English names, before translation | B, "display" everywhere |
-| `350-5-diagnostics-language.png` | Whether the Copy Diagnostics report stays in English or follows the Mac's language | A, English |
+| File in `sheets/` | Decision | Recommended | Sam picked |
+| --- | --- | --- | --- |
+| `352-1-menu-position.png` | Where the two items go in the menu bar menu | A, under Copy Diagnostics | C, a Help submenu |
+| `352-2-settings-placement.png` | Where the two actions go in Settings | A, a Feedback section on Diagnostics | A |
+| `352-3-item-wording.png` | What the items are called | A, Report a Bug… and Request a Feature… | B, one Send Feedback… item |
+| `352-4-bug-flow.png` | Browser directly, or the Diagnostics preview first | B, the Diagnostics preview first | B, adapted to one item (see below) |
+| `351-1-illustration-style.png` | Strip sketch, glyph, or before and after pair | A, strip sketch | C, before and after pair |
+| `351-2-size-and-placement.png` | Inline, popover, or preview panel on the Shortcuts page | C, preview panel above the list | C |
+| `351-3-motion.png` | Still, animated on hover or focus, or looping, and what Reduce Motion shows | B, animated only in the preview | B |
+| `351-4-voiceover-wording.png` | What VoiceOver reads for an illustration | A, what moves, where, and what stays | A |
+| `350-1-clipping.png` | Wrap, shorter translations, or a wider window | A, wrap and never cut off | A |
+| `350-2-arabic-layout.png` | Mirror the window for Arabic, or right-align the text only | A, mirror, with real directions kept | A |
+| `350-3-action-names.png` | Translated, English, or both names in the Shortcuts list | A, translated, and search also matches English | A |
+| `350-4-monitor-or-display.png` | "Monitor" or "display" in the English names, before translation | B, "display" everywhere | B |
+| `350-5-diagnostics-language.png` | Whether the Copy Diagnostics report stays in English or follows the Mac's language | A, English | B, the Mac's language |
 
 The `mocks/` folder holds the first-round mocks from the same session, which the sheets replace.
 
-## Decisions for Sam without a sheet
+## How the #352 picks fit together
 
-1. #352: whether the new-issue address names only the form, or also fills in the Miri and macOS versions.
-   The recommendation is the form only, because filling in fields sends data to GitHub when the page loads.
-2. #352: whether a simpler public bug form follows as a separate task before the public release.
-   The current forms require fields such as Acceptance criteria that people outside the project cannot fill in.
-3. #350: where translations come from and who reviews them.
-   The recommendation is a machine draft from a glossary, a second model that checks it, and a native speaker review for the languages where Sam can find one.
-4. #350: whether the translator glossary lives in a `TRANSLATION.md` file, which Xcode 27 reads, with Apple's own names for macOS settings.
+Wording B leaves one **Send Feedback…** item, so no **Report a Bug…** item is left for bug flow B to route through the Diagnostics preview.
+On 9 November 2026 Sam chose this combination:
+
+- **Send Feedback…** opens GitHub's list of issue forms, `issues/new/choose`, where the person picks a form.
+- It sits in a **Help** submenu of the menu bar menu, and in a **Feedback** section on the Settings Diagnostics page.
+- The Diagnostics preview gains a **Copy and Open Bug Report…** button, which copies the report and opens the bug report form.
+
+## Decisions without a sheet
+
+Sam took the recommendation for each of these on 9 November 2026.
+
+1. #352: the new-issue address names only the form and fills in no fields, because filling in fields sends data to GitHub when the page loads.
+2. #352: a simpler public bug form follows as a separate task before the public release.
+   The current forms require fields such as Acceptance criteria that people outside the project cannot fill in, and GitHub's list of forms also shows the maintainer forms Task and Decision.
+3. #350: an AI drafts the translations from the glossary, a second model checks them, and a native speaker reviews each language where Sam can find one.
+   A missing reviewer does not hold a language back.
+4. #350: the translator glossary lives in a `TRANSLATION.md` file, which Xcode 27 reads, with Apple's own names for macOS settings.
 
 ## Settled without Sam
 
 T3 Tots settled these technical choices for Sam on 8 November 2026, so they have no sheet.
 On the same day, T3 Tots moved the language of the Copy Diagnostics report back to Sam as a product choice, which `350-5-diagnostics-language.png` shows.
-Until Sam picks, Copy Diagnostics keeps its current behavior.
 
 - The order is #352, then the #350 groundwork with an English copy pass, then #351, then the translations.
 - The illustration scenes live in code, with one test for a missing scene and one test against the keybinding reference.
 - `scripts/check-strings.py` lists interface text, and its `--check` option joins `make lint` once a string catalog exists.
 
-## Acceptance criteria that a recommendation would change
+## Acceptance criteria that Sam's picks change
 
-Sam has approved none of these changes.
-Each one applies only if Sam picks the option named.
+Sam's picks on 9 November 2026 approve these changes, and each issue body carries them.
 
 ### #352
 
-- Criterion 1 says that **Report a Bug…** opens the bug report form.
-  With bug flow B, it opens the Diagnostics preview first, and its **Copy and Open Bug Report…** button opens the form.
-- Criteria 1 and 2 name **Report a Bug…** and **Request a Feature…**.
-  With wording B or C, both names change, and with wording B one item replaces the two.
+- **Send Feedback…** replaces **Report a Bug…** and **Request a Feature…**, in the menu bar's Help submenu and in a Feedback section on the Settings Diagnostics page.
+  It opens `github.com/samanyudas/miri/issues/new/choose`.
+- The Diagnostics preview has a **Copy and Open Bug Report…** button, which copies the report and opens the bug report form.
+- The Swift test checks the bug report form and the address of the list of forms.
 
 ### #351
 
-- The issue's proposed behavior says that each shortcut row can show a small illustration.
-  With placement C, the illustration shows in one preview panel above the list, for the row under the pointer or with keyboard focus, not inside each row.
-- Criterion 4 says that VoiceOver reads a text description of each illustration.
-  With placement C and wording A, VoiceOver reads the visible caption, and the drawing itself is hidden from VoiceOver.
+- The illustration shows in one preview panel above the list, for the row under the pointer or with keyboard focus, not inside each row.
+- Each illustration is a before and after pair of strip sketches.
+- The preview plays the move once on hover or focus, and Reduce Motion shows the still pair.
+- VoiceOver reads the visible caption, which says what moves, where, and what stays, and the drawing itself is hidden from VoiceOver.
 
 ### #350
 
-- Criterion 1 covers every user-facing string in `Sources/Miri`.
-  Setup checks, action names, and configuration errors come from `Sources/MiriCore`, so criterion 2 needs the criterion to cover `Sources/MiriCore` too.
-- Criterion 7 says that Copy Diagnostics output stays in English.
-  With diagnostics language A, it stays as written.
-  With diagnostics language B, the report follows the Mac's language, and the criterion and its Swift test change to match.
-- Criteria 2, 4, and 5 set the Mac's primary language.
-  The proposal is to launch Miri with `-AppleLanguages` instead, because agents must not change the Mac's language, and to keep a change of the system language as a hand check for Sam only.
-- Criterion 3 asks for a complete translation of all 22 languages.
-  If Sam decides that some languages ship only after a native speaker review, those languages leave the first release, and the criterion lists fewer languages.
-- Criterion 4 says that Settings and initial setup lay out right to left.
-  With Arabic layout A, key caps, illustrations, and display directions keep the screen's real left and right, so the criterion names those exceptions.
-- Criterion 6 checks that labels fit at the default window size.
-  With clipping C, the default window size grows, and with clipping A an automatic check with longer test text joins the manual check.
-- With action names B, criterion 2 needs an exception, because action names stay in English inside a translated Settings window.
+- Criterion 1 covers `Sources/MiriCore` as well as `Sources/Miri`, because setup checks, action names, and configuration errors live there.
+- Criterion 7 changes: the Copy Diagnostics report follows the Mac's language, and its Swift test checks that the report uses the translation.
+- Criteria 2, 4, and 5 launch Miri with `-AppleLanguages`, because agents must not change the Mac's language.
+  Sam keeps a change of the system language as a hand check.
+- Criterion 3 keeps all 22 languages, because a missing native reviewer does not hold a language back.
+- Criterion 4 names the exceptions to the mirrored layout: key caps, illustrations, and display directions keep the screen's real left and right.
+- Criterion 6 gains an automatic check with longer test text, next to the manual check, because labels wrap instead of being cut off.
 
 ### Outside the issues
 
-- With monitor or display B, 8 action names and `decisions/keybinding reference.md` change before translation, and `GLOSSARY.md` may need its term Physical monitor reworded.
+- 8 action names say "display" instead of "monitor" before translation, `decisions/keybinding reference.md` changes to match, and `GLOSSARY.md` may need its term Physical monitor reworded.

@@ -17,12 +17,13 @@ The public release path and the complete acceptance runs follow.
 ## Bug reports, shortcut illustrations, and localization
 
 Sam chose to build [#352](https://github.com/samanyudas/miri/issues/352), [#351](https://github.com/samanyudas/miri/issues/351), and [#350](https://github.com/samanyudas/miri/issues/350) on 8 November 2026, with every design choice decided before implementation.
-Branch `design/350-351-352` holds groundwork with no design content, and no PR is open.
+Sam picked every design option on 9 November 2026, and `docs/design/350-351-352/README.md` on branch `design/350-351-352` records the picks and the acceptance criteria they change.
+That branch also holds the groundwork, and no PR is open for it.
 `IssueForm` in `MiriCore` builds the new-issue address for each issue form, and `IssueFormTests` checks that each form file exists.
 `scripts/check-strings.py` lists the literals that read like interface text, 576 of them on `3dc50c83`.
 Its `--check` option fails on text that no string catalog holds, so `make lint` does not run it yet.
 A probe showed that `swift build` compiles a `.xcstrings` catalog, and that the app's `Info.plist` must list `CFBundleLocalizations` before macOS uses a translation.
-Next: Sam answers the design questions for the three issues, then building starts.
+Next: build #352, then the #350 groundwork with an English copy pass, then #351, then the translations.
 
 ## Desktop at the shared edge while columns slide back in
 
