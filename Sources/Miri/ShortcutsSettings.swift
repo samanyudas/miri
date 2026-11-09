@@ -23,6 +23,9 @@ struct ShortcutsSettings: View {
     @State private var pendingConflict: PendingConflict?
     @State private var confirmingReset = false
     @State private var hovered: ShortcutAction?
+    /// The action the preview panel shows: the last row the pointer entered or the keyboard moved to.
+    @State private var previewed: ShortcutAction?
+    @FocusState private var focusedAction: ShortcutAction?
 
     var body: some View {
         SettingsPage(
@@ -59,12 +62,23 @@ struct ShortcutsSettings: View {
                     .padding(.vertical, 40)
                 }
                 if !actions.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        SectionLabel(String(localized: "Actions"))
-                        SettingsGroup {
-                            ForEach(actions, id: \.self) { action in
-                                row(action, chords: shortcuts.chords(for: action))
+                    // The preview stays pinned at the top while the rows scroll under it, so it is on screen
+                    // beside any row the pointer or keyboard is on.
+                    LazyVStack(alignment: .leading, spacing: 8, pinnedViews: [.sectionHeaders]) {
+                        Section {
+                            SettingsGroup {
+                                ForEach(actions, id: \.self) { action in
+                                    row(action, chords: shortcuts.chords(for: action))
+                                }
                             }
+                        } header: {
+                            VStack(alignment: .leading, spacing: 8) {
+                                SectionLabel(String(localized: "Actions"))
+                                ShortcutPreview(
+                                    action: previewed.flatMap { actions.contains($0) ? $0 : nil } ?? actions[0])
+                            }
+                            .padding(.bottom, 8)
+                            .background(Palette.content)
                         }
                         Text(
                             "Point at a shortcut to remove it. Press Escape to cancel recording. Stop window manager works even while the engine is stopped."
@@ -101,6 +115,7 @@ struct ShortcutsSettings: View {
             }
         }
         .onDisappear(perform: stopRecording)
+        .onChange(of: focusedAction) { if let focusedAction { previewed = focusedAction } }
         .onChange(of: notice) { if let notice { AccessibilityNotification.Announcement(notice.text).post() } }
         .alert(
             conflictTitle,
@@ -195,7 +210,12 @@ struct ShortcutsSettings: View {
         .background(notice?.action == action ? Palette.errorTint : .clear)
         .contentShape(.rect)
         .onHover { inside in
-            if inside { hovered = action } else if hovered == action { hovered = nil }
+            if inside {
+                hovered = action
+                previewed = action
+            } else if hovered == action {
+                hovered = nil
+            }
         }
     }
 
@@ -229,6 +249,7 @@ struct ShortcutsSettings: View {
                 .contentShape(.rect)
         }
         .buttonStyle(.borderless)
+        .focused($focusedAction, equals: action)
         .help("Add a shortcut for \(action.title)")
         .accessibilityLabel("Add Shortcut for \(action.title)")
         .disabled(recording == action)
