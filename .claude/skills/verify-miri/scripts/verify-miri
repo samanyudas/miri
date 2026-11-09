@@ -356,11 +356,13 @@ def quit_app(pid: int, run: dict | None = None, label: str = "app") -> bool:
     return bool(app_gone and engine_gone)
 
 
-def launch_app(bundle: str, run: dict, label: str, record: bool = False) -> int:
+def launch_app(bundle: str, run: dict, label: str, record: bool = False, language: str | None = None) -> int:
     """Launch a Miri Developer bundle and wait until its engine answers and session restore has run.
-    With `record`, saves the app's process ID in the run before waiting, so `end` can stop it after a failure."""
+    With `record`, saves the app's process ID in the run before waiting, so `end` can stop it after a failure.
+    With `language`, such as `de`, the app shows that language through `-AppleLanguages`, and the Mac keeps its own."""
     started = time.time()
-    subprocess.run(["open", bundle], check=True)
+    options = ["--args", "-AppleLanguages", f"({language})"] if language else []
+    subprocess.run(["open", bundle, *options], check=True)
     app = wait(lambda: next((p for p in running_apps() if p["bundle"] == normal(bundle)), None), 15)
     if not app:
         raise Failure(f"{bundle} did not start within 15 s.")
@@ -782,15 +784,18 @@ def cmd_settings(_args) -> int:
     return 0 if shown else 1
 
 
-def cmd_relaunch(_args) -> int:
+def cmd_relaunch(args) -> int:
     """Quit the test build and open it again, as a person does, to check what it keeps across launches.
-    A build with a saved Stop starts no engine. That is a result to read, not a failure."""
+    A build with a saved Stop starts no engine. That is a result to read, not a failure.
+    With `--language`, the build starts in that language. A later `relaunch` without it starts in the Mac's language."""
     run = load_run()
     old = test_pid(run)
     if not quit_app(old, run, "test build"):
         raise Failure("The test build or its engine did not exit. Run `verify-miri doctor`.")
     try:
-        launch_app(run["test_app"], run, "test build", record=True)
+        launch_app(run["test_app"], run, "test build", record=True, language=args.language)
+        if args.language:
+            log(run, f"relaunched test build in language {args.language}")
     except Failure as error:
         new = run.get("test_pid")
         if new == old or not new or not alive(new):
@@ -941,8 +946,9 @@ def main() -> int:
     p.add_argument("rest", nargs=argparse.REMAINDER)
     p.set_defaults(func=cmd_ax)
     sub.add_parser("settings", help="open the test build's Settings window").set_defaults(func=cmd_settings)
-    sub.add_parser("relaunch", help="quit the test build and open it again, to check what it keeps across launches"
-                   ).set_defaults(func=cmd_relaunch)
+    p = sub.add_parser("relaunch", help="quit the test build and open it again, to check what it keeps across launches")
+    p.add_argument("--language", help="start the build in this language, such as de, without changing the Mac's")
+    p.set_defaults(func=cmd_relaunch)
     p = sub.add_parser("standin", help="run a harmless process with another app's name, such as yabai")
     p.add_argument("name")
     p.add_argument("--seconds", type=int, default=900)

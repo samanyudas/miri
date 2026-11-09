@@ -4,6 +4,7 @@ import Foundation
 ///
 /// After any failure the store keeps the last valid settings. It never writes to a file it could not read correctly.
 public final class ConfigurationStore {
+    // Not interface text: the file header stays English, like the TOML keys it describes.
     public static let header = """
         # Miri configuration.
         # Miri Settings writes this file, and you can also edit it by hand. Valid edits apply immediately.
@@ -79,7 +80,7 @@ public final class ConfigurationStore {
         var changed = settings
         change(&changed)
         try changed.validate()
-        guard document != nil else { throw issue ?? .unreadable("Reload the file and try again.") }
+        guard document != nil else { throw issue ?? .unreadable(String(localized: "Reload the file and try again.")) }
         try write(changed, reduceMotion: reduceMotion, replacing: settings)
         settings = changed
     }
@@ -94,7 +95,7 @@ public final class ConfigurationStore {
     /// On failure the file stays unchanged. A reset backs up the file before replacing `[bindings]`.
     public func apply(_ edit: ShortcutEdit) throws {
         guard let current = document else {
-            throw issue ?? ConfigurationIssue.unreadable("Reload the file and try again.")
+            throw issue ?? ConfigurationIssue.unreadable(String(localized: "Reload the file and try again."))
         }
         let shortcuts = Shortcuts(document: current, layout: layout)
         let next: TOMLDocument
@@ -107,7 +108,9 @@ public final class ConfigurationStore {
         } catch let error as TOMLEditError {
             throw ConfigurationIssue.notEditable(error.description)
         }
-        try commit(next, replacing: current, backingUpBefore: edit == .resetToDefaults ? "resetting shortcuts" : nil)
+        try commit(
+            next, replacing: current,
+            backingUpBefore: edit == .resetToDefaults ? String(localized: "resetting shortcuts") : nil)
         issue = nil
         refreshKeptDefaults(in: next)
         stopChordsToRegister = Shortcuts(document: next, layout: layout).stopChordsToRegister(layout: layout)
@@ -128,7 +131,7 @@ public final class ConfigurationStore {
         let data: Data
         do { data = try Data(contentsOf: url) } catch { throw .unreadable(error.localizedDescription) }
         guard let text = String(data: data, encoding: .utf8) else {
-            throw .unreadable("The file is not UTF-8 text.")
+            throw .unreadable(String(localized: "The file is not UTF-8 text."))
         }
         return text
     }
@@ -172,7 +175,7 @@ public final class ConfigurationStore {
         }
         let versionPath = ["miri", "default_bindings_version"]
         let upgrades = current.value(at: versionPath) != next.value(at: versionPath)
-        try commit(next, replacing: current, backingUpBefore: upgrades ? "upgrading it" : nil)
+        try commit(next, replacing: current, backingUpBefore: upgrades ? String(localized: "upgrading it") : nil)
         writtenGestureFingers = fingers
         refreshKeptDefaults(in: next)
         stopChordsToRegister = Shortcuts(document: next, layout: layout).stopChordsToRegister(layout: layout)
@@ -221,7 +224,7 @@ public final class ConfigurationStore {
         guard next.text != current.text else { return }
         // Refuse to replace a file that changed since Miri read it. The file watcher reloads it instead.
         guard (try? String(contentsOf: url, encoding: .utf8)) == current.text else {
-            throw .unwritable("The file changed while Miri was saving. Miri reloaded it. Try again.")
+            throw .unwritable(String(localized: "The file changed while Miri was saving. Miri reloaded it. Try again."))
         }
         if let backupReason { try backUp(current, before: backupReason) }
         do {
@@ -240,7 +243,9 @@ public final class ConfigurationStore {
             try Data(document.text.utf8).write(to: backup, options: .withoutOverwriting)
         } catch {
             throw .unwritable(
-                "Miri could not back up the configuration before \(reason). \(error.localizedDescription)")
+                String(
+                    localized:
+                        "Miri could not back up the configuration before \(reason). \(error.localizedDescription)"))
         }
     }
 }

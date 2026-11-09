@@ -14,7 +14,7 @@ public struct EnginePaths: Sendable {
         self.support = support
         self.serviceName = serviceName
         configuration = support.appending(path: "config.toml")
-        logs = support.appending(path: "Logs")
+        logs = support.appending(path: "Logs")  // Not interface text
     }
 
     /// The engine's environment. XDG folders point inside Miri's folder, so the engine cannot find standalone

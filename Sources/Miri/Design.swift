@@ -309,9 +309,9 @@ enum NoticeKind {
     var spokenPrefix: String {
         switch self {
         case .neutral, .success: ""
-        case .info: "Note: "
-        case .warning: "Warning: "
-        case .error: "Error: "
+        case .info: String(localized: "Note: ")
+        case .warning: String(localized: "Warning: ")
+        case .error: String(localized: "Error: ")
         }
     }
 }
@@ -457,8 +457,10 @@ extension KeyCap {
     /// A shortcut label in words, so VoiceOver does not read modifier and arrow symbols by their glyph names.
     static func spoken(_ label: String) -> String {
         let words: [Character: String] = [
-            "⌃": "Control", "⌥": "Option", "⇧": "Shift", "⌘": "Command",
-            "←": "Left Arrow", "→": "Right Arrow", "↑": "Up Arrow", "↓": "Down Arrow",
+            "⌃": String(localized: "Control"), "⌥": String(localized: "Option"), "⇧": String(localized: "Shift"),
+            "⌘": String(localized: "Command"),
+            "←": String(localized: "Left Arrow"), "→": String(localized: "Right Arrow"),
+            "↑": String(localized: "Up Arrow"), "↓": String(localized: "Down Arrow"),
         ]
         var parts: [String] = []
         var rest = ""

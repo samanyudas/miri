@@ -83,7 +83,7 @@ Each drive command logs to `<run>/log.txt` with a timestamp.
 | `V focused [--wait-for fixture-1]` | Prints the engine's focused window and macOS's frontmost app, named as fixtures. With `--wait-for`, exits 1 unless both views show that fixture within `--timeout` seconds (3 by default). |
 | `V snapshot <label>` | Writes `<label>.json` (the focus record and every fixture's frame, focus, visibility, and floating state) and one PNG per fixture window. |
 | `V settings` | Reopens the test app, which shows Settings, as a user does from Finder or Spotlight. |
-| `V relaunch` | Quits the test build with SIGTERM and opens it again, to check what it keeps across launches, such as a saved Stop. A build that starts no engine is a result, not a failure. |
+| `V relaunch [--language de]` | Quits the test build with SIGTERM and opens it again, to check what it keeps across launches, such as a saved Stop. A build that starts no engine is a result, not a failure. `--language` starts it in that language through `-AppleLanguages`, without changing the Mac's language. |
 | `V ax test press "General"` | Presses Settings pages and buttons by title, accessibility description, or help text, in order. It looks for each one again after the previous press, so a page and a button on it work in one call. `dump` lists every element with its help text, `status` prints the status text of the page that shows, and `windows` lists window numbers. |
 | `V empty-display` | Hides each app with a managed window on the built-in display, so the display has none. `end` shows the apps again. [Empty a display](#empty-a-display) has the steps. |
 | `V standin yabai` | Runs a harmless compiled process named `yabai`, so the Setup page reports a competing window manager. |

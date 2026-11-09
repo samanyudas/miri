@@ -10,24 +10,31 @@ struct GestureSettings: View {
 
     var body: some View {
         SettingsPage(
-            title: "Gestures",
+            title: String(localized: "Gestures"),
             subtitle:
-                "Scroll the strip with a swipe on the trackpad."
+                String(localized: "Scroll the strip with a swipe on the trackpad.")
         ) {
             ConfigurationIssueNotice(model: model)
             hero
-            SettingsSection("Strip swipe") {
+            SettingsSection(String(localized: "Strip swipe")) {
                 SettingsRow(
-                    title: "Fingers", detail: "Four is recommended. Three fingers can clash with Three Finger Drag."
+                    title: String(localized: "Fingers"),
+                    detail: String(localized: "Four is recommended. Three fingers can clash with Three Finger Drag.")
                 ) {
                     SegmentedChoice(
-                        label: "Fingers", selection: setting(\.stripGesture),
-                        options: [("Three", .three), ("Four", .four), ("Off", .off)])
+                        label: String(localized: "Fingers"), selection: setting(\.stripGesture),
+                        options: [
+                            (String(localized: "Three"), .three), (String(localized: "Four"), .four),
+                            (String(localized: "Off"), .off),
+                        ])
                 }
-                SettingsRow(title: "Direction", detail: "Changing fingers or direction needs a new test.") {
+                SettingsRow(
+                    title: String(localized: "Direction"),
+                    detail: String(localized: "Changing fingers or direction needs a new test.")
+                ) {
                     SegmentedChoice(
-                        label: "Direction", selection: setting(\.reverseSwipe),
-                        options: [("Follow fingers", false), ("Reversed", true)])
+                        label: String(localized: "Direction"), selection: setting(\.reverseSwipe),
+                        options: [(String(localized: "Follow fingers"), false), (String(localized: "Reversed"), true)])
                 }
                 if case .conflict(let message) = model.gestureState {
                     NoticeRow(kind: .warning, text: message) {
@@ -100,35 +107,36 @@ struct GestureSettings: View {
 
     private var eyebrow: (text: String, color: Color) {
         switch model.gestureState {
-        case .off: ("Off", Palette.secondaryText)
-        case .enabled: ("On", Palette.greenText)
-        case .needsTest: ("Needs a test", Palette.accentText)
-        case .conflict: ("Blocked by macOS", Palette.orange)
+        case .off: (String(localized: "Off"), Palette.secondaryText)
+        case .enabled: (String(localized: "On"), Palette.greenText)
+        case .needsTest: (String(localized: "Needs a test"), Palette.accentText)
+        case .conflict: (String(localized: "Blocked by macOS"), Palette.orange)
         }
     }
 
     private var heroTitle: String {
         switch model.settings.stripGesture {
-        case .three: "Three-finger swipe"
-        case .four: "Four-finger swipe"
-        case .off: "Strip swipe is off"
+        case .three: String(localized: "Three-finger swipe")
+        case .four: String(localized: "Four-finger swipe")
+        case .off: String(localized: "Strip swipe is off")
         }
     }
 
     private var heroDetail: String {
         switch model.gestureState {
         case .off:
-            "Choose three or four fingers below to use the swipe."
+            String(localized: "Choose three or four fingers below to use the swipe.")
         case .enabled(let date): AppModel.confirmedSentence(date)
         case .needsTest(let reason, let detectionUnavailable):
             [
-                reason.sentence, "Test it to turn it on.",
+                reason.sentence, String(localized: "Test it to turn it on."),
                 detectionUnavailable
-                    ? "Miri can't read your macOS gesture settings, so the test is the only check." : nil,
+                    ? String(localized: "Miri can't read your macOS gesture settings, so the test is the only check.")
+                    : nil,
                 model.gestureTestBlocker,
             ].compactMap(\.self).joined(separator: " ")
         case .conflict:
-            "Resolve the macOS conflict below, then test again."
+            String(localized: "Resolve the macOS conflict below, then test again.")
         }
     }
 
@@ -174,16 +182,20 @@ private struct TrackpadPicture: View {
 extension AppModel {
     /// Says when the user confirmed the swipe, in the same words on the Gestures page and in Set Up Miri.
     static func confirmedSentence(_ date: Date) -> String {
-        "You confirmed on \(date.formatted(date: .abbreviated, time: .omitted)) that the strip follows your fingers."
+        String(
+            localized:
+                "You confirmed on \(date.formatted(date: .abbreviated, time: .omitted)) that the strip follows your fingers."
+        )
     }
 
     /// One line about the strip swipe, which Settings and the test tools read as its status.
     var gestureSummary: String {
         switch gestureState {
-        case .off: "Off"
-        case .enabled(let date): "On, verified by user test on \(date.formatted(date: .abbreviated, time: .omitted))"
-        case .needsTest(let reason, _): "Off until tested: \(reason.explanation)"
-        case .conflict: "Off: macOS uses this swipe"
+        case .off: String(localized: "Off")
+        case .enabled(let date):
+            String(localized: "On, verified by user test on \(date.formatted(date: .abbreviated, time: .omitted))")
+        case .needsTest(let reason, _): String(localized: "Off until tested: \(reason.explanation)")
+        case .conflict: String(localized: "Off: macOS uses this swipe")
         }
     }
 }
@@ -191,12 +203,12 @@ extension AppModel {
 extension MiriCore.GestureState.TestReason {
     var explanation: String {
         switch self {
-        case .neverTested: "not tested yet"
-        case .fingersChanged: "the finger count changed"
-        case .directionChanged: "the direction changed"
-        case .macOSChanged: "macOS was updated"
-        case .engineChanged: "Miri's engine was updated"
-        case .gestureSettingsChanged: "macOS trackpad gestures changed"
+        case .neverTested: String(localized: "not tested yet")
+        case .fingersChanged: String(localized: "the finger count changed")
+        case .directionChanged: String(localized: "the direction changed")
+        case .macOSChanged: String(localized: "macOS was updated")
+        case .engineChanged: String(localized: "Miri's engine was updated")
+        case .gestureSettingsChanged: String(localized: "macOS trackpad gestures changed")
         }
     }
 
@@ -204,11 +216,11 @@ extension MiriCore.GestureState.TestReason {
     var sentence: String? {
         switch self {
         case .neverTested: nil
-        case .fingersChanged: "The finger count changed."
-        case .directionChanged: "The direction changed."
-        case .macOSChanged: "macOS was updated."
-        case .engineChanged: "Miri's engine was updated."
-        case .gestureSettingsChanged: "Your macOS trackpad gestures changed."
+        case .fingersChanged: String(localized: "The finger count changed.")
+        case .directionChanged: String(localized: "The direction changed.")
+        case .macOSChanged: String(localized: "macOS was updated.")
+        case .engineChanged: String(localized: "Miri's engine was updated.")
+        case .gestureSettingsChanged: String(localized: "Your macOS trackpad gestures changed.")
         }
     }
 }
@@ -270,20 +282,25 @@ struct GestureTestSheet: View {
 
     private var title: String {
         switch test.phase {
-        case .idle, .watching: "Swipe left and right with \(fingerWord) fingers on the trackpad."
-        case .passedAwaitingConfirmation: "Did the strip follow your fingers?"
+        case .idle, .watching: String(localized: "Swipe left and right with \(fingerWord) fingers on the trackpad.")
+        case .passedAwaitingConfirmation: String(localized: "Did the strip follow your fingers?")
         case .failed(let reason): reason
         case .inconclusive:
-            "Miri did not see the strip move both ways within \(GestureTest.timeout.components.seconds) seconds."
+            String(
+                localized:
+                    "Miri did not see the strip move both ways within \(GestureTest.timeout.components.seconds) seconds."
+            )
         }
     }
 
     private var detail: String {
         switch test.phase {
-        case .idle, .watching: "Keep at least two windows on this display so the strip can move."
+        case .idle, .watching: String(localized: "Keep at least two windows on this display so the strip can move.")
         case .passedAwaitingConfirmation:
-            "Miri saw the strip move both ways and no macOS action. Only your answer turns the swipe on."
-        case .failed, .inconclusive: "The swipe stays off. Keyboard shortcuts keep working."
+            String(
+                localized: "Miri saw the strip move both ways and no macOS action. Only your answer turns the swipe on."
+            )
+        case .failed, .inconclusive: String(localized: "The swipe stays off. Keyboard shortcuts keep working.")
         }
     }
 
@@ -314,8 +331,8 @@ struct GestureTestSheet: View {
     private var announcement: String {
         switch test.phase {
         case .idle, .watching(movementSeen: false): title
-        case .watching(movementSeen: true): "The strip moved. Keep swiping left and right."
-        case .passedAwaitingConfirmation: "The strip moved both ways. Did it follow your fingers?"
+        case .watching(movementSeen: true): String(localized: "The strip moved. Keep swiping left and right.")
+        case .passedAwaitingConfirmation: String(localized: "The strip moved both ways. Did it follow your fingers?")
         case .failed, .inconclusive: "\(title) \(detail)"
         }
     }

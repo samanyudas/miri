@@ -70,7 +70,18 @@ linked_sdk=$(vtool -show-build "$bundle/Contents/MacOS/Miri" | awk '$1 == "sdk" 
 cp LICENSE "$bundle/Contents/Resources/Miri-GPL-3.0.txt"
 cp vendor/paneru/LICENSE.txt "$bundle/Contents/Resources/Paneru-MIT.txt"
 printf '%s\n' "$revision" > "$bundle/Contents/Resources/engine-revision.txt"
-cat > "$bundle/Contents/Info.plist" <<'PLIST'
+# The string catalog becomes one .lproj folder per language. English needs only the plural forms,
+# because each English string is its own key.
+xcrun xcstringstool compile Localization/Localizable.xcstrings --output-directory "$bundle/Contents/Resources"
+# macOS shows a translation only for a language that Info.plist lists, so list every language the catalog holds.
+localizations=$(python3 - <<'PY'
+import json
+catalog = json.load(open("Localization/Localizable.xcstrings", encoding="utf-8"))
+languages = {"en"} | {language for entry in catalog["strings"].values() for language in entry.get("localizations", {})}
+print("".join(f"<string>{language}</string>" for language in sorted(languages)))
+PY
+)
+cat > "$bundle/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
@@ -82,6 +93,8 @@ cat > "$bundle/Contents/Info.plist" <<'PLIST'
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleVersion</key><string>1</string>
 <key>CFBundleShortVersionString</key><string>0.0.1</string>
+<key>CFBundleDevelopmentRegion</key><string>en</string>
+<key>CFBundleLocalizations</key><array>$localizations</array>
 <key>LSMinimumSystemVersion</key><string>15.0</string>
 <key>NSHighResolutionCapable</key><true/>
 <key>LSUIElement</key><true/>

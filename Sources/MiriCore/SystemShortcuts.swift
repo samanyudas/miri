@@ -37,7 +37,8 @@ public struct SystemShortcuts: Sendable {
         for (key, value) in symbolicHotKeys.sorted(by: { $0.key < $1.key }) {
             guard let id = Int(key), !seen.contains(id), let entry = value as? [String: Any],
                 isEnabled(entry) == true,
-                let parsed = shortcut(in: entry, name: "a shortcut in System Settings > Keyboard > Keyboard Shortcuts")
+                let parsed = shortcut(
+                    in: entry, name: String(localized: "a shortcut in System Settings > Keyboard > Keyboard Shortcuts"))
             else { continue }
             result.append(parsed)
         }
@@ -109,53 +110,53 @@ public struct SystemShortcuts: Sendable {
     /// The macOS 27 defaults for the symbolic hot keys a Miri shortcut is likely to meet.
     private static let defaults: [HotKey] =
         [
-            HotKey(7, "Move focus to the menu bar", [.control], 120),
-            HotKey(8, "Move focus to the Dock", [.control], 99),
-            HotKey(27, "Move focus to next window", [.command], 50),
-            HotKey(28, "Save picture of screen as a file", [.shift, .command], 20),
-            HotKey(29, "Copy picture of screen", [.control, .shift, .command], 20),
-            HotKey(30, "Save picture of selected area", [.shift, .command], 21),
-            HotKey(31, "Copy picture of selected area", [.control, .shift, .command], 21),
-            HotKey(32, "Mission Control", [.control], 126),
-            HotKey(33, "Application windows", [.control], 125),
-            HotKey(36, "Show Desktop", [], 103),
-            HotKey(52, "Turn Dock hiding on or off", [.option, .command], 2),
-            HotKey(60, "Select the previous input source", [.control], 49),
-            HotKey(61, "Select next source in Input menu", [.control, .option], 49),
-            HotKey(64, "Show Spotlight search", [.command], 49),
-            HotKey(65, "Show Finder search window", [.option, .command], 49),
-            HotKey(79, "Move left a space", [.control], 123),
-            HotKey(81, "Move right a space", [.control], 124),
+            HotKey(7, String(localized: "Move focus to the menu bar"), [.control], 120),
+            HotKey(8, String(localized: "Move focus to the Dock"), [.control], 99),
+            HotKey(27, String(localized: "Move focus to next window"), [.command], 50),
+            HotKey(28, String(localized: "Save picture of screen as a file"), [.shift, .command], 20),
+            HotKey(29, String(localized: "Copy picture of screen"), [.control, .shift, .command], 20),
+            HotKey(30, String(localized: "Save picture of selected area"), [.shift, .command], 21),
+            HotKey(31, String(localized: "Copy picture of selected area"), [.control, .shift, .command], 21),
+            HotKey(32, String(localized: "Mission Control"), [.control], 126),
+            HotKey(33, String(localized: "Application windows"), [.control], 125),
+            HotKey(36, String(localized: "Show Desktop"), [], 103),
+            HotKey(52, String(localized: "Turn Dock hiding on or off"), [.option, .command], 2),
+            HotKey(60, String(localized: "Select the previous input source"), [.control], 49),
+            HotKey(61, String(localized: "Select next source in Input menu"), [.control, .option], 49),
+            HotKey(64, String(localized: "Show Spotlight search"), [.command], 49),
+            HotKey(65, String(localized: "Show Finder search window"), [.option, .command], 49),
+            HotKey(79, String(localized: "Move left a space"), [.control], 123),
+            HotKey(81, String(localized: "Move right a space"), [.control], 124),
         ]
         + zip(1...9, [18, 19, 20, 21, 23, 22, 26, 28, 25] as [UInt16]).map { number, keyCode in
-            HotKey(117 + number, "Switch to Desktop \(number)", [.control], keyCode, enabled: false)
+            HotKey(117 + number, String(localized: "Switch to Desktop \(number)"), [.control], keyCode, enabled: false)
         }
-        + [HotKey(184, "Screenshot and recording options", [.shift, .command], 23)]
+        + [HotKey(184, String(localized: "Screenshot and recording options"), [.shift, .command], 23)]
 
     /// Standard app shortcuts, with keys named as the engine names them so they follow the layout.
     private static let appShortcuts: [(name: String, modifiers: Set<ChordModifier>, key: String)] = [
-        ("Quit the frontmost app", [.command], "q"),
-        ("Close window", [.command], "w"),
-        ("Hide app", [.command], "h"),
-        ("Hide other apps", [.option, .command], "h"),
-        ("Minimize window", [.command], "m"),
-        ("App switcher", [.command], "tab"),
-        ("App switcher", [.shift, .command], "tab"),
-        ("App settings", [.command], ","),
-        ("Force Quit", [.option, .command], "escape"),
-        ("Lock Screen", [.control, .command], "q"),
-        ("Full screen", [.control, .command], "f"),
-        ("Emoji and Symbols", [.control, .command], "space"),
-        ("Copy", [.command], "c"),
-        ("Paste", [.command], "v"),
-        ("Cut", [.command], "x"),
-        ("Undo", [.command], "z"),
-        ("Select all", [.command], "a"),
-        ("Save", [.command], "s"),
-        ("New", [.command], "n"),
-        ("New tab", [.command], "t"),
-        ("Find", [.command], "f"),
-        ("Print", [.command], "p"),
-        ("Open", [.command], "o"),
+        (String(localized: "Quit the frontmost app"), [.command], "q"),
+        (String(localized: "Close window"), [.command], "w"),
+        (String(localized: "Hide app"), [.command], "h"),
+        (String(localized: "Hide other apps"), [.option, .command], "h"),
+        (String(localized: "Minimize window"), [.command], "m"),
+        (String(localized: "App switcher"), [.command], "tab"),
+        (String(localized: "App switcher"), [.shift, .command], "tab"),
+        (String(localized: "App settings"), [.command], ","),
+        (String(localized: "Force Quit"), [.option, .command], "escape"),
+        (String(localized: "Lock Screen"), [.control, .command], "q"),
+        (String(localized: "Full screen"), [.control, .command], "f"),
+        (String(localized: "Emoji and Symbols"), [.control, .command], "space"),
+        (String(localized: "Copy"), [.command], "c"),
+        (String(localized: "Paste"), [.command], "v"),
+        (String(localized: "Cut"), [.command], "x"),
+        (String(localized: "Undo"), [.command], "z"),
+        (String(localized: "Select all"), [.command], "a"),
+        (String(localized: "Save"), [.command], "s"),
+        (String(localized: "New"), [.command], "n"),
+        (String(localized: "New tab"), [.command], "t"),
+        (String(localized: "Find"), [.command], "f"),
+        (String(localized: "Print"), [.command], "p"),
+        (String(localized: "Open"), [.command], "o"),
     ]
 }

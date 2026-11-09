@@ -39,14 +39,14 @@ final class WindowPresenter {
     private func makeWindow(_ kind: Kind) -> NSWindow {
         let (title, content): (String, AnyView) =
             switch kind {
-            case .settings: ("Miri Settings", AnyView(SettingsView(model: model)))
-            case .diagnostics: ("Copy Diagnostics", AnyView(DiagnosticsView(model: model)))
+            case .settings: (String(localized: "Miri Settings"), AnyView(SettingsView(model: model)))
+            case .diagnostics: (String(localized: "Copy Diagnostics"), AnyView(DiagnosticsView(model: model)))
             case .permissionExperiment:
                 (
-                    "Permission Experiment",
+                    String(localized: "Permission Experiment"),
                     AnyView(ExperimentView(experiment: experiment).frame(width: 560, height: 360))
                 )
-            case .initialSetup: ("Set Up Miri", AnyView(InitialSetupView(model: model)))
+            case .initialSetup: (String(localized: "Set Up Miri"), AnyView(InitialSetupView(model: model)))
             }
         let host = NSHostingController(rootView: content.environment(\.presenter, self))
         // Settings and Copy Diagnostics draw under their title bars at the design's size.
@@ -66,8 +66,9 @@ final class WindowPresenter {
         window.isReleasedWhenClosed = false
         // macOS keeps a closed window on its last desktop, and showing it again would switch the display back there.
         window.collectionBehavior.insert(.moveToActiveSpace)
-        window.setFrameAutosaveName("Miri.\(kind)")
-        let restored = window.setFrameUsingName("Miri.\(kind)")
+        let autosaveName = "Miri.\(kind)"  // Not interface text
+        window.setFrameAutosaveName(autosaveName)
+        let restored = window.setFrameUsingName(autosaveName)
         if !restored { window.center() }
         if designSize != nil || kind == .initialSetup {
             // The content runs under the title bar, so the window buttons sit on it, as in the design.

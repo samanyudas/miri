@@ -9,8 +9,8 @@ struct ConfigurationIssueNotice: View {
     var body: some View {
         if let issue = model.configurationIssue {
             Banner(
-                kind: .warning, title: "The configuration file has a problem",
-                detail: "\(issue.description) Miri does not change the file until it is fixed."
+                kind: .warning, title: String(localized: "The configuration file has a problem"),
+                detail: String(localized: "\(issue.description) Miri does not change the file until it is fixed.")
             ) {
                 Button("Show Configuration File in Finder") {
                     NSWorkspace.shared.activateFileViewerSelecting([model.paths.configuration])
@@ -27,15 +27,19 @@ struct GeneralSettings: View {
     @Binding var page: SettingsView.Page
 
     var body: some View {
-        SettingsPage(title: "General", subtitle: "Closing this window keeps Miri in the menu bar.") {
+        SettingsPage(
+            title: String(localized: "General"),
+            subtitle: String(localized: "Closing this window keeps Miri in the menu bar.")
+        ) {
             ConfigurationIssueNotice(model: model)
             status
-            SettingsSection("Startup") {
+            SettingsSection(String(localized: "Startup")) {
                 SettingsRow(
-                    title: "Launch at login", detail: "If you stopped Miri before logging out, it stays stopped."
+                    title: String(localized: "Launch at login"),
+                    detail: String(localized: "If you stopped Miri before logging out, it stays stopped.")
                 ) {
                     RowSwitch(
-                        label: "Launch at login",
+                        label: String(localized: "Launch at login"),
                         isOn: Binding(get: { model.settings.launchAtLogin }, set: { model.setLaunchAtLogin($0) }))
                 }
                 if let error = model.loginItemError {
@@ -49,23 +53,27 @@ struct GeneralSettings: View {
                 }
                 ShowInDockRow(model: model)
             }
-            SettingsSection("Pointer") {
+            SettingsSection(String(localized: "Pointer")) {
                 SettingsRow(
-                    title: "Move the pointer to windows that Miri focuses",
+                    title: String(localized: "Move the pointer to windows that Miri focuses"),
                     detail:
-                        "Focus shortcuts, display focus, and workspace switches move it to the window's centre. Clicks and Cmd-Tab leave it in place."
+                        String(
+                            localized:
+                                "Focus shortcuts, display focus, and workspace switches move it to the window's centre. Clicks and Cmd-Tab leave it in place."
+                        )
                 ) {
                     RowSwitch(
-                        label: "Move the pointer to windows that Miri focuses",
+                        label: String(localized: "Move the pointer to windows that Miri focuses"),
                         isOn: Binding(
                             get: { model.settings.mouseFollowsFocus },
                             set: { value in model.update { $0.mouseFollowsFocus = value } }))
                 }
             }
-            SettingsSection("Configuration file") {
+            SettingsSection(String(localized: "Configuration file")) {
                 SettingsRow(
                     title: (model.paths.configuration.path as NSString).abbreviatingWithTildeInPath,
-                    detail: "Changes here apply right away. Settings from other tools are not touched.",
+                    detail: String(
+                        localized: "Changes here apply right away. Settings from other tools are not touched."),
                     monospacedTitle: true
                 ) {
                     Button("Show in Finder") {
@@ -80,13 +88,16 @@ struct GeneralSettings: View {
         switch model.engineState {
         case .running:
             StatusHero(
-                eyebrow: "Running", eyebrowColor: Palette.accentText, title: model.statusText,
+                eyebrow: String(localized: "Running"), eyebrowColor: Palette.accentText, title: model.statusText,
                 detail: displaysSentence, tint: Palette.heroTint, faded: false)
         case .restarting:
             StatusHero(
-                eyebrow: "Restarting", eyebrowColor: Palette.orange, title: model.statusText,
+                eyebrow: String(localized: "Restarting"), eyebrowColor: Palette.orange, title: model.statusText,
                 detail:
-                    "The engine stopped unexpectedly. Your windows are back on screen, and Miri restarts it in a moment.",
+                    String(
+                        localized:
+                            "The engine stopped unexpectedly. Your windows are back on screen, and Miri restarts it in a moment."
+                    ),
                 tint: Palette.warningTint, faded: true)
         case .failed(let reason):
             Banner(
@@ -100,9 +111,12 @@ struct GeneralSettings: View {
             }
         case .stopped where !model.startBlockers.isEmpty:
             Banner(
-                kind: .warning, title: "Waiting for setup",
+                kind: .warning, title: String(localized: "Waiting for setup"),
                 detail:
-                    "Waiting for the \u{201C}\(model.startBlockers.first?.title ?? "required")\u{201D} check. \(AppModel.startsWhenReadySentence)",
+                    String(
+                        localized:
+                            "Waiting for the \u{201C}\(model.startBlockers.first?.title ?? "required")\u{201D} check. \(AppModel.startsWhenReadySentence)"
+                    ),
                 accessibilityValue: model.statusText
             ) {
                 Button(AppModel.cancelAutomaticStartTitle) { model.stop() }
@@ -112,11 +126,11 @@ struct GeneralSettings: View {
             }
         case .stopped:
             Banner(
-                kind: .neutral, title: "Window management is stopped",
+                kind: .neutral, title: String(localized: "Window management is stopped"),
                 // Only a stop the user chose is remembered across log-ins, so only that one promises it.
                 detail: model.stoppedByUser
-                    ? "Your windows stay where they are. Miri stays stopped until you start it."
-                    : "Your windows stay where they are.",
+                    ? String(localized: "Your windows stay where they are. Miri stays stopped until you start it.")
+                    : String(localized: "Your windows stay where they are."),
                 accessibilityValue: model.statusText
             ) {
                 Button("Start Window Management") { model.start() }
@@ -129,8 +143,8 @@ struct GeneralSettings: View {
     /// Names the displays Miri manages, such as "Built-in Retina Display and LG 27UK850, one strip per Space."
     private var displaysSentence: String {
         let names = NSScreen.screens.map(\.localizedName)
-        guard !names.isEmpty else { return "One strip per Space." }
-        return "\(names.formatted(.list(type: .and))), one strip per Space."
+        guard !names.isEmpty else { return String(localized: "One strip per Space.") }
+        return String(localized: "\(names.formatted(.list(type: .and))), one strip per Space.")
     }
 }
 
@@ -221,17 +235,17 @@ struct LayoutSettings: View {
 
     var body: some View {
         SettingsPage(
-            title: "Layout",
-            subtitle: "How columns sit on the strip. Changes apply right away."
+            title: String(localized: "Layout"),
+            subtitle: String(localized: "How columns sit on the strip. Changes apply right away.")
         ) {
             ConfigurationIssueNotice(model: model)
-            SettingsSection("Gaps") {
-                gapRow("Between windows", \.innerGap)
-                gapRow("At screen edges", \.outerGap)
+            SettingsSection(String(localized: "Gaps")) {
+                gapRow(String(localized: "Between windows"), \.innerGap)
+                gapRow(String(localized: "At screen edges"), \.outerGap)
             }
-            SettingsSection("Column widths and motion") {
+            SettingsSection(String(localized: "Column widths and motion")) {
                 SettingsRow(
-                    title: "Width presets",
+                    title: String(localized: "Width presets"),
                     detail: presetsDetail
                 ) {
                     TextField("Width presets", text: $presetsText, prompt: Text("0.25, 0.5, 0.75"))
@@ -248,19 +262,22 @@ struct LayoutSettings: View {
                 if let presetsError {
                     NoticeRow(kind: .error, text: presetsError)
                 }
-                SettingsRow(title: "Animate window movement", detail: motionDetail) {
+                SettingsRow(title: String(localized: "Animate window movement"), detail: motionDetail) {
                     RowSwitch(
-                        label: "Animate window movement",
+                        label: String(localized: "Animate window movement"),
                         isOn: Binding(
                             get: { model.settings.animations },
                             set: { value in model.update { $0.animations = value } }))
                 }
             }
-            SettingsSection("Stacks") {
+            SettingsSection(String(localized: "Stacks")) {
                 SettingsRow(
-                    title: "Windows per stack",
+                    title: String(localized: "Windows per stack"),
                     detail:
-                        "Up to \(mainDisplayFit) fit on the main display at the minimum height of \(StackLimit.minimumWindowHeight) points. A full stack sends the next window to a new column."
+                        String(
+                            localized:
+                                "Up to \(mainDisplayFit) fit on the main display at the minimum height of \(StackLimit.minimumWindowHeight) points. A full stack sends the next window to a new column."
+                        )
                 ) {
                     Picker("Windows per stack", selection: stackLimit) {
                         Text("Fit the display").tag(StackLimit.fit)
@@ -275,22 +292,28 @@ struct LayoutSettings: View {
                     .fixedSize()
                 }
                 SettingsRow(
-                    title: "Maximized stacked window opens",
-                    detail: "Restoring it returns it to the stack if there is room."
+                    title: String(localized: "Maximized stacked window opens"),
+                    detail: String(localized: "Restoring it returns it to the stack if there is room.")
                 ) {
                     SegmentedChoice(
-                        label: "Maximized stacked window opens", selection: maximizedWindowSide,
-                        options: [("Left of its stack", .left), ("Right of its stack", .right)])
+                        label: String(localized: "Maximized stacked window opens"), selection: maximizedWindowSide,
+                        options: [
+                            (String(localized: "Left of its stack"), .left),
+                            (String(localized: "Right of its stack"), .right),
+                        ])
                 }
             }
-            SettingsSection("Displays side by side") {
+            SettingsSection(String(localized: "Displays side by side")) {
                 SettingsRow(
-                    title: "Show window contents on edges next to another display",
+                    title: String(localized: "Show window contents on edges next to another display"),
                     detail:
-                        "A column waiting past an edge next to another display shows a photo of its window. Needs Screen Recording permission."
+                        String(
+                            localized:
+                                "A column waiting past an edge next to another display shows a photo of its window. Needs Screen Recording permission."
+                        )
                 ) {
                     RowSwitch(
-                        label: "Show window contents on edges next to another display",
+                        label: String(localized: "Show window contents on edges next to another display"),
                         isOn: Binding(
                             get: { model.settings.sharedEdgeSlices }, set: { model.setSharedEdgeSlices($0) }))
                 }
@@ -298,7 +321,10 @@ struct LayoutSettings: View {
                     NoticeRow(
                         kind: .warning,
                         text:
-                            "Off because Miri does not have Screen Recording permission. Turn on Miri there, then switch this on again."
+                            String(
+                                localized:
+                                    "Off because Miri does not have Screen Recording permission. Turn on Miri there, then switch this on again."
+                            )
                     ) {
                         if let url = SystemScreenRecording.settingsURL {
                             Button("Open Screen Recording Settings") { NSWorkspace.shared.open(url) }
@@ -320,8 +346,8 @@ struct LayoutSettings: View {
 
     private var presetsDetail: String {
         editingPresets && presetsText != formattedPresets
-            ? "Press Return to apply. Fractions of the display width, narrowest first."
-            : "Fractions of the display width, narrowest first. \(cycleShortcutText)"
+            ? String(localized: "Press Return to apply. Fractions of the display width, narrowest first.")
+            : String(localized: "Fractions of the display width, narrowest first. \(cycleShortcutText)")
     }
 
     private var formattedPresets: String {
@@ -331,8 +357,8 @@ struct LayoutSettings: View {
 
     private var motionDetail: String {
         model.reduceMotion
-            ? "Reduce Motion is on in System Settings, so windows move instantly."
-            : "Movement is always instant when macOS Reduce Motion is on."
+            ? String(localized: "Reduce Motion is on in System Settings, so windows move instantly.")
+            : String(localized: "Movement is always instant when macOS Reduce Motion is on.")
     }
 
     /// Names the shortcuts bound to cycling the presets, which the user can change in Shortcuts.
@@ -341,9 +367,9 @@ struct LayoutSettings: View {
         guard let shortcuts = model.shortcuts else { return "" }
         let labels = shortcuts.chords(for: action).map(model.keyLayout.label(for:))
         return labels.isEmpty
-            ? "\(action.title) has no shortcut. Add one in Shortcuts."
+            ? String(localized: "\(action.title) has no shortcut. Add one in Shortcuts.")
             // A no-break space keeps the shortcut on the same line as its verb.
-            : "\(labels.formatted(.list(type: .or)))\u{00A0}cycles through them."
+            : String(localized: "\(labels.formatted(.list(type: .or)))\u{00A0}cycles through them.")
     }
 
     private var stackLimit: Binding<StackLimit> {
@@ -369,7 +395,7 @@ struct LayoutSettings: View {
     private func gapRow(_ title: String, _ key: WritableKeyPath<MiriSettings, Int>) -> some View {
         SettingsRow(title: title) {
             Stepper(value: gap(key), in: MiriSettings.gapRange) {
-                LiveText("\(model.settings[keyPath: key]) pt")
+                LiveText(String(localized: "\(model.settings[keyPath: key]) pt"))
                     .font(.rowTitle)
                     .monospacedDigit()
                     .foregroundStyle(Palette.primaryText)
@@ -399,7 +425,8 @@ struct LayoutSettings: View {
         candidate.widthPresets = values.compactMap(\.self)
         do throws(ConfigurationIssue) {
             guard !values.contains(nil) else {
-                throw ConfigurationIssue.invalidValue(key: "", message: "Enter numbers separated by commas.")
+                throw ConfigurationIssue.invalidValue(
+                    key: "", message: String(localized: "Enter numbers separated by commas."))
             }
             try candidate.validate()
             presetsError = nil
@@ -422,15 +449,20 @@ struct SetupSettings: View {
 
     var body: some View {
         SettingsPage(
-            title: "Setup",
+            title: String(localized: "Setup"),
             subtitle:
-                "Miri checks your Mac for anything that blocks window management. It never changes your settings for you."
+                String(
+                    localized:
+                        "Miri checks your Mac for anything that blocks window management. It never changes your settings for you."
+                )
         ) {
             Button(checked ? "Checked" : "Check Again", systemImage: checked ? "checkmark" : "arrow.clockwise") {
                 model.refreshSetup()
                 let count = model.setupReviewCount
                 AccessibilityNotification.Announcement(
-                    count == 0 ? "Checked. Nothing to review." : "Checked. \(count) to review."
+                    count == 0
+                        ? String(localized: "Checked. Nothing to review.")
+                        : String(localized: "Checked. \(count) to review.")
                 ).post()
                 // The button says Checked for a moment, so a check that changed nothing still shows it ran.
                 checked = true
@@ -444,7 +476,7 @@ struct SetupSettings: View {
         } content: {
             if !model.startBlockers.isEmpty {
                 Banner(
-                    kind: .warning, title: "Waiting for setup",
+                    kind: .warning, title: String(localized: "Waiting for setup"),
                     detail: AppModel.startsWhenReadySentence)
             }
             let required = model.setupChecks.filter(\.blocksStart)
@@ -452,14 +484,14 @@ struct SetupSettings: View {
             let others = model.setupChecks.filter { !$0.blocksStart }
             let recommended = others.filter(\.needsAttention) + others.filter { !$0.needsAttention }
             if !required.isEmpty {
-                SettingsSection("Required to start") {
+                SettingsSection(String(localized: "Required to start")) {
                     ForEach(required) { check in
                         SetupCheckItem(check: check, openGestures: { page = .gestures }, inRequiredSection: true)
                     }
                 }
             }
             if !recommended.isEmpty {
-                SettingsSection("Recommended") {
+                SettingsSection(String(localized: "Recommended")) {
                     ForEach(recommended) { check in SetupCheckItem(check: check) { page = .gestures } }
                 }
             }
@@ -519,25 +551,26 @@ struct SetupCheckItem: View {
     private var title: String {
         switch check.status {
         case .passed, .problem: check.title
-        case .notChecked: "\(check.title): Not checked"
-        case .unableToVerify: "\(check.title): Unable to verify"
+        case .notChecked: String(localized: "\(check.title): Not checked")
+        case .unableToVerify: String(localized: "\(check.title): Unable to verify")
         }
     }
 
     /// The result VoiceOver reads with the title, because the colored symbol is hidden from it.
     private var result: String {
         switch check.status {
-        case .passed: check.isGestureCheck ? "No conflict found" : "Passed"
-        case .problem: check.blocksStart ? "Blocks start" : "Recommended change"
-        case .notChecked: "Not checked"
-        case .unableToVerify: "Unable to verify"
+        case .passed: check.isGestureCheck ? String(localized: "No conflict found") : String(localized: "Passed")
+        case .problem: check.blocksStart ? String(localized: "Blocks start") : String(localized: "Recommended change")
+        case .notChecked: String(localized: "Not checked")
+        case .unableToVerify: String(localized: "Unable to verify")
         }
     }
 
     private var detail: String? {
         switch check.status {
-        case .passed: check.isGestureCheck ? "No conflict found." : nil
-        case .problem(let text): check.blocksStart && !inRequiredSection ? "Blocks start. \(text)" : text
+        case .passed: check.isGestureCheck ? String(localized: "No conflict found.") : nil
+        case .problem(let text):
+            check.blocksStart && !inRequiredSection ? String(localized: "Blocks start. \(text)") : text
         case .notChecked(let text), .unableToVerify(let text): text
         }
     }
@@ -574,8 +607,8 @@ struct DiagnosticsSettings: View {
 
     var body: some View {
         SettingsPage(
-            title: "Diagnostics",
-            subtitle: "Engine health and local logs."
+            title: String(localized: "Diagnostics"),
+            subtitle: String(localized: "Engine health and local logs.")
         ) {
             if case .failed(let reason) = model.engineState {
                 Banner(kind: .error, title: model.statusText, detail: reason) {
@@ -586,7 +619,7 @@ struct DiagnosticsSettings: View {
             }
             engineFacts
             VStack(alignment: .leading, spacing: 8) {
-                SectionLabel(title: "Engine log") {
+                SectionLabel(title: String(localized: "Engine log")) {
                     Button("Show Logs in Finder") { model.showLogsInFinder() }
                         .controlSize(.small)
                 }
@@ -623,18 +656,19 @@ struct DiagnosticsSettings: View {
                     .font(.detail)
                     .foregroundStyle(Palette.secondaryText)
             }
-            SettingsSection("Feedback") {
+            SettingsSection(String(localized: "Feedback")) {
                 SettingsRow(
-                    title: "Send feedback",
-                    detail: "Opens GitHub, where you pick a bug report or a feature request."
+                    title: String(localized: "Send feedback"),
+                    detail: String(localized: "Opens GitHub, where you pick a bug report or a feature request.")
                 ) {
                     Button("Send Feedback…") { NSWorkspace.shared.open(Feedback.formList) }
                 }
             }
-            SettingsSection("Developer") {
+            SettingsSection(String(localized: "Developer")) {
                 SettingsRow(
-                    title: "Accessibility permission experiment",
-                    detail: "Checks which process macOS credits with Miri's Accessibility permission."
+                    title: String(localized: "Accessibility permission experiment"),
+                    detail: String(
+                        localized: "Checks which process macOS credits with Miri's Accessibility permission.")
                 ) {
                     Button("Permission Experiment…") { presenter?.show(.permissionExperiment) }
                 }
@@ -651,11 +685,13 @@ struct DiagnosticsSettings: View {
 
     private var engineFacts: some View {
         HStack(spacing: 0) {
-            fact("Engine", value: engineWord, dot: model.stateColor)
+            fact(String(localized: "Engine"), value: engineWord, dot: model.stateColor)
             Rectangle().fill(Palette.divider).frame(width: 1)
-            fact("Process", value: processText, dot: nil, muted: processText == "None")
+            fact(
+                String(localized: "Process"), value: processText, dot: nil,
+                muted: processText == String(localized: "None"))
             Rectangle().fill(Palette.divider).frame(width: 1)
-            fact("Displays", value: "\(NSScreen.screens.count)", dot: nil)
+            fact(String(localized: "Displays"), value: "\(NSScreen.screens.count)", dot: nil)
         }
         .fixedSize(horizontal: false, vertical: true)
         .background(Palette.group, in: .rect(cornerRadius: 10))
@@ -685,17 +721,18 @@ struct DiagnosticsSettings: View {
 
     private var engineWord: String {
         switch model.engineState {
-        case .running: "Running"
-        case .restarting: "Restarting"
-        case .failed: "Failed"
-        case .stopped: model.startBlockers.isEmpty ? "Stopped" : "Waiting for setup"
+        case .running: String(localized: "Running")
+        case .restarting: String(localized: "Restarting")
+        case .failed: String(localized: "Failed")
+        case .stopped:
+            model.startBlockers.isEmpty ? String(localized: "Stopped") : String(localized: "Waiting for setup")
         }
     }
 
     private var processText: String {
         switch model.engineState {
-        case .running(let pid): "pid \(pid)"
-        case .restarting, .failed, .stopped: "None"
+        case .running(let pid): String(localized: "pid \(String(pid))")
+        case .restarting, .failed, .stopped: String(localized: "None")
         }
     }
 
@@ -742,9 +779,12 @@ struct ShowInDockRow: View {
     let model: AppModel
 
     var body: some View {
-        SettingsRow(title: "Show in Dock", detail: "When off, open Miri from its menu bar icon.") {
+        SettingsRow(
+            title: String(localized: "Show in Dock"),
+            detail: String(localized: "When off, open Miri from its menu bar icon.")
+        ) {
             RowSwitch(
-                label: "Show in Dock",
+                label: String(localized: "Show in Dock"),
                 isOn: Binding(get: { model.settings.showInDock }, set: { on in model.update { $0.showInDock = on } }))
         }
     }

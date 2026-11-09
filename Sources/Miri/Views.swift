@@ -6,14 +6,14 @@ extension AppModel {
     /// One line that says whether Miri is managing windows, and why not.
     var statusText: String {
         switch engineState {
-        case .running: "Managing windows"
-        case .restarting: "Restarting the engine…"
-        case .failed: "Stopped after engine failures"
+        case .running: String(localized: "Managing windows")
+        case .restarting: String(localized: "Restarting the engine…")
+        case .failed: String(localized: "Stopped after engine failures")
         case .stopped:
             if let blocker = startBlockers.first {
-                "Waiting for setup: \(blocker.title)"
+                String(localized: "Waiting for setup: \(blocker.title)")
             } else {
-                stoppedByUser ? "Stopped by you" : "Stopped"
+                stoppedByUser ? String(localized: "Stopped by you") : String(localized: "Stopped")
             }
         }
     }
@@ -103,7 +103,8 @@ struct MenuContent: View {
     /// Names how many setup checks to review, with the same count as the Setup badge in Settings.
     private var setupCheckerTitle: String {
         let count = model.setupReviewCount
-        return count == 0 ? "Setup Checker…" : "Setup Checker… (\(count) to review)"
+        return count == 0
+            ? String(localized: "Setup Checker…") : String(localized: "Setup Checker… (\(count) to review)")
     }
 }
 
@@ -144,23 +145,18 @@ struct DiagnosticsView: View {
             }
             .background(Palette.group, in: .rect(cornerRadius: 10))
             .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Palette.groupRing, lineWidth: 1))
-            HStack(spacing: 10) {
-                Button("Refresh") { refresh() }
-                Spacer()
-                if copied {
-                    Label("Copied", systemImage: "checkmark")
-                        .font(.detail)
-                        .foregroundStyle(Palette.secondaryText)
+            // When a translation is too long for one row, Refresh moves above the copy buttons instead of cutting them off.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) {
+                    Button("Refresh") { refresh() }
+                    Spacer()
+                    copyButtons
                 }
-                // The person pastes the report into the form's diagnostics field, so Miri sends nothing itself.
-                Button("Copy and Open Bug Report…") {
-                    copy()
-                    NSWorkspace.shared.open(Feedback.bugReport)
+                VStack(alignment: .trailing, spacing: 10) {
+                    Button("Refresh") { refresh() }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(spacing: 10) { copyButtons }
                 }
-                Button("Copy to Clipboard") { copy() }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Palette.accentFill)
-                    .keyboardShortcut(.defaultAction)
             }
         }
         .padding(.horizontal, 32)
@@ -173,6 +169,25 @@ struct DiagnosticsView: View {
         .onAppear(perform: refresh)
     }
 
+    @ViewBuilder private var copyButtons: some View {
+        if copied {
+            Label("Copied", systemImage: "checkmark")
+                .font(.detail)
+                .foregroundStyle(Palette.secondaryText)
+        }
+        // The person pastes the report into the form's diagnostics field, so Miri sends nothing itself.
+        Button("Copy and Open Bug Report…") {
+            copy()
+            NSWorkspace.shared.open(Feedback.bugReport)
+        }
+        .fixedSize()
+        Button("Copy to Clipboard") { copy() }
+            .buttonStyle(.borderedProminent)
+            .tint(Palette.accentFill)
+            .keyboardShortcut(.defaultAction)
+            .fixedSize()
+    }
+
     private func refresh() {
         report = model.diagnostics()
         copied = false
@@ -182,6 +197,6 @@ struct DiagnosticsView: View {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(report, forType: .string)
         copied = true
-        AccessibilityNotification.Announcement("Copied to the clipboard").post()
+        AccessibilityNotification.Announcement(String(localized: "Copied to the clipboard")).post()
     }
 }

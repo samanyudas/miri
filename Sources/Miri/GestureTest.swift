@@ -58,7 +58,7 @@ import Observation
     /// The user saw the strip not follow their fingers.
     func deny() {
         guard phase == .passedAwaitingConfirmation else { return }
-        fail(.failed("You reported that the strip did not follow your fingers."))
+        fail(.failed(String(localized: "You reported that the strip did not follow your fingers.")))
     }
 
     /// Ends a running test without a result, as when the sheet closes.
@@ -117,7 +117,7 @@ import Observation
         observers = [
             center.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) {
                 [weak self] _ in
-                MainActor.assumeIsolated { self?.macOSActed("macOS switched Spaces.") }
+                MainActor.assumeIsolated { self?.macOSActed(String(localized: "macOS switched Spaces.")) }
             }
         ]
     }

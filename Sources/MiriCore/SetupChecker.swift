@@ -74,6 +74,7 @@ public struct SetupCheck: Equatable, Sendable, Identifiable {
 
 public enum SetupChecker {
     /// Known window managers that fight Miri for window positions, by bundle identifier and by process name.
+    // Not interface text: app names stay as the apps spell them.
     public static let competingManagers: [(name: String, bundleIdentifiers: Set<String>, processNames: Set<String>)] = [
         ("Paneru", ["com.github.karinushka.paneru", "com.github.karinushka.paneru.launcher"], ["paneru"]),
         ("AeroSpace", ["bobko.aerospace"], ["AeroSpace"]),
@@ -83,6 +84,7 @@ public enum SetupChecker {
 
     /// Apps that move a window when you use one of their window actions, by bundle identifier. Each identifier comes
     /// from the app's signed bundle.
+    // Not interface text: app names stay as the apps spell them.
     public static let snappingApps: [(name: String, bundleIdentifiers: Set<String>)] = [
         ("Rectangle", ["com.knollsoft.Rectangle"]),
         ("Loop", ["com.MrKai77.Loop"]),
@@ -96,43 +98,47 @@ public enum SetupChecker {
 
     /// The pane under Privacy & Security that holds the Accessibility permission. macOS 27 renamed it.
     static func accessibilityPane(_ observation: SetupObservation) -> String {
-        observation.macOSMajorVersion >= 27 ? "Device Control and Data Access" : "Accessibility"
+        observation.macOSMajorVersion >= 27
+            ? String(localized: "Device Control and Data Access") : String(localized: "Accessibility")
     }
 
     public static func evaluate(_ observation: SetupObservation) -> [SetupCheck] {
         [
             SetupCheck(
-                id: .accessibility, title: "Accessibility permission",
+                id: .accessibility, title: String(localized: "Accessibility permission"),
                 status: observation.accessibilityTrusted
                     ? .passed
                     : .problem(
-                        "Turn on Miri in System Settings > Privacy & Security > \(accessibilityPane(observation)). Miri needs this Accessibility permission to move windows."
+                        String(
+                            localized:
+                                "Turn on Miri in System Settings > Privacy & Security > \(accessibilityPane(observation)). Miri needs this Accessibility permission to move windows."
+                        )
                     ),
                 blocksStart: true, settingsURL: accessibilityURL),
             SetupCheck(
-                id: .separateSpaces, title: "Displays have separate Spaces",
+                id: .separateSpaces, title: String(localized: "Displays have separate Spaces"),
                 status: spacesStatus(observation),
                 blocksStart: true, settingsURL: desktopURL),
             SetupCheck(
-                id: .competingManagers, title: "Other window managers",
+                id: .competingManagers, title: String(localized: "Other window managers"),
                 status: competingStatus(observation), blocksStart: true, settingsURL: nil),
             SetupCheck(
-                id: .snappingApps, title: "Window-snapping apps",
+                id: .snappingApps, title: String(localized: "Window-snapping apps"),
                 status: snappingStatus(observation), blocksStart: false, settingsURL: nil),
             SetupCheck(
-                id: .stageManager, title: "Stage Manager",
+                id: .stageManager, title: String(localized: "Stage Manager"),
                 status: stageManagerStatus(observation),
                 blocksStart: false, settingsURL: desktopURL),
             SetupCheck(
-                id: .macOSTiling, title: "macOS window tiling",
+                id: .macOSTiling, title: String(localized: "macOS window tiling"),
                 status: tilingStatus(observation),
                 blocksStart: false, settingsURL: desktopURL),
             SetupCheck(
-                id: .fourFingerGesture, title: "Four-finger strip swipe",
+                id: .fourFingerGesture, title: String(localized: "Four-finger strip swipe"),
                 status: fourFingerStatus(observation),
                 blocksStart: false, settingsURL: trackpadURL),
             SetupCheck(
-                id: .threeFingerGesture, title: "Three-finger strip swipe",
+                id: .threeFingerGesture, title: String(localized: "Three-finger strip swipe"),
                 status: threeFingerStatus(observation), blocksStart: false, settingsURL: trackpadURL),
         ]
     }
@@ -149,7 +155,8 @@ public enum SetupChecker {
         let running = runningCompetitors(observation)
         guard !running.isEmpty else { return .passed }
         let names = ListFormatter.localizedString(byJoining: running)
-        return .problem("Quit \(names) before starting Miri. Miri leaves \(names)'s configuration untouched.")
+        return .problem(
+            String(localized: "Quit \(names) before starting Miri. Miri leaves \(names)'s configuration untouched."))
     }
 
     private static func snappingStatus(_ observation: SetupObservation) -> SetupStatus {
@@ -159,7 +166,10 @@ public enum SetupChecker {
         guard !running.isEmpty else { return .passed }
         let names = ListFormatter.localizedString(byJoining: running.map(\.name))
         return .problem(
-            "\(names) can move a window that Miri arranges, and the window's column can then change place in the strip. Quit \(names) while Miri manages windows."
+            String(
+                localized:
+                    "\(names) can move a window that Miri arranges, and the window's column can then change place in the strip. Quit \(names) while Miri manages windows."
+            )
         )
     }
 
@@ -168,11 +178,17 @@ public enum SetupChecker {
         case false?: .passed
         case true?:
             .problem(
-                "Turn on Displays have separate Spaces in System Settings > Desktop & Dock > Mission Control, then log out and back in."
+                String(
+                    localized:
+                        "Turn on Displays have separate Spaces in System Settings > Desktop & Dock > Mission Control, then log out and back in."
+                )
             )
         case nil:
             .notChecked(
-                "Open System Settings > Desktop & Dock > Mission Control and make sure Displays have separate Spaces is on."
+                String(
+                    localized:
+                        "Open System Settings > Desktop & Dock > Mission Control and make sure Displays have separate Spaces is on."
+                )
             )
         }
     }
@@ -181,27 +197,35 @@ public enum SetupChecker {
         switch observation.stageManager {
         case false?: .passed
         case true?:
-            .problem("Turn off Stage Manager in System Settings > Desktop & Dock. It rearranges windows.")
-        case nil: .notChecked("Open System Settings > Desktop & Dock and make sure Stage Manager is off.")
+            .problem(
+                String(localized: "Turn off Stage Manager in System Settings > Desktop & Dock. It rearranges windows."))
+        case nil:
+            .notChecked(String(localized: "Open System Settings > Desktop & Dock and make sure Stage Manager is off."))
         }
     }
 
     private static func tilingStatus(_ observation: SetupObservation) -> SetupStatus {
         let options = [
-            (observation.edgeTiling, "Drag windows to left or right edge of screen to tile"),
-            (observation.menuBarTiling, "Drag windows to menu bar to fill screen"),
-            (observation.optionDragTiling, "Hold ⌥ key while dragging windows to tile"),
+            (observation.edgeTiling, String(localized: "Drag windows to left or right edge of screen to tile")),
+            (observation.menuBarTiling, String(localized: "Drag windows to menu bar to fill screen")),
+            (observation.optionDragTiling, String(localized: "Hold ⌥ key while dragging windows to tile")),
         ]
         let on = options.filter { $0.0 == true }.map(\.1)
         let unread = options.filter { $0.0 == nil }.map(\.1)
         if !on.isEmpty {
             return .problem(
-                "Turn off \(ListFormatter.localizedString(byJoining: on)) in System Settings > Desktop & Dock > Windows. macOS tiling moves windows that Miri arranges, including windows you drag."
+                String(
+                    localized:
+                        "Turn off \(ListFormatter.localizedString(byJoining: on)) in System Settings > Desktop & Dock > Windows. macOS tiling moves windows that Miri arranges, including windows you drag."
+                )
             )
         }
         if !unread.isEmpty {
             return .notChecked(
-                "Open System Settings > Desktop & Dock > Windows and make sure \(ListFormatter.localizedString(byJoining: unread)) is off."
+                String(
+                    localized:
+                        "Open System Settings > Desktop & Dock > Windows and make sure \(ListFormatter.localizedString(byJoining: unread)) is off."
+                )
             )
         }
         return .passed
@@ -214,7 +238,10 @@ public enum SetupChecker {
         case (0?, _), (2?, 2?): .passed
         case (2?, _?):
             .problem(
-                "Four-finger swipes switch full-screen apps. Set Swipe between full-screen applications to three fingers in System Settings > Trackpad > More Gestures, which keeps swiping between desktops. Turning it off also stops swiping between desktops."
+                String(
+                    localized:
+                        "Four-finger swipes switch full-screen apps. Set Swipe between full-screen applications to three fingers in System Settings > Trackpad > More Gestures, which keeps swiping between desktops. Turning it off also stops swiping between desktops."
+                )
             )
         default: gestureUnverified(fingers: "four")
         }
@@ -223,18 +250,27 @@ public enum SetupChecker {
     private static func threeFingerStatus(_ observation: SetupObservation) -> SetupStatus {
         if observation.threeFingerDrag == true {
             return .problem(
-                "Three Finger Drag is on. Turn it off in System Settings > Accessibility > Pointer Control > Trackpad Options, or use four fingers."
+                String(
+                    localized:
+                        "Three Finger Drag is on. Turn it off in System Settings > Accessibility > Pointer Control > Trackpad Options, or use four fingers."
+                )
             )
         }
         switch observation.threeFingerSwipe {
         case 0? where observation.threeFingerDrag == false: return .passed
         case 1?:
             return .problem(
-                "Three-finger swipes navigate between pages. Set Swipe between pages to two fingers in System Settings > Trackpad > More Gestures."
+                String(
+                    localized:
+                        "Three-finger swipes navigate between pages. Set Swipe between pages to two fingers in System Settings > Trackpad > More Gestures."
+                )
             )
         case 2?:
             return .problem(
-                "Three-finger swipes switch full-screen apps. Set Swipe between full-screen applications to four fingers in System Settings > Trackpad > More Gestures."
+                String(
+                    localized:
+                        "Three-finger swipes switch full-screen apps. Set Swipe between full-screen applications to four fingers in System Settings > Trackpad > More Gestures."
+                )
             )
         default: return gestureUnverified(fingers: "three")
         }
@@ -242,7 +278,10 @@ public enum SetupChecker {
 
     private static func gestureUnverified(fingers: String) -> SetupStatus {
         .unableToVerify(
-            "Miri could not read the macOS \(fingers)-finger swipe settings. Use Test Gesture on the Gestures page to check the swipe."
+            String(
+                localized:
+                    "Miri could not read the macOS \(fingers)-finger swipe settings. Use Test Gesture on the Gestures page to check the swipe."
+            )
         )
     }
 }

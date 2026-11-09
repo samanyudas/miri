@@ -70,42 +70,54 @@ public struct DiagnosticsReport: Sendable {
     /// Markdown for a GitHub issue. Everything that could carry personal text goes through the redactor.
     public func rendered(with redactor: Redactor) -> String {
         var lines = [
-            "## Miri diagnostics", "",
-            "- Miri: \(appVersion)",
-            "- Engine: \(engineRevision)",
-            "- macOS: \(macOSVersion) (\(architecture))",
-            "- Engine status: \(Self.describe(engineState))",
-            "- Configuration: \(configurationIssue.map { redactor.redact($0.description) } ?? "valid")",
-            "", "### Displays", "",
+            String(localized: "## Miri diagnostics"), "",
+            String(localized: "- Miri: \(appVersion)"),
+            String(localized: "- Engine: \(engineRevision)"),
+            String(localized: "- macOS: \(macOSVersion) (\(architecture))"),
+            String(localized: "- Engine status: \(Self.describe(engineState))"),
+            String(
+                localized:
+                    "- Configuration: \(configurationIssue.map { redactor.redact($0.description) } ?? String(localized: "valid"))"
+            ),
+            "", String(localized: "### Displays"), "",
         ]
         for (index, display) in displays.enumerated() {
+            // Plain digits, without the grouping separators of a localized number, so reports compare across languages.
+            let (number, width, height) = (String(index + 1), String(display.width), String(display.height))
+            let (scale, x, y) = (display.scale.formatted(), String(display.x), String(display.y))
             lines.append(
-                "- Display \(index + 1)\(display.isMain ? " (main)" : ""): \(display.width) x \(display.height) points "
-                    + "at \(display.scale.formatted())x, origin (\(display.x), \(display.y))")
+                display.isMain
+                    ? String(
+                        localized:
+                            "- Display \(number) (main): \(width) x \(height) points at \(scale)x, origin (\(x), \(y))")
+                    : String(
+                        localized: "- Display \(number): \(width) x \(height) points at \(scale)x, origin (\(x), \(y))")
+            )
         }
-        lines += ["", "### Setup checks", ""]
+        lines += ["", String(localized: "### Setup checks"), ""]
         for check in setupChecks { lines.append("- \(check.title): \(Self.describe(check.status))") }
         lines += [
-            "", "### Engine log (redacted)", "", "```", redactor.redact(log).trimmingCharacters(in: .newlines), "```",
+            "", String(localized: "### Engine log (redacted)"), "", "```",
+            redactor.redact(log).trimmingCharacters(in: .newlines), "```",
         ]
         return lines.joined(separator: "\n") + "\n"
     }
 
     static func describe(_ state: EngineState) -> String {
         switch state {
-        case .stopped: "stopped"
-        case .running: "running"
-        case .restarting(let crashes): "restarting after \(crashes) crash\(crashes == 1 ? "" : "es")"
-        case .failed(let reason): "failed: \(reason)"
+        case .stopped: String(localized: "stopped")
+        case .running: String(localized: "running")
+        case .restarting(let crashes): String(localized: "restarting after \(crashes) crashes")
+        case .failed(let reason): String(localized: "failed: \(reason)")
         }
     }
 
     static func describe(_ status: SetupStatus) -> String {
         switch status {
-        case .passed: "passed"
-        case .problem(let message): "problem: \(message)"
-        case .notChecked: "not checked"
-        case .unableToVerify: "unable to verify"
+        case .passed: String(localized: "passed")
+        case .problem(let message): String(localized: "problem: \(message)")
+        case .notChecked: String(localized: "not checked")
+        case .unableToVerify: String(localized: "unable to verify")
         }
     }
 }

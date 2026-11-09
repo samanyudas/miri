@@ -168,7 +168,7 @@ A fresh press crosses only when a display touches that horizontal side, with pos
 A key auto-repeat stays inside its strip.
 A plain move arrives at the destination edge it crossed, so the opposite move returns it to the source strip end.
 A plain focus that crosses lands on the destination column nearest the crossed edge, on that column's last-focused window, so the opposite focus returns to the column it left ([#332](https://github.com/samanyudas/miri/issues/332)).
-Move column to monitor above or below, the dedicated monitor moves, and ⌃⌥N keep their arrival-after-active-column rule.
+Move column to display above or below, the dedicated monitor moves, and ⌃⌥N keep their arrival-after-active-column rule.
 On 7 November 2026, Sam decided that ⌃⌥⌘⇧← and ⌃⌥⌘⇧→ only move the focused column to the first or last place on its own display and never cross to another display ([#331](https://github.com/samanyudas/miri/issues/331)).
 Scrolling reliability keeps off-screen windows on their assigned displays without macOS relocating them.
 These are distinct requirements.

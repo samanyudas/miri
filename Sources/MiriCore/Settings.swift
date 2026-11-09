@@ -46,7 +46,8 @@ public struct MiriSettings: Equatable, Sendable {
         if let value = document.value(at: ["miri", "strip_gesture"]) {
             guard case .string(let name) = value, let gesture = StripGesture(rawValue: name) else {
                 throw .invalidValue(
-                    key: "miri.strip_gesture", message: "miri.strip_gesture must be \"off\", \"three\", or \"four\".")
+                    key: "miri.strip_gesture",
+                    message: String(localized: "miri.strip_gesture must be \"off\", \"three\", or \"four\"."))
             }
             stripGesture = gesture
         }
@@ -74,7 +75,7 @@ public struct MiriSettings: Equatable, Sendable {
             guard case .string(let name) = value, let side = MaximizedWindowSide(rawValue: name) else {
                 throw .invalidValue(
                     key: "options.maximized_window_side",
-                    message: "options.maximized_window_side must be \"left\" or \"right\".")
+                    message: String(localized: "options.maximized_window_side must be \"left\" or \"right\"."))
             }
             maximizedWindowSide = side
         }
@@ -176,6 +177,7 @@ public struct MiriSettings: Equatable, Sendable {
         } else {
             try edit(nil) { try result.removing(table: gesture, key: "fingers_count") }
         }
+        // Not interface text: engine values.
         try set(.string(reverseSwipe ? "Reversed" : "Natural"), gesture, "direction")
         // V1 strip swipes are horizontal. The engine otherwise takes vertical swipes with the same finger count,
         // which macOS uses for Mission Control and App Exposé.
@@ -194,7 +196,7 @@ public struct MiriSettings: Equatable, Sendable {
 
     private static func boolean(_ value: TOMLValue, key: String) throws(ConfigurationIssue) -> Bool {
         guard case .boolean(let flag) = value else {
-            throw .invalidValue(key: key, message: "\(key) must be true or false.")
+            throw .invalidValue(key: key, message: String(localized: "\(key) must be true or false."))
         }
         return flag
     }
@@ -203,18 +205,24 @@ public struct MiriSettings: Equatable, Sendable {
         .invalidValue(
             key: "miri.\(key)",
             message:
-                "miri.\(key) must be a whole number of points from \(gapRange.lowerBound) to \(gapRange.upperBound).")
+                String(
+                    localized:
+                        "miri.\(key) must be a whole number of points from \(gapRange.lowerBound) to \(gapRange.upperBound)."
+                ))
     }
 
     private static let presetIssue = ConfigurationIssue.invalidValue(
         key: "options.preset_column_widths",
         message:
-            "options.preset_column_widths must list 1 to 10 increasing ratios from 0.05 to 1, such as [0.33, 0.5, 0.66]."
+            String(
+                localized:
+                    "options.preset_column_widths must list 1 to 10 increasing ratios from 0.05 to 1, such as [0.33, 0.5, 0.66]."
+            )
     )
 
     private static let stackLimitIssue = ConfigurationIssue.invalidValue(
         key: "options.stack_limit",
-        message: "options.stack_limit must be a whole number from 1 or \"fit\"."
+        message: String(localized: "options.stack_limit must be a whole number from 1 or \"fit\".")
     )
 }
 
@@ -263,10 +271,11 @@ public enum ConfigurationIssue: Error, Equatable, Sendable, CustomStringConverti
 
     public var description: String {
         switch self {
-        case .invalidTOML(let error): "The configuration file is not valid TOML. \(error)"
+        case .invalidTOML(let error):
+            String(localized: "The configuration file is not valid TOML. \(error.description)")
         case .invalidValue(_, let message): message
-        case .unreadable(let reason): "Miri cannot read the configuration file. \(reason)"
-        case .unwritable(let reason): "Miri cannot save the configuration file. \(reason)"
+        case .unreadable(let reason): String(localized: "Miri cannot read the configuration file. \(reason)")
+        case .unwritable(let reason): String(localized: "Miri cannot save the configuration file. \(reason)")
         case .notEditable(let reason): reason
         }
     }
@@ -277,8 +286,9 @@ public enum ConfigurationIssue: Error, Equatable, Sendable, CustomStringConverti
     public var menuSummary: String {
         let summary =
             switch self {
-            case .invalidTOML(let error): "Configuration error on line \(error.line): \(error.message)"
-            default: "Configuration error: \(description)"
+            case .invalidTOML(let error):
+                String(localized: "Configuration error on line \(error.line): \(error.message)")
+            default: String(localized: "Configuration error: \(description)")
             }
         guard summary.count > Self.menuSummaryLimit else { return summary }
         return summary.prefix(Self.menuSummaryLimit - 1) + "…"

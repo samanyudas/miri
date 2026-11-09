@@ -14,12 +14,12 @@ struct InitialSetupView: View {
             VStack(alignment: .leading, spacing: 22) {
                 header
                 ConfigurationIssueNotice(model: model)
-                SettingsSection("Window management") {
+                SettingsSection(String(localized: "Window management")) {
                     status
                     ForEach(model.startBlockers) { check in SetupCheckItem(check: check) }
                 }
                 swipe
-                SettingsSection("Dock") { ShowInDockRow(model: model) }
+                SettingsSection(String(localized: "Dock")) { ShowInDockRow(model: model) }
             }
             .padding(.horizontal, 40)
             .padding(.top, 52)
@@ -102,7 +102,9 @@ struct InitialSetupView: View {
         }
     }
 
-    private var statusTitle: String { model.startBlockers.isEmpty ? model.statusText : "Waiting for setup" }
+    private var statusTitle: String {
+        model.startBlockers.isEmpty ? model.statusText : String(localized: "Waiting for setup")
+    }
 
     private var canStart: Bool { model.engineState == .stopped && model.startBlockers.isEmpty }
 
@@ -114,28 +116,32 @@ struct InitialSetupView: View {
 
     private var statusDetail: String {
         switch model.engineState {
-        case .running: "Keyboard shortcuts work now."
-        case .restarting: "The engine is restarting. Keyboard shortcuts resume when it is ready."
+        case .running: String(localized: "Keyboard shortcuts work now.")
+        case .restarting: String(localized: "The engine is restarting. Keyboard shortcuts resume when it is ready.")
         case .failed: "Restart the engine to manage windows again. Settings > Diagnostics has the log."
         case .stopped where !model.startBlockers.isEmpty: AppModel.startsWhenReadySentence
-        case .stopped: "Keyboard shortcuts work once Miri starts."
+        case .stopped: String(localized: "Keyboard shortcuts work once Miri starts.")
         }
     }
 
     private var swipe: some View {
-        SettingsSection("Strip swipe") {
+        SettingsSection(String(localized: "Strip swipe")) {
             SettingsRow(
-                title: "Fingers", detail: "Four is recommended. Three fingers can clash with Three Finger Drag."
+                title: String(localized: "Fingers"),
+                detail: String(localized: "Four is recommended. Three fingers can clash with Three Finger Drag.")
             ) {
                 SegmentedChoice(
-                    label: "Fingers",
+                    label: String(localized: "Fingers"),
                     selection: Binding(
                         get: { model.settings.stripGesture },
                         set: { value in model.update { $0.stripGesture = value } }),
-                    options: [("Three", .three), ("Four", .four), ("Off", .off)])
+                    options: [
+                        (String(localized: "Three"), .three), (String(localized: "Four"), .four),
+                        (String(localized: "Off"), .off),
+                    ])
             }
             if model.settings.stripGesture != .off {
-                SettingsRow(title: "Swipe test", detail: testDetail) {
+                SettingsRow(title: String(localized: "Swipe test"), detail: testDetail) {
                     Button("Test Gesture…") { testing = true }
                         .disabled(model.gestureTestBlocker != nil)
                         .accessibilityHint(model.gestureTestBlocker ?? "")
@@ -157,11 +163,11 @@ struct InitialSetupView: View {
     /// The swipe's state, and why the test is not available yet. Only a macOS conflict gets a warning.
     private var testDetail: String {
         switch model.gestureState {
-        case .off: "Off."
+        case .off: String(localized: "Off.")
         case .enabled(let date): AppModel.confirmedSentence(date)
         // The same reason as on the Gestures page, such as "Start window management to test the swipe."
-        case .needsTest: model.gestureTestBlocker ?? "The swipe stays off until you test it."
-        case .conflict: "Off, because macOS uses this swipe."
+        case .needsTest: model.gestureTestBlocker ?? String(localized: "The swipe stays off until you test it.")
+        case .conflict: String(localized: "Off, because macOS uses this swipe.")
         }
     }
 
