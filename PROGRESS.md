@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `feat/352-send-feedback`, based on `main` at `604b8551`
+Updated: 2026-11-10 on branch `feat/352-send-feedback`, based on `main` at `632efc42`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -109,6 +109,15 @@ Next: the audit's [Remaining blockers](docs/v1-audit.md#remaining-blockers) tabl
 `verify-miri` runs `20261108-012140` and `20261108-014840` failed all 3 criteria on `main` `91865afa`, and run `20261108-014458` passed all 3 on the fix.
 #323 closed on 8 November 2026 after `verify-miri` run `20261108-020409` passed all 3 criteria on a build of `7c2b9a28`.
 Set Up Miri was not driven, because it shares `show` with the two windows that were.
+
+## Where a crossing focus lands
+
+[#332](https://github.com/samanyudas/miri/issues/332): a plain ⌃⌥← or ⌃⌥→ that crosses to a touching display now focuses the destination's column nearest the crossed edge, so the opposite press returns.
+When that column is a stack, the window that last had focus in it gets focus, as Sam decided on 8 November 2026.
+Before, the crossing focused the destination's last-focused window, which could sit in the middle of its strip.
+[paneru#150](https://github.com/samanyudas/paneru/pull/150) holds the engine change, with its failing tests in the commit before the fix.
+It merged into `miri/v0.5.2` as `7be4df9`, which this branch pins.
+[#333](https://github.com/samanyudas/miri/issues/333), the ⌃⌥N screen order in [paneru#149](https://github.com/samanyudas/paneru/pull/149), is held until its three-display check can run, so this pin leaves it out.
 
 ## Command-Shift Left and Right stay on their display
 

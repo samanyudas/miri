@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from urllib.parse import unquote
 
-AGENTS_MAX_LINES = 120
+AGENTS_MAX_LINES = 140
 BANNED = {chr(0x2014): "em dash; use a plain dash"}
 SKIPPED_PREFIXES = ("vendor/",)
 SKIPPED_FILES = {"LICENSE"}

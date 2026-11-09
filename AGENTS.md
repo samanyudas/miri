@@ -4,6 +4,21 @@ Miri is a native macOS scrolling window manager with a bundled Paneru-based engi
 Today the repository holds the product design and a menu bar app that supervises the engine.
 Read this map first, then the linked document for the area you touch.
 
+## A note from Sam
+
+I like ambitious ideas, simple systems, and software that feels obvious.
+Do not preserve complexity just because it already exists.
+Do not introduce machinery because it looks architecturally impressive.
+Understand the real constraint, then fight for the smallest model that makes the correct behavior unsurprising.
+
+Channel both "measure twice, cut once" and "yagni".
+Fight scope creep.
+Try to honor the dev's intent in both a minimal and realistic fashion.
+
+The rest of this document is meant to help you navigate the codebase and make changes effectively.
+Think of these instructions less as "hard rules", more as "good defaults".
+The developer's preferences should be able to override anything here.
+
 ## Start and end every session
 
 1. Read [PROGRESS.md](PROGRESS.md). The SessionStart hook prints it with the branch and uncommitted changes.
@@ -66,6 +81,22 @@ Before any step that changes the real desktop, including `make e2e`, take the [l
 - [File an issue](CONTRIBUTING.md#file-an-issue) and [Take up an issue](CONTRIBUTING.md#take-up-an-issue) have the full rules.
   The command guard reads the templates and blocks a `gh issue create` command that breaks these rules.
 
+## Pull requests
+
+- Conventional commit titles, plain language: fix(engine): stacked windows no longer go out of reach.
+- Body: the problem in a sentence or two, then how you fixed it.
+  End with the model and harness that did the work.
+- UI changes need before/after images.
+  Motion or timing needs a short video.
+- Upload PR evidence to GitHub after Sam approves it, as [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#capture-evidence) describes.
+  Never commit PR-only screenshots or assets such as .github/pr-assets/.
+- One request is one PR.
+  Split it only when the maintainer asks.
+  Outside contributions follow the stricter one problem per PR rule.
+- Reference an issue the PR delivers with `Refs #N`, rather than closing keywords such as `Closes`, `Fixes`, or `Resolves`.
+  The [issue lifecycle](CONTRIBUTING.md#issue-lifecycle) explains why.
+- Use `Part of #N` for a PR that only records decisions, changes docs, or delivers part of the issue.
+
 ## Definition of done
 
 - The issue's acceptance criteria hold, and you observed them on the real artifact.
@@ -99,9 +130,6 @@ Share window evidence as [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#capture-
 
 - Never use the em dash character. `make docs` rejects it.
 - In Markdown, put each sentence on its own line.
-- In PRs, reference an issue the PR delivers with `Refs #N`, rather than closing keywords such as `Closes`, `Fixes`, or `Resolves`.
-  The [issue lifecycle](CONTRIBUTING.md#issue-lifecycle) explains why.
-- Use `Part of #N` for a PR that only records decisions, changes docs, or delivers part of the issue.
 - Never edit `CHANGELOG.md` or generated files by hand.
 
 ## Deeper docs

@@ -80,6 +80,12 @@ On 1 November 2026, Sam decided that Focus column left or right and Move column 
 A fresh plain horizontal press crosses only when a display touches that side with positive vertical overlap.
 A plain move arrives at the destination's left edge when moving right, or its right edge when moving left.
 The opposite plain move therefore returns the column to the source strip end.
+A plain focus that crosses lands on the destination's first column when moving right, or its last column when moving left, and brings that column into view.
+When that column is a stack, focus goes to the window that last had focus in it, as for Jump to column.
+The opposite plain focus therefore returns to the column it left.
+Sam chose this landing on 7 November 2026, and the stack rule on 8 November 2026 ([#332](https://github.com/samanyudas/miri/issues/332)).
+Before that, a crossing gave focus as a focused display does, to the destination's last-focused visible window, which could sit in the middle of its strip.
+Focus monitor left and right still follow that display focus rule.
 Plain key auto-repeat can step within a strip but never crosses a display.
 Whole-column sizing, maximize, stack order, and focus follow use the same rules as dedicated monitor moves.
 
