@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-09 on branch `fix/316-all-hidden`, based on `main` at `255fb826`
+Updated: 2026-11-09 on branch `docs/316-closeout`, based on `main` at `62bfb3d9`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,17 +16,15 @@ The public release path and the complete acceptance runs follow.
 
 ## Desktop at the shared edge while columns slide back in
 
-[#316](https://github.com/samanyudas/miri/issues/316) has two engine fixes on `miri/v0.5.2`, and this branch pins the second.
-[paneru#146](https://github.com/samanyudas/paneru/pull/146), merged as `c61a547`, shows the next hidden column out behind the nearest hidden column and behind each sliding photo, so its panel exists before the nearer photo leaves the edge.
-macOS shows a new panel a frame late, which left the edge bare for that frame.
-[paneru#148](https://github.com/samanyudas/paneru/pull/148), merged as `0f4affb`, shows every hidden column at a shared edge at rest, as Sam chose, so no panel is made while photos move.
+[#316](https://github.com/samanyudas/miri/issues/316) closed on 9 November 2026 after `verify-miri` run `20261109-144222` on `main` at `62bfb3d9`, engine `0f4affb`.
+macOS shows a new photo panel a frame late, so a panel made while photos slid left the shared edge, or the space between columns, bare for that frame.
+[paneru#146](https://github.com/samanyudas/paneru/pull/146), pinned by [#385](https://github.com/samanyudas/miri/pull/385), shows the next hidden column out behind the nearest hidden column and behind each sliding photo.
+[paneru#148](https://github.com/samanyudas/paneru/pull/148), pinned by [#392](https://github.com/samanyudas/miri/pull/392), shows every hidden column at a shared edge at rest, so no panel is made while photos move.
 Behind a hidden stack, whose slices have gaps, the farther columns still show only while they slide.
-A live check of 24 rounds found 9 edge exposures over 8 pt on `main` at `1417553f`, 4 of them over 30 pt.
-On engine `c61a547`, 24 rounds showed 0 edge exposures and 0 gaps between columns, but an earlier run of that fix showed 1 gap of 166 pt for 7 ms in the frame that a new panel was made.
-On engine `a1999c4`, the tested head of paneru#148 with the same tree as `0f4affb`, two runs of 24 rounds showed 0 edge exposures.
-They showed 0 and 1 gaps over 8 pt between columns: 24 pt for 7 ms, when an existing photo panel moved one window server sample after the window ahead of it, with no new panel in that frame.
-Criterion 2 of #316 asks for no such gap wider than the 8 pt rest gap, so it is not yet strictly met, and Sam decides whether that lag is acceptable.
-The live scripts are in `/tmp/miri316/tools2`, and the runs in `/tmp/miri316/live2`, outside the repository.
+In 24 rounds, `main` at `1417553f` showed 9 edge exposures over 8 pt and 1 gap of 438 pt between columns, and `main` at `62bfb3d9` showed none of either.
+Across 72 rounds of engine `0f4affb` or its identical PR head, one sample showed 24 pt between columns for 7 ms, when an existing photo panel moved one sample after the window ahead of it.
+Sam accepted that lag on 9 November 2026.
+The real Helium window case from the issue report was not rechecked.
 
 ## macOS 15 support
 
