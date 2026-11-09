@@ -19,7 +19,7 @@ A changed or new picture needs a new approval.
 
 | File in `sheets/` | Decision | Recommended | Sam picked |
 | --- | --- | --- | --- |
-| `352-1-menu-position.png` | Where the two items go in the menu bar menu | A, under Copy Diagnostics | C, a Help submenu |
+| `352-1-menu-position.png` | Where the two items go in the menu bar menu | A, under Copy Diagnostics | C, a Help submenu, then changed to under Copy Diagnostics (see below) |
 | `352-2-settings-placement.png` | Where the two actions go in Settings | A, a Feedback section on Diagnostics | A |
 | `352-3-item-wording.png` | What the items are called | A, Report a Bug… and Request a Feature… | B, one Send Feedback… item |
 | `352-4-bug-flow.png` | Browser directly, or the Diagnostics preview first | B, the Diagnostics preview first | B, adapted to one item (see below) |
@@ -41,7 +41,8 @@ Wording B leaves one **Send Feedback…** item, so no **Report a Bug…** item i
 On 9 November 2026 Sam chose this combination:
 
 - **Send Feedback…** opens GitHub's list of issue forms, `issues/new/choose`, where the person picks a form.
-- It sits in a **Help** submenu of the menu bar menu, and in a **Feedback** section on the Settings Diagnostics page.
+- It sits in the menu bar menu under **Copy Diagnostics…**, and in a **Feedback** section on the Settings Diagnostics page.
+  Sam first picked a Help submenu, then on 10 November 2026 asked to drop it, because it held only this one item.
 - The Diagnostics preview gains a **Copy and Open Bug Report…** button, which copies the report and opens the bug report form.
 
 ## Decisions without a sheet
@@ -70,7 +71,7 @@ Sam's picks on 9 November 2026 approve these changes, and each issue body carrie
 
 ### #352
 
-- **Send Feedback…** replaces **Report a Bug…** and **Request a Feature…**, in the menu bar's Help submenu and in a Feedback section on the Settings Diagnostics page.
+- **Send Feedback…** replaces **Report a Bug…** and **Request a Feature…**, in the menu bar menu and in a Feedback section on the Settings Diagnostics page.
   It opens `github.com/samanyudas/miri/issues/new/choose`.
 - The Diagnostics preview has a **Copy and Open Bug Report…** button, which copies the report and opens the bug report form.
 - The Swift test checks the bug report form and the address of the list of forms.
