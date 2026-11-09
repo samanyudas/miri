@@ -107,7 +107,7 @@ Set Up Miri was not driven, because it shares `show` with the two windows that w
 When that column is a stack, the window that last had focus in it gets focus, as Sam decided on 8 November 2026.
 Before, the crossing focused the destination's last-focused window, which could sit in the middle of its strip.
 [paneru#150](https://github.com/samanyudas/paneru/pull/150) holds the engine change, with its failing tests in the commit before the fix.
-This branch pins its head until Sam merges it, and then pins the merge commit.
+It merged into `miri/v0.5.2` as `7be4df9`, which this branch pins.
 [#333](https://github.com/samanyudas/miri/issues/333), the ⌃⌥N screen order in [paneru#149](https://github.com/samanyudas/paneru/pull/149), is held until its three-display check can run, so this pin leaves it out.
 
 ## Command-Shift Left and Right stay on their display
