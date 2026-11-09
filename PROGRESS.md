@@ -208,7 +208,9 @@ In `verify-miri` run `20261108-xdisplay` (load average 4 to 8), 20 of 20 drops r
 #314 closed on 7 November 2026, and the check on `main` found [#388](https://github.com/samanyudas/miri/issues/388): a dropped window that reached its slot's origin while the app was still resizing it kept a narrower width.
 [paneru#147](https://github.com/samanyudas/paneru/pull/147) makes Miri wait while the app's frame still changes, and write the slot again when the app stops short of it.
 It merged into `miri/v0.5.2` as `24fef41`, which branch `fix/388-pin-engine` pins.
-Next: the 20 quarter drops of #388's second criterion on the pinned build, which stay unticked while any drop ends on the wrong display ([#390](https://github.com/samanyudas/miri/issues/390)).
+In `verify-miri` runs `20261110-034914`, `-035139`, `-035535`, and `-040113` on that pin, 17 of 20 valid quarter drops returned T3 Code to its full 1676 by 1394 frame, and none came back narrower.
+The other 3 ended on the built-in display, which is [#390](https://github.com/samanyudas/miri/issues/390), so #388's 20 of 20 criterion stays unticked.
+Next: Sam merges [#406](https://github.com/samanyudas/miri/pull/406), and the 20 of 20 check runs again after #390 is fixed.
 #277 closed on 6 November 2026 after `verify-miri` run `20261106-131827` on `main` at `5eb9366f`: the row named Rectangle and Magnet, management still started, and the row passed after both quit.
 
 ## Picture-in-Picture resizing
