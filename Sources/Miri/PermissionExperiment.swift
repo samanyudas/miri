@@ -74,11 +74,11 @@ final class PermissionExperiment {
 
     private func observe(targetPid: Int32) async throws -> Report {
         guard targetPid > 0, kill(targetPid, 0) == 0 else {
-            throw ExperimentError.failure("The fixture process is unavailable.")
+            throw ExperimentError.failure(String(localized: "The fixture process is unavailable."))
         }
         let executable = Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/miri-engine")
         guard FileManager.default.isExecutableFile(atPath: executable.path) else {
-            throw ExperimentError.failure("The bundled engine is missing or is not executable.")
+            throw ExperimentError.failure(String(localized: "The bundled engine is missing or is not executable."))
         }
         let element = AXUIElementCreateApplication(targetPid)
         let timeout = AXUIElementSetMessagingTimeout(element, 1)
@@ -104,7 +104,7 @@ final class PermissionExperiment {
                     atPath: url.path, contents: nil,
                     attributes: [.posixPermissions: 0o600])
             else {
-                throw ExperimentError.failure("Cannot create the engine output file.")
+                throw ExperimentError.failure(String(localized: "Cannot create the engine output file."))
             }
         }
         let stdout = try FileHandle(forWritingTo: output)
@@ -130,12 +130,12 @@ final class PermissionExperiment {
         while process.isRunning {
             try Task.checkCancellation()
             guard ContinuousClock.now < deadline else {
-                throw ExperimentError.failure("The engine did not finish within five seconds.")
+                throw ExperimentError.failure(String(localized: "The engine did not finish within five seconds."))
             }
             for url in [output, errors] {
                 let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
                 guard ((attributes[.size] as? NSNumber)?.intValue ?? 0) <= 16_384 else {
-                    throw ExperimentError.failure("The engine response exceeds the size limit.")
+                    throw ExperimentError.failure(String(localized: "The engine response exceeds the size limit."))
                 }
             }
             try await Task.sleep(for: .milliseconds(20))
@@ -144,17 +144,18 @@ final class PermissionExperiment {
         for url in [output, errors] {
             let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
             guard ((attributes[.size] as? NSNumber)?.intValue ?? 0) <= 16_384 else {
-                throw ExperimentError.failure("The engine response exceeds the size limit.")
+                throw ExperimentError.failure(String(localized: "The engine response exceeds the size limit."))
             }
         }
         guard process.terminationStatus == 0 else {
-            throw ExperimentError.failure("The engine exited with code \(process.terminationStatus).")
+            throw ExperimentError.failure(
+                String(localized: "The engine exited with code \(process.terminationStatus)."))
         }
         let response = try FileHandle(forReadingFrom: output)
         defer { try? response.close() }
         let data = try response.read(upToCount: 16_385) ?? Data()
         guard data.count <= 16_384 else {
-            throw ExperimentError.failure("The engine response exceeds the size limit.")
+            throw ExperimentError.failure(String(localized: "The engine response exceeds the size limit."))
         }
         let engine = try JSONDecoder().decode(AXObservation.self, from: data)
         guard engine.schemaVersion == 1, engine.pid == process.processIdentifier,
@@ -163,7 +164,8 @@ final class PermissionExperiment {
                 == executable.resolvingSymlinksInPath().path,
             engine.bundleIdentifier == Bundle.main.bundleIdentifier.map({ "\($0).engine" })
         else {
-            throw ExperimentError.failure("The engine response has an unexpected identity or schema.")
+            throw ExperimentError.failure(
+                String(localized: "The engine response has an unexpected identity or schema."))
         }
         let revisionURL = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/engine-revision.txt")
         let revision = try String(contentsOf: revisionURL, encoding: .utf8)

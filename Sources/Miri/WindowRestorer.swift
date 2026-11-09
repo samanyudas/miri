@@ -112,7 +112,7 @@ enum RecoverySelftest {
         guard let window = WindowRestorer.windows(of: targetPid).first,
             let original = WindowRestorer.frame(of: window)
         else {
-            report.failure = "The fixture has no standard window."
+            report.failure = String(localized: "The fixture has no standard window.")
             return report
         }
         report.original = original

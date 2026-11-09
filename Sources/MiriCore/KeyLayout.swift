@@ -122,7 +122,7 @@ public struct KeyLayout: Equatable, Sendable {
         if let code = keyCode(for: name), let character = keys.first(where: { $0.code == code })?.character,
             Self.isPrintable(character)
         {
-            return (EngineKey.isKeypad(code) ? "Keypad " : "") + character.uppercased()
+            return (EngineKey.isKeypad(code) ? String(localized: "Keypad ") : "") + character.uppercased()
         }
         return name
     }
@@ -137,7 +137,8 @@ public struct KeyLayout: Equatable, Sendable {
 
     private static let keySymbols = [
         "leftarrow": "←", "rightarrow": "→", "uparrow": "↑", "downarrow": "↓", "return": "↩", "tab": "⇥",
-        "space": "Space", "delete": "⌫", "escape": "⎋", "forwarddelete": "⌦", "home": "↖", "end": "↘",
+        "space": String(localized: "Space"), "delete": "⌫", "escape": "⎋", "forwarddelete": "⌦", "home": "↖",
+        "end": "↘",
         "pageup": "⇞", "pagedown": "⇟",
     ]
 }

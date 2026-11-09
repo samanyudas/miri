@@ -1,0 +1,728 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "": {},
+    "\"%@\" has more than one dash. Write the modifiers joined by +, then one dash and the key.": {},
+    "\"%@\" names the key \"%@\", which the engine does not know, so the shortcut does nothing. ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "\"%1$@\" names the key \"%2$@\", which the engine does not know, so the shortcut does nothing. "
+          }
+        }
+      }
+    },
+    "\"%@\" names the modifier \"%@\", which the engine does not know. ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "\"%1$@\" names the modifier \"%2$@\", which the engine does not know. "
+          }
+        }
+      }
+    },
+    "## Miri diagnostics": {},
+    "### Displays": {},
+    "### Engine log (redacted)": {},
+    "### Setup checks": {},
+    "%@ Miri does not change the file until it is fixed.": {},
+    "%@ Using %@ removes it from %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ Using %2$@ removes it from %3$@."
+          }
+        }
+      }
+    },
+    "%@ added for %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ added for %2$@."
+          }
+        }
+      }
+    },
+    "%@ can move a window that Miri arranges, and the window's column can then change place in the strip. Quit %@ while Miri manages windows.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ can move a window that Miri arranges, and the window's column can then change place in the strip. Quit %2$@ while Miri manages windows."
+          }
+        }
+      }
+    },
+    "%@ has a new default, %@, but %@ uses it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ has a new default, %2$@, but %3$@ uses it."
+          }
+        }
+      }
+    },
+    "%@ has no shortcut now.": {},
+    "%@ has no shortcut. Add one in Shortcuts.": {},
+    "%@ is already a shortcut for this action.": {},
+    "%@ is already used by %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ is already used by %2$@."
+          }
+        }
+      }
+    },
+    "%@ is used by macOS for ": {},
+    "%@ must be a shortcut string or an array of shortcut strings.": {},
+    "%@ must be true or false.": {},
+    "%@ names a command the engine does not know.": {},
+    "%@, one strip per Space.": {},
+    "%@: Not checked": {},
+    "%@: Unable to verify": {},
+    "%@ cycles through them.": {},
+    "%lld": {},
+    "%lld pt": {},
+    "%lld to review": {},
+    "- Configuration: %@": {},
+    "- Display %@ (main): %@ x %@ points at %@x, origin (%@, %@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "- Display %1$@ (main): %2$@ x %3$@ points at %4$@x, origin (%5$@, %6$@)"
+          }
+        }
+      }
+    },
+    "- Display %@: %@ x %@ points at %@x, origin (%@, %@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "- Display %1$@: %2$@ x %3$@ points at %4$@x, origin (%5$@, %6$@)"
+          }
+        }
+      }
+    },
+    "- Engine status: %@": {},
+    "- Engine: %@": {},
+    "- Miri: %@": {},
+    "- macOS: %@ (%@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "- macOS: %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "0.25, 0.5, 0.75": {},
+    "A column waiting past an edge next to another display shows a photo of its window. Needs Screen Recording permission.": {},
+    "Accessibility": {},
+    "Accessibility permission": {},
+    "Accessibility permission experiment": {},
+    "Actions": {},
+    "Add Shortcut for %@": {},
+    "Add a shortcut for %@": {},
+    "Animate window movement": {},
+    "App settings": {},
+    "App switcher": {},
+    "Application windows": {},
+    "At screen edges": {},
+    "Between windows": {},
+    "Blocked by macOS": {},
+    "Blocks start": {},
+    "Blocks start. %@": {},
+    "Cancel": {},
+    "Cancel Automatic Start": {},
+    "Cancel Recording": {},
+    "Cancel recording": {},
+    "Cannot add dotted key %@ to an existing value or table.": {},
+    "Cannot create the engine output file.": {},
+    "Cannot extend the inline table %@.": {},
+    "Centre column": {},
+    "Change the macOS gesture setting before testing the swipe.": {},
+    "Changes here apply right away. Settings from other tools are not touched.": {},
+    "Changing fingers or direction needs a new test.": {},
+    "Check Again": {},
+    "Check permission": {},
+    "Checked": {},
+    "Checked. %lld to review.": {},
+    "Checked. Nothing to review.": {},
+    "Checking app and engine…": {},
+    "Checks which process macOS credits with Miri's Accessibility permission.": {},
+    "Choose three or four fingers below to use the swipe.": {},
+    "Choose three or four fingers to test the swipe.": {},
+    "Clear Search": {},
+    "Clear the search": {},
+    "Close window": {},
+    "Closing this window keeps Miri in the menu bar.": {},
+    "Column widths and motion": {},
+    "Command": {},
+    "Compare Miri and its bundled engine against a harmless fixture. Permission attribution remains unresolved until a manual grant comparison.": {},
+    "Configuration error on line %lld: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Configuration error on line %1$lld: %2$@"
+          }
+        }
+      }
+    },
+    "Configuration error: %@": {},
+    "Configuration file": {},
+    "Control": {},
+    "Control characters are not allowed in comments.": {},
+    "Copied": {},
+    "Copied to the clipboard": {},
+    "Copy": {},
+    "Copy Diagnostics": {},
+    "Copy Diagnostics…": {},
+    "Copy and Open Bug Report…": {},
+    "Copy picture of screen": {},
+    "Copy picture of selected area": {},
+    "Copy to Clipboard": {},
+    "Cut": {},
+    "Cycle preset widths forward": {},
+    "Developer": {},
+    "Device Control and Data Access": {},
+    "Diagnostics": {},
+    "Did the strip follow your fingers?": {},
+    "Direction": {},
+    "Displays": {},
+    "Displays have separate Spaces": {},
+    "Displays side by side": {},
+    "Dock": {},
+    "Done": {},
+    "Down Arrow": {},
+    "Drag windows to left or right edge of screen to tile": {},
+    "Drag windows to menu bar to fill screen": {},
+    "Edit these bindings in the configuration file.": {},
+    "Emoji and Symbols": {},
+    "Engine": {},
+    "Engine health and local logs.": {},
+    "Engine log": {},
+    "Engine process %d. Attribution unresolved.": {},
+    "Engine trusted: %@. AX read: %d. Role: %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Engine trusted: %1$@. AX read: %2$d. Role: %3$@."
+          }
+        }
+      }
+    },
+    "Enter numbers separated by commas.": {},
+    "Equalize window heights within column": {},
+    "Error: ": {},
+    "Expected , or ] in the array.": {},
+    "Expected , or } in the inline table.": {},
+    "Expected = after the key %@.": {},
+    "Expected ] to close the table header.": {},
+    "Expected ]] to close the array of tables header.": {},
+    "Expected a key.": {},
+    "Expected a newline after the value.": {},
+    "Expected a value.": {},
+    "Failed": {},
+    "Feedback": {},
+    "Find": {},
+    "Fingers": {},
+    "Fit the display": {},
+    "Fixture process ID": {},
+    "Float or unfloat focused window": {},
+    "Focus column left": {},
+    "Focus column right": {},
+    "Focus display above": {},
+    "Focus display below": {},
+    "Focus display left": {},
+    "Focus display right": {},
+    "Focus first column": {},
+    "Focus last column": {},
+    "Focus shortcuts, display focus, and workspace switches move it to the window's centre. Clicks and Cmd-Tab leave it in place.": {},
+    "Focus window above within column": {},
+    "Focus window below within column": {},
+    "Follow fingers": {},
+    "Force Quit": {},
+    "Four": {},
+    "Four is recommended. Three fingers can clash with Three Finger Drag.": {},
+    "Four-finger strip swipe": {},
+    "Four-finger swipe": {},
+    "Four-finger swipes switch full-screen apps. Set Swipe between full-screen applications to three fingers in System Settings > Trackpad > More Gestures, which keeps swiping between desktops. Turning it off also stops swiping between desktops.": {},
+    "Fractions of the display width, narrowest first. %@": {},
+    "Full screen": {},
+    "Gaps": {},
+    "General": {},
+    "Gesture test": {},
+    "Gestures": {},
+    "Hide app": {},
+    "Hide other apps": {},
+    "Hold ⌥ key while dragging windows to tile": {},
+    "How columns sit on the strip. Changes apply right away.": {},
+    "If you stopped Miri before logging out, it stays stopped.": {},
+    "If you use it anyway, one of the two shortcuts may stop working.": {},
+    "Include Control, Option, or Command.": {},
+    "Incomplete Unicode escape.": {},
+    "Invalid Unicode escape \\%@%@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Invalid Unicode escape \\%1$@%2$@."
+          }
+        }
+      }
+    },
+    "Invalid escape sequence \\%@.": {},
+    "Invalid value %@.": {},
+    "Jump to column %lld": {},
+    "Keep at least two windows on this display so the strip can move.": {},
+    "Keyboard shortcuts work now.": {},
+    "Keyboard shortcuts work once Miri starts.": {},
+    "Keyboard shortcuts work whether the swipe is on or off. Miri never changes macOS settings.": {},
+    "Keypad ": {},
+    "Launch at login": {},
+    "Launch at login could not be changed. %@": {},
+    "Launch at login takes effect after you move Miri to the Applications folder.": {},
+    "Layout": {},
+    "Left Arrow": {},
+    "Left of its stack": {},
+    "Line %lld: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Line %1$lld: %2$@"
+          }
+        }
+      }
+    },
+    "Lock Screen": {},
+    "Logs stay on this Mac. Miri sends no telemetry.": {},
+    "Make column narrower": {},
+    "Make column wider": {},
+    "Make window shorter": {},
+    "Make window taller": {},
+    "Managing windows": {},
+    "Maximize or restore window": {},
+    "Maximized stacked window opens": {},
+    "Minimize window": {},
+    "Miri": {},
+    "Miri Settings": {},
+    "Miri backs up your configuration file first.": {},
+    "Miri can't read your macOS gesture settings, so the test is the only check.": {},
+    "Miri cannot change %@ because the file defines it in a form Miri does not rewrite. Edit it by hand.": {},
+    "Miri cannot read the configuration file. %@": {},
+    "Miri cannot save the configuration file. %@": {},
+    "Miri cannot use this key in a shortcut.": {},
+    "Miri checks your Mac for anything that blocks window management. It never changes your settings for you.": {},
+    "Miri could not back up the configuration before %@. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Miri could not back up the configuration before %1$@. %2$@"
+          }
+        }
+      }
+    },
+    "Miri could not change %@ safely, so the file was left unchanged.": {},
+    "Miri could not read the macOS %@-finger swipe settings. Use Test Gesture on the Gestures page to check the swipe.": {},
+    "Miri did not see the strip move both ways within %lld seconds.": {},
+    "Miri has not checked the macOS gesture settings yet.": {},
+    "Miri kept %@.": {},
+    "Miri lines up the windows on each display side by side in a strip that you scroll.": {},
+    "Miri removes window titles, document paths, user names, and the configuration file.": {},
+    "Miri saw the strip move both ways and no macOS action. Only your answer turns the swipe on.": {},
+    "Miri starts by itself when the required checks pass.": {},
+    "Miri trusted: %@. AX read: %d. Role: %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Miri trusted: %1$@. AX read: %2$d. Role: %3$@."
+          }
+        }
+      }
+    },
+    "Miri turns the strip swipe off until you test it again.": {},
+    "Miri's engine was updated": {},
+    "Miri's engine was updated.": {},
+    "Mission Control": {},
+    "Move %@ from %@ to %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Move %1$@ from %2$@ to %3$@"
+          }
+        }
+      }
+    },
+    "Move column left": {},
+    "Move column right": {},
+    "Move column to display above": {},
+    "Move column to display below": {},
+    "Move column to display left": {},
+    "Move column to display right": {},
+    "Move column to first position": {},
+    "Move column to last position": {},
+    "Move focus to next window": {},
+    "Move focus to the Dock": {},
+    "Move focus to the menu bar": {},
+    "Move left a space": {},
+    "Move right a space": {},
+    "Move the pointer to windows that Miri focuses": {},
+    "Move window down within column": {},
+    "Move window up within column": {},
+    "Movement is always instant when macOS Reduce Motion is on.": {},
+    "Multi-line strings cannot be keys.": {},
+    "Needs a test": {},
+    "New": {},
+    "New tab": {},
+    "No": {},
+    "No conflict found": {},
+    "No conflict found.": {},
+    "No shortcuts match “%@”.": {},
+    "None": {},
+    "Not checked": {},
+    "Note: ": {},
+    "Off": {},
+    "Off because Miri does not have Screen Recording permission. Turn on Miri there, then switch this on again.": {},
+    "Off until tested: %@": {},
+    "Off, because macOS uses this swipe.": {},
+    "Off.": {},
+    "Off: macOS uses this swipe": {},
+    "On": {},
+    "On, verified by user test on %@": {},
+    "One strip per Space.": {},
+    "Open": {},
+    "Open Accessibility Settings": {},
+    "Open Gestures": {},
+    "Open Screen Recording Settings": {},
+    "Open Setup": {},
+    "Open System Settings": {},
+    "Open System Settings > Desktop & Dock > Mission Control and make sure Displays have separate Spaces is on.": {},
+    "Open System Settings > Desktop & Dock > Windows and make sure %@ is off.": {},
+    "Open System Settings > Desktop & Dock and make sure Stage Manager is off.": {},
+    "Open Trackpad Settings": {},
+    "Open the System Settings page for %@": {},
+    "Opens GitHub, where you pick a bug report or a feature request.": {},
+    "Option": {},
+    "Other engine bindings": {},
+    "Other window managers": {},
+    "Passed": {},
+    "Paste": {},
+    "Permission Experiment": {},
+    "Permission Experiment…": {},
+    "Point at a shortcut to remove it. Press Escape to cancel recording. Stop window manager works even while the engine is stopped.": {},
+    "Pointer": {},
+    "Pop focused window out to left": {},
+    "Pop focused window out to right": {},
+    "Press + to add a shortcut. Miri blocks keys another action uses, and warns about macOS clashes.": {},
+    "Press Return to apply. Fractions of the display width, narrowest first.": {},
+    "Print": {},
+    "Process": {},
+    "Quit": {},
+    "Quit %@ before starting Miri. Miri leaves %@'s configuration untouched.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Quit %1$@ before starting Miri. Miri leaves %2$@'s configuration untouched."
+          }
+        }
+      }
+    },
+    "Quit Miri": {},
+    "Quit the frontmost app": {},
+    "Recommended": {},
+    "Recommended change": {},
+    "Recording a shortcut for %@. Press the keys, or Escape to cancel.": {},
+    "Reduce Motion is on in System Settings, so windows move instantly.": {},
+    "Refresh": {},
+    "Reload the file and try again.": {},
+    "Remove %@": {},
+    "Remove %@ from %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Remove %1$@ from %2$@"
+          }
+        }
+      }
+    },
+    "Replace": {},
+    "Replace all shortcuts with Miri's defaults?": {},
+    "Report Change": {},
+    "Report a macOS Gesture Change": {},
+    "Report a macOS gesture change?": {},
+    "Required to start": {},
+    "Reset to Defaults…": {},
+    "Resolve the macOS conflict below, then test again.": {},
+    "Restart Engine": {},
+    "Restarting": {},
+    "Restarting the engine": {},
+    "Restarting the engine…": {},
+    "Restoring it returns it to the stack if there is room.": {},
+    "Reversed": {},
+    "Review the report before you copy it": {},
+    "Right Arrow": {},
+    "Right of its stack": {},
+    "Running": {},
+    "Running · %lld displays": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Running · %lld display"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Running · %lld displays"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Save": {},
+    "Save picture of screen as a file": {},
+    "Save picture of selected area": {},
+    "Screenshot and recording options": {},
+    "Scroll the strip with a swipe on the trackpad.": {},
+    "Search": {},
+    "Search actions or shortcuts": {},
+    "Select all": {},
+    "Select next source in Input menu": {},
+    "Select the previous input source": {},
+    "Send Feedback…": {},
+    "Send column to next display": {},
+    "Send feedback": {},
+    "Set Up Miri": {},
+    "Settings…": {},
+    "Setup": {},
+    "Setup Checker…": {},
+    "Setup Checker… (%lld to review)": {},
+    "Shift": {},
+    "Shortcuts": {},
+    "Show Configuration File in Finder": {},
+    "Show Desktop": {},
+    "Show Finder search window": {},
+    "Show Logs in Finder": {},
+    "Show Miri in Finder": {},
+    "Show Spotlight search": {},
+    "Show in Dock": {},
+    "Show in Finder": {},
+    "Show window contents on edges next to another display": {},
+    "Space": {},
+    "Stack focused window into left column": {},
+    "Stack focused window into right column": {},
+    "Stacks": {},
+    "Stage Manager": {},
+    "Start AXFixture, then enter its process ID.": {},
+    "Start Window Management": {},
+    "Start window management to test the swipe.": {},
+    "Startup": {},
+    "Stop Window Management": {},
+    "Stop window manager": {},
+    "Stopped": {},
+    "Stopped after engine failures": {},
+    "Stopped by you": {},
+    "Strip swipe": {},
+    "Strip swipe is off": {},
+    "Swipe left and right with %@ fingers on the trackpad.": {},
+    "Swipe test": {},
+    "Switch to Desktop %lld": {},
+    "Test Gesture…": {},
+    "Test it to turn it on.": {},
+    "The bundled engine is missing or is not executable.": {},
+    "The configuration file has a problem": {},
+    "The configuration file is not valid TOML. %@": {},
+    "The direction changed.": {},
+    "The engine could not start. %@": {},
+    "The engine did not finish within five seconds.": {},
+    "The engine exited with code %d.": {},
+    "The engine is restarting. Keyboard shortcuts resume when it is ready.": {},
+    "The engine response exceeds the size limit.": {},
+    "The engine response has an unexpected identity or schema.": {},
+    "The engine stopped unexpectedly %lld times within five minutes. Miri stopped restarting it.": {},
+    "The engine stopped unexpectedly. Your windows are back on screen, and Miri restarts it in a moment.": {},
+    "The file changed while Miri was saving. Miri reloaded it. Try again.": {},
+    "The file is not UTF-8 text.": {},
+    "The finger count changed.": {},
+    "The fixture has no standard window.": {},
+    "The fixture process is unavailable.": {},
+    "The key %@ is already defined as a value.": {},
+    "The key %@ is already defined.": {},
+    "The key %@ is defined twice.": {},
+    "The log is empty.": {},
+    "The strip moved both ways.": {},
+    "The strip moved both ways. Did it follow your fingers?": {},
+    "The strip moved. Keep swiping left and right.": {},
+    "The swipe stays off until you test it.": {},
+    "The swipe stays off. Keyboard shortcuts keep working.": {},
+    "The table %@ is defined twice.": {},
+    "Three": {},
+    "Three Finger Drag is on. Turn it off in System Settings > Accessibility > Pointer Control > Trackpad Options, or use four fingers.": {},
+    "Three-finger strip swipe": {},
+    "Three-finger swipe": {},
+    "Three-finger swipes navigate between pages. Set Swipe between pages to two fingers in System Settings > Trackpad > More Gestures.": {},
+    "Three-finger swipes switch full-screen apps. Set Swipe between full-screen applications to four fingers in System Settings > Trackpad > More Gestures.": {},
+    "Try Again": {},
+    "Turn Dock hiding on or off": {},
+    "Turn off %@ in System Settings > Desktop & Dock > Windows. macOS tiling moves windows that Miri arranges, including windows you drag.": {},
+    "Turn off Stage Manager in System Settings > Desktop & Dock. It rearranges windows.": {},
+    "Turn on Displays have separate Spaces in System Settings > Desktop & Dock > Mission Control, then log out and back in.": {},
+    "Turn on Miri in System Settings > Privacy & Security > %@. Miri needs this Accessibility permission to move windows.": {},
+    "Type Shortcut": {},
+    "Unable to verify": {},
+    "Undo": {},
+    "Unexpected control character.": {},
+    "Unterminated escape sequence.": {},
+    "Unterminated multi-line string.": {},
+    "Unterminated string.": {},
+    "Up Arrow": {},
+    "Up to %lld fit on the main display at the minimum height of %lld points. A full stack sends the next window to a new column.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Up to %1$lld fit on the main display at the minimum height of %2$lld points. A full stack sends the next window to a new column."
+          }
+        }
+      }
+    },
+    "Updated default shortcuts": {},
+    "Use %@": {},
+    "Use %@ for %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Use %1$@ for %2$@"
+          }
+        }
+      }
+    },
+    "Use Anyway": {},
+    "Use a key name such as leftarrow, equal, or h.": {},
+    "Use ctrl, alt, cmd, shift, or fn.": {},
+    "Version %@ · Engine %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Version %1$@ · Engine %2$@"
+          }
+        }
+      }
+    },
+    "Waiting for setup": {},
+    "Waiting for setup: %@": {},
+    "Waiting for the strip to move…": {},
+    "Waiting for the “%@” check. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Waiting for the “%1$@” check. %2$@"
+          }
+        }
+      }
+    },
+    "Warning: ": {},
+    "Welcome to Miri": {},
+    "When off, open Miri from its menu bar icon.": {},
+    "Width presets": {},
+    "Window management": {},
+    "Window management is stopped": {},
+    "Window-snapping apps": {},
+    "Windows per stack": {},
+    "Yes": {},
+    "You can change all of this later in Settings.": {},
+    "You confirmed on %@ that the strip follows your fingers.": {},
+    "You reported that the strip did not follow your fingers.": {},
+    "Your macOS trackpad gestures changed.": {},
+    "Your windows stay where they are.": {},
+    "Your windows stay where they are. Miri stays stopped until you start it.": {},
+    "a shortcut in System Settings > Keyboard > Keyboard Shortcuts": {},
+    "bindings must be a table of shortcuts.": {},
+    "failed: %@": {},
+    "macOS switched Spaces.": {},
+    "macOS trackpad gestures changed": {},
+    "macOS was updated": {},
+    "macOS was updated.": {},
+    "macOS window tiling": {},
+    "miri.%@ must be a whole number of points from %lld to %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "miri.%1$@ must be a whole number of points from %2$lld to %3$lld."
+          }
+        }
+      }
+    },
+    "miri.default_bindings_version must be a whole number.": {},
+    "miri.strip_gesture must be \"off\", \"three\", or \"four\".": {},
+    "not checked": {},
+    "not tested yet": {},
+    "options.maximized_window_side must be \"left\" or \"right\".": {},
+    "options.preset_column_widths must list 1 to 10 increasing ratios from 0.05 to 1, such as [0.33, 0.5, 0.66].": {},
+    "options.stack_limit must be a whole number from 1 or \"fit\".": {},
+    "passed": {},
+    "pid %@": {},
+    "problem: %@": {},
+    "resetting shortcuts": {},
+    "restarting after %lld crashes": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "restarting after %lld crash"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "restarting after %lld crashes"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "running": {},
+    "stopped": {},
+    "the direction changed": {},
+    "the finger count changed": {},
+    "unable to verify": {},
+    "unknown": {},
+    "upgrading it": {},
+    "valid": {}
+  },
+  "version": "1.0"
+}

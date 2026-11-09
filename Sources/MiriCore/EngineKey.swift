@@ -14,13 +14,19 @@ enum EngineKey {
         var message: String {
             switch self {
             case .extraDash(let text):
-                "\"\(text)\" has more than one dash. Write the modifiers joined by +, then one dash and the key."
+                String(
+                    localized:
+                        "\"\(text)\" has more than one dash. Write the modifiers joined by +, then one dash and the key."
+                )
             case .invalidModifier(let text, let name):
-                "\"\(text)\" names the modifier \"\(name)\", which the engine does not know. "
-                    + "Use ctrl, alt, cmd, shift, or fn."
+                String(localized: "\"\(text)\" names the modifier \"\(name)\", which the engine does not know. ")
+                    + String(localized: "Use ctrl, alt, cmd, shift, or fn.")
             case .unknownKey(let text, let name):
-                "\"\(text)\" names the key \"\(name)\", which the engine does not know, so the shortcut does nothing. "
-                    + "Use a key name such as leftarrow, equal, or h."
+                String(
+                    localized:
+                        "\"\(text)\" names the key \"\(name)\", which the engine does not know, so the shortcut does nothing. "
+                )
+                    + String(localized: "Use a key name such as leftarrow, equal, or h.")
             }
         }
     }

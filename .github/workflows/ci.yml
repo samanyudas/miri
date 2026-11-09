@@ -84,6 +84,7 @@ jobs:
           submodules: true
           fetch-depth: 0
       - run: make swift-lint
+      - run: make strings
       - run: make swift-test
 
   engine-lint:

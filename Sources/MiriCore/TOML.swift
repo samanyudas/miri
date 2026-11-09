@@ -25,7 +25,7 @@ public enum TOMLValue: Equatable, Sendable {
             } else if value.isInfinite {
                 value < 0 ? "-inf" : "inf"
             } else if value == value.rounded(), abs(value) < 1e15 {
-                String(format: "%.1f", value)
+                String(format: "%.1f", value)  // Not interface text
             } else {
                 "\(value)"
             }
@@ -51,7 +51,7 @@ public enum TOMLValue: Equatable, Sendable {
             case "\t": result += "\\t"
             case "\r": result += "\\r"
             case _ where scalar.value < 0x20 || scalar.value == 0x7F:
-                result += String(format: "\\u%04X", scalar.value)
+                result += String(format: "\\u%04X", scalar.value)  // Not interface text
             default: result.unicodeScalars.append(scalar)
             }
         }
@@ -69,7 +69,7 @@ public struct TOMLError: Error, Equatable, Sendable, CustomStringConvertible {
     public let line: Int
     public let message: String
 
-    public var description: String { "Line \(line): \(message)" }
+    public var description: String { String(localized: "Line \(line): \(message)") }
 }
 
 /// A TOML document that remembers where each statement is, so Miri can change one value without touching the rest.
@@ -198,7 +198,10 @@ struct TOMLParser {
     private func checkAllowed(_ scalar: Unicode.Scalar, inComment: Bool) throws(TOMLError) {
         let control = scalar.value < 0x20 && scalar != "\t"
         if control || scalar.value == 0x7F {
-            throw fail(inComment ? "Control characters are not allowed in comments." : "Unexpected control character.")
+            throw fail(
+                inComment
+                    ? String(localized: "Control characters are not allowed in comments.")
+                    : String(localized: "Unexpected control character."))
         }
     }
 
@@ -212,7 +215,7 @@ struct TOMLParser {
         case "\r" where peek(1) == "\n":
             index += 1
             advance()
-        default: throw fail("Expected a newline after the value.")
+        default: throw fail(String(localized: "Expected a newline after the value."))
         }
     }
 
@@ -253,10 +256,10 @@ struct TOMLParser {
         skipSpaces()
         let path = try parseKey()
         skipSpaces()
-        guard peek == "]" else { throw fail("Expected ] to close the table header.") }
+        guard peek == "]" else { throw fail(String(localized: "Expected ] to close the table header.")) }
         index += 1
         if isArray {
-            guard peek == "]" else { throw fail("Expected ]] to close the array of tables header.") }
+            guard peek == "]" else { throw fail(String(localized: "Expected ]] to close the array of tables header.")) }
             index += 1
         }
         let headerLine = line
@@ -294,10 +297,10 @@ struct TOMLParser {
                 table.entries[key] = .table(next)
                 table = next
             case .table(let next):
-                if next.origin == .inline { throw fail("Cannot extend the inline table \(key).") }
+                if next.origin == .inline { throw fail(String(localized: "Cannot extend the inline table \(key).")) }
                 table = next
             case .tableArray(let tables): table = tables[tables.count - 1]
-            case .value: throw fail("The key \(key) is already defined as a value.")
+            case .value: throw fail(String(localized: "The key \(key) is already defined as a value."))
             }
         }
         return table
@@ -314,8 +317,9 @@ struct TOMLParser {
         case .table(let table) where table.origin == .implicit:
             table.origin = .header
             return table
-        case .table: throw fail("The table \(path.joined(separator: ".")) is defined twice.")
-        case .tableArray, .value: throw fail("The key \(path.joined(separator: ".")) is already defined.")
+        case .table: throw fail(String(localized: "The table \(path.joined(separator: ".")) is defined twice."))
+        case .tableArray, .value:
+            throw fail(String(localized: "The key \(path.joined(separator: ".")) is already defined."))
         }
     }
 
@@ -326,7 +330,7 @@ struct TOMLParser {
         switch parent.entries[name] {
         case nil: parent.entries[name] = .tableArray([table])
         case .tableArray(let tables): parent.entries[name] = .tableArray(tables + [table])
-        default: throw fail("The key \(path.joined(separator: ".")) is already defined.")
+        default: throw fail(String(localized: "The key \(path.joined(separator: ".")) is already defined."))
         }
         return table
     }
@@ -351,7 +355,9 @@ struct TOMLParser {
     private mutating func parseKeyValue() throws(TOMLError) -> ([String], TOMLValue, Range<Int>) {
         let key = try parseKey()
         skipSpaces()
-        guard peek == "=" else { throw fail("Expected = after the key \(key.joined(separator: ".")).") }
+        guard peek == "=" else {
+            throw fail(String(localized: "Expected = after the key \(key.joined(separator: "."))."))
+        }
         index += 1
         skipSpaces()
         let start = index
@@ -370,12 +376,16 @@ struct TOMLParser {
             case .table(let next) where next.origin == .dotted || next.origin == .implicit:
                 next.origin = .dotted
                 target = next
-            default: throw fail("Cannot add dotted key \(key.joined(separator: ".")) to an existing value or table.")
+            default:
+                throw fail(
+                    String(
+                        localized: "Cannot add dotted key \(key.joined(separator: ".")) to an existing value or table.")
+                )
             }
         }
         let name = key[key.count - 1]
         guard target.entries[name] == nil else {
-            throw fail("The key \(key.joined(separator: ".")) is defined twice.")
+            throw fail(String(localized: "The key \(key.joined(separator: ".")) is defined twice."))
         }
         target.entries[name] = .value(value)
     }
@@ -400,15 +410,15 @@ struct TOMLParser {
     private mutating func parseSimpleKey() throws(TOMLError) -> String {
         switch peek {
         case "\"":
-            if starts(with: "\"\"\"") { throw fail("Multi-line strings cannot be keys.") }
+            if starts(with: "\"\"\"") { throw fail(String(localized: "Multi-line strings cannot be keys.")) }
             return try parseBasicString()
         case "'":
-            if starts(with: "'''") { throw fail("Multi-line strings cannot be keys.") }
+            if starts(with: "'''") { throw fail(String(localized: "Multi-line strings cannot be keys.")) }
             return try parseLiteralString()
         default:
             let start = index
             while let scalar = peek, TOMLParser.isBareKey(scalar) { index += 1 }
-            guard index > start else { throw fail("Expected a key.") }
+            guard index > start else { throw fail(String(localized: "Expected a key.")) }
             return String(String.UnicodeScalarView(scalars[start..<index]))
         }
     }
@@ -416,7 +426,7 @@ struct TOMLParser {
     // MARK: Values
 
     private mutating func parseValue() throws(TOMLError) -> TOMLValue {
-        guard let scalar = peek else { throw fail("Expected a value.") }
+        guard let scalar = peek else { throw fail(String(localized: "Expected a value.")) }
         switch scalar {
         case "\"":
             return .string(starts(with: "\"\"\"") ? try parseMultilineBasicString() : try parseBasicString())
@@ -458,7 +468,7 @@ struct TOMLParser {
             case "]":
                 index += 1
                 return .array(values)
-            default: throw fail("Expected , or ] in the array.")
+            default: throw fail(String(localized: "Expected , or ] in the array."))
             }
         }
     }
@@ -482,7 +492,7 @@ struct TOMLParser {
                 index += 1
                 freeze(table)
                 return table.value
-            default: throw fail("Expected , or } in the inline table.")
+            default: throw fail(String(localized: "Expected , or } in the inline table."))
             }
         }
     }
@@ -496,7 +506,7 @@ struct TOMLParser {
         index += 1
         var result = String.UnicodeScalarView()
         while true {
-            guard let scalar = peek, scalar != "\n" else { throw fail("Unterminated string.") }
+            guard let scalar = peek, scalar != "\n" else { throw fail(String(localized: "Unterminated string.")) }
             index += 1
             switch scalar {
             case "\"": return String(result)
@@ -513,7 +523,7 @@ struct TOMLParser {
         skipLeadingNewline()
         var result = String.UnicodeScalarView()
         while true {
-            guard let scalar = peek else { throw fail("Unterminated multi-line string.") }
+            guard let scalar = peek else { throw fail(String(localized: "Unterminated multi-line string.")) }
             if starts(with: "\"\"\"") {
                 index += 3
                 // Up to two quotes may directly precede the closing delimiter.
@@ -554,7 +564,7 @@ struct TOMLParser {
     }
 
     private mutating func parseEscape() throws(TOMLError) -> Unicode.Scalar {
-        guard let scalar = peek else { throw fail("Unterminated escape sequence.") }
+        guard let scalar = peek else { throw fail(String(localized: "Unterminated escape sequence.")) }
         index += 1
         switch scalar {
         case "b": return "\u{08}"
@@ -567,14 +577,14 @@ struct TOMLParser {
         case "\\": return "\\"
         case "u", "U":
             let length = scalar == "u" ? 4 : 8
-            guard index + length <= scalars.count else { throw fail("Incomplete Unicode escape.") }
+            guard index + length <= scalars.count else { throw fail(String(localized: "Incomplete Unicode escape.")) }
             let digits = String(String.UnicodeScalarView(scalars[index..<index + length]))
             index += length
             guard let code = UInt32(digits, radix: 16), let result = Unicode.Scalar(code) else {
-                throw fail("Invalid Unicode escape \\\(scalar)\(digits).")
+                throw fail(String(localized: "Invalid Unicode escape \\\(String(scalar))\(digits)."))
             }
             return result
-        default: throw fail("Invalid escape sequence \\\(scalar).")
+        default: throw fail(String(localized: "Invalid escape sequence \\\(String(scalar))."))
         }
     }
 
@@ -582,7 +592,7 @@ struct TOMLParser {
         index += 1
         let start = index
         while true {
-            guard let scalar = peek, scalar != "\n" else { throw fail("Unterminated string.") }
+            guard let scalar = peek, scalar != "\n" else { throw fail(String(localized: "Unterminated string.")) }
             if scalar == "'" { break }
             try checkAllowed(scalar, inComment: false)
             index += 1
@@ -597,7 +607,7 @@ struct TOMLParser {
         skipLeadingNewline()
         var result = String.UnicodeScalarView()
         while true {
-            guard let scalar = peek else { throw fail("Unterminated multi-line string.") }
+            guard let scalar = peek else { throw fail(String(localized: "Unterminated multi-line string.")) }
             if starts(with: "'''") {
                 index += 3
                 for _ in 0..<2 where peek == "'" {
@@ -625,10 +635,10 @@ struct TOMLParser {
             }
         }
         let token = String(String.UnicodeScalarView(scalars[start..<index]))
-        guard !token.isEmpty else { throw fail("Expected a value.") }
+        guard !token.isEmpty else { throw fail(String(localized: "Expected a value.")) }
         if let value = TOMLParser.number(token) { return value }
         if TOMLParser.isDateTime(token) { return .dateTime(token) }
-        throw fail("Invalid value \(token).")
+        throw fail(String(localized: "Invalid value \(token)."))
     }
 
     private func isDate(_ range: Range<Int>) -> Bool {
@@ -656,6 +666,7 @@ struct TOMLParser {
             return Int64(token.replacing("_", with: "")).map(TOMLValue.integer)
         }
         let float = /[+-]?(?:0|[1-9](?:_?\d)*)(?:\.\d(?:_?\d)*)?(?:[eE][+-]?\d(?:_?\d)*)?/
+        // Not interface text
         guard token.wholeMatch(of: float) != nil, token.contains(where: { ".eE".contains($0) }) else { return nil }
         return Double(token.replacing("_", with: "")).map(TOMLValue.float)
     }

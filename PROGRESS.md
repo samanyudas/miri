@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `feat/352-send-feedback`, based on `main` at `632efc42`
+Updated: 2026-11-10 on branch `feat/350-localization-groundwork`, based on `main` at `766ea76b`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -18,10 +18,12 @@ The public release path and the complete acceptance runs follow.
 
 Sam picked the design of [#352](https://github.com/samanyudas/miri/issues/352), [#351](https://github.com/samanyudas/miri/issues/351), and [#350](https://github.com/samanyudas/miri/issues/350) on 9 November 2026.
 The [decision record](https://github.com/samanyudas/miri/blob/design/350-351-352/docs/design/350-351-352/README.md) on branch `design/350-351-352` holds the picks, and each issue body carries the acceptance criteria they change.
-Branch `feat/352-send-feedback` adds **Send Feedback…** to the menu bar menu, under Copy Diagnostics…, and to the Settings Diagnostics page, and **Copy and Open Bug Report…** in the Copy Diagnostics preview.
-`verify-miri` run `20261110-002537` pressed each control in the running app and saw the browser open the expected GitHub page.
+[#352](https://github.com/samanyudas/miri/issues/352) closed on 10 November 2026 after [#398](https://github.com/samanyudas/miri/pull/398) merged as `766ea76b`.
 [#394](https://github.com/samanyudas/miri/issues/394) tracks simpler public issue forms before the public release.
-Next: the #350 groundwork with an English copy pass, then #351, then the translations.
+Branch `feat/350-localization-groundwork` moves every interface text in `Sources/Miri` and `Sources/MiriCore` into `Localization/Localizable.xcstrings`, which holds only English so far.
+`make strings` fails on text that is not localized where it stands, and `verify-miri relaunch --language` starts Miri in another language without changing the Mac's.
+The 8 actions named "monitor" now say "display".
+Next: #351, then the #350 translations.
 
 ## Desktop at the shared edge while columns slide back in
 

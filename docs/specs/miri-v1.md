@@ -361,10 +361,10 @@ The following table records the selected v1 defaults without claiming tested act
 | Focus column right | Control-Option-Right | Control-Option-L, Control-Option-D |
 | Focus window above within column | Control-Option-Up | Control-Option-K, Control-Option-W |
 | Focus window below within column | Control-Option-Down | Control-Option-J, Control-Option-S |
-| Focus monitor left | Control-Option-Command-Left | Control-Option-Command-H, Control-Option-Command-A |
-| Focus monitor right | Control-Option-Command-Right | Control-Option-Command-L, Control-Option-Command-D |
-| Focus monitor above | Control-Option-Command-Up | Control-Option-Command-K, Control-Option-Command-W |
-| Focus monitor below | Control-Option-Command-Down | Control-Option-Command-J, Control-Option-Command-S |
+| Focus display left | Control-Option-Command-Left | Control-Option-Command-H, Control-Option-Command-A |
+| Focus display right | Control-Option-Command-Right | Control-Option-Command-L, Control-Option-Command-D |
+| Focus display above | Control-Option-Command-Up | Control-Option-Command-K, Control-Option-Command-W |
+| Focus display below | Control-Option-Command-Down | Control-Option-Command-J, Control-Option-Command-S |
 | Jump to column 1 through 9 | Control-Option-1 through Control-Option-9 | |
 | Move column left | Control-Option-Shift-Left | Control-Option-Shift-H, Control-Option-Shift-A |
 | Move column right | Control-Option-Shift-Right | Control-Option-Shift-L, Control-Option-Shift-D |
@@ -372,8 +372,8 @@ The following table records the selected v1 defaults without claiming tested act
 | Move window down within column | Control-Option-Shift-Down | Control-Option-Shift-J, Control-Option-Shift-S |
 | Move column to first position | Control-Option-Command-Shift-Left | Control-Option-Command-Shift-H, Control-Option-Command-Shift-A |
 | Move column to last position | Control-Option-Command-Shift-Right | Control-Option-Command-Shift-L, Control-Option-Command-Shift-D |
-| Move column to monitor above | Control-Option-Command-Shift-Up | Control-Option-Command-Shift-K, Control-Option-Command-Shift-W |
-| Move column to monitor below | Control-Option-Command-Shift-Down | Control-Option-Command-Shift-J, Control-Option-Command-Shift-S |
+| Move column to display above | Control-Option-Command-Shift-Up | Control-Option-Command-Shift-K, Control-Option-Command-Shift-W |
+| Move column to display below | Control-Option-Command-Shift-Down | Control-Option-Command-Shift-J, Control-Option-Command-Shift-S |
 | Send column to next display | Control-Option-N | |
 | Stop window manager | Control-Option-Q | |
 | Cycle preset widths forward | Control-Option-R | |

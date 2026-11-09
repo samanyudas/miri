@@ -116,73 +116,99 @@ public struct DefaultBinding: Sendable {
     /// the action is app-owned or deferred to v2. `decisions/keybinding reference.md` names each one and the reason.
     public static let table: [DefaultBinding] =
         [
-            DefaultBinding("Focus column left", "window_focus_west", ctrlAlt("leftarrow"), ctrlAlt("h"), ctrlAlt("a")),
             DefaultBinding(
-                "Focus column right", "window_focus_east", ctrlAlt("rightarrow"), ctrlAlt("l"), ctrlAlt("d")),
+                String(localized: "Focus column left"), "window_focus_west", ctrlAlt("leftarrow"), ctrlAlt("h"),
+                ctrlAlt("a")),
             DefaultBinding(
-                "Focus window above within column", "window_focus_north", ctrlAlt("uparrow"), ctrlAlt("k"),
+                String(localized: "Focus column right"), "window_focus_east", ctrlAlt("rightarrow"), ctrlAlt("l"),
+                ctrlAlt("d")),
+            DefaultBinding(
+                String(localized: "Focus window above within column"), "window_focus_north", ctrlAlt("uparrow"),
+                ctrlAlt("k"),
                 ctrlAlt("w")),
             DefaultBinding(
-                "Focus window below within column", "window_focus_south", ctrlAlt("downarrow"), ctrlAlt("j"),
+                String(localized: "Focus window below within column"), "window_focus_south", ctrlAlt("downarrow"),
+                ctrlAlt("j"),
                 ctrlAlt("s")),
             DefaultBinding(
-                "Focus monitor left", "window_focusdisplay_west", ctrlAlt("leftarrow", .command),
+                String(localized: "Focus display left"), "window_focusdisplay_west", ctrlAlt("leftarrow", .command),
                 ctrlAlt("h", .command), ctrlAlt("a", .command), version: 5),
             DefaultBinding(
-                "Focus monitor right", "window_focusdisplay_east", ctrlAlt("rightarrow", .command),
+                String(localized: "Focus display right"), "window_focusdisplay_east", ctrlAlt("rightarrow", .command),
                 ctrlAlt("l", .command), ctrlAlt("d", .command), version: 5),
             DefaultBinding(
-                "Focus monitor above", "window_focusdisplay_north", ctrlAlt("uparrow", .command),
+                String(localized: "Focus display above"), "window_focusdisplay_north", ctrlAlt("uparrow", .command),
                 ctrlAlt("k", .command), ctrlAlt("w", .command), version: 2),
             DefaultBinding(
-                "Focus monitor below", "window_focusdisplay_south", ctrlAlt("downarrow", .command),
+                String(localized: "Focus display below"), "window_focusdisplay_south", ctrlAlt("downarrow", .command),
                 ctrlAlt("j", .command), ctrlAlt("s", .command), version: 2),
         ]
-        + (1...9).map { DefaultBinding("Jump to column \($0)", "window_focus_\($0)", ctrlAlt("\($0)")) }
+        + (1...9).map {
+            DefaultBinding(String(localized: "Jump to column \($0)"), "window_focus_\($0)", ctrlAlt("\($0)"))
+        }
         + [
             DefaultBinding(
-                "Move column left", "window_swap_west", ctrlAlt("leftarrow", .shift), ctrlAlt("h", .shift),
+                String(localized: "Move column left"), "window_swap_west", ctrlAlt("leftarrow", .shift),
+                ctrlAlt("h", .shift),
                 ctrlAlt("a", .shift)),
             DefaultBinding(
-                "Move column right", "window_swap_east", ctrlAlt("rightarrow", .shift), ctrlAlt("l", .shift),
+                String(localized: "Move column right"), "window_swap_east", ctrlAlt("rightarrow", .shift),
+                ctrlAlt("l", .shift),
                 ctrlAlt("d", .shift)),
             DefaultBinding(
-                "Move window up within column", "window_swap_north", ctrlAlt("uparrow", .shift), ctrlAlt("k", .shift),
+                String(localized: "Move window up within column"), "window_swap_north", ctrlAlt("uparrow", .shift),
+                ctrlAlt("k", .shift),
                 ctrlAlt("w", .shift)),
             DefaultBinding(
-                "Move window down within column", "window_swap_south", ctrlAlt("downarrow", .shift),
+                String(localized: "Move window down within column"), "window_swap_south", ctrlAlt("downarrow", .shift),
                 ctrlAlt("j", .shift), ctrlAlt("s", .shift)),
             DefaultBinding(
-                "Move column to first position", "window_swap_first", ctrlAlt("leftarrow", .command, .shift),
+                String(localized: "Move column to first position"), "window_swap_first",
+                ctrlAlt("leftarrow", .command, .shift),
                 ctrlAlt("h", .command, .shift), ctrlAlt("a", .command, .shift), version: 6),
             DefaultBinding(
-                "Move column to last position", "window_swap_last", ctrlAlt("rightarrow", .command, .shift),
+                String(localized: "Move column to last position"), "window_swap_last",
+                ctrlAlt("rightarrow", .command, .shift),
                 ctrlAlt("l", .command, .shift), ctrlAlt("d", .command, .shift), version: 6),
             DefaultBinding(
-                "Move column to monitor above", "window_movedisplay_north", ctrlAlt("uparrow", .command, .shift),
+                String(localized: "Move column to display above"), "window_movedisplay_north",
+                ctrlAlt("uparrow", .command, .shift),
                 ctrlAlt("k", .command, .shift), ctrlAlt("w", .command, .shift), version: 2),
             DefaultBinding(
-                "Move column to monitor below", "window_movedisplay_south", ctrlAlt("downarrow", .command, .shift),
+                String(localized: "Move column to display below"), "window_movedisplay_south",
+                ctrlAlt("downarrow", .command, .shift),
                 ctrlAlt("j", .command, .shift), ctrlAlt("s", .command, .shift), version: 2),
-            DefaultBinding("Send column to next display", "window_nextdisplay", ctrlAlt("n")),
-            DefaultBinding("Cycle preset widths forward", "window_resize", ctrlAlt("r")),
+            DefaultBinding(String(localized: "Send column to next display"), "window_nextdisplay", ctrlAlt("n")),
+            DefaultBinding(String(localized: "Cycle preset widths forward"), "window_resize", ctrlAlt("r")),
             // Version 1 offered this as `window_fullwidth`, which the engine still reads as `window_maximize`.
-            DefaultBinding("Maximize or restore window", "window_maximize", ctrlAlt("f")),
-            DefaultBinding("Centre column", "window_center", ctrlAlt("c")),
-            DefaultBinding("Make column wider", "window_step_grow", ctrlAlt("equal"), version: 2),
-            DefaultBinding("Make column narrower", "window_step_shrink", ctrlAlt("minus"), version: 2),
-            DefaultBinding("Make window taller", "window_vertical_step_grow", ctrlAlt("equal", .shift), version: 2),
-            DefaultBinding("Make window shorter", "window_vertical_step_shrink", ctrlAlt("minus", .shift), version: 2),
-            DefaultBinding("Equalize window heights within column", "window_equalize", ctrlAlt("0")),
-            DefaultBinding("Stack focused window into left column", "window_stack_west", ctrlAlt("leftbracket")),
-            DefaultBinding("Stack focused window into right column", "window_stack_east", ctrlAlt("rightbracket")),
-            DefaultBinding("Pop focused window out to right", "window_unstack_east", ctrlAlt("rightbracket", .shift)),
-            DefaultBinding("Pop focused window out to left", "window_unstack_west", ctrlAlt("leftbracket", .shift)),
-            DefaultBinding("Float or unfloat focused window", "window_manage", ctrlAlt("t")),
-            DefaultBinding("Focus first column", "window_focus_first"),
-            DefaultBinding("Focus last column", "window_focus_last"),
-            DefaultBinding("Move column to monitor left", "window_movedisplay_west", version: 2),
-            DefaultBinding("Move column to monitor right", "window_movedisplay_east", version: 2),
+            DefaultBinding(String(localized: "Maximize or restore window"), "window_maximize", ctrlAlt("f")),
+            DefaultBinding(String(localized: "Centre column"), "window_center", ctrlAlt("c")),
+            DefaultBinding(String(localized: "Make column wider"), "window_step_grow", ctrlAlt("equal"), version: 2),
+            DefaultBinding(
+                String(localized: "Make column narrower"), "window_step_shrink", ctrlAlt("minus"), version: 2),
+            DefaultBinding(
+                String(localized: "Make window taller"), "window_vertical_step_grow", ctrlAlt("equal", .shift),
+                version: 2),
+            DefaultBinding(
+                String(localized: "Make window shorter"), "window_vertical_step_shrink", ctrlAlt("minus", .shift),
+                version: 2),
+            DefaultBinding(String(localized: "Equalize window heights within column"), "window_equalize", ctrlAlt("0")),
+            DefaultBinding(
+                String(localized: "Stack focused window into left column"), "window_stack_west", ctrlAlt("leftbracket")),
+            DefaultBinding(
+                String(localized: "Stack focused window into right column"), "window_stack_east",
+                ctrlAlt("rightbracket")),
+            DefaultBinding(
+                String(localized: "Pop focused window out to right"), "window_unstack_east",
+                ctrlAlt("rightbracket", .shift)),
+            DefaultBinding(
+                String(localized: "Pop focused window out to left"), "window_unstack_west",
+                ctrlAlt("leftbracket", .shift)),
+            DefaultBinding(String(localized: "Float or unfloat focused window"), "window_manage", ctrlAlt("t")),
+            DefaultBinding(String(localized: "Focus first column"), "window_focus_first"),
+            DefaultBinding(String(localized: "Focus last column"), "window_focus_last"),
+            DefaultBinding(String(localized: "Move column to display left"), "window_movedisplay_west", version: 2),
+            DefaultBinding(String(localized: "Move column to display right"), "window_movedisplay_east", version: 2),
         ]
 
     /// The newest version in the table or in `changed`. Miri records it after offering the defaults.
@@ -280,7 +306,8 @@ public struct DefaultBinding: Sendable {
         case .integer(let version): offered = Int(clamping: version)
         default:
             throw ConfigurationIssue.invalidValue(
-                key: "miri.default_bindings_version", message: "miri.default_bindings_version must be a whole number.")
+                key: "miri.default_bindings_version",
+                message: String(localized: "miri.default_bindings_version must be a whole number."))
         }
         guard offered < currentVersion else { return document }
 
@@ -395,7 +422,8 @@ public struct DefaultBinding: Sendable {
     static func inspect(in document: TOMLDocument, layout: KeyLayout = .positional) -> BindingInspection {
         guard let bindings = document.value(at: ["bindings"]) else { return .usable(droppedKeyIssue: nil) }
         guard case .table(let entries) = bindings else {
-            return .rejected(.invalidValue(key: "bindings", message: "bindings must be a table of shortcuts."))
+            return .rejected(
+                .invalidValue(key: "bindings", message: String(localized: "bindings must be a table of shortcuts.")))
         }
         var droppedKeyIssue: ConfigurationIssue?
         for (command, value) in entries.sorted(by: { $0.key < $1.key }) {
@@ -410,12 +438,16 @@ public struct DefaultBinding: Sendable {
                 guard case .string(let text) = value else {
                     return .rejected(
                         .invalidValue(
-                            key: path, message: "\(path) must be a shortcut string or an array of shortcut strings."))
+                            key: path,
+                            message: String(
+                                localized: "\(path) must be a shortcut string or an array of shortcut strings.")))
                 }
                 texts.append(text)
             }
             guard texts.isEmpty || EngineCommand.canonical(command) != nil else {
-                return .rejected(.invalidValue(key: path, message: "\(path) names a command the engine does not know."))
+                return .rejected(
+                    .invalidValue(
+                        key: path, message: String(localized: "\(path) names a command the engine does not know.")))
             }
             for text in texts {
                 guard let problem = EngineKey.problem(in: text, layout: layout) else { continue }

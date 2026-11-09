@@ -85,7 +85,7 @@ public enum EngineState: Equatable, Sendable {
             process = launched
             state = .running(pid: launched.pid)
         } catch {
-            state = .failed("The engine could not start. \(error.localizedDescription)")
+            state = .failed(String(localized: "The engine could not start. \(error.localizedDescription)"))
         }
     }
 
@@ -136,7 +136,10 @@ public enum EngineState: Equatable, Sendable {
         }
         guard policy.recordCrash(at: now()) else {
             state = .failed(
-                "The engine stopped unexpectedly \(CrashPolicy.limit) times within five minutes. Miri stopped restarting it."
+                String(
+                    localized:
+                        "The engine stopped unexpectedly \(CrashPolicy.limit) times within five minutes. Miri stopped restarting it."
+                )
             )
             return
         }

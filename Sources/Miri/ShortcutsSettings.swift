@@ -26,20 +26,23 @@ struct ShortcutsSettings: View {
 
     var body: some View {
         SettingsPage(
-            title: "Shortcuts",
+            title: String(localized: "Shortcuts"),
             subtitle:
-                "Press + to add a shortcut. Miri blocks keys another action uses, and warns about macOS clashes."
+                String(
+                    localized:
+                        "Press + to add a shortcut. Miri blocks keys another action uses, and warns about macOS clashes."
+                )
         ) {
             ConfigurationIssueNotice(model: model)
             if let shortcuts = model.shortcuts {
                 HStack(spacing: 10) {
-                    SearchField(text: $filter, prompt: "Search actions or shortcuts")
+                    SearchField(text: $filter, prompt: String(localized: "Search actions or shortcuts"))
                     Button("Reset to Defaults…") { confirmingReset = true }
                         .controlSize(.large)
                         .buttonBorderShape(.roundedRectangle)
                 }
                 if !model.keptDefaults.isEmpty {
-                    SettingsSection("Updated default shortcuts") {
+                    SettingsSection(String(localized: "Updated default shortcuts")) {
                         ForEach(model.keptDefaults, id: \.self) { kept in keptDefaultRow(kept) }
                     }
                 }
@@ -47,7 +50,7 @@ struct ShortcutsSettings: View {
                 let others = shortcuts.others.filter { matches($0) }
                 if actions.isEmpty, others.isEmpty {
                     VStack(spacing: 10) {
-                        Text("No shortcuts match \u{201C}\(filter)\u{201D}.")
+                        Text(String(localized: "No shortcuts match \u{201C}\(filter)\u{201D}."))
                             .font(.rowTitle)
                             .foregroundStyle(Palette.secondaryText)
                         Button("Clear Search") { filter = "" }
@@ -57,7 +60,7 @@ struct ShortcutsSettings: View {
                 }
                 if !actions.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
-                        SectionLabel("Actions")
+                        SectionLabel(String(localized: "Actions"))
                         SettingsGroup {
                             ForEach(actions, id: \.self) { action in
                                 row(action, chords: shortcuts.chords(for: action))
@@ -73,7 +76,7 @@ struct ShortcutsSettings: View {
                 }
                 if !others.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
-                        SettingsSection("Other engine bindings") {
+                        SettingsSection(String(localized: "Other engine bindings")) {
                             ForEach(others, id: \.self) { other in
                                 HStack(spacing: 6) {
                                     Text(other.key)
@@ -233,7 +236,7 @@ struct ShortcutsSettings: View {
 
     private var conflictTitle: String {
         guard let pendingConflict else { return "" }
-        return "\(model.keyLayout.label(for: pendingConflict.chord)) is used by macOS for "
+        return String(localized: "\(model.keyLayout.label(for: pendingConflict.chord)) is used by macOS for ")
             + "\(pendingConflict.shortcut.name)."
     }
 
@@ -241,8 +244,11 @@ struct ShortcutsSettings: View {
     private func keptText(_ kept: KeptDefault, movable: Bool) -> String {
         let wanted = model.keyLayout.label(for: kept.wanted)
         let labels = kept.kept.map(model.keyLayout.label(for:)).formatted(.list(type: .and))
-        let keptSentence = kept.kept.isEmpty ? "\(kept.action.title) has no shortcut now." : "Miri kept \(labels)."
-        return movable ? "\(keptSentence) Using \(wanted) removes it from \(kept.owner)." : keptSentence
+        let keptSentence =
+            kept.kept.isEmpty
+            ? String(localized: "\(kept.action.title) has no shortcut now.") : String(localized: "Miri kept \(labels).")
+        return movable
+            ? String(localized: "\(keptSentence) Using \(wanted) removes it from \(kept.owner).") : keptSentence
     }
 
     private func matches(_ action: ShortcutAction, _ shortcuts: Shortcuts) -> Bool {
@@ -262,7 +268,7 @@ struct ShortcutsSettings: View {
         heldModifiers = []
         recording = action
         AccessibilityNotification.Announcement(
-            "Recording a shortcut for \(action.title). Press the keys, or Escape to cancel."
+            String(localized: "Recording a shortcut for \(action.title). Press the keys, or Escape to cancel.")
         ).post()
         recorder.start { event in
             handle(event, for: action)
@@ -290,11 +296,11 @@ struct ShortcutsSettings: View {
                 return
             }
             guard !press.modifiers.isDisjoint(with: [.control, .option, .command]) else {
-                notice = Notice(action: action, text: "Include Control, Option, or Command.")
+                notice = Notice(action: action, text: String(localized: "Include Control, Option, or Command."))
                 return
             }
             guard let name = model.keyLayout.name(for: press.keyCode) else {
-                notice = Notice(action: action, text: "Miri cannot use this key in a shortcut.")
+                notice = Notice(action: action, text: String(localized: "Miri cannot use this key in a shortcut."))
                 return
             }
             stopRecording()
@@ -307,13 +313,15 @@ struct ShortcutsSettings: View {
         switch model.addShortcut(chord, to: action, allowingSystemConflict: allowingSystemConflict) {
         case .added:
             notice = nil
-            AccessibilityNotification.Announcement("\(KeyCap.spoken(label)) added for \(action.title).").post()
+            AccessibilityNotification.Announcement(
+                String(localized: "\(KeyCap.spoken(label)) added for \(action.title).")
+            ).post()
         case .failed:
             notice = nil
         case .rejected(.usedBy(let owner)):
-            notice = Notice(action: action, text: "\(label) is already used by \(owner).")
+            notice = Notice(action: action, text: String(localized: "\(label) is already used by \(owner)."))
         case .rejected(.alreadyAssigned):
-            notice = Notice(action: action, text: "\(label) is already a shortcut for this action.")
+            notice = Notice(action: action, text: String(localized: "\(label) is already a shortcut for this action."))
         case .systemConflict(let shortcut):
             pendingConflict = PendingConflict(chord: chord, action: action, shortcut: shortcut)
         }
@@ -360,7 +368,7 @@ struct RecordingChip: View {
 
     var body: some View {
         HStack(spacing: 2) {
-            Text(modifiers.isEmpty ? "Type Shortcut" : KeyLayout.label(for: modifiers))
+            Text(modifiers.isEmpty ? String(localized: "Type Shortcut") : KeyLayout.label(for: modifiers))
                 .font(.detail.weight(.medium))
                 .foregroundStyle(modifiers.isEmpty ? Palette.secondaryText : Palette.primaryText)
                 .lineLimit(1)

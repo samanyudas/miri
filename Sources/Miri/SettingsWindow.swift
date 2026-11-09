@@ -9,12 +9,12 @@ struct SettingsView: View {
 
         var title: String {
             switch self {
-            case .setup: "Setup"
-            case .general: "General"
-            case .layout: "Layout"
-            case .shortcuts: "Shortcuts"
-            case .gestures: "Gestures"
-            case .diagnostics: "Diagnostics"
+            case .setup: String(localized: "Setup")
+            case .general: String(localized: "General")
+            case .layout: String(localized: "Layout")
+            case .shortcuts: String(localized: "Shortcuts")
+            case .gestures: String(localized: "Gestures")
+            case .diagnostics: String(localized: "Diagnostics")
             }
         }
 
@@ -144,35 +144,53 @@ struct SettingsSidebar: View {
     @ViewBuilder private var managementButton: some View {
         switch model.engineState {
         case .running, .restarting:
-            sidebarButton("Stop Window Management") { model.stop() }
+            sidebarButton(String(localized: "Stop Window Management")) { model.stop() }
         case .failed:
-            sidebarButton("Restart Engine") { model.restart() }
+            sidebarButton(String(localized: "Restart Engine")) { model.restart() }
         case .stopped where !model.startBlockers.isEmpty:
             sidebarButton(AppModel.cancelAutomaticStartTitle) { model.stop() }
         case .stopped:
-            sidebarButton("Start Window Management") { model.start() }
+            sidebarButton(String(localized: "Start Window Management")) { model.start() }
         }
     }
 
     /// Uses the same title as the page and menu buttons, so the action has one name everywhere.
+    /// A title too long for one line, as in some translations, wraps in a drawn button of the same shape,
+    /// because a bordered macOS button keeps one line and cuts the rest off.
     private func sidebarButton(_ title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(.detail.weight(.medium))
-                .lineLimit(1)
-                .minimumScaleFactor(0.9)
-                .frame(maxWidth: .infinity)
+        ViewThatFits(in: .horizontal) {
+            Button(action: action) {
+                Text(title)
+                    .font(.detail.weight(.medium))
+                    .lineLimit(1)
+                    .fixedSize()
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.large)
+            .buttonBorderShape(.roundedRectangle)
+            Button(action: action) {
+                Text(title)
+                    .font(.detail.weight(.medium))
+                    .foregroundStyle(Palette.primaryText)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .frame(maxWidth: .infinity, minHeight: 28)
+                    .background(Palette.chip, in: .rect(cornerRadius: 6))
+                    .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Palette.groupRing, lineWidth: 0.5))
+                    .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.bordered)
-        .controlSize(.large)
-        .buttonBorderShape(.roundedRectangle)
     }
 
     private var versionLine: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let revision = model.gestureEnvironment.engineRevision
-        let engine = revision == "unknown" ? "unknown" : String(revision.prefix(7))
-        return "Version \(version) · Engine \(engine)"
+        let engine = revision == "unknown" ? String(localized: "unknown") : String(revision.prefix(7))
+        return String(localized: "Version \(version) · Engine \(engine)")
     }
 
     private func badge(for page: SettingsView.Page) -> Int {
@@ -228,22 +246,23 @@ extension AppModel {
     }
 
     /// What happens while Miri waits for setup, in the same words in Settings, Set Up Miri, and the menu.
-    static let startsWhenReadySentence = "Miri starts by itself when the required checks pass."
+    static let startsWhenReadySentence = String(localized: "Miri starts by itself when the required checks pass.")
 
     /// The action that keeps Miri stopped while it waits for setup, which would otherwise start it by itself.
-    static let cancelAutomaticStartTitle = "Cancel Automatic Start"
+    static let cancelAutomaticStartTitle = String(localized: "Cancel Automatic Start")
 
     /// A few words for the sidebar about whether Miri is managing windows.
     var sidebarStatus: String {
         switch engineState {
         case .running:
             let count = NSScreen.screens.count
-            return "Running · \(count) \(count == 1 ? "display" : "displays")"
-        case .restarting: return "Restarting the engine"
-        case .failed: return "Stopped after engine failures"
+            // The catalog holds the singular and plural forms.
+            return String(localized: "Running · \(count) displays")
+        case .restarting: return String(localized: "Restarting the engine")
+        case .failed: return String(localized: "Stopped after engine failures")
         case .stopped:
-            if !startBlockers.isEmpty { return "Waiting for setup" }
-            return stoppedByUser ? "Stopped by you" : "Stopped"
+            if !startBlockers.isEmpty { return String(localized: "Waiting for setup") }
+            return stoppedByUser ? String(localized: "Stopped by you") : String(localized: "Stopped")
         }
     }
 

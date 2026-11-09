@@ -15,7 +15,7 @@ public enum ShortcutAction: Hashable, Sendable {
     public var title: String {
         switch self {
         case .engine(let command): DefaultBinding.row(for: command)?.action ?? command
-        case .stop: "Stop window manager"
+        case .stop: String(localized: "Stop window manager")
         }
     }
 }
@@ -185,7 +185,8 @@ public struct Shortcuts: Sendable {
         for item in items {
             guard case .string(let text) = item else {
                 return .invalidValue(
-                    key: key, message: "\(key) must be a shortcut string or an array of shortcut strings.")
+                    key: key,
+                    message: String(localized: "\(key) must be a shortcut string or an array of shortcut strings."))
             }
             texts.append(text)
         }

@@ -4,7 +4,7 @@
 ENGINE := --manifest-path vendor/paneru/Cargo.toml --target-dir vendor/paneru/target --locked --no-default-features
 SHELL_SCRIPTS := $(shell git ls-files '*.sh' .githooks)
 
-.PHONY: setup pre-push check lint lint-doctor docs harness-tests shell actions compat native doctor swift-lint engine-format engine-lint build test swift-test engine-test e2e package format verify-engine-lifecycle
+.PHONY: setup pre-push check lint lint-doctor docs harness-tests shell actions compat native doctor swift-lint strings strings-update engine-format engine-lint build test swift-test engine-test e2e package format verify-engine-lifecycle
 
 setup:
 	git submodule update --init
@@ -38,13 +38,21 @@ actions:
 compat:
 	python3 scripts/check-compat.py
 
-native: doctor swift-lint engine-lint build test e2e package
+native: doctor swift-lint strings engine-lint build test e2e package
 
 doctor:
 	scripts/doctor.sh native
 
 swift-lint:
 	swift format lint --strict --recursive Sources Tests Package.swift
+
+# Fails on interface text in Sources that is not localized where it stands, or when Localization/Localizable.xcstrings
+# differs from the strings the compiler extracts. `make strings-update` fixes the catalog. It needs macOS.
+strings:
+	scripts/sync-strings.sh --check
+
+strings-update:
+	scripts/sync-strings.sh
 
 engine-format:
 	env -u CARGO_BUILD_TARGET cargo fmt --manifest-path vendor/paneru/Cargo.toml --check

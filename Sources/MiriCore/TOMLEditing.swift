@@ -8,9 +8,12 @@ public enum TOMLEditError: Error, Equatable, Sendable, CustomStringConvertible {
     public var description: String {
         switch self {
         case .notEditable(let path):
-            "Miri cannot change \(path) because the file defines it in a form Miri does not rewrite. Edit it by hand."
+            String(
+                localized:
+                    "Miri cannot change \(path) because the file defines it in a form Miri does not rewrite. Edit it by hand."
+            )
         case .verificationFailed(let path):
-            "Miri could not change \(path) safely, so the file was left unchanged."
+            String(localized: "Miri could not change \(path) safely, so the file was left unchanged.")
         }
     }
 }

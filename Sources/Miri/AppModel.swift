@@ -52,7 +52,7 @@ import ServiceManagement
 
     init(bundle: Bundle = .main) {
         let identifier = bundle.bundleIdentifier ?? "io.github.samanyudas.miri"
-        let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "Miri"
+        let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "Miri"  // Not interface text
         let support = URL.applicationSupportDirectory.appending(path: name, directoryHint: .isDirectory)
         paths = EnginePaths(
             executable: bundle.bundleURL.appending(path: "Contents/Helpers/miri-engine"), support: support,
@@ -256,9 +256,13 @@ import ServiceManagement
 
     /// Why the gesture test cannot start, or `nil` when it can.
     var gestureTestBlocker: String? {
-        guard engineState.isRunning else { return "Start window management to test the swipe." }
-        guard settings.stripGesture != .off else { return "Choose three or four fingers to test the swipe." }
-        if case .conflict = gestureState { return "Change the macOS gesture setting before testing the swipe." }
+        guard engineState.isRunning else { return String(localized: "Start window management to test the swipe.") }
+        guard settings.stripGesture != .off else {
+            return String(localized: "Choose three or four fingers to test the swipe.")
+        }
+        if case .conflict = gestureState {
+            return String(localized: "Change the macOS gesture setting before testing the swipe.")
+        }
         return nil
     }
 
@@ -275,7 +279,7 @@ import ServiceManagement
         refreshSetup()
         if let blocker = gestureTestBlocker { throw GestureTestBlocked(message: blocker) }
         guard let fingers = settings.stripGesture.fingers else {
-            throw GestureTestBlocked(message: "Choose three or four fingers to test the swipe.")
+            throw GestureTestBlocked(message: String(localized: "Choose three or four fingers to test the swipe."))
         }
         gestureTestFingers = fingers
         applyGestureFingers()
@@ -326,7 +330,7 @@ import ServiceManagement
     private func gestureState(for settings: MiriSettings) -> GestureState {
         let conflict =
             settings.stripGesture.fingers.flatMap { gestureCheck(for: $0)?.status }
-            ?? .unableToVerify("Miri has not checked the macOS gesture settings yet.")
+            ?? .unableToVerify(String(localized: "Miri has not checked the macOS gesture settings yet."))
         return GestureState.evaluate(
             preference: settings.stripGesture, reversed: settings.reverseSwipe, verification: gestureVerification,
             environment: gestureEnvironment, conflict: conflict)
@@ -461,7 +465,8 @@ import ServiceManagement
     private func syncLoginItem() {
         let service = SMAppService.mainApp
         guard Self.isInApplicationsFolder else {
-            loginItemError = "Launch at login takes effect after you move Miri to the Applications folder."
+            loginItemError = String(
+                localized: "Launch at login takes effect after you move Miri to the Applications folder.")
             return
         }
         do {
@@ -472,7 +477,7 @@ import ServiceManagement
             }
             loginItemError = nil
         } catch {
-            loginItemError = "Launch at login could not be changed. \(error.localizedDescription)"
+            loginItemError = String(localized: "Launch at login could not be changed. \(error.localizedDescription)")
         }
     }
 }
