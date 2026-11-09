@@ -94,9 +94,7 @@ struct MenuContent: View {
             Button(setupCheckerTitle) { presenter.showSettings(.setup) }
         }
         Button("Copy Diagnostics…") { presenter.show(.diagnostics) }
-        Menu("Help") {
-            Button("Send Feedback…") { NSWorkspace.shared.open(Feedback.formList) }
-        }
+        Button("Send Feedback…") { NSWorkspace.shared.open(Feedback.formList) }
         Divider()
         Button("Quit Miri") { NSApp.terminate(nil) }
             .keyboardShortcut("q")

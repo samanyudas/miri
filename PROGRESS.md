@@ -18,7 +18,7 @@ The public release path and the complete acceptance runs follow.
 
 Sam picked the design of [#352](https://github.com/samanyudas/miri/issues/352), [#351](https://github.com/samanyudas/miri/issues/351), and [#350](https://github.com/samanyudas/miri/issues/350) on 9 November 2026.
 The [decision record](https://github.com/samanyudas/miri/blob/design/350-351-352/docs/design/350-351-352/README.md) on branch `design/350-351-352` holds the picks, and each issue body carries the acceptance criteria they change.
-Branch `feat/352-send-feedback` adds **Send Feedback…** in a Help submenu of the menu bar menu and on the Settings Diagnostics page, and **Copy and Open Bug Report…** in the Copy Diagnostics preview.
+Branch `feat/352-send-feedback` adds **Send Feedback…** to the menu bar menu, under Copy Diagnostics…, and to the Settings Diagnostics page, and **Copy and Open Bug Report…** in the Copy Diagnostics preview.
 `verify-miri` run `20261110-002537` pressed each control in the running app and saw the browser open the expected GitHub page.
 [#394](https://github.com/samanyudas/miri/issues/394) tracks simpler public issue forms before the public release.
 Next: the #350 groundwork with an English copy pass, then #351, then the translations.
