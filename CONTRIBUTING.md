@@ -84,18 +84,6 @@ State which displays and arrangement you tested, and state what remains untested
 
 Use the [template](.github/PULL_REQUEST_TEMPLATE.md).
 Write the title as a conventional commit in plain language, for example `fix(engine): stacked windows no longer go out of reach`.
-In the body, state the problem in a sentence or two, then how you fixed it.
-End the body with the model and harness that did the work.
-
-UI changes need before and after images.
-Motion or timing needs a short video.
-Upload that evidence to GitHub after Sam approves it, as [capture evidence](docs/AI-CONTRIBUTIONS.md#capture-evidence) describes.
-Never commit PR-only screenshots or assets, such as `.github/pr-assets/`, to the pull request branch.
-
-One request is one pull request.
-Split it only when the maintainer asks.
-Outside contributions follow the stricter rule of one problem per pull request.
-
 Open unfinished work as a draft and name what is missing.
 Leave version bumps and release notes to the maintainer.
 
