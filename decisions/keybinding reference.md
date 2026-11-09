@@ -71,6 +71,7 @@ On 7 November 2026, Sam decided that ⌃⌥⌘⇧← and ⌃⌥⌘⇧→ do only
 Before that, a press on a column already at the end moved it to the neighboring display, and the opposite press could not undo the crossing.
 Move column to display above, Move column to display below, and Send column to next display move the column at once.
 Send column to next display visits the displays in screen order: left to right by left edge, then top to bottom.
+Displays at the same origin, such as mirrored displays, follow in display ID order.
 After the last display it wraps to the first, so with two displays it switches between them.
 Focusing a display by any other means leaves this order unchanged.
 On 7 November 2026, Sam chose screen order so that ⌃⌥N reaches every display, including one that touches the current display only at a corner ([#333](https://github.com/samanyudas/miri/issues/333)).
