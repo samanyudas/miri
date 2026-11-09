@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `docs/332-334-closeout`, based on `main` at `015bfd0d`
+Updated: 2026-11-10 on branch `feat/351-shortcut-illustrations`, based on `main` at `f520e5f2`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -20,10 +20,13 @@ Sam picked the design of [#352](https://github.com/samanyudas/miri/issues/352), 
 The [decision record](https://github.com/samanyudas/miri/blob/design/350-351-352/docs/design/350-351-352/README.md) on branch `design/350-351-352` holds the picks, and each issue body carries the acceptance criteria they change.
 [#352](https://github.com/samanyudas/miri/issues/352) closed on 10 November 2026 after [#398](https://github.com/samanyudas/miri/pull/398) merged as `766ea76b`.
 [#394](https://github.com/samanyudas/miri/issues/394) tracks simpler public issue forms before the public release.
-Branch `feat/350-localization-groundwork` moves every interface text in `Sources/Miri` and `Sources/MiriCore` into `Localization/Localizable.xcstrings`, which holds only English so far.
+[#399](https://github.com/samanyudas/miri/pull/399) merged on 10 November 2026 as `015bfd0d`, and moves every interface text in `Sources/Miri` and `Sources/MiriCore` into `Localization/Localizable.xcstrings`, which holds only English so far.
 `make strings` fails on text that is not localized where it stands, and `verify-miri relaunch --language` starts Miri in another language without changing the Mac's.
 The 8 actions named "monitor" now say "display".
-Next: #351, then the #350 translations.
+Branch `feat/351-shortcut-illustrations` adds a preview panel to Settings > Shortcuts, pinned above the list as Sam chose on 10 November 2026.
+It draws a before and after sketch of the action under the pointer or keyboard focus, plays the move once, and shows a caption that VoiceOver reads.
+The scenes live in `Sources/MiriCore/ShortcutSceneCatalog.swift`, and `ShortcutSceneTests` checks them against `decisions/keybinding reference.md`.
+Next: Sam's hand checks of #351, then the #350 translations.
 
 ## Desktop at the shared edge while columns slide back in
 
