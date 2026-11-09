@@ -12,7 +12,8 @@ AppKit controls such as buttons, switches, and the search field are drawn copies
 Every non-English sample is a machine draft for length and layout only, and each sheet that shows one says so.
 Pages are cropped narrower than the real 584 pt content column so that three options fit side by side, and each such sheet says by how much.
 
-The PNG files are in a separate commit that waits for Sam's approval under the media rule in `scripts/check-pushed-media.py`.
+Sam approved pushing these PNG files on 9 November 2026, under the media rule in `scripts/check-pushed-media.py`.
+A changed or new picture needs a new approval.
 
 ## Sheets
 
