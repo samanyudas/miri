@@ -79,20 +79,23 @@ class VerifyMiriTest(unittest.TestCase):
             self.assertIn("free", lock.stdout)
 
     @staticmethod
-    def state(*strips):
-        """A `query state` reply. Each strip is (Space, row, [(window ID, display, floating), ...]) in column order."""
+    def state(*strips, widths=None):
+        """A `query state` reply. Each strip is (Space, row, [(window ID, display, floating), ...]) in column order.
+        Each window is 800 points wide unless `widths` maps its ID to another width."""
+        widths = widths or {}
         return {"virtual_workspaces": [
             {"native_workspace_id": space, "number": row, "windows": [
-                {"window_id": wid, "app_name": f"App{wid}", "title": "private", "display_id": display, "floating": floating}
+                {"window_id": wid, "app_name": f"App{wid}", "title": "private", "display_id": display, "floating": floating,
+                 "frame": {"x": 0, "y": 0, "width": widths.get(wid, 800), "height": 600}}
                 for wid, display, floating in windows]}
             for space, row, windows in strips]}
 
     def test_layout_records_strips_by_window_id_without_titles(self):
         layout = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, None, False), (12, 1, True)])))
         self.assertEqual(layout, [
-            {"window_id": 10, "app": "App10", "space": 6, "row": 1, "display": 1, "position": 0},
-            {"window_id": 11, "app": "App11", "space": 6, "row": 1, "display": 1, "position": 1},
-            {"window_id": 12, "app": "App12", "space": 6, "row": 1, "display": 1, "position": None},
+            {"window_id": 10, "app": "App10", "space": 6, "row": 1, "display": 1, "position": 0, "width": 800},
+            {"window_id": 11, "app": "App11", "space": 6, "row": 1, "display": 1, "position": 1, "width": 800},
+            {"window_id": 12, "app": "App12", "space": 6, "row": 1, "display": 1, "position": None, "width": 800},
         ])
         self.assertNotIn("private", json.dumps(layout))
 
@@ -139,6 +142,22 @@ class VerifyMiriTest(unittest.TestCase):
         before = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False), (12, 1, False)])))
         after = self.vm.layout(self.state((6, 1, [(99, 1, False), (11, 1, False), (12, 1, False)])))
         self.assertEqual(self.vm.layout_differences(before, after), [])
+
+    def test_a_window_of_another_width_is_reported(self):
+        # A harness drag once left a window 1070 points wide instead of 854, in its strip and position.
+        before = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False)]), widths={11: 854}))
+        after = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False)]), widths={11: 1070}))
+        differences = self.vm.layout_differences(before, after)
+        self.assertEqual(len(differences), 1, differences)
+        self.assertIn("App11 window 11 was 854 pt wide, now 1070 pt", differences[0])
+
+    def test_a_width_within_the_tolerance_or_unrecorded_is_not_reported(self):
+        before = self.vm.layout(self.state((6, 1, [(10, 1, False)]), widths={10: 854}))
+        after = self.vm.layout(self.state((6, 1, [(10, 1, False)]), widths={10: 856}))
+        self.assertEqual(self.vm.layout_differences(before, after), [])
+        unrecorded = [{key: value for key, value in window.items() if key != "width"} for window in before]
+        self.assertEqual(self.vm.layout_differences(unrecorded, self.vm.layout(self.state(
+            (6, 1, [(10, 1, False)]), widths={10: 1070}))), [])
 
     def test_a_window_that_floats_now_is_reported(self):
         before = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False)])))

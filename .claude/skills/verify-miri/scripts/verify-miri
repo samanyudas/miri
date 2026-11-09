@@ -258,8 +258,8 @@ def focus_record(run: dict) -> dict:
 
 
 def layout(state: dict) -> list[dict]:
-    """Where each managed window sits: its Space, row, the row's display, and its position among the row's tiled
-    windows, which the engine lists in column order. Keeps app names and window IDs, never titles."""
+    """Where each managed window sits: its Space, row, the row's display, its position among the row's tiled
+    windows, which the engine lists in column order, and its width. Keeps app names and window IDs, never titles."""
     records = []
     for workspace in state.get("virtual_workspaces", []):
         windows = workspace.get("windows", [])
@@ -271,7 +271,8 @@ def layout(state: dict) -> list[dict]:
             records.append({"window_id": window["window_id"], "app": window.get("app_name"),
                             "space": workspace.get("native_workspace_id"), "row": workspace.get("number"),
                             "display": display,
-                            "position": None if window.get("floating") else tiled.index(window["window_id"])})
+                            "position": None if window.get("floating") else tiled.index(window["window_id"]),
+                            "width": (window.get("frame") or {}).get("width")})
     return records
 
 
@@ -290,9 +291,14 @@ def display_windows(state: dict, display: int) -> list[dict]:
     return list(found.values())
 
 
+# How far a window's width may differ from `begin`, for rounding between the engine's frames.
+WIDTH_TOLERANCE = 2
+
+
 def layout_differences(before: list[dict], after: list[dict]) -> list[str]:
-    """Each window from `before` that is now in another strip, tiles or floats differently, or sits in another order
-    among the windows that stayed in its strip. Closed and new windows do not count, and do not shift the others."""
+    """Each window from `before` that is now in another strip, tiles or floats differently, sits in another order
+    among the windows that stayed in its strip, or is more than WIDTH_TOLERANCE points narrower or wider. Closed and
+    new windows do not count, and do not shift the others. A layout recorded without widths skips the width check."""
     now = {w["window_id"]: w for w in after}
     memberships = {(w["window_id"], w["space"], w["row"]): w for w in after}
     lines = []
@@ -313,8 +319,12 @@ def layout_differences(before: list[dict], after: list[dict]) -> list[str]:
         elif (was["position"] is None) != (current["position"] is None):
             lines.append(f"{label(was)} was {'floating' if was['position'] is None else 'tiled'}, "
                          f"now {'floating' if current['position'] is None else 'tiled'}, in {place(current)}")
-        elif was["position"] is not None:
-            stayed.setdefault((was["space"], was["row"]), []).append((was, current))
+        else:
+            if was["position"] is not None:
+                stayed.setdefault((was["space"], was["row"]), []).append((was, current))
+            if was.get("width") is not None and current.get("width") is not None \
+                    and abs(was["width"] - current["width"]) > WIDTH_TOLERANCE:
+                lines.append(f"{label(was)} was {was['width']:g} pt wide, now {current['width']:g} pt, in {place(current)}")
     for pairs in stayed.values():
         old = [was["window_id"] for was, _ in sorted(pairs, key=lambda pair: pair[0]["position"])]
         new = [current["window_id"] for _, current in sorted(pairs, key=lambda pair: pair[1]["position"])]
@@ -516,7 +526,7 @@ def cmd_begin(args) -> int:
         try:
             recorded = layout(query("state", apps[0]["pid"]))
             (backup / "layout.json").write_text(json.dumps(recorded, indent=2) + "\n")
-            log(run, f"recorded the strip, display, and position of {len(recorded)} windows in {backup / 'layout.json'}")
+            log(run, f"recorded the strip, display, position, and width of {len(recorded)} windows in {backup / 'layout.json'}")
         except Failure as error:
             log(run, f"WARNING: could not record the window layout, so `end` cannot check it: {error}")
         if not quit_app(apps[0]["pid"], run, "previous build"):
@@ -612,7 +622,7 @@ def cmd_end(args) -> int:
             return 1
         else:
             log(run, f"layout check passed: {len(before_layout) - len(gone)} windows are in the strip, display, "
-                     "and position they had at `begin`")
+                     "and position, and have the width, they had at `begin`")
     released = lock("release", "--owner", run["owner"])
     log(run, (released.stdout + released.stderr).strip())
     for problem in problems:
