@@ -70,6 +70,11 @@ Neither shortcut crosses to another display, so a press on a column that is alre
 On 7 November 2026, Sam decided that ⌃⌥⌘⇧← and ⌃⌥⌘⇧→ do only this ([#331](https://github.com/samanyudas/miri/issues/331)).
 Before that, a press on a column already at the end moved it to the neighboring display, and the opposite press could not undo the crossing.
 Move column to display above, Move column to display below, and Send column to next display move the column at once.
+Send column to next display visits the displays in screen order: left to right by left edge, then top to bottom.
+After the last display it wraps to the first, so with two displays it switches between them.
+Focusing a display by any other means leaves this order unchanged.
+On 7 November 2026, Sam chose screen order so that ⌃⌥N reaches every display, including one that touches the current display only at a corner ([#333](https://github.com/samanyudas/miri/issues/333)).
+Before that, the engine took the first other display in its own storage order, so four displays could skip one.
 Every display move takes the whole column, so each stack member moves with it in the same order, and the focused member keeps focus.
 To move one member alone, pop it out into its own column first.
 For Move column to display above, below, left, or right and for Send column to next display, the arriving column goes immediately after the destination's active column, which is the column a display focus would select there.
@@ -185,7 +190,7 @@ Any action not listed here maps directly, and the live run confirmed it.
 | Maximize or restore window | `window_maximize` | None. `window_fullwidth` is the engine's older name for the same command, so a file that binds it keeps working, and Settings lists it under this action. |
 | Focus display above, left, below, or right | `window_focusdisplay_north`, `_west`, `_south`, `_east` | None. Focus goes to the display's last-focused window when it is visible, otherwise to its most visible window. A display with no visible window gets its desktop focused, so its menu bar becomes active and shows Finder. The pointer stays where it is. |
 | Move column to display above, left, below, or right | `window_movedisplay_north`, `_west`, `_south`, `_east` | None. Focus follows the column. |
-| Send column to next display | `window_nextdisplay` | None. Focus follows the column. |
+| Send column to next display | `window_nextdisplay` | None. The next display follows screen order, and focus follows the column. |
 | Stop window manager | | Miri's own shortcut, because the engine `quit` command ends the engine, and the app treats that exit as a crash and restarts it. |
 | Toggle column between stacked and tabbed | | This action is deferred to v2. |
 
