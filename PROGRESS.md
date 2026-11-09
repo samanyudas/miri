@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `fix/351-preview-focus`, based on `main` at `95114845`
+Updated: 2026-11-10 on branch `fix/388-pin-engine`, based on `main` at `5c0bfadc`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -205,7 +205,10 @@ In the 6th, Magnet put its third on the built-in display, and Miri kept T3 Code 
 Under a load average of 19 or more, Magnet applied its shortcut more than 1 s after release, and Miri kept its width as the app's own.
 [paneru#145](https://github.com/samanyudas/paneru/pull/145), merged as `31be78d`, is Sam's choice for that case: while Miri resizes a window it just dropped, a size outside the sizes between its size before the drop and Miri's new size counts as a snapping app's tile, so the window returns to the drop's place.
 In `verify-miri` run `20261108-xdisplay` (load average 4 to 8), 20 of 20 drops returned to the exact slot on the 27-inch display in 0.33 to 1.44 s, 19 of them after macOS had moved the window to the built-in display during the drag.
-Next: drops onto Magnet are checked on `main` before #314 closes.
+#314 closed on 7 November 2026, and the check on `main` found [#388](https://github.com/samanyudas/miri/issues/388): a dropped window that reached its slot's origin while the app was still resizing it kept a narrower width.
+[paneru#147](https://github.com/samanyudas/paneru/pull/147) makes Miri wait while the app's frame still changes, and write the slot again when the app stops short of it.
+It merged into `miri/v0.5.2` as `24fef41`, which branch `fix/388-pin-engine` pins.
+Next: the 20 quarter drops of #388's second criterion on the pinned build, which stay unticked while any drop ends on the wrong display ([#390](https://github.com/samanyudas/miri/issues/390)).
 #277 closed on 6 November 2026 after `verify-miri` run `20261106-131827` on `main` at `5eb9366f`: the row named Rectangle and Magnet, management still started, and the row passed after both quit.
 
 ## Picture-in-Picture resizing
