@@ -94,6 +94,7 @@ struct MenuContent: View {
             Button(setupCheckerTitle) { presenter.showSettings(.setup) }
         }
         Button("Copy Diagnostics…") { presenter.show(.diagnostics) }
+        Button("Send Feedback…") { NSWorkspace.shared.open(Feedback.formList) }
         Divider()
         Button("Quit Miri") { NSApp.terminate(nil) }
             .keyboardShortcut("q")
@@ -151,15 +152,15 @@ struct DiagnosticsView: View {
                         .font(.detail)
                         .foregroundStyle(Palette.secondaryText)
                 }
-                Button("Copy to Clipboard") {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(report, forType: .string)
-                    copied = true
-                    AccessibilityNotification.Announcement("Copied to the clipboard").post()
+                // The person pastes the report into the form's diagnostics field, so Miri sends nothing itself.
+                Button("Copy and Open Bug Report…") {
+                    copy()
+                    NSWorkspace.shared.open(Feedback.bugReport)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(Palette.accentFill)
-                .keyboardShortcut(.defaultAction)
+                Button("Copy to Clipboard") { copy() }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Palette.accentFill)
+                    .keyboardShortcut(.defaultAction)
             }
         }
         .padding(.horizontal, 32)
@@ -175,5 +176,12 @@ struct DiagnosticsView: View {
     private func refresh() {
         report = model.diagnostics()
         copied = false
+    }
+
+    private func copy() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(report, forType: .string)
+        copied = true
+        AccessibilityNotification.Announcement("Copied to the clipboard").post()
     }
 }

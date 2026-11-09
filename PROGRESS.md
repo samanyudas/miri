@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-09 on branch `fix/332-crossing-focus-edge`, based on `main` at `604b8551`
+Updated: 2026-11-10 on branch `feat/352-send-feedback`, based on `main` at `632efc42`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,15 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Bug reports, shortcut illustrations, and localization
+
+Sam picked the design of [#352](https://github.com/samanyudas/miri/issues/352), [#351](https://github.com/samanyudas/miri/issues/351), and [#350](https://github.com/samanyudas/miri/issues/350) on 9 November 2026.
+The [decision record](https://github.com/samanyudas/miri/blob/design/350-351-352/docs/design/350-351-352/README.md) on branch `design/350-351-352` holds the picks, and each issue body carries the acceptance criteria they change.
+Branch `feat/352-send-feedback` adds **Send Feedback…** to the menu bar menu, under Copy Diagnostics…, and to the Settings Diagnostics page, and **Copy and Open Bug Report…** in the Copy Diagnostics preview.
+`verify-miri` run `20261110-002537` pressed each control in the running app and saw the browser open the expected GitHub page.
+[#394](https://github.com/samanyudas/miri/issues/394) tracks simpler public issue forms before the public release.
+Next: the #350 groundwork with an English copy pass, then #351, then the translations.
 
 ## Desktop at the shared edge while columns slide back in
 
