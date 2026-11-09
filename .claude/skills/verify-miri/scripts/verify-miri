@@ -366,6 +366,10 @@ def quit_app(pid: int, run: dict | None = None, label: str = "app") -> bool:
     return bool(app_gone and engine_gone)
 
 
+# The shipped languages that read right to left.
+RIGHT_TO_LEFT = {"ar"}
+
+
 def launch_app(bundle: str, run: dict, label: str, record: bool = False, language: str | None = None,
                double_length: bool = False) -> int:
     """Launch a Miri Developer bundle and wait until its engine answers and session restore has run.
@@ -374,6 +378,9 @@ def launch_app(bundle: str, run: dict, label: str, record: bool = False, languag
     With `double_length`, Foundation shows every translated text twice, as Xcode's double-length pseudolanguage does."""
     started = time.time()
     options = (["-AppleLanguages", f"({language})"] if language else []) + (
+        # This Mac's /Library/Preferences/.GlobalPreferences sets AppleTextDirection to 0, which keeps every app
+        # left to right whatever its language. YES lifts that for the test build only, as a Mac in Arabic would.
+        ["-AppleTextDirection", "YES"] if language and language.split("-")[0] in RIGHT_TO_LEFT else []) + (
         ["-NSDoubleLocalizedStrings", "YES"] if double_length else [])
     options = ["--args", *options] if options else []
     # `open` can exit 1 for a moment after the same bundle quit, as it did in two `relaunch` runs on 10 November 2026.
@@ -817,6 +824,8 @@ def cmd_relaunch(args) -> int:
     try:
         launch_app(run["test_app"], run, "test build", record=True, language=args.language,
                    double_length=args.double_length)
+        run["language"] = args.language
+        save_run(run)
         if args.language or args.double_length:
             log(run, f"relaunched test build in language {args.language or 'of the Mac'}"
                      f"{' with double-length text' if args.double_length else ''}")
@@ -848,7 +857,9 @@ def cmd_cutoff(args) -> int:
         for page in SETTINGS_PAGES:
             tool("axdo", pid, "press", f"miri.page.{page}")
             time.sleep(0.6)
-            result = tool("axdo", pid, "cutoff", check=False)
+            # Measured in the app's language, Chinese and Japanese text takes the app's fallback fonts and widths.
+            language = ["-AppleLanguages", f"({run['language']})"] if run.get("language") else []
+            result = tool("axdo", pid, "cutoff", *language, check=False)
             cut = [line for line in result.splitlines() if line.startswith("CUT ")]
             total += len(cut)
             log(run, f"cutoff {page}: {len(cut)} cut off" + "".join(f"\n  {line}" for line in cut))

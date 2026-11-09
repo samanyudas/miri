@@ -9,7 +9,9 @@
 //   axdo <pid> cutoff                each text in view that is cut off: a one-line text or button whose whole title is
 //                                    wider than its frame, or a text or control that runs past its window's edge.
 //                                    Exits 1 if any. A button whose VoiceOver label differs from its title can be
-//                                    reported wrongly, so check each report in a screenshot.
+//                                    reported wrongly, so check each report in a screenshot. Run it with the app's
+//                                    language, such as `-AppleLanguages (ja)`, so Chinese and Japanese text measures
+//                                    with the same fallback fonts as in the app.
 //   axdo frontmost                   the process ID of the frontmost app
 //   axdo builtin-display             the display ID of the built-in display, or nothing when none is active
 //   axdo hide <bundle id>            hides each running app with that bundle ID, as Command-H does, and prints one
@@ -208,7 +210,9 @@ case "cutoff":
         guard let bounds = frame(window) else { continue }
         walk(window) { element, _ in
             let role = text(element, kAXRoleAttribute) ?? ""
-            guard role != kAXWindowRole as String, let box = frame(element), box.width > 0, box.height > 0,
+            // Miri's segmented controls report frames up to 69 points away from where they draw, so skip them.
+            guard role != kAXWindowRole as String, role != kAXRadioButtonRole as String,
+                let box = frame(element), box.width > 0, box.height > 0,
                 box.maxY > bounds.minY, box.minY < bounds.maxY  // in view, not scrolled away
             else { return }
             let label = [text(element, kAXValueAttribute), text(element, kAXTitleAttribute), text(element, kAXDescriptionAttribute)]
@@ -221,9 +225,9 @@ case "cutoff":
                 box.width >= 40, box.height <= 30  // a text button on one line, not an icon or a window button
             {
                 // Buttons report no font. A push button uses the 13-point system font, a small one (20 points high)
-                // the 11-point font, with about 8 points on each side.
+                // the 11-point font, with at least 6 points on each side.
                 let size: CGFloat = box.height <= 21 ? 11 : 13
-                let needed = (label as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: size)]).width + 16
+                let needed = (label as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: size)]).width + 12
                 if needed > box.width + 1 { problem = "title needs \(Int(needed)) pt, has \(Int(box.width)) pt" }
             } else if role == kAXStaticTextRole as String, let drawn = text(element, kAXValueAttribute), drawn == label,
                 (text(element, kAXDescriptionAttribute) ?? "").isEmpty,  // else the value is VoiceOver's, not drawn

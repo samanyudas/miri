@@ -6215,7 +6215,7 @@
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Menghalangi mulai"
+            "value": "Mencegah Miri dimulai"
           }
         },
         "it": {
@@ -6345,7 +6345,7 @@
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Menghalangi mulai. %@"
+            "value": "Mencegah Miri dimulai. %@"
           }
         },
         "it": {
@@ -7751,7 +7751,7 @@
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Wenn du Finger oder Richtung änderst, ist ein neuer Test nötig."
+            "value": "Wenn du die Anzahl der Finger oder die Richtung änderst, ist ein neuer Test nötig."
           }
         },
         "es": {
@@ -7775,7 +7775,7 @@
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Mengubah jari atau arah memerlukan tes baru."
+            "value": "Mengubah jumlah jari atau arah memerlukan tes baru."
           }
         },
         "it": {
@@ -7799,7 +7799,7 @@
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Als je vingers of richting wijzigt, is een nieuwe test nodig."
+            "value": "Als je het aantal vingers of de richting wijzigt, is een nieuwe test nodig."
           }
         },
         "pl": {
@@ -7811,13 +7811,13 @@
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Alterar os dedos ou a direção exige um novo teste."
+            "value": "Alterar o número de dedos ou a direção exige um novo teste."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Alterar os dedos ou a direção exige um novo teste."
+            "value": "Alterar o número de dedos ou a direção exige um novo teste."
           }
         },
         "ru": {
@@ -7829,7 +7829,7 @@
         "sv": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Om du ändrar fingrar eller riktning behövs ett nytt test."
+            "value": "Om du ändrar antalet fingrar eller riktningen behövs ett nytt test."
           }
         },
         "th": {
@@ -9335,7 +9335,7 @@
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Tutup jendela"
+            "value": "Tutup Jendela"
           }
         },
         "it": {
@@ -9371,7 +9371,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Fechar janela"
+            "value": "Fechar Janela"
           }
         },
         "pt-PT": {
@@ -9879,7 +9879,7 @@
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Vergelijk Miri en de meegeleverde engine met een onschadelijk testprogramma. Aan welk proces de toestemming hoort, blijft onduidelijk tot een handmatige vergelijking met toestemming."
+            "value": "Vergelijk Miri en de meegeleverde engine met een onschadelijk testprogramma. Het blijft onduidelijk aan welk proces de toestemming wordt toegeschreven totdat een vergelijking met handmatig verleende toestemming is uitgevoerd."
           }
         },
         "pl": {
@@ -11421,7 +11421,7 @@
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Salin gambar layar"
+            "value": "Salin gambar layar ke papan klip"
           }
         },
         "it": {
@@ -11457,13 +11457,13 @@
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Copiar tela"
+            "value": "Copiar tela para área de transferência"
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Copiar imagem do ecrã"
+            "value": "Copiar imagem do ecrã para o clipboard"
           }
         },
         "ru": {
@@ -11551,7 +11551,7 @@
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Salin gambar area terpilih"
+            "value": "Salin gambar area terpilih ke papan klip"
           }
         },
         "it": {
@@ -11587,13 +11587,13 @@
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Copiar seleção"
+            "value": "Copiar seleção para área de transferência"
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Copiar imagem da área selecionada"
+            "value": "Copiar imagem da área selecionada para o clipboard"
           }
         },
         "ru": {
@@ -12019,7 +12019,7 @@
         "vi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Chuyển vòng độ rộng đặt sẵn tới"
+            "value": "Chuyển lần lượt qua các độ rộng đặt sẵn"
           }
         },
         "zh-Hans": {
@@ -13731,127 +13731,127 @@
         "ar": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "حرّر عمليات الربط هذه في جدول bindings في ملف التكوين."
+            "value": "عدّل هذه الاختصارات في ملف التكوين."
           }
         },
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Bearbeite diese Einträge unter bindings in der Konfigurationsdatei."
+            "value": "Bearbeite diese Kurzbefehle in der Konfigurationsdatei."
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Edita estos atajos en la tabla bindings del archivo de configuración."
+            "value": "Edita estos atajos en el archivo de configuración."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Modifiez ces raccourcis dans la table bindings du fichier de configuration."
+            "value": "Modifiez ces raccourcis dans le fichier de configuration."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "इन असाइनमेंट को कॉन्फ़िगरेशन फ़ाइल की bindings टेबल में संपादित करें।"
+            "value": "इन शॉर्टकट को कॉन्फ़िगरेशन फ़ाइल में संपादित करें।"
           }
         },
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Edit entri bindings ini di file konfigurasi."
+            "value": "Edit pintasan ini di file konfigurasi."
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Modifica queste scorciatoie nella tabella bindings del file di configurazione."
+            "value": "Modifica queste scorciatoie nel file di configurazione."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "これらの割り当ては設定ファイルのbindingsで編集してください。"
+            "value": "これらのキー割り当ては設定ファイルで編集してください。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "이 bindings 항목은 구성 파일에서 편집하십시오."
+            "value": "이 단축키는 구성 파일에서 편집하십시오."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Wijzig deze items onder bindings in het configuratiebestand."
+            "value": "Wijzig deze toetscombinaties in het configuratiebestand."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Te przypisania z tabeli bindings zmienia się w pliku konfiguracji."
+            "value": "Edytuj te skróty w pliku konfiguracji."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Edite estas entradas de bindings no arquivo de configuração."
+            "value": "Edite estes atalhos no arquivo de configuração."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Edite estas entradas de bindings no ficheiro de configuração."
+            "value": "Edite estes atalhos no ficheiro de configuração."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Эти привязки из таблицы bindings меняются в файле конфигурации."
+            "value": "Эти сочетания клавиш можно изменить в файле конфигурации."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Redigera de här posterna under bindings i konfigurationsfilen."
+            "value": "Redigera de här kortkommandona i konfigurationsfilen."
           }
         },
         "th": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "แก้ไข bindings เหล่านี้ในไฟล์การกำหนดค่า"
+            "value": "แก้ไขปุ่มลัดเหล่านี้ในไฟล์การกำหนดค่า"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Bu atamaları yapılandırma dosyasının bindings tablosunda düzenleyin."
+            "value": "Bu kestirmeleri yapılandırma dosyasında düzenleyin."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ці прив’язки з таблиці bindings змінюються у файлі конфігурації."
+            "value": "Ці скорочення можна змінити у файлі конфігурації."
           }
         },
         "vi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Sửa các bindings này trong tệp cấu hình."
+            "value": "Sửa các phím tắt này trong tệp cấu hình."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "请在配置文件的 bindings 中编辑这些绑定。"
+            "value": "请在配置文件中编辑这些快捷键。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "請在設定檔的bindings中編輯這些綁定。"
+            "value": "請在設定檔中編輯這些快速鍵。"
           }
         }
       }
@@ -14489,7 +14489,7 @@
         "vi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Tiến trình bộ máy %d. Chưa xác định được quyền."
+            "value": "Tiến trình bộ máy %d. Chưa rõ macOS ghi nhận quyền cho tiến trình nào."
           }
         },
         "zh-Hans": {
@@ -14517,7 +14517,7 @@
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Engine vertraut: %1$@. AX-Lesen: %2$d. Rolle: %3$@."
+            "value": "Engine vertrauenswürdig: %1$@. AX-Lesen: %2$d. Rolle: %3$@."
           }
         },
         "en": {
@@ -14559,7 +14559,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "エンジンの信頼：%1$@。AX読み取り：%2$d。役割：%3$@。"
+            "value": "エンジンの信頼状態：%1$@。AX読み取り：%2$d。役割：%3$@。"
           }
         },
         "ko": {
@@ -14631,13 +14631,13 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "引擎已信任：%1$@。AX 读取：%2$d。角色：%3$@。"
+            "value": "引擎受信任状态：%1$@。AX 读取：%2$d。角色：%3$@。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "引擎已信任：%1$@。AX讀取：%2$d。角色：%3$@。"
+            "value": "引擎受信任狀態：%1$@。AX讀取：%2$d。角色：%3$@。"
           }
         }
       }
@@ -17023,7 +17023,7 @@
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Rendi fluttuante o fissa la finestra attiva"
+            "value": "Attiva o disattiva la modalità fluttuante della finestra attiva"
           }
         },
         "ja": {
@@ -17047,7 +17047,7 @@
         "pl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Przełącz pływanie aktywnego okna"
+            "value": "Przełącz tryb pływający aktywnego okna"
           }
         },
         "pt-BR": {
@@ -20445,7 +20445,7 @@
         "ru": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Рекомендуется четыре. Три пальца могут конфликтовать с «Перетягиванием тремя пальцами»."
+            "value": "Рекомендуется четыре. Смахивание тремя пальцами может конфликтовать с функцией «Перетягивание тремя пальцами»."
           }
         },
         "sv": {
@@ -20469,7 +20469,7 @@
         "uk": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Рекомендовано чотири. Три пальці можуть конфліктувати з «Перетягуванням трьома пальцями»."
+            "value": "Рекомендовано чотири. Змахування трьома пальцями може конфліктувати з функцією «Перетягування трьома пальцями»."
           }
         },
         "vi": {
@@ -21047,7 +21047,7 @@
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Masuk ke layar penuh"
+            "value": "Masuk ke Layar Penuh"
           }
         },
         "it": {
@@ -21083,7 +21083,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Entrar em tela cheia"
+            "value": "Entrar em Tela Cheia"
           }
         },
         "pt-PT": {
@@ -24805,55 +24805,55 @@
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Sperrbildschirm"
+            "value": "Bildschirm sperren"
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Pantalla de bloqueo"
+            "value": "Bloquear pantalla"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Écran verrouillé"
+            "value": "Verrouiller l’écran"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "लॉक स्क्रीन"
+            "value": "स्क्रीन लॉक करें"
           }
         },
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Layar Terkunci"
+            "value": "Kunci Layar"
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Schermata di blocco"
+            "value": "Blocca schermo"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "ロック画面"
+            "value": "画面をロック"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "잠금 화면"
+            "value": "화면 잠금"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Toegangs­scherm"
+            "value": "Vergrendel scherm"
           }
         },
         "pl": {
@@ -24865,13 +24865,13 @@
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Tela Bloqueada"
+            "value": "Bloquear Tela"
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ecrã bloqueado"
+            "value": "Bloquear ecrã"
           }
         },
         "ru": {
@@ -24883,19 +24883,19 @@
         "sv": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Låsskärmen"
+            "value": "Lås skärm"
           }
         },
         "th": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "หน้าจอล็อค"
+            "value": "ล็อคหน้าจอ"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Kilitli Ekran"
+            "value": "Ekranı Kilitle"
           }
         },
         "uk": {
@@ -24907,19 +24907,19 @@
         "vi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Màn hình khóa"
+            "value": "Khóa màn hình"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "锁屏"
+            "value": "锁定屏幕"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "鎖定畫面"
+            "value": "鎖定螢幕"
           }
         }
       }
@@ -29009,7 +29009,7 @@
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Miri vertraut: %1$@. AX-Lesen: %2$d. Rolle: %3$@."
+            "value": "Miri vertrauenswürdig: %1$@. AX-Lesen: %2$d. Rolle: %3$@."
           }
         },
         "en": {
@@ -29051,7 +29051,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Miriの信頼：%1$@。AX読み取り：%2$d。役割：%3$@。"
+            "value": "Miriの信頼状態：%1$@。AX読み取り：%2$d。役割：%3$@。"
           }
         },
         "ko": {
@@ -29123,13 +29123,13 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Miri 已信任：%1$@。AX 读取：%2$d。角色：%3$@。"
+            "value": "Miri 受信任状态：%1$@。AX 读取：%2$d。角色：%3$@。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Miri已信任：%1$@。AX讀取：%2$d。角色：%3$@。"
+            "value": "Miri受信任狀態：%1$@。AX讀取：%2$d。角色：%3$@。"
           }
         }
       }
@@ -32425,7 +32425,7 @@
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Tab baru"
+            "value": "Tab Baru"
           }
         },
         "it": {
@@ -32461,7 +32461,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Nova aba"
+            "value": "Nova Aba"
           }
         },
         "pt-PT": {
@@ -36295,127 +36295,127 @@
         "ar": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "عمليات ربط أخرى للمحرك (bindings)"
+            "value": "اختصارات المحرك الأخرى"
           }
         },
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Andere Engine-Belegungen (bindings)"
+            "value": "Andere Engine-Kurzbefehle"
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Otros atajos del motor (bindings)"
+            "value": "Otros atajos del motor"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Autres raccourcis du moteur (bindings)"
+            "value": "Autres raccourcis du moteur"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "इंजन के अन्य असाइनमेंट (bindings)"
+            "value": "इंजन के अन्य शॉर्टकट"
           }
         },
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Entri bindings mesin lainnya"
+            "value": "Pintasan mesin lainnya"
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Altre scorciatoie del motore (bindings)"
+            "value": "Altre scorciatoie del motore"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "その他のエンジンの割り当て（bindings）"
+            "value": "エンジンのその他のキー割り当て"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "기타 엔진 bindings"
+            "value": "기타 엔진 단축키"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Andere engine-koppelingen (bindings)"
+            "value": "Andere toetscombinaties van de engine"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Inne przypisania silnika (bindings)"
+            "value": "Inne skróty silnika"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Outras entradas de bindings do motor"
+            "value": "Outros atalhos do motor"
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Outras entradas de bindings do motor"
+            "value": "Outros atalhos do motor"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Другие привязки движка (bindings)"
+            "value": "Другие сочетания клавиш движка"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Andra motorbindningar (bindings)"
+            "value": "Andra kortkommandon för motorn"
           }
         },
         "th": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "bindings อื่นๆ ของเอนจิน"
+            "value": "ปุ่มลัดอื่นๆ ของเอนจิน"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Diğer motor atamaları (bindings)"
+            "value": "Diğer motor kestirmeleri"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Інші прив’язки рушія (bindings)"
+            "value": "Інші скорочення рушія"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Các bindings khác của bộ máy"
+            "value": "Các phím tắt khác của bộ máy"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "其他引擎绑定（bindings）"
+            "value": "其他引擎快捷键"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "其他引擎綁定（bindings）"
+            "value": "其他引擎快速鍵"
           }
         }
       }
@@ -41283,7 +41283,7 @@
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ripristinandola torna nella pila, se c’è spazio."
+            "value": "Quando la ripristini, torna nella pila, se c’è spazio."
           }
         },
         "ja": {
@@ -42669,7 +42669,7 @@
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Simpan gambar area yg dipilih"
+            "value": "Simpan gambar area yg dipilih sebagai file"
           }
         },
         "it": {
@@ -42705,13 +42705,13 @@
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Salvar seleção"
+            "value": "Salvar seleção como arquivo"
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Guardar imagem da área selecionada"
+            "value": "Guardar imagem da área selecionada como ficheiro"
           }
         },
         "ru": {
@@ -43319,7 +43319,7 @@
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Pilih semua"
+            "value": "Pilih Semua"
           }
         },
         "it": {
@@ -43355,7 +43355,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Selecionar tudo"
+            "value": "Selecionar Tudo"
           }
         },
         "pt-PT": {
@@ -43391,7 +43391,7 @@
         "uk": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Вибрати все"
+            "value": "Вибрати всі"
           }
         },
         "vi": {
@@ -45629,7 +45629,7 @@
         "ar": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "إظهار بحث Spotlight"
+            "value": "إظهار البحث من أداة الباحث"
           }
         },
         "de": {
@@ -45743,7 +45743,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "显示“聚焦”搜索（Spotlight）"
+            "value": "显示“聚焦”搜索"
           }
         },
         "zh-Hant": {
@@ -47751,7 +47751,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "エンジンの障害により停止"
+            "value": "エンジンの障害が繰り返されたため停止"
           }
         },
         "ko": {
@@ -51127,13 +51127,13 @@
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "La ventana de prueba no tiene una ventana estándar."
+            "value": "La app de prueba no tiene ninguna ventana estándar."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "La fenêtre de test n’a pas de fenêtre standard."
+            "value": "L’app de test n’a pas de fenêtre standard."
           }
         },
         "hi": {
@@ -51151,7 +51151,7 @@
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "La finestra di prova non ha una finestra standard."
+            "value": "L’app di prova non ha una finestra standard."
           }
         },
         "ja": {
@@ -51399,7 +51399,7 @@
         "hi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "फ़ोकस किया गया कॉलम अपने बीच के हिस्से के आसपास एक स्टेप संकरा होता है। उसके पास के कॉलम खिसकते हैं और अपनी चौड़ाई बनाए रखते हैं।"
+            "value": "फ़ोकस किया गया कॉलम अपना केंद्र स्थिर रखते हुए एक स्टेप संकरा हो जाता है। उसके पास के कॉलम खिसकते हैं और अपनी चौड़ाई बनाए रखते हैं।"
           }
         },
         "id": {
@@ -51529,7 +51529,7 @@
         "hi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "फ़ोकस किया गया कॉलम अपने बीच के हिस्से के आसपास एक स्टेप चौड़ा होता है। उसके पास के कॉलम खिसकते हैं और अपनी चौड़ाई बनाए रखते हैं।"
+            "value": "फ़ोकस किया गया कॉलम अपना केंद्र स्थिर रखते हुए एक स्टेप चौड़ा हो जाता है। उसके पास के कॉलम खिसकते हैं और अपनी चौड़ाई बनाए रखते हैं।"
           }
         },
         "id": {
@@ -52829,7 +52829,7 @@
         "hi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "फ़ोकस किया गया कॉलम अपने बीच के हिस्से के आसपास अगली प्रीसेट चौड़ाई लेता है। उसके पास के कॉलम खिसकते हैं और अपनी चौड़ाई बनाए रखते हैं।"
+            "value": "फ़ोकस किया गया कॉलम अपना केंद्र स्थिर रखते हुए अगली प्रीसेट चौड़ाई पर आ जाता है। उसके पास के कॉलम खिसकते हैं और अपनी चौड़ाई बनाए रखते हैं।"
           }
         },
         "id": {
@@ -53231,7 +53231,7 @@
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "La finestra attiva si abbassa di un passo e l’altra finestra della sua colonna si alza."
+            "value": "L’altezza della finestra attiva diminuisce di un passo e quella dell’altra finestra nella stessa colonna aumenta."
           }
         },
         "ja": {
@@ -53361,7 +53361,7 @@
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "La finestra attiva si alza di un passo e l’altra finestra della sua colonna si abbassa."
+            "value": "L’altezza della finestra attiva aumenta di un passo e quella dell’altra finestra nella stessa colonna diminuisce."
           }
         },
         "ja": {
@@ -58331,7 +58331,7 @@
         "pl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Na głównym wyświetlaczu mieści się do %1$lld okien przy minimalnej wysokości %2$lld pkt. Pełny stos wysyła następne okno do nowej kolumny."
+            "value": "Maksymalna liczba okien na głównym wyświetlaczu przy minimalnej wysokości %2$lld pkt: %1$lld. Pełny stos wysyła następne okno do nowej kolumny."
           }
         },
         "pt-BR": {
@@ -58349,7 +58349,7 @@
         "ru": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "До %1$lld окон помещается на основном дисплее при минимальной высоте %2$lld пт. Когда стопка заполнена, следующее окно попадает в новую колонку."
+            "value": "Максимальное число окон на основном дисплее при минимальной высоте %2$lld пт: %1$lld. Когда стопка заполнена, следующее окно попадает в новую колонку."
           }
         },
         "sv": {
@@ -58373,7 +58373,7 @@
         "uk": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "На основному дисплеї вміщується до %1$lld вікон за мінімальної висоти %2$lld пт. Коли стос заповнено, наступне вікно потрапляє в нову колонку."
+            "value": "Максимальна кількість вікон на основному дисплеї за мінімальної висоти %2$lld пт: %1$lld. Коли стос заповнено, наступне вікно потрапляє в нову колонку."
           }
         },
         "vi": {

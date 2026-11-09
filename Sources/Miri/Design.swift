@@ -1,4 +1,5 @@
 import AppKit
+import MiriCore
 import SwiftUI
 
 /// The colors of the Paper design for the Settings window, each with a light and a dark value.
@@ -458,7 +459,7 @@ struct KeyCap: View {
     var minWidth: CGFloat = 40
 
     var body: some View {
-        Text(label)
+        Text(KeyLayout.isolated(label))
             .font(.detail.weight(.medium))
             .foregroundStyle(Palette.primaryText)
             .lineLimit(1)

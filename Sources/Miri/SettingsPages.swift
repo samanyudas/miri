@@ -194,6 +194,8 @@ private struct StripPicture: View {
             }
         }
         .frame(width: 200)
+        // A picture of the screen keeps the screen's real left and right, also in Arabic.
+        .environment(\.layoutDirection, .leftToRight)
         .accessibilityHidden(true)
     }
 
@@ -365,7 +367,7 @@ struct LayoutSettings: View {
     private var cycleShortcutText: String {
         let action = ShortcutAction.cyclePresetWidths
         guard let shortcuts = model.shortcuts else { return "" }
-        let labels = shortcuts.chords(for: action).map(model.keyLayout.label(for:))
+        let labels = shortcuts.chords(for: action).map(model.keyLayout.sentenceLabel(for:))
         return labels.isEmpty
             ? String(localized: "\(action.title) has no shortcut. Add one in Shortcuts.")
             // A no-break space keeps the shortcut on the same line as its verb.
