@@ -25,10 +25,20 @@ private enum Scenes {
         ShortcutScene(before: before, after: after, caption: caption)
     }
 
-    /// Two displays, `first` to the left of or above `second`.
-    static func pair(_ first: [Column], _ second: [Column], focused: String, vertical: Bool = false) -> StripSketch {
-        StripSketch([Display(at: (0, 0), first), Display(at: vertical ? (0, 1) : (1, 0), second)], focused: focused)
+    /// Two displays, `first` to the left of or above `second`. `offsets` scroll each display's strip.
+    static func pair(
+        _ first: [Column], _ second: [Column], focused: String, vertical: Bool = false,
+        offsets: (Double, Double) = (0, 0)
+    ) -> StripSketch {
+        StripSketch(
+            [
+                Display(at: (0, 0), first, offset: offsets.0),
+                Display(at: vertical ? (0, 1) : (1, 0), second, offset: offsets.1),
+            ], focused: focused)
     }
+
+    /// A display move keeps each column's width, so the strip scrolls to show the arriving column in the middle.
+    static let arrival = -0.235
 
     static func forCommand(_ command: String) -> ShortcutScene? {
         let three = [Column("a"), Column("b"), Column("c")]
@@ -36,11 +46,15 @@ private enum Scenes {
         case "window_focus_west":
             return scene(
                 StripSketch([Display(three)], focused: "b"), StripSketch([Display(three)], focused: "a"),
-                String(localized: "Focus moves to the column on the left. No window moves."))
+                String(
+                    localized:
+                        "Focus moves to the column on the left. The strip scrolls if that column is off the display."))
         case "window_focus_east":
             return scene(
                 StripSketch([Display(three)], focused: "b"), StripSketch([Display(three)], focused: "c"),
-                String(localized: "Focus moves to the column on the right. No window moves."))
+                String(
+                    localized:
+                        "Focus moves to the column on the right. The strip scrolls if that column is off the display."))
         case "window_focus_north":
             let columns = [Column("a", "b"), Column("c")]
             return scene(
@@ -57,14 +71,20 @@ private enum Scenes {
             ]
             return scene(
                 StripSketch([Display(columns)], focused: "c"), StripSketch([Display(columns)], focused: "a"),
-                String(localized: "Focus moves to the first column of the strip. No window moves."))
+                String(
+                    localized:
+                        "Focus moves to the first column of the strip. The strip scrolls if that column is off the display."
+                ))
         case "window_focus_last":
             let columns = [
                 Column("a", width: 0.21), Column("b", width: 0.21), Column("c", width: 0.21), Column("d", width: 0.21),
             ]
             return scene(
                 StripSketch([Display(columns)], focused: "b"), StripSketch([Display(columns)], focused: "d"),
-                String(localized: "Focus moves to the last column of the strip. No window moves."))
+                String(
+                    localized:
+                        "Focus moves to the last column of the strip. The strip scrolls if that column is off the display."
+                ))
         case "window_focusdisplay_west":
             let left = [Column("a", width: 0.45), Column("b", width: 0.45)]
             let right = [Column("c", width: 0.45), Column("d", width: 0.45)]
@@ -137,8 +157,8 @@ private enum Scenes {
                     [Column("a", width: 0.45), Column("b", width: 0.45)],
                     [Column("c", width: 0.45), Column("d", width: 0.45)], focused: "c"),
                 pair(
-                    [Column("a", width: 0.29), Column("c", width: 0.29), Column("b", width: 0.29)],
-                    [Column("d", width: 0.45)], focused: "c"),
+                    [Column("a", width: 0.45), Column("c", width: 0.45), Column("b", width: 0.45)],
+                    [Column("d", width: 0.45)], focused: "c", offsets: (arrival, 0)),
                 String(
                     localized:
                         "The focused column moves to the display on the left, after its active column. Focus follows it."
@@ -159,7 +179,8 @@ private enum Scenes {
                     [Column("c", width: 0.45), Column("d", width: 0.45)], focused: "b"),
                 pair(
                     [Column("a", width: 0.45)],
-                    [Column("c", width: 0.29), Column("b", width: 0.29), Column("d", width: 0.29)], focused: "b"),
+                    [Column("c", width: 0.45), Column("b", width: 0.45), Column("d", width: 0.45)], focused: "b",
+                    offsets: (0, arrival)),
                 caption)
         case "window_movedisplay_north":
             return scene(
@@ -167,8 +188,8 @@ private enum Scenes {
                     [Column("a", width: 0.45), Column("b", width: 0.45)],
                     [Column("c", width: 0.45), Column("d", width: 0.45)], focused: "d", vertical: true),
                 pair(
-                    [Column("a", width: 0.29), Column("d", width: 0.29), Column("b", width: 0.29)],
-                    [Column("c", width: 0.45)], focused: "d", vertical: true),
+                    [Column("a", width: 0.45), Column("d", width: 0.45), Column("b", width: 0.45)],
+                    [Column("c", width: 0.45)], focused: "d", vertical: true, offsets: (arrival, 0)),
                 String(
                     localized:
                         "The focused column moves to the display above, after its active column. Focus follows it."))
@@ -179,27 +200,37 @@ private enum Scenes {
                     [Column("c", width: 0.45), Column("d", width: 0.45)], focused: "b", vertical: true),
                 pair(
                     [Column("a", width: 0.45)],
-                    [Column("c", width: 0.29), Column("b", width: 0.29), Column("d", width: 0.29)], focused: "b",
-                    vertical: true),
+                    [Column("c", width: 0.45), Column("b", width: 0.45), Column("d", width: 0.45)], focused: "b",
+                    vertical: true, offsets: (0, arrival)),
                 String(
                     localized:
                         "The focused column moves to the display below, after its active column. Focus follows it."))
         case "window_resize":
             return scene(
                 strip(Column("a", width: 0.2), Column("b", width: 0.28), Column("c", width: 0.2), focused: "b"),
-                strip(Column("a", width: 0.2), Column("b", width: 0.45), Column("c", width: 0.2), focused: "b"),
+                strip(
+                    Column("a", width: 0.2), Column("b", width: 0.45), Column("c", width: 0.2), focused: "b",
+                    offset: -0.085),
                 String(
-                    localized: "The focused column takes the next preset width. The other columns keep their widths."))
+                    localized:
+                        "The focused column takes the next preset width around its center. The columns beside it slide and keep their widths."
+                ))
         case "window_step_grow":
             return scene(
                 strip(Column("a"), Column("b"), Column("c"), focused: "b"),
-                strip(Column("a"), Column("b", width: 0.36), Column("c"), focused: "b"),
-                String(localized: "The focused column gets a step wider. The other columns keep their widths."))
+                strip(Column("a"), Column("b", width: 0.36), Column("c"), focused: "b", offset: -0.04),
+                String(
+                    localized:
+                        "The focused column gets a step wider around its center. The columns beside it slide and keep their widths."
+                ))
         case "window_step_shrink":
             return scene(
-                strip(Column("a"), Column("b", width: 0.36), Column("c"), focused: "b"),
+                strip(Column("a"), Column("b", width: 0.36), Column("c"), focused: "b", offset: -0.04),
                 strip(Column("a"), Column("b"), Column("c"), focused: "b"),
-                String(localized: "The focused column gets a step narrower. The other columns keep their widths."))
+                String(
+                    localized:
+                        "The focused column gets a step narrower around its center. The columns beside it slide and keep their widths."
+                ))
         case "window_maximize":
             return scene(
                 strip(Column("a"), Column("b"), Column("c"), focused: "b"),
@@ -271,7 +302,15 @@ private enum Scenes {
         case "window_manage":
             return scene(
                 strip(Column("a"), Column("b"), Column("c"), focused: "b"),
-                StripSketch([Display([Column("a"), Column("c")], floating: ["b"])], focused: "b"),
+                // The window keeps its width, gets at most 4/5 of the display height, and shifts a little from
+                // where its column was, as the engine floats it.
+                StripSketch(
+                    [
+                        Display(
+                            [Column("a"), Column("c")],
+                            floating: [SketchFloat("b", x: 0.37, y: 0.1, width: 0.28, height: 0.8)])
+                    ],
+                    focused: "b"),
                 String(
                     localized:
                         "The focused window floats above the strip, and the other columns close the gap. Press again to tile it."
@@ -294,11 +333,18 @@ private enum Scenes {
         return scene(
             StripSketch([Display(columns)], focused: start),
             StripSketch([Display(columns)], focused: names[number - 1]),
-            String(localized: "Focus moves to column \(number) of the strip. No window moves."))
+            String(
+                localized:
+                    "Focus moves to column \(number) of the strip. The strip scrolls if that column is off the display."
+            ))
     }
 
     static let stop = scene(
         strip(Column("a"), Column("b"), Column("c"), focused: "b"),
-        StripSketch([Display([Column("a"), Column("b"), Column("c")])], focused: nil, managed: false),
-        String(localized: "Miri stops arranging windows. Every window stays where it is until you start Miri again."))
+        // Stop leaves the focused app in front, so focus stays on b.
+        StripSketch([Display([Column("a"), Column("b"), Column("c")])], focused: "b", managed: false),
+        String(
+            localized:
+                "Miri stops arranging windows. A window open before Miri started goes back to where it was, and no window is left off the display."
+        ))
 }

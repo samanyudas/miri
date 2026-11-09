@@ -73,12 +73,20 @@ private struct SketchView: View {
                 }
                 ForEach(sketch.windows.sorted(), id: \.self) { window in
                     let rect = layout.windows[window] ?? .zero
+                    let clip = layout.clips[window] ?? .zero
                     let floating = sketch.place(of: window)?.column == nil
+                    // The window keeps its full size while it moves, and its display cuts off what lies outside,
+                    // so a column sliding off the display keeps its width.
                     RoundedRectangle(cornerRadius: 2)
                         .fill(fill(for: window))
                         .shadow(color: .black.opacity(floating ? 0.25 : 0), radius: 2, y: 1)
-                        .frame(width: max(rect.width, 0), height: max(rect.height, 0))
+                        .frame(width: rect.width, height: rect.height)
                         .position(x: rect.midX, y: rect.midY)
+                        .mask {
+                            Rectangle()
+                                .frame(width: clip.width, height: clip.height)
+                                .position(x: clip.midX, y: clip.midY)
+                        }
                         .zIndex(floating ? 1 : 0)
                 }
             }
@@ -86,7 +94,8 @@ private struct SketchView: View {
     }
 
     private func fill(for window: String) -> Color {
-        guard sketch.managed else { return Palette.heroTile.opacity(0.55) }
-        return window == sketch.focused ? Palette.accent : Palette.heroTile
+        let color = window == sketch.focused ? Palette.accent : Palette.heroTile
+        // After Stop, Miri no longer arranges the windows, so they fade.
+        return sketch.managed ? color : color.opacity(0.45)
     }
 }

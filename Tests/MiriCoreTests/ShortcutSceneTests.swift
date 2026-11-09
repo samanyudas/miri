@@ -78,18 +78,49 @@ struct ShortcutSceneTests {
         }
     }
 
-    /// Every window is drawn inside its display, so the sketch never spills over the panel.
-    @Test(arguments: ShortcutAction.editable) func everyWindowFitsItsDisplay(_ action: ShortcutAction) throws {
+    /// Every window is cut to its own display, and the window the action is about is fully on screen in both sketches.
+    @Test(arguments: ShortcutAction.editable) func theFocusedWindowIsOnItsDisplay(_ action: ShortcutAction) throws {
         let scene = try #require(action.scene)
         for sketch in [scene.before, scene.after] {
-            let layout = sketch.layout(in: CGSize(width: 100, height: 96), arrangement: scene.before)
+            let layout = sketch.layout(in: CGSize(width: 160, height: 100), arrangement: scene.before)
             for window in sketch.windows {
                 let place = try #require(sketch.place(of: window))
-                let rect = try #require(layout.windows[window])
-                #expect(
-                    layout.displays[place.display].insetBy(dx: -0.001, dy: -0.001).contains(rect), "\(window) spills")
+                #expect(layout.clips[window] == layout.displays[place.display], "\(window) is cut to another display")
             }
+            // Centre column starts with the focused column partly off the display, which is what it fixes.
+            if action == .engine(command: "window_center"), sketch == scene.before { continue }
+            let focused = try #require(sketch.focused)
+            let place = try #require(sketch.place(of: focused))
+            let rect = try #require(layout.windows[focused])
+            #expect(
+                layout.displays[place.display].insetBy(dx: -0.001, dy: -0.001).contains(rect),
+                "\(action.title): the focused window \(focused) reaches off its display")
         }
+    }
+
+    /// Width changes keep the column's center, as the keybinding reference says.
+    @Test(arguments: ["window_resize", "window_step_grow", "window_step_shrink"])
+    func widthChangesKeepTheColumnCenter(_ command: String) throws {
+        let scene = try #require(ShortcutAction.engine(command: EngineCommand.canonical(command)!).scene)
+        let size = CGSize(width: 160, height: 100)
+        let focused = try #require(scene.before.focused)
+        let before = try #require(scene.before.layout(in: size).windows[focused])
+        let after = try #require(scene.after.layout(in: size).windows[focused])
+        #expect(before.width != after.width)
+        #expect(abs(before.midX - after.midX) < 0.01, "\(command) moves the column's center")
+    }
+
+    /// A display move keeps every column's width.
+    @Test(arguments: [
+        "window_movedisplay_west", "window_movedisplay_east", "window_movedisplay_north", "window_movedisplay_south",
+        "window_nextdisplay",
+    ])
+    func displayMovesKeepColumnWidths(_ command: String) throws {
+        let scene = try #require(ShortcutAction.engine(command: EngineCommand.canonical(command)!).scene)
+        let widths = { (sketch: StripSketch) in
+            Dictionary(uniqueKeysWithValues: sketch.displays.flatMap(\.columns).map { ($0.windows[0], $0.width) })
+        }
+        #expect(widths(scene.before) == widths(scene.after))
     }
 
     /// The action names in the reference's shortcut tables, with "Jump to column 1 through 9" as nine names.

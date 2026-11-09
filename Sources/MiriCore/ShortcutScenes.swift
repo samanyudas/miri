@@ -17,7 +17,7 @@ public struct StripSketch: Equatable, Sendable {
 
     /// Every window in the sketch, tiled or floating.
     public var windows: [String] {
-        displays.flatMap { $0.columns.flatMap(\.windows) + $0.floating }
+        displays.flatMap { $0.columns.flatMap(\.windows) + $0.floating.map(\.window) }
     }
 
     /// Where a window sits: its display, its column, and its place in the column. A floating window has no column.
@@ -26,7 +26,7 @@ public struct StripSketch: Equatable, Sendable {
             for (columnIndex, column) in display.columns.enumerated() {
                 if let row = column.windows.firstIndex(of: window) { return (displayIndex, columnIndex, row) }
             }
-            if display.floating.contains(window) { return (displayIndex, nil, 0) }
+            if display.floating.contains(where: { $0.window == window }) { return (displayIndex, nil, 0) }
         }
         return nil
     }
@@ -37,12 +37,12 @@ public struct SketchDisplay: Equatable, Sendable {
     /// The display's place in the arrangement, in whole displays, as in System Settings > Displays.
     public var position: (x: Int, y: Int)
     public var columns: [SketchColumn]
-    public var floating: [String]
+    public var floating: [SketchFloat]
     /// How far the strip has scrolled, as a fraction of the display width. A negative value shows later columns.
     public var offset: Double
 
     public init(
-        at position: (x: Int, y: Int) = (0, 0), _ columns: [SketchColumn], floating: [String] = [],
+        at position: (x: Int, y: Int) = (0, 0), _ columns: [SketchColumn], floating: [SketchFloat] = [],
         offset: Double = 0
     ) {
         self.position = position
@@ -54,6 +54,24 @@ public struct SketchDisplay: Equatable, Sendable {
     public static func == (lhs: SketchDisplay, rhs: SketchDisplay) -> Bool {
         lhs.position == rhs.position && lhs.columns == rhs.columns && lhs.floating == rhs.floating
             && lhs.offset == rhs.offset
+    }
+}
+
+/// A window that floats above the strip, placed in fractions of its display: `x` and `width` of the display width,
+/// `y` and `height` of the display height.
+public struct SketchFloat: Equatable, Sendable {
+    public var window: String
+    public var x: Double
+    public var y: Double
+    public var width: Double
+    public var height: Double
+
+    public init(_ window: String, x: Double, y: Double, width: Double, height: Double) {
+        self.window = window
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
     }
 }
 
@@ -80,9 +98,12 @@ public struct ShortcutScene: Equatable, Sendable {
 }
 
 /// Where each display and window of a sketch is drawn, in points.
+/// A window's rectangle is its full size, which can reach past its display when the strip is scrolled. The drawing
+/// cuts it to `clips`, its display's rectangle, so a column that slides off the display keeps its width while it moves.
 public struct SketchLayout: Equatable, Sendable {
     public var displays: [CGRect]
     public var windows: [String: CGRect]
+    public var clips: [String: CGRect]
 }
 
 extension StripSketch {
@@ -92,7 +113,6 @@ extension StripSketch {
     static let displayAspect = 0.625
 
     /// Places the displays and windows in a box of `size`, keeping the displays' shape.
-    /// A window outside its display is cut to the display's edge, so a scrolled strip shows only what is on screen.
     /// `frame` is the arrangement of both sketches of a scene, so the before and after sketches use one scale.
     public func layout(in size: CGSize, arrangement frame: StripSketch? = nil) -> SketchLayout {
         let reference = frame ?? self
@@ -107,7 +127,7 @@ extension StripSketch {
             width: unit * Double(columns) + spacing * Double(columns - 1),
             height: displayHeight * Double(rows) + spacing * Double(rows - 1))
         let origin = CGPoint(x: (size.width - used.width) / 2, y: (size.height - used.height) / 2)
-        var result = SketchLayout(displays: [], windows: [:])
+        var result = SketchLayout(displays: [], windows: [:], clips: [:])
         for display in displays {
             let box = CGRect(
                 x: origin.x + Double(display.position.x) * (unit + spacing),
@@ -118,32 +138,24 @@ extension StripSketch {
             var x = box.minX + (display.offset + Self.gap) * unit
             for column in display.columns {
                 let width = column.width * unit
-                let shares =
-                    column.heights ?? Array(repeating: 1 / Double(column.windows.count), count: column.windows.count)
+                let count = column.windows.count
+                let shares = column.heights ?? Array(repeating: 1 / Double(count), count: count)
                 var y = box.minY + inset
-                let height = box.height - 2 * inset - inset * Double(column.windows.count - 1)
+                let height = box.height - 2 * inset - inset * Double(count - 1)
                 for (window, share) in zip(column.windows, shares) {
-                    let rect = CGRect(x: x, y: y, width: width, height: height * share)
-                    result.windows[window] =
-                        rect.intersection(box).isNull ? clamped(rect, to: box) : rect.intersection(box)
+                    result.windows[window] = CGRect(x: x, y: y, width: width, height: height * share)
+                    result.clips[window] = box
                     y += height * share + inset
                 }
                 x += width + inset
             }
-            for (index, window) in display.floating.enumerated() {
-                let size = CGSize(width: box.width * 0.42, height: box.height * 0.55)
-                result.windows[window] = CGRect(
-                    x: box.midX - size.width / 2 + Double(index) * inset,
-                    y: box.midY - size.height / 2 + Double(index) * inset,
-                    width: size.width, height: size.height)
+            for float in display.floating {
+                result.windows[float.window] = CGRect(
+                    x: box.minX + float.x * unit, y: box.minY + float.y * box.height,
+                    width: float.width * unit, height: float.height * box.height)
+                result.clips[float.window] = box
             }
         }
         return result
-    }
-
-    /// A zero-width rectangle at the display edge nearest a window that lies wholly outside it.
-    private func clamped(_ rect: CGRect, to box: CGRect) -> CGRect {
-        let x = rect.maxX <= box.minX ? box.minX : box.maxX
-        return CGRect(x: x, y: max(rect.minY, box.minY), width: 0, height: min(rect.height, box.height))
     }
 }
