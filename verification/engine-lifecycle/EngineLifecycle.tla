@@ -21,14 +21,16 @@ MaxPending == 3    \* Bound: Step drops any step that leaves more than 3 stop co
 VARIABLE s
 vars == <<s>>
 
-Init == s = [
+\* Miri can launch with either saved Stop value, and with or without a setup check
+\* that blocks start, such as missing Accessibility permission on a first launch.
+Init == \E saved, blockedAtLaunch \in BOOLEAN : s = [
     \* AppDelegate (Sources/Miri/App.swift) and AppModel.launch.
     app |-> "launching",          \* "launching", "open", "quitting", "quit"
     \* AppModel (Sources/Miri/AppModel.swift).
-    stoppedByUser |-> FALSE,      \* Set below from the saved value, which can be either.
+    stoppedByUser |-> saved,      \* The saved value from the last session.
     polling |-> FALSE,            \* setupPoll != nil
     blockersShown |-> FALSE,      \* !startBlockers.isEmpty
-    blocked |-> FALSE,            \* What refreshSetup would find: a setup check blocks start.
+    blocked |-> blockedAtLaunch,  \* What refreshSetup would find: a setup check blocks start.
     \* EngineSupervisor (Sources/MiriCore/Engine.swift).
     engine |-> "stopped",         \* EngineState without its payload: "stopped", "running", "restarting", "failed"
     proc |-> 0,                   \* process, or 0 for nil
@@ -42,13 +44,8 @@ Init == s = [
     alive |-> {},                 \* Engine processes that run.
     exitQueued |-> {},            \* Processes that ended. Their onExit job waits for the main actor.
     \* Ghost variables. They change no behavior.
-    wantsStopped |-> FALSE,       \* Your last Start, Stop, or Restart was a Stop.
+    wantsStopped |-> saved,       \* Your last Start, Stop, or Restart was a Stop.
     launchedWhileStopped |-> FALSE
-  ] \/ s = [
-    app |-> "launching", stoppedByUser |-> TRUE, polling |-> FALSE, blockersShown |-> FALSE,
-    blocked |-> FALSE, engine |-> "stopped", proc |-> 0, stopRequested |-> FALSE,
-    completions |-> <<>>, restartArmed |-> FALSE, killArmed |-> FALSE, crashes |-> 0,
-    restartAfterStop |-> FALSE, alive |-> {}, exitQueued |-> {}, wantsStopped |-> TRUE, launchedWhileStopped |-> FALSE
   ]
 
 Free(t) == CHOOSE i \in Ids : i \notin t.alive \cup t.exitQueued /\ i # t.proc
