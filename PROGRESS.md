@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-12 on branch `docs/308-closeout-progress`, based on `main` at `c6b01293`
+Updated: 2026-11-13 on branch `feat/305-new-window-half-width`, based on `main` at `4d6ce472`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -86,6 +86,22 @@ On `main` `3e5523ac`, `verify-miri` runs `20261110-181524`, `20261110-182323`, a
 CI's `make engine-test` on the same pin passed the new test `drag::a_busy_apps_window_sliding_back_after_a_drop_stays_in_its_column`, which fails before the fix.
 Both acceptance criteria are ticked, and #377 closed on 11 November 2026.
 
+## New windows at half the display width
+
+[#305](https://github.com/samanyudas/miri/issues/305) is implemented on branch `feat/305-new-window-half-width`, with the engine from [paneru#160](https://github.com/samanyudas/paneru/pull/160), merged as `d5eff6e`.
+The engine option `[options].new_window_width` sizes a window that opens while the engine runs, and Miri writes `0.5` when the key is absent.
+Windows found at startup, windows in `LaunchWindows` that a scan finds late, and windows that session restore places keep their widths.
+A `[windows]` rule's `width` wins over the option.
+A new window joins the active display's strip, so the active display is the window's own display, as Sam chose on 11 November 2026.
+A window that session restore can match only by a title that arrives late keeps its own width until restore places it.
+If the startup grace period ends without a match, it gets the new width then, unless a width rule, the user, or a native tab group gave it its width.
+`verify-miri` run `20261111-032938` on `a752921` passed all four live checks:
+a new fixture tiled at 1280 of 2560 points, a 900-point fixture opened with Miri quit kept 908 after launch and after a relaunch, and a background fixture on the external display joined the built-in display's strip at 1024 of 2048 points.
+`verify-miri` run `20261113-011137` compared engine `52061c6` with `7487494`, with an 8-second grace period.
+A window reopened in the grace period, with its title after 1 second, went 1272 then 1676 on `52061c6`, and 380 then 1676 on `7487494`.
+An untitled window that matched nothing kept 380 until the grace period ended on `7487494`, then took 1272.
+Next: the Miri PR merges, then the agent rechecks on `main` and closes #305.
+
 ## A new window wider than its display
 
 [#410](https://github.com/samanyudas/miri/issues/410) closed on 10 November 2026 after `verify-miri` run `20261110-180854` on `main` at `547f9777`, engine `578e228`.
@@ -93,7 +109,8 @@ T3 Code relaunched after an update 2560 points wide, and the engine had put it i
 [paneru#157](https://github.com/samanyudas/paneru/pull/157), pinned by [#412](https://github.com/samanyudas/miri/pull/412), narrows a new window that joins the active strip to the tiling area.
 [#411](https://github.com/samanyudas/miri/pull/411) added `V fixture --width --display --background` and the [new window width](.claude/skills/verify-miri/features/new-window-width.md) recipe.
 Sam relaunched T3 Code on the fix build, and it fit the built-in display.
-Not narrowed: a window that joins the strip after the above-ordinary level check in `recheck_window_level`, and a window that opens during a cross-display focus handoff, which can get the previous display's limit. Neither was observed.
+Not narrowed: a window that opens during a cross-display focus handoff, which can get the previous display's limit. It was not observed.
+Since paneru#160, a window that joins the strip after the above-ordinary level check in `recheck_window_level` is narrowed too.
 
 ## Bug reports, shortcut illustrations, and localization
 
