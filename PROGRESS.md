@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-11 on branch `docs/377-verified`, based on `main` at `814f18f3`
+Updated: 2026-11-11 on branch `docs/302-hyper-key-v1`, based on `main` at `7dae1cd3`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,17 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Karabiner-Elements and Hyper key chords
+
+[#302](https://github.com/samanyudas/miri/issues/302) needs no code change.
+The engine and the shortcut recorder already read chords with all four modifiers, and the defaults already use twelve of them.
+Sam accepted reworded checks on 11 November 2026, because ⌃⌥⇧⌘H is the default for Move column to first position.
+Branch `docs/302-hyper-key-v1` moves Hyper key recording into v1 in the decision documents and the v1 specification, and adds a Karabiner-Elements section to the keybinding reference.
+`ShortcutsTests.aHyperKeyChordSavesAndReadsBackUnchanged` checks that a Hyper chord saves, reads back unchanged, and is rejected on a chord a default holds.
+Sam's manual checks with Karabiner-Elements remain, because synthetic key events never pass through Karabiner-Elements.
+Two Karabiner-Elements profiles on Sam's Mac, "Miri 302 Hyper test" and "Miri 302 no rules", exist for those checks.
+Remove them after the checks.
 
 ## A display left on an empty desktop after a replug
 

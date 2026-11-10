@@ -157,6 +157,19 @@ import Testing
         }
     }
 
+    @Test func aHyperKeyChordSavesAndReadsBackUnchanged() throws {
+        let hyper: Set<ChordModifier> = [.control, .option, .shift, .command]
+        let text = "[bindings]\nwindow_swap_first = \"ctrl+alt+cmd+shift-h\"\n"
+        let file = try shortcuts(text)
+        #expect(throws: ShortcutRejection.usedBy("Move column to first position")) {
+            try file.adding(Chord(hyper, "h"), to: focusWest, layout: us)
+        }
+        let added = try file.adding(Chord(hyper, "u"), to: focusWest, layout: us)
+        #expect(added.text == text + "window_focus_west = \"ctrl+alt+cmd+shift-u\"\n")
+        #expect(Shortcuts(document: added, layout: us).chords(for: focusWest) == [Chord(hyper, "u")])
+        #expect(us.label(for: Chord(hyper, "u")) == "⌃⌥⇧⌘U")
+    }
+
     @Test func addsToTheKeySpellingTheFileUses() throws {
         let file = try shortcuts("[bindings]\nwindow_grow = \"ctrl+alt-r\" # cycle\n")
         let result = try file.adding(Chord([.control, .option, .shift], "r"), to: resize, layout: us)
