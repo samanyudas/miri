@@ -178,7 +178,8 @@ The endurance requirement that engine memory stays stable has no measurable pass
 Tabbed columns, the minimap, inactive-window dimming, advanced rules, and portable display layouts remain outside v1.
 Virtual workspaces are dropped, not deferred, as the [v2 roadmap](v2-roadmap.md#dropped-ideas) records.
 Dragging windows into columns, to new columns, and between displays is v1 work.
-Focus borders, a focus-follows-mouse control, display exclusions, fixed-pixel presets, animation tuning, and Hyper-key recording are also excluded from v1.
+Focus borders, a focus-follows-mouse control, display exclusions, fixed-pixel presets, and animation tuning are also excluded from v1.
+Recording Hyper key chords is v1 work ([#302](https://github.com/samanyudas/miri/issues/302)).
 Five-finger strip gestures are also deferred.
 Alternative automatic centering modes, `never` and `always`, remain unselected proposals outside the accepted v1 controls.
 Their detailed design can remain unresolved without blocking the v1 interview.

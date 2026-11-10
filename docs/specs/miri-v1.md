@@ -402,7 +402,8 @@ The following table records the selected v1 defaults without claiming tested act
 - Provide a shortcut recorder with several bindings per action and support AZERTY, QWERTZ, and Dvorak layouts.
   Reject a binding already assigned to a different Miri action, warn about known macOS conflicts, and never silently replace another binding.
 - Preserve user bindings on upgrade, add defaults only where keys are free, and offer an explicit reset to the current default set.
-  Hyper-key recording and tabbed-column commands remain excluded from v1.
+  Record chords that Karabiner-Elements sends, including a Hyper key chord that holds Control, Option, Shift, and Command.
+  Tabbed-column commands remain excluded from v1.
 
 ### Gesture policy
 
@@ -637,7 +638,7 @@ An accepted deferral does not commit every candidate to a future implementation.
 - Grid arrangements and a maximum-display-count commitment.
   The v2 display-count discussion does not establish a v1 eight-display guarantee.
 - Five-finger strip gestures and other gesture controls beyond the accepted v1 selections, target choice, and direction reversal.
-- Fixed-pixel width presets, animation duration or damping controls, and Hyper-key recording.
+- Fixed-pixel width presets and animation duration or damping controls.
 - Alternative automatic-centering controls for `never` and `always`.
 - The guided shortcut tutorial, its taught-shortcut selection, and other deferred first-run teaching.
 - A public Miri CLI, URL scheme, and Raycast automation commands.
