@@ -10346,6 +10346,136 @@
         }
       }
     },
+    "Continuous": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "مستمر"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fortlaufend"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continuo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continu"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "लगातार"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Berkelanjutan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continuo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "連続"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "연속"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Doorlopend"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Płynnie"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Contínua"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Contínuo"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Непрерывно"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kontinuerligt"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ต่อเนื่อง"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sürekli"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Безперервно"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Liên tục"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "连续"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "連續"
+          }
+        }
+      }
+    },
     "Control": {
       "localizations": {
         "ar": {
@@ -42894,6 +43024,136 @@
         }
       }
     },
+    "Scroll by": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "التمرير حسب"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scrollart"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Desplazar por"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Faire défiler par"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "स्क्रॉल का तरीका"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Gulir per"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scorri per"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "スクロール単位"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "스크롤 단위"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scrollen per"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Przewijaj"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rolar por"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Deslocar por"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Шаг прокрутки"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rulla per"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "เลื่อนแบบ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kaydırma biçimi"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Крок прокручування"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Cuộn theo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "滚动方式"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "捲動方式"
+          }
+        }
+      }
+    },
     "Scroll the strip with a swipe on the trackpad.": {
       "localizations": {
         "ar": {
@@ -43020,6 +43280,136 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "在觸控式軌跡板上滑動以捲動條帶。"
+          }
+        }
+      }
+    },
+    "Scrolling": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "التمرير"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scrollen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Desplazamiento"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Défilement"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "स्क्रॉलिंग"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pengguliran"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scorrimento"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "スクロール"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "스크롤"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scrollen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Przewijanie"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rolagem"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Deslocamento"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Прокрутка"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rullning"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "การเลื่อน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kaydırma"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Прокручування"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Cuộn"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "滚动"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "捲動"
           }
         }
       }
@@ -60364,6 +60754,266 @@
         }
       }
     },
+    "Window by window": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "نافذة تلو الأخرى"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fenster für Fenster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ventana a ventana"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fenêtre par fenêtre"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "एक-एक विंडो"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Jendela demi jendela"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Finestra per finestra"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ウインドウごと"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "윈도우별"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Venster voor venster"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Okno po oknie"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Janela por janela"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Janela a janela"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "По окнам"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fönster för fönster"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ทีละหน้าต่าง"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pencere pencere"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "По вікнах"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Từng cửa sổ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "逐个窗口"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "逐一視窗"
+          }
+        }
+      }
+    },
+    "Window by window moves focus one window for each short swipe or each Option-scroll step, with a tap you can feel on the trackpad.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "يؤدي \"نافذة تلو الأخرى\" إلى نقل التركيز نافذة واحدة مع كل تمرير سريع قصير أو كل خطوة تمرير مع Option، مع نقرة تشعر بها على لوحة التعقب."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "„Fenster für Fenster“ bewegt den Fokus bei jeder kurzen Wischbewegung oder jedem Scrollschritt mit Option um ein Fenster weiter, mit einem spürbaren Tippen auf dem Trackpad."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "«Ventana a ventana» activa la ventana siguiente con cada deslizamiento corto o cada paso de desplazamiento con Opción, con un toque que notas en el trackpad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "« Fenêtre par fenêtre » active la fenêtre suivante à chaque balayage court ou à chaque cran de défilement avec Option, avec une légère pression ressentie sur le trackpad."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"एक-एक विंडो\" हर छोटे स्वाइप या Option के साथ हर स्क्रॉल स्टेप पर फ़ोकस को एक विंडो आगे ले जाता है, और ट्रैकपैड पर हल्का टैप महसूस होता है।"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"Jendela demi jendela\" memindahkan fokus satu jendela untuk setiap gesekan pendek atau setiap langkah gulir dengan Option, disertai ketukan yang terasa di trackpad."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "«Finestra per finestra» attiva la finestra successiva a ogni scorrimento breve o a ogni scatto di scorrimento con Opzione, con un tocco che senti sul trackpad."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "「ウインドウごと」では、短くスワイプするか、Optionを押しながら1段階スクロールするたびに、フォーカスが1つのウインドウ分移動し、トラックパッドに軽い振動を感じます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "‘윈도우별’은 짧게 쓸어넘기거나 Option을 누른 채 한 단계 스크롤할 때마다 초점을 윈도우 하나만큼 옮기며, 트랙패드에서 가벼운 탭을 느낄 수 있습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "'Venster voor venster' verplaatst de focus één venster bij elke korte veeg of elke scrollstap met Option, met een tik die je op het trackpad voelt."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "„Okno po oknie” uaktywnia następne okno przy każdym krótkim przesunięciu lub każdym kroku przewijania z Option, a gładzik odpowiada wyczuwalnym stuknięciem."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "“Janela por janela” move o foco uma janela a cada gesto curto ou a cada passo de rolagem com Option, com um toque que você sente no trackpad."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "“Janela a janela” move o foco uma janela a cada gesto curto ou a cada passo de deslocamento com Opção, com um toque que sente no trackpad."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "«По окнам» переводит фокус на одно окно при каждом коротком смахивании или каждом шаге прокрутки с Option, а трекпад отвечает ощутимым касанием."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "”Fönster för fönster” flyttar fokus ett fönster för varje kort svep eller varje rullningssteg med Alternativ, med ett tryck du känner på styrplattan."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"ทีละหน้าต่าง\" จะย้ายโฟกัสไปหนึ่งหน้าต่างทุกครั้งที่ปัดสั้นๆ หรือเลื่อนหนึ่งขั้นพร้อมกด Option พร้อมการแตะที่รู้สึกได้บนแทร็คแพด"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"Pencere pencere\", her kısa kaydırmada veya Option ile her kaydırma adımında odağı bir pencere taşır ve izleme dörtgeninde hissedilen bir dokunuş verir."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "«По вікнах» переводить фокус на одне вікно за кожного короткого змахування або кожного кроку прокручування з Option, а трекпед відповідає відчутним дотиком."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"Từng cửa sổ\" chuyển tiêu điểm một cửa sổ cho mỗi lần vuốt ngắn hoặc mỗi nấc cuộn với Option, kèm một cú chạm bạn cảm nhận được trên bàn di chuột."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "选择“逐个窗口”时，每次短轻扫或每次按住 Option 滚动一格，焦点都会移动一个窗口，并在触控板上产生可感觉到的轻触。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "選擇「逐一視窗」時，每次短滑動或每次按住 Option 捲動一格，焦點都會移動一個視窗，並在觸控式軌跡板上產生可感覺到的輕觸。"
+          }
+        }
+      }
+    },
     "Window management": {
       "localizations": {
         "ar": {
@@ -63356,6 +64006,136 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "miri.strip_gesture必須是\"off\"、\"three\"或\"four\"。"
+          }
+        }
+      }
+    },
+    "miri.strip_scrolling must be \"continuous\" or \"window\".": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "يجب أن تكون miri.strip_scrolling \"continuous\" أو \"window\"."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling muss \"continuous\" oder \"window\" sein."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling debe ser \"continuous\" o \"window\"."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling doit valoir \"continuous\" ou \"window\"."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling \"continuous\" या \"window\" होना चाहिए।"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling harus berupa \"continuous\" atau \"window\"."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling deve essere \"continuous\" o \"window\"."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrollingは\"continuous\"か\"window\"にする必要があります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling는 \"continuous\" 또는 \"window\"여야 합니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling moet \"continuous\" of \"window\" zijn."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling musi mieć wartość \"continuous\" lub \"window\"."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling deve ser \"continuous\" ou \"window\"."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling tem de ser \"continuous\" ou \"window\"."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling должно быть \"continuous\" или \"window\"."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling måste vara \"continuous\" eller \"window\"."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling ต้องเป็น \"continuous\" หรือ \"window\""
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling \"continuous\" veya \"window\" olmalı."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling має бути \"continuous\" або \"window\"."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling phải là \"continuous\" hoặc \"window\"."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling 必须是 \"continuous\" 或 \"window\"。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling必須是\"continuous\"或\"window\"。"
           }
         }
       }

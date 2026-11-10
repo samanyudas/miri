@@ -27,6 +27,18 @@ public enum GestureFingers: Int, Codable, Sendable {
     }
 }
 
+/// The strip swipe the engine intercepts, and whether a gesture test turned it on.
+public struct StripSwipe: Equatable, Sendable {
+    public var fingers: GestureFingers
+    /// A gesture test runs. The test needs the strip to slide freely, so Miri writes no paging while it runs.
+    public var isTest: Bool
+
+    public init(fingers: GestureFingers, isTest: Bool) {
+        self.fingers = fingers
+        self.isTest = isTest
+    }
+}
+
 /// The macOS trackpad settings that decide whether a strip swipe clashes with a macOS gesture. `nil` is unreadable.
 public struct GestureSettingsSnapshot: Codable, Equatable, Sendable {
     public var threeFingerSwipe: Int?

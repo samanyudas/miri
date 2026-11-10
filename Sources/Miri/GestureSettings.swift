@@ -44,6 +44,22 @@ struct GestureSettings: View {
                     }
                 }
             }
+            SettingsSection(String(localized: "Scrolling")) {
+                SettingsRow(
+                    title: String(localized: "Scroll by"),
+                    detail: String(
+                        localized:
+                            "Window by window moves focus one window for each short swipe or each Option-scroll step, with a tap you can feel on the trackpad."
+                    )
+                ) {
+                    SegmentedChoice(
+                        label: String(localized: "Scroll by"), selection: setting(\.stripScrolling),
+                        options: [
+                            (String(localized: "Continuous"), .continuous),
+                            (String(localized: "Window by window"), .window),
+                        ])
+                }
+            }
             Text("Keyboard shortcuts work whether the swipe is on or off. Miri never changes macOS settings.")
                 .font(.detail)
                 .foregroundStyle(Palette.secondaryText)

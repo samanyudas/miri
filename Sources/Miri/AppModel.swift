@@ -73,8 +73,8 @@ import ServiceManagement
             launcher: ProcessEngineLauncher(paths: paths, log: log),
             recoverWindows: { WindowRestorer.recover() })
         supervisor.onChange = { [weak self] state in self?.engineState = state }
-        store.gestureFingers = { [weak self] settings in
-            MainActor.assumeIsolated { self?.activeGestureFingers(for: settings) }
+        store.stripSwipe = { [weak self] settings in
+            MainActor.assumeIsolated { self?.activeStripSwipe(for: settings) }
         }
     }
 
@@ -227,7 +227,7 @@ import ServiceManagement
             gestureEnvironment.gestureSettings = gestureSettings
         }
         dropStaleGestureVerification()
-        applyGestureFingers()
+        applyStripSwipe()
     }
 
     // MARK: Initial setup
@@ -282,7 +282,7 @@ import ServiceManagement
             throw GestureTestBlocked(message: String(localized: "Choose three or four fingers to test the swipe."))
         }
         gestureTestFingers = fingers
-        applyGestureFingers()
+        applyStripSwipe()
         return GestureVerification(
             fingers: fingers, reversed: settings.reverseSwipe, environment: gestureEnvironment, date: .now)
     }
@@ -293,7 +293,7 @@ import ServiceManagement
         switch result {
         case .confirmed(let verification): saveGestureVerification(verification)
         case .failed: saveGestureVerification(nil)
-        case .cancelled: applyGestureFingers()
+        case .cancelled: applyStripSwipe()
         }
     }
 
@@ -324,7 +324,7 @@ import ServiceManagement
         } else {
             defaults.removeObject(forKey: Self.gestureVerificationKey)
         }
-        applyGestureFingers()
+        applyStripSwipe()
     }
 
     private func gestureState(for settings: MiriSettings) -> GestureState {
@@ -336,14 +336,15 @@ import ServiceManagement
             environment: gestureEnvironment, conflict: conflict)
     }
 
-    private func activeGestureFingers(for settings: MiriSettings) -> GestureFingers? {
-        if let gestureTestFingers { return gestureTestFingers }
-        return gestureState(for: settings).isEnabled ? settings.stripGesture.fingers : nil
+    private func activeStripSwipe(for settings: MiriSettings) -> StripSwipe? {
+        if let gestureTestFingers { return StripSwipe(fingers: gestureTestFingers, isTest: true) }
+        guard gestureState(for: settings).isEnabled, let fingers = settings.stripGesture.fingers else { return nil }
+        return StripSwipe(fingers: fingers, isTest: false)
     }
 
-    private func applyGestureFingers() {
+    private func applyStripSwipe() {
         do {
-            try store.applyGestureFingers(reduceMotion: reduceMotion)
+            try store.applyStripSwipe(reduceMotion: reduceMotion)
         } catch {
             configurationIssue = error
         }
