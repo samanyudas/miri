@@ -66,16 +66,18 @@ final class WindowPresenter {
         window.isReleasedWhenClosed = false
         // macOS keeps a closed window on its last desktop, and showing it again would switch the display back there.
         window.collectionBehavior.insert(.moveToActiveSpace)
-        let autosaveName = "Miri.\(kind)"  // Not interface text
-        window.setFrameAutosaveName(autosaveName)
-        let restored = window.setFrameUsingName(autosaveName)
-        if !restored { window.center() }
         if designSize != nil || kind == .initialSetup {
             // The content runs under the title bar, so the window buttons sit on it, as in the design.
+            // This comes before the restore: added after it, AppKit keeps the content size, and the saved frame
+            // lost the 32-point title bar at every launch.
             window.styleMask.insert(.fullSizeContentView)
             window.titlebarAppearsTransparent = true
             window.titleVisibility = .hidden
         }
+        let autosaveName = "Miri.\(kind)"  // Not interface text
+        window.setFrameAutosaveName(autosaveName)
+        let restored = window.setFrameUsingName(autosaveName)
+        if !restored { window.center() }
         if let designSize {
             // The content covers the whole frame, so the frame is the design's size. Keep the saved top-left corner.
             var size = designSize
