@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `feat/350-translations`, based on `main` at `abe13aa1`
+Updated: 2026-11-10 on branch `fix/265-replug-space`, based on `main` at `923d84e6`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,17 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A display left on an empty desktop after a replug
+
+[#265](https://github.com/samanyudas/miri/issues/265) reported that after a replug of the main external display, the built-in display showed an empty desktop while its windows sat in another Space.
+On 10 November a software replug reproduced it on `main` `abe13aa1`, once on each display (`verify-miri` run `20261110-200106`).
+macOS moves the windows into a Space it does not show, and a frame write cannot move a window between two Spaces of one display.
+[paneru#158](https://github.com/samanyudas/paneru/pull/158) adds `ecs/shown_space.rs`: after a display change that moved a display's Spaces, the engine focuses a window in the Space that holds them, macOS switches the display, and focus goes back.
+Sol approved it in 2 rounds, and Sam merged it as `87d7a81`, whose tree matches the tested head `af10d64`. This branch pins `87d7a81`. On `af10d64`, run `20261110-212943` switched the external display back in 0.7 s and returned focus to Notes.
+Not checked live: the built-in display case on the fix (a mock replay covers it), a cable replug, and three or more displays.
+Seen in the same runs and not filed: when the main display changes by arrangement, the restore sometimes leaves two busy Helium windows in their old Spaces, on the other display.
+Next: Sam merges the pin PR, then a check on a `main` build closes #265.
 
 ## A window lost while it slides back after a drop
 
