@@ -16,4 +16,9 @@ Apply `ready-for-agent` only when the issue meets [File an issue](../../CONTRIBU
 Use `needs-info` when it does not.
 The type labels `bug`, `enhancement`, `task`, and `decision` come from the [issue templates](../../.github/ISSUE_TEMPLATE), and each issue has exactly one.
 
+Apply `stuck` when something outside the tracker blocks an issue, such as hardware that nobody has.
+If another open issue blocks it, record that issue as a blocker on GitHub instead.
+Comment with what the issue waits for, and remove `stuck` when that blocker is gone.
+Sam's issue board puts both kinds of blocked issue in its Stuck column.
+
 Edit the right-hand column to match whatever vocabulary you actually use.
