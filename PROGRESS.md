@@ -25,8 +25,9 @@ This is the same cause as the lost windows in `verify-miri` run `20261109-052022
 Branch `fix/377-engine-pin` pins its commit `50f56bc`, without paneru#157, which a separate PR for #410 pins.
 In `verify-miri` runs `20261110-172230`, `-172758`, and `-174326`, none of 39 loaded drops of T3 Code stopped partway or lost the window.
 37 drops ended at the slot, and 2 ended at the top of the column 2 pt and 4 pt wider, because T3 Code widens itself during a drag and the engine kept that width.
+Sam chose to track the wider column as [#414](https://github.com/samanyudas/miri/issues/414), not against #377.
 Only 30 of the 39 drops ran at a load average above 10, so the 40-drop criterion stays unticked.
-Next: Sam merges the pin PR, Sam decides whether the wider column is a separate bug, and a loaded run on `main` completes the 40 drops.
+Next: Sam merges [#413](https://github.com/samanyudas/miri/pull/413), and a loaded run on `main` completes the 40 drops.
 
 ## A new window wider than its display
 
