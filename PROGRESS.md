@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `feat/350-translations`, based on `main` at `04ae4c7a`
+Updated: 2026-11-10 on branch `feat/350-translations`, based on `main` at `abe13aa1`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,30 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A window lost while it slides back after a drop
+
+[#377](https://github.com/samanyudas/miri/issues/377) reported a dropped window that stopped partway back to its column under load.
+The retained traces show that the engine had not stalled the slide: it had dropped the live window.
+When macOS reports that a window left a Space, the engine keeps the window only if a fresh read of its AX role succeeds.
+A busy app leaves that read unanswered within 0.25 s (`kAXErrorCannotComplete`), and the engine counted that as a closed window.
+This is the same cause as the lost windows in `verify-miri` run `20261109-052022`.
+[paneru#156](https://github.com/samanyudas/paneru/pull/156), merged on 10 November 2026, counts only a read the app answers with an error as a closed window.
+Branch `fix/377-engine-pin` pins its merge `f238891`, on top of the #410 pin `578e228`.
+In `verify-miri` runs `20261110-172230`, `-172758`, and `-174326`, on the fix commit `50f56bc` without paneru#157, none of 39 loaded drops of T3 Code stopped partway or lost the window.
+37 drops ended at the slot, and 2 ended at the top of the column 2 pt and 4 pt wider, because T3 Code widens itself during a drag and the engine kept that width.
+Sam chose to track the wider column as [#414](https://github.com/samanyudas/miri/issues/414), not against #377.
+Only 30 of the 39 drops ran at a load average above 10, so the 40-drop criterion stays unticked.
+Next: Sam merges [#413](https://github.com/samanyudas/miri/pull/413), and a loaded run on `main` completes the 40 drops.
+
+## A new window wider than its display
+
+[#410](https://github.com/samanyudas/miri/issues/410) closed on 10 November 2026 after `verify-miri` run `20261110-180854` on `main` at `547f9777`, engine `578e228`.
+T3 Code relaunched after an update 2560 points wide, and the engine had put it in the built-in display's strip at that width, so 520 points ran past the right edge.
+[paneru#157](https://github.com/samanyudas/paneru/pull/157), pinned by [#412](https://github.com/samanyudas/miri/pull/412), narrows a new window that joins the active strip to the tiling area.
+[#411](https://github.com/samanyudas/miri/pull/411) added `V fixture --width --display --background` and the [new window width](.claude/skills/verify-miri/features/new-window-width.md) recipe.
+Sam relaunched T3 Code on the fix build, and it fit the built-in display.
+Not narrowed: a window that joins the strip after the above-ordinary level check in `recheck_window_level`, and a window that opens during a cross-display focus handoff, which can get the previous display's limit. Neither was observed.
 
 ## Bug reports, shortcut illustrations, and localization
 
@@ -132,7 +156,10 @@ Before, the crossing focused the destination's last-focused window, which could 
 Run `20261108-225330` on `main` `3dc50c83` focused Y on ⌃⌥→ instead.
 Sam also hand-checked both directions on the #396 build.
 A stacked edge column was not checked on hardware, and an engine test covers it.
-[#333](https://github.com/samanyudas/miri/issues/333), the ⌃⌥N screen order in [paneru#149](https://github.com/samanyudas/paneru/pull/149), is held until its three-display check can run, so `main` leaves it out.
+[#333](https://github.com/samanyudas/miri/issues/333): ⌃⌥N now visits the displays in screen order, left to right by left edge and then top to bottom, and wraps from the last to the first.
+Before, it took the first other display in the engine's storage order, so four displays could skip one.
+[paneru#149](https://github.com/samanyudas/paneru/pull/149) holds the engine change and merged into `miri/v0.5.2` as `f1c14be`, and branch `fix/333-pin-screen-order` pins it.
+#333 stays open after the pin merges, because its three-display check waits for hardware.
 
 ## Command-Shift Left and Right stay on their display
 
@@ -143,7 +170,7 @@ An upgrade removes those defaults only where the user kept them unchanged, and a
 [paneru#137](https://github.com/samanyudas/paneru/pull/137) makes a swap to the end that the column already holds do nothing, instead of swapping inside its stack.
 [#354](https://github.com/samanyudas/miri/pull/354) pinned its merge `b5ae4bd` and reached `main` at `a35bb5f4`.
 #331 closed on 8 November 2026 after `verify-miri` run `20261108-140758` on `a35bb5f4` passed both directions and the Settings check, against run `20261107-013236` on `main` `54e4e5f4`, which crossed.
-Of the rest of the 7 November shortcut decisions, [#332](https://github.com/samanyudas/miri/issues/332) and [#334](https://github.com/samanyudas/miri/issues/334) are closed, and [#333](https://github.com/samanyudas/miri/issues/333) is held.
+Of the rest of the 7 November shortcut decisions, [#332](https://github.com/samanyudas/miri/issues/332) and [#334](https://github.com/samanyudas/miri/issues/334) are closed, and [#333](https://github.com/samanyudas/miri/issues/333) waits for its three-display check.
 
 ## Pointer stays after a click
 
@@ -203,7 +230,8 @@ On the merged engine `ec85ffc` (run `20261108-ec85ffc`), 11 of 12 drops returned
 [paneru#141](https://github.com/samanyudas/paneru/pull/141) fixes that stall in two ways, and [paneru#143](https://github.com/samanyudas/paneru/pull/143), merged as `d0b532f`, fixes two cases its review found.
 Once Miri is done writing and the app has held a frame for 200 ms, Miri writes its frame once more, and a write the app leaves unanswered (`kAXErrorCannotComplete`) is sent once more with every part of it.
 On the re-assert commit `8011f0e` (run `20261108-reassert3`), the first 28 of 41 drops returned to the exact slot in 0.4 to 2.3 s with no 5 s stall.
-The 29th stopped partway home, and a traced run (`20261108-trace2`) showed two causes: lost last writes, which the retry covers, and a move that stops sending frames, which is [#377](https://github.com/samanyudas/miri/issues/377).
+The 29th stopped partway home, and a traced run (`20261108-trace2`) showed two causes: lost last writes, which the retry covers, and a window that stopped partway, which is [#377](https://github.com/samanyudas/miri/issues/377).
+The section [A window lost while it slides back after a drop](#a-window-lost-while-it-slides-back-after-a-drop) gives its cause.
 On `d0b532f` with trace lines (run `20261108-guarded`, load average 7 to 9), 5 drops returned to the exact slot in 0.9 to 1.6 s, two of them after the retry resent a write T3 Code left unanswered.
 In the 6th, Magnet put its third on the built-in display, and Miri kept T3 Code there at Magnet's width.
 Under a load average of 19 or more, Magnet applied its shortcut more than 1 s after release, and Miri kept its width as the app's own.
