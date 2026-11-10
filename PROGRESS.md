@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `fix/410-pin-engine`, based on `main` at `b0d1bf18`
+Updated: 2026-11-10 on branch `fix/377-engine-pin`, based on `main` at `547f9777`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,21 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A window lost while it slides back after a drop
+
+[#377](https://github.com/samanyudas/miri/issues/377) reported a dropped window that stopped partway back to its column under load.
+The retained traces show that the engine had not stalled the slide: it had dropped the live window.
+When macOS reports that a window left a Space, the engine keeps the window only if a fresh read of its AX role succeeds.
+A busy app leaves that read unanswered within 0.25 s (`kAXErrorCannotComplete`), and the engine counted that as a closed window.
+This is the same cause as the lost windows in `verify-miri` run `20261109-052022`.
+[paneru#156](https://github.com/samanyudas/paneru/pull/156), merged on 10 November 2026, counts only a read the app answers with an error as a closed window.
+Branch `fix/377-engine-pin` pins its merge `f238891`, on top of the #410 pin `578e228`.
+In `verify-miri` runs `20261110-172230`, `-172758`, and `-174326`, on the fix commit `50f56bc` without paneru#157, none of 39 loaded drops of T3 Code stopped partway or lost the window.
+37 drops ended at the slot, and 2 ended at the top of the column 2 pt and 4 pt wider, because T3 Code widens itself during a drag and the engine kept that width.
+Sam chose to track the wider column as [#414](https://github.com/samanyudas/miri/issues/414), not against #377.
+Only 30 of the 39 drops ran at a load average above 10, so the 40-drop criterion stays unticked.
+Next: Sam merges [#413](https://github.com/samanyudas/miri/pull/413), and a loaded run on `main` completes the 40 drops.
 
 ## A new window wider than its display
 
@@ -208,7 +223,8 @@ On the merged engine `ec85ffc` (run `20261108-ec85ffc`), 11 of 12 drops returned
 [paneru#141](https://github.com/samanyudas/paneru/pull/141) fixes that stall in two ways, and [paneru#143](https://github.com/samanyudas/paneru/pull/143), merged as `d0b532f`, fixes two cases its review found.
 Once Miri is done writing and the app has held a frame for 200 ms, Miri writes its frame once more, and a write the app leaves unanswered (`kAXErrorCannotComplete`) is sent once more with every part of it.
 On the re-assert commit `8011f0e` (run `20261108-reassert3`), the first 28 of 41 drops returned to the exact slot in 0.4 to 2.3 s with no 5 s stall.
-The 29th stopped partway home, and a traced run (`20261108-trace2`) showed two causes: lost last writes, which the retry covers, and a move that stops sending frames, which is [#377](https://github.com/samanyudas/miri/issues/377).
+The 29th stopped partway home, and a traced run (`20261108-trace2`) showed two causes: lost last writes, which the retry covers, and a window that stopped partway, which is [#377](https://github.com/samanyudas/miri/issues/377).
+The section [A window lost while it slides back after a drop](#a-window-lost-while-it-slides-back-after-a-drop) gives its cause.
 On `d0b532f` with trace lines (run `20261108-guarded`, load average 7 to 9), 5 drops returned to the exact slot in 0.9 to 1.6 s, two of them after the retry resent a write T3 Code left unanswered.
 In the 6th, Magnet put its third on the built-in display, and Miri kept T3 Code there at Magnet's width.
 Under a load average of 19 or more, Magnet applied its shortcut more than 1 s after release, and Miri kept its width as the app's own.
