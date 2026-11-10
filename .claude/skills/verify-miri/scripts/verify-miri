@@ -683,10 +683,15 @@ def cmd_fixture(args) -> int:
         name = f"fixture-{len(run['fixtures']) + 1}"
         ready = folder / f"{name}.pid"
         bundle = fixture_bundle(binary, folder, name)
-        options = ["--ready-file", str(ready), "--label", name, "--activate"] + ([] if args.fixed else ["--resizable"])
+        options = ["--ready-file", str(ready), "--label", name] + ([] if args.background else ["--activate"])
+        options += [] if args.fixed else ["--resizable"]
         if args.min_height:
             options += ["--min-height", str(args.min_height)]
-        subprocess.run(["open", "-n", str(bundle), "--args", *options], check=True)
+        if args.width:
+            options += ["--width", str(args.width)]
+        if args.display:
+            options += ["--display", str(args.display)]
+        subprocess.run(["open", "-n", *(["-g"] if args.background else []), str(bundle), "--args", *options], check=True)
         if not wait(ready.exists, 10, 0.05):
             raise Failure(f"{name} did not start")
         pid = int(ready.read_text())
@@ -940,6 +945,10 @@ def main() -> int:
     p.add_argument("--settle", type=float, default=1.0, help="seconds to wait after each window")
     p.add_argument("--fixed", action="store_true", help="a window that cannot resize, which the engine floats")
     p.add_argument("--min-height", type=int, help="points below which the window refuses to shrink, as an app minimum")
+    p.add_argument("--width", type=int, help="points wide the window opens, as an app that remembers its size")
+    p.add_argument("--display", type=int, help="the display ID whose top left the window opens at")
+    p.add_argument("--background", action="store_true",
+                   help="opens without taking focus, as an app that an updater relaunches does")
     p.set_defaults(func=cmd_fixture)
     p = sub.add_parser("key", help='press a chord in Miri\'s format, such as "ctrl+alt-leftarrow"')
     p.add_argument("chord")
