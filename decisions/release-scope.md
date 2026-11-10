@@ -221,7 +221,10 @@ A settle never leaves empty space beside a strip that overflows the display, so 
 Landing on a stack focuses the window in that stack that was used last.
 A strip that already fits the display slides a little with resistance, then springs back.
 Modifier-scroll with a mouse wheel settles the same way after a short pause.
-Settling is always on in v1 and has no setting.
+Settling applies to Continuous scrolling, which is the default and which existing configurations keep.
+Sam added a Window by window scrolling mode on 11 November 2026 ([#281](https://github.com/samanyudas/miri/issues/281)).
+In it, each 2 cm of strip swipe, or each modifier-scroll wheel input, moves focus one window or column, with the same focus rules as keyboard focus.
+While the fingers are on the trackpad, it gives one pulse for each step, and no pulse at a strip end.
 
 ## V1 interactions
 

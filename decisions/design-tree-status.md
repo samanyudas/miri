@@ -38,7 +38,7 @@ The native app is implemented, but no complete acceptance run has passed.
 - Fixed-size windows and Miri's settings float automatically.
 - When focus moves, the strip moves only as far as needed to show the focused column fully.
   Sam replaced the earlier rule, which centered the focused column whenever the strip overflowed, on 19 October 2026.
-- After a swipe or modifier scroll, the strip settles on a column, as [Release scope](release-scope.md) describes.
+- After a swipe or modifier scroll, the strip settles on a column in Continuous scrolling, and moves focus one window per step in Window by window scrolling, as [Settling after a swipe](release-scope.md#settling-after-a-swipe) describes.
 - Trackpad scrolling moves the strip under the pointer by default, and a setting chooses the focused strip instead.
 - [Stacks](release-scope.md#stacks) keep equal heights after membership changes and never overlap while they fit.
   An overflowing stack overlaps each window below the top bar of the window above, and the focused window comes to the front.
