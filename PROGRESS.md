@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `fix/377-engine-pin`, based on `main` at `b0d1bf18`
+Updated: 2026-11-10 on branch `fix/377-engine-pin`, based on `main` at `547f9777`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -22,8 +22,8 @@ When macOS reports that a window left a Space, the engine keeps the window only 
 A busy app leaves that read unanswered within 0.25 s (`kAXErrorCannotComplete`), and the engine counted that as a closed window.
 This is the same cause as the lost windows in `verify-miri` run `20261109-052022`.
 [paneru#156](https://github.com/samanyudas/paneru/pull/156), merged on 10 November 2026, counts only a read the app answers with an error as a closed window.
-Branch `fix/377-engine-pin` pins its commit `50f56bc`, without paneru#157, which a separate PR for #410 pins.
-In `verify-miri` runs `20261110-172230`, `-172758`, and `-174326`, none of 39 loaded drops of T3 Code stopped partway or lost the window.
+Branch `fix/377-engine-pin` pins its merge `f238891`, on top of the #410 pin `578e228`.
+In `verify-miri` runs `20261110-172230`, `-172758`, and `-174326`, on the fix commit `50f56bc` without paneru#157, none of 39 loaded drops of T3 Code stopped partway or lost the window.
 37 drops ended at the slot, and 2 ended at the top of the column 2 pt and 4 pt wider, because T3 Code widens itself during a drag and the engine kept that width.
 Sam chose to track the wider column as [#414](https://github.com/samanyudas/miri/issues/414), not against #377.
 Only 30 of the 39 drops ran at a load average above 10, so the 40-drop criterion stays unticked.
@@ -33,9 +33,11 @@ Next: Sam merges [#413](https://github.com/samanyudas/miri/pull/413), and a load
 
 [#410](https://github.com/samanyudas/miri/issues/410): T3 Code relaunched after an update 2560 points wide, and the engine put it in the built-in display's strip at that width, so 520 points ran past the right edge.
 A new window joined the active strip at the width it opened with, and nothing limited it to the tiling area.
-[paneru#157](https://github.com/samanyudas/paneru/pull/157) narrows such a window to the tiling area, Sol approved it in 1 round, and it awaits Sam's merge.
-`verify-miri` runs `20261110-171803` (`main` at `04ae4c7a`) and `20261110-173043` (engine `387adf7`) show the overflow and the fix on the live desktop, with the new `V fixture --width --display --background` options.
-Next: after paneru#157 merges, pin it in Miri with the same `verify-miri` recipe, [new window width](.claude/skills/verify-miri/features/new-window-width.md), then close #410.
+[paneru#157](https://github.com/samanyudas/paneru/pull/157) narrows such a window to the tiling area, and merged on 10 November 2026 as `578e228`, which this branch pins.
+[#411](https://github.com/samanyudas/miri/pull/411) merged as `b0d1bf18` with the `V fixture --width --display --background` options and the [new window width](.claude/skills/verify-miri/features/new-window-width.md) recipe.
+`verify-miri` runs `20261110-171803` and `20261110-173813` on `main` at `04ae4c7a` show the overflow with fixtures and with GitHub Desktop, and runs `20261110-173043` and `20261110-174121` on engine `387adf7`, the same tree as `578e228`, show the fix.
+paneru#157 got no GitHub Actions run, so its three CI jobs ran only locally; Miri's CI runs the engine tests on this pin.
+Next: after this pin merges, recheck the recipe on `main`, then close #410. T3 Code's own relaunch is Sam's check, because quitting T3 Code ends the agent session.
 
 ## Bug reports, shortcut illustrations, and localization
 
