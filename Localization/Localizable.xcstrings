@@ -683,7 +683,7 @@
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "### Registro del motor (censurado)"
+            "value": "### Registro del motor (con datos ocultos)"
           }
         },
         "fr": {
@@ -8797,7 +8797,7 @@
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Elige tres o cuatro dedos abajo para usar el deslizamiento."
+            "value": "Más abajo, elige tres o cuatro dedos para usar el deslizamiento."
           }
         },
         "fr": {
@@ -8851,13 +8851,13 @@
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Escolha três ou quatro dedos abaixo para usar o gesto."
+            "value": "Abaixo, escolha três ou quatro dedos para usar o gesto."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Escolha três ou quatro dedos abaixo para usar o gesto."
+            "value": "Abaixo, escolha três ou quatro dedos para usar o gesto."
           }
         },
         "ru": {
@@ -9837,7 +9837,7 @@
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Compara Miri y su motor integrado con una ventana de prueba inofensiva. La atribución del permiso sigue sin resolverse hasta comparar con una concesión manual."
+            "value": "Compara Miri y su motor integrado con una app de prueba inofensiva. La atribución del permiso sigue sin resolverse hasta comparar con una concesión manual."
           }
         },
         "fr": {
@@ -9939,13 +9939,13 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "用一个无害的测试 App 比较 Miri 与其内置引擎。在手动授权比较之前，权限归属仍未确定。"
+            "value": "用一个无害的测试 App 比较 Miri 与其内置引擎。在手动授予权限并进行比较之前，权限归属仍未确定。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "以一個無害的測試App比較Miri與其內建引擎。在手動授權比較之前，權限歸屬仍未確定。"
+            "value": "以一個無害的測試App比較Miri與其內建引擎。在手動授予權限並進行比較之前，權限歸屬仍未確定。"
           }
         }
       }
@@ -16847,7 +16847,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "符合顯示器"
+            "value": "配合顯示器大小"
           }
         }
       }
@@ -16869,7 +16869,7 @@
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "ID de proceso de la ventana de prueba"
+            "value": "ID de proceso de la app de prueba"
           }
         },
         "fr": {
@@ -16999,7 +16999,7 @@
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Hacer flotante o no la ventana activa"
+            "value": "Hacer flotante la ventana activa o devolverla a la tira"
           }
         },
         "fr": {
@@ -25935,7 +25935,7 @@
         "tr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Büyütülen yığın penceresi şurada açılır"
+            "value": "Yığındaki pencere büyütüldüğünde şurada açılır"
           }
         },
         "uk": {
@@ -28619,7 +28619,7 @@
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Miri hat gesehen, dass sich der Streifen in beide Richtungen bewegt, und keine Aktion von macOS. Nur deine Antwort schaltet das Streichen ein."
+            "value": "Miri hat gesehen, dass sich der Streifen in beide Richtungen bewegt, und dabei keine Aktion von macOS erkannt. Nur deine Antwort schaltet das Streichen ein."
           }
         },
         "es": {
@@ -28673,7 +28673,7 @@
         "pl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Miri zauważyło ruch pasa w obie strony i żadnej czynności macOS. Przesuwanie włącza tylko Twoja odpowiedź."
+            "value": "Miri zauważyło ruch pasa w obie strony i nie wykryło żadnej czynności macOS. Przesuwanie włącza tylko Twoja odpowiedź."
           }
         },
         "pt-BR": {
@@ -28755,7 +28755,7 @@
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Miri se inicia solo cuando se superan las comprobaciones necesarias."
+            "value": "Miri se inicia por sí solo cuando se superan las comprobaciones necesarias."
           }
         },
         "fr": {
@@ -40503,7 +40503,7 @@
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ripristina predefinite…"
+            "value": "Ripristina valori predefiniti…"
           }
         },
         "ja": {
@@ -50269,7 +50269,7 @@
         "th": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "การตอบกลับของเอนจินมีข้อมูลระบุตัวตนหรือสคีมาที่ไม่คาดคิด"
+            "value": "การตอบกลับของเอนจินมีตัวตนหรือสคีมาที่ไม่คาดคิด"
           }
         },
         "tr": {
@@ -51257,7 +51257,7 @@
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "El proceso de la ventana de prueba no está disponible."
+            "value": "El proceso de la app de prueba no está disponible."
           }
         },
         "fr": {
@@ -56783,7 +56783,7 @@
         "ru": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "В разделе «Системные настройки > Рабочий стол и Dock > Окна» выключите: %@. Плитки macOS перемещают окна, которые упорядочивает Miri, в том числе окна, которые вы перетягиваете."
+            "value": "В разделе «Системные настройки > Рабочий стол и Dock > Окна» выключите: %@. Размещение окон плитками в macOS перемещает окна, которые упорядочивает Miri, в том числе окна, которые вы перетягиваете."
           }
         },
         "sv": {
@@ -60115,7 +60115,7 @@
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Wenn aus, öffne Miri über sein Symbol in der Menüleiste."
+            "value": "Wenn ausgeschaltet, öffne Miri über sein Symbol in der Menüleiste."
           }
         },
         "es": {
@@ -62917,7 +62917,7 @@
         "ru": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Плитки окон macOS"
+            "value": "Размещение окон плитками в macOS"
           }
         },
         "sv": {
@@ -64489,7 +64489,7 @@
         "sv": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "kortkommandona återställdes"
+            "value": "kortkommandona skulle återställas"
           }
         },
         "th": {
@@ -65751,7 +65751,7 @@
         "sv": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "den uppgraderades"
+            "value": "den skulle uppgraderas"
           }
         },
         "th": {
