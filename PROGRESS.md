@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-11 on branch `docs/350-verified`, based on `main` at `fe171b37`
+Updated: 2026-11-11 on branch `docs/377-verified`, based on `main` at `814f18f3`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -33,12 +33,13 @@ When macOS reports that a window left a Space, the engine keeps the window only 
 A busy app leaves that read unanswered within 0.25 s (`kAXErrorCannotComplete`), and the engine counted that as a closed window.
 This is the same cause as the lost windows in `verify-miri` run `20261109-052022`.
 [paneru#156](https://github.com/samanyudas/paneru/pull/156), merged on 10 November 2026, counts only a read the app answers with an error as a closed window.
-Branch `fix/377-engine-pin` pins its merge `f238891`, on top of the #410 pin `578e228`.
+[#413](https://github.com/samanyudas/miri/pull/413) pinned its merge `f238891` on `main`, on top of the #410 pin `578e228`.
 In `verify-miri` runs `20261110-172230`, `-172758`, and `-174326`, on the fix commit `50f56bc` without paneru#157, none of 39 loaded drops of T3 Code stopped partway or lost the window.
 37 drops ended at the slot, and 2 ended at the top of the column 2 pt and 4 pt wider, because T3 Code widens itself during a drag and the engine kept that width.
 Sam chose to track the wider column as [#414](https://github.com/samanyudas/miri/issues/414), not against #377.
-Only 30 of the 39 drops ran at a load average above 10, so the 40-drop criterion stays unticked.
-Next: Sam merges [#413](https://github.com/samanyudas/miri/pull/413), and a loaded run on `main` completes the 40 drops.
+On `main` `3e5523ac`, `verify-miri` runs `20261110-181524`, `20261110-182323`, and `20261111-002842` dragged T3 Code below the display 40 times at a load average of 10.4 to 15.9, and all 40 drops ended at the slot at the column's width.
+CI's `make engine-test` on the same pin passed the new test `drag::a_busy_apps_window_sliding_back_after_a_drop_stays_in_its_column`, which fails before the fix.
+Both acceptance criteria are ticked, and #377 closed on 11 November 2026.
 
 ## A new window wider than its display
 
