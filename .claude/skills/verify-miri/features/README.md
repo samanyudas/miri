@@ -36,6 +36,7 @@ Read the index, then use the matching feature file as the recipe.
 | [Start, stop, and restart window management](window-management-controls.md) | Yes, on 2026-11-05 at `main` c4ba432e, run `20261105-160539`: every sub-feature, the menu bar menu excepted. |
 | [Setup checks](setup-checks.md) | Yes, on 2026-11-05 at `main` c4ba432e, run `20261105-160539`: the `yabai` stand-in, Waiting, and auto-start. |
 | [Customize shortcuts](shortcut-customization.md) | Yes, on 2026-11-05 at `main` c4ba432e, run `20261105-160539`: remove, add, both conflicts, and reset. Not the filter. |
+| [New window width](new-window-width.md) | Yes, on 2026-11-10 with engine 387adf7, run `20261110-173043`: background open and focused open. The overflow reproduced on `main` 04ae4c7a in run `20261110-171803`. |
 
 ## Surfaces without a map entry
 

@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `fix/388-pin-engine`, based on `main` at `5c0bfadc`
+Updated: 2026-11-10 on branch `fix/410-new-window-width`, based on `main` at `04ae4c7a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,14 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A new window wider than its display
+
+[#410](https://github.com/samanyudas/miri/issues/410): T3 Code relaunched after an update 2560 points wide, and the engine put it in the built-in display's strip at that width, so 520 points ran past the right edge.
+A new window joined the active strip at the width it opened with, and nothing limited it to the tiling area.
+[paneru#157](https://github.com/samanyudas/paneru/pull/157) narrows such a window to the tiling area, Sol approved it in 1 round, and it awaits Sam's merge.
+`verify-miri` runs `20261110-171803` (`main` at `04ae4c7a`) and `20261110-173043` (engine `387adf7`) show the overflow and the fix on the live desktop, with the new `V fixture --width --display --background` options.
+Next: after paneru#157 merges, pin it in Miri with the same `verify-miri` recipe, [new window width](.claude/skills/verify-miri/features/new-window-width.md), then close #410.
 
 ## Bug reports, shortcut illustrations, and localization
 
