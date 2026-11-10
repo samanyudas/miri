@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-11 on branch `docs/302-closed`, based on `main` at `f68a3610`
+Updated: 2026-11-11 on branch `fix/issue-308`, based on `main` at `d755306d`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,17 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Desktop beside a column that changes width
+
+[#308](https://github.com/samanyudas/miri/issues/308) reported that desktop shows beside a column while it changes width.
+Row pacing held each column only by its left edge, so a column that widened about its center left its right neighbor free to run ahead.
+[paneru#159](https://github.com/samanyudas/paneru/pull/159), merged as `597afe2`, paces each pair of windows at the edge they share, and this branch pins it.
+On verify-miri run `20261111-020017`, widening from 665 to 1012 points opened 47 to 77 points of desktop on all 6 presses on `main`, and none past the 8 point rest gap on the fix.
+Narrowing from the largest preset to the smallest still opens 93 to 136 points with the fix, against 148 to 254 on `main`, because the narrowing column's right edge runs ahead of its right neighbor.
+Sam chose on 11 November 2026 to ship the widening fix first and to hold the narrowing column's width in the next PR for #308, so #308 stays open.
+
+**Next:** verify widening on the landed `main`, then build the width hold for narrowing with a failing engine test first.
 
 ## Karabiner-Elements and Hyper key chords
 
