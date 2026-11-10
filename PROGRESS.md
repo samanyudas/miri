@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-11 on branch `fix/issue-308`, based on `main` at `d755306d`
+Updated: 2026-11-11 on branch `fix/issue-326`, based on `main` at `2c505050`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,21 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A keyboard slide that starts late
+
+[#326](https://github.com/samanyudas/miri/issues/326) reported keyboard slides to a Finder column that started up to half a second late.
+Timing logs on 6 November 2026 showed the cause: focusing a window called `AXRaise` on the engine's main loop, and no frame ran until the app answered, 66 to 154 ms for Finder and up to 206 ms for System Settings.
+Sam chose on 11 November 2026 to move the raise off the main loop, and to measure criterion 2 from the engine's key log line, counting the engine's photo panels.
+[paneru#162](https://github.com/samanyudas/paneru/pull/162) queues the raise in `focus_with_raise` on the app's window writer, and this branch pins its head `c367966`.
+Each writer keeps only the newest raise, so an older raise landing late cannot take focus back. Sol approved it after 2 rounds.
+`raise_without_focus` stays synchronous, because the stack and strip raises depend on when each raise lands.
+On verify-miri run `20261111-022802`, engine `87d7a81` started 3 of 10 slides to Finder later than 100 ms (30 to 119 ms).
+On run `20261111-033301`, the fix `45b6117` started all 10 within 13 to 38 ms, and Finder answered the raise on its writer in 3.5 to 70.5 ms while the slide moved.
+Slides back to T3 Code first moved 50 to 95 ms after the key on both builds.
+The raise does not explain that, and it is not tracked yet.
+
+**Next:** after Sam merges paneru#162, pin its merge commit, then check criterion 2 again on the landed `main` and close #326.
 
 ## Desktop beside a column that changes width
 
