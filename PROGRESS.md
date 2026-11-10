@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-11 on branch `docs/302-hyper-key-v1`, based on `main` at `7dae1cd3`
+Updated: 2026-11-11 on branch `docs/302-closed`, based on `main` at `f68a3610`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -19,11 +19,12 @@ The public release path and the complete acceptance runs follow.
 [#302](https://github.com/samanyudas/miri/issues/302) needs no code change.
 The engine and the shortcut recorder already read chords with all four modifiers, and the defaults already use twelve of them.
 Sam accepted reworded checks on 11 November 2026, because ⌃⌥⇧⌘H is the default for Move column to first position.
-Branch `docs/302-hyper-key-v1` moves Hyper key recording into v1 in the decision documents and the v1 specification, and adds a Karabiner-Elements section to the keybinding reference.
+#424 moved Hyper key recording into v1 in the decision documents and the v1 specification, and added a Karabiner-Elements section to the keybinding reference.
 `ShortcutsTests.aHyperKeyChordSavesAndReadsBackUnchanged` checks that a Hyper chord saves, reads back unchanged, and is rejected on a chord a default holds.
 Sam's hand checks with Karabiner-Elements 16.3.0 passed on 11 November 2026: Hyper and H, a recorded Hyper and U, the conflict warning, a remapped ⌃⌥←, and the defaults with no rules.
 The test profiles are removed from Karabiner-Elements.
-Close #302 after this branch merges.
+[#424](https://github.com/samanyudas/miri/pull/424) merged as `f68a3610`, and #302 closed on 11 November 2026.
+Sam decided that Miri ships no Karabiner-Elements profile or rule, so people set up a Hyper key in Karabiner-Elements themselves.
 
 ## A display left on an empty desktop after a replug
 
