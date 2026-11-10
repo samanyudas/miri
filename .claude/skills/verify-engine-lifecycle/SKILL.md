@@ -17,7 +17,7 @@ make verify-engine-lifecycle
 ```
 
 It runs `scripts/verify-engine-lifecycle.py --mutants` and takes about 3 seconds after the first run, which downloads the tools.
-It checks 196 distinct states.
+It checks 198 distinct states.
 The first run downloads TLC 1.7.4 and a Temurin 21 Java runtime, both pinned by SHA-256, into `~/.cache/miri/verification`.
 Set `JAVA` and `TLA2TOOLS` to use your own Java 11 or later and `tla2tools.jar` instead.
 
