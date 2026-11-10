@@ -20,7 +20,7 @@ The public release path and the complete acceptance runs follow.
 Row pacing held each column only by its left edge, so a column that widened about its center left its right neighbor free to run ahead.
 [paneru#159](https://github.com/samanyudas/paneru/pull/159), merged as `597afe2`, paces each pair of windows at the edge they share, and this branch pins it.
 On verify-miri run `20261111-020017`, widening from 665 to 1012 points opened 47 to 77 points of desktop on all 6 presses on `main`, and none past the 8 point rest gap on the fix.
-Narrowing from the largest preset to the smallest still opens 93 to 136 points with the fix, against 148 to 254 on `main`, because the narrowing column's right edge runs ahead of its right neighbor.
+Narrowing from the largest preset to the smallest still opens 101 to 136 points with the fix, against 148 to 254 on `main`, because the narrowing column's right edge runs ahead of its right neighbor.
 Sam chose on 11 November 2026 to ship the widening fix first and to hold the narrowing column's width in the next PR for #308, so #308 stays open.
 
 **Next:** verify widening on the landed `main`, then build the width hold for narrowing with a failing engine test first.
