@@ -21,9 +21,9 @@ The engine and the shortcut recorder already read chords with all four modifiers
 Sam accepted reworded checks on 11 November 2026, because ⌃⌥⇧⌘H is the default for Move column to first position.
 Branch `docs/302-hyper-key-v1` moves Hyper key recording into v1 in the decision documents and the v1 specification, and adds a Karabiner-Elements section to the keybinding reference.
 `ShortcutsTests.aHyperKeyChordSavesAndReadsBackUnchanged` checks that a Hyper chord saves, reads back unchanged, and is rejected on a chord a default holds.
-Sam's manual checks with Karabiner-Elements remain, because synthetic key events never pass through Karabiner-Elements.
-Two Karabiner-Elements profiles on Sam's Mac, "Miri 302 Hyper test" and "Miri 302 no rules", exist for those checks.
-Remove them after the checks.
+Sam's hand checks with Karabiner-Elements 16.3.0 passed on 11 November 2026: Hyper and H, a recorded Hyper and U, the conflict warning, a remapped ⌃⌥←, and the defaults with no rules.
+The test profiles are removed from Karabiner-Elements.
+Close #302 after this branch merges.
 
 ## A display left on an empty desktop after a replug
 
