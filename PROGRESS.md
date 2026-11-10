@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `fix/333-pin-screen-order`, based on `main` at `3e5523ac`
+Updated: 2026-11-10 on branch `feat/350-translations`, based on `main` at `abe13aa1`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -51,8 +51,12 @@ Branch `feat/351-shortcut-illustrations` adds a preview panel to Settings > Shor
 It draws a before and after sketch of the action under the pointer or keyboard focus, plays the move once, and shows a caption that VoiceOver reads.
 The scenes live in `Sources/MiriCore/ShortcutSceneCatalog.swift`, and `ShortcutSceneTests` checks them against `decisions/keybinding reference.md`.
 [#401](https://github.com/samanyudas/miri/pull/401) merged as `3454d61d`, and Sam confirmed the pictures and Reduce Motion on 10 November 2026.
-Branch `fix/351-preview-focus` makes the panel follow keyboard focus on key chips and the VoiceOver cursor, adds each caption as the row title's VoiceOver hint, and corrects 25 scenes that a Sol review found inaccurate against the engine.
-Next: Sam rechecks VoiceOver and keyboard navigation, then the #350 translations.
+[#403](https://github.com/samanyudas/miri/pull/403) made the panel follow keyboard focus and VoiceOver, and #351 closed on 10 November 2026.
+Branch `feat/350-translations` adds the translations for all 22 languages of #350.
+Claude Opus 5.5 drafted them from the glossary in [TRANSLATION.md](TRANSLATION.md), GPT-6.1 Sol checked them, and each is marked `needs_review` until a native speaker reviews it.
+`make strings` now fails on a missing translation, and `verify-miri cutoff` with `relaunch --double-length` checks every Settings page for cut-off text.
+Next: Sam merges the PR, an agent verifies #350 on `main`, and Sam changes the Mac's language once as the hand check that criterion 2 names.
+[#407](https://github.com/samanyudas/miri/pull/407) merged as `04ae4c7a`, so the Settings window no longer loses 32 points of height at each launch.
 
 ## Desktop at the shared edge while columns slide back in
 

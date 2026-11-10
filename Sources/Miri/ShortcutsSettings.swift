@@ -145,11 +145,12 @@ struct ShortcutsSettings: View {
     /// A default an upgrade could not move, with one button that moves it when another listed action holds it.
     private func keptDefaultRow(_ kept: KeptDefault) -> some View {
         let wanted = model.keyLayout.label(for: kept.wanted)
+        let wantedInSentence = model.keyLayout.sentenceLabel(for: kept.wanted)
         let owner = ShortcutAction.editable.first { $0.title == kept.owner }
         return HStack(alignment: .center, spacing: 10) {
             NoticeGlyph(kind: .info)
             VStack(alignment: .leading, spacing: 2) {
-                Text("\(kept.action.title) has a new default, \(wanted), but \(kept.owner) uses it.")
+                Text("\(kept.action.title) has a new default, \(wantedInSentence), but \(kept.owner) uses it.")
                     .font(.rowTitle)
                     .foregroundStyle(Palette.primaryText)
                     .fixedSize(horizontal: false, vertical: true)
@@ -160,7 +161,7 @@ struct ShortcutsSettings: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             if let owner {
-                Button("Use \(wanted)") {
+                Button("Use \(wantedInSentence)") {
                     notice = nil
                     // The owner can spell the same keys another way, such as `ctrl+alt-[` for `ctrl+alt-leftbracket`.
                     for chord in model.shortcuts?.chords(for: owner) ?? []
@@ -171,7 +172,7 @@ struct ShortcutsSettings: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Palette.accentFill)
-                .help("Move \(wanted) from \(kept.owner) to \(kept.action.title)")
+                .help("Move \(wantedInSentence) from \(kept.owner) to \(kept.action.title)")
                 .accessibilityLabel("Use \(KeyCap.spoken(wanted)) for \(kept.action.title)")
             }
         }
@@ -265,14 +266,14 @@ struct ShortcutsSettings: View {
 
     private var conflictTitle: String {
         guard let pendingConflict else { return "" }
-        return String(localized: "\(model.keyLayout.label(for: pendingConflict.chord)) is used by macOS for ")
+        return String(localized: "\(model.keyLayout.sentenceLabel(for: pendingConflict.chord)) is used by macOS for ")
             + "\(pendingConflict.shortcut.name)."
     }
 
     /// Says what Miri kept and, when the button can move the new default, that moving it takes it from its owner.
     private func keptText(_ kept: KeptDefault, movable: Bool) -> String {
-        let wanted = model.keyLayout.label(for: kept.wanted)
-        let labels = kept.kept.map(model.keyLayout.label(for:)).formatted(.list(type: .and))
+        let wanted = model.keyLayout.sentenceLabel(for: kept.wanted)
+        let labels = kept.kept.map(model.keyLayout.sentenceLabel(for:)).formatted(.list(type: .and))
         let keptSentence =
             kept.kept.isEmpty
             ? String(localized: "\(kept.action.title) has no shortcut now.") : String(localized: "Miri kept \(labels).")
@@ -348,9 +349,14 @@ struct ShortcutsSettings: View {
         case .failed:
             notice = nil
         case .rejected(.usedBy(let owner)):
-            notice = Notice(action: action, text: String(localized: "\(label) is already used by \(owner)."))
+            notice = Notice(
+                action: action,
+                text: String(localized: "\(model.keyLayout.sentenceLabel(for: chord)) is already used by \(owner)."))
         case .rejected(.alreadyAssigned):
-            notice = Notice(action: action, text: String(localized: "\(label) is already a shortcut for this action."))
+            notice = Notice(
+                action: action,
+                text: String(
+                    localized: "\(model.keyLayout.sentenceLabel(for: chord)) is already a shortcut for this action."))
         case .systemConflict(let shortcut):
             pendingConflict = PendingConflict(chord: chord, action: action, shortcut: shortcut)
         }
@@ -400,10 +406,13 @@ struct RecordingChip: View {
 
     var body: some View {
         HStack(spacing: 2) {
-            Text(modifiers.isEmpty ? String(localized: "Type Shortcut") : KeyLayout.label(for: modifiers))
-                .font(.detail.weight(.medium))
-                .foregroundStyle(modifiers.isEmpty ? Palette.secondaryText : Palette.primaryText)
-                .lineLimit(1)
+            Text(
+                modifiers.isEmpty
+                    ? String(localized: "Type Shortcut") : KeyLayout.isolated(KeyLayout.label(for: modifiers))
+            )
+            .font(.detail.weight(.medium))
+            .foregroundStyle(modifiers.isEmpty ? Palette.secondaryText : Palette.primaryText)
+            .lineLimit(1)
             Button(action: cancel) {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundStyle(Palette.secondaryText)

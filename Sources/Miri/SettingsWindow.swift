@@ -232,6 +232,8 @@ private struct SidebarRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(page.title)
+        // A handle that stays the same in every language, for the verify-miri test tool.
+        .accessibilityIdentifier("miri.page.\(page.rawValue)")
         .accessibilityValue(badge > 0 ? "\(badge) to review" : "")
         .accessibilityAddTraits(selected ? [.isSelected] : [])
     }

@@ -69,7 +69,7 @@ First it rejects new commits that add a screen recording, or an image outside `a
 | `make shell`, `make actions` | Shell scripts and workflows pass ShellCheck and actionlint. |
 | `make compat` | Declared macOS minimums agree, the Rust pin satisfies the engine, and the engine pin is published on the fork branch. |
 | `make swift-lint`, `make engine-lint` | Swift formatting, rustfmt, and Clippy with warnings as errors. |
-| `make strings` | Every interface text in `Sources` is localized where it stands, and `Localization/Localizable.xcstrings` matches the strings the compiler extracts. |
+| `make strings` | Every interface text in `Sources` is localized where it stands, `Localization/Localizable.xcstrings` matches the strings the compiler extracts, and every string has a translation in each shipped language. |
 | `make build`, `make test` | The signed app bundle builds, and the Swift and engine unit tests pass. |
 | `make e2e` | The packaged app and engine run a real Accessibility observation through Launch Services, and with the Accessibility grant, the app recovers a stranded fixture window. |
 | `make package` | Miri Developer packs into a DMG that mounts with valid signatures. |
@@ -81,6 +81,9 @@ That needs the manual procedure in the [permission prototype record](docs/protot
 Interface text goes through the string catalog in `Localization/`.
 Pass text to a `String` parameter as `String(localized: "...")`, because SwiftUI localizes only literals that it receives directly, such as in `Text("...")`.
 Run `make strings-update` after you add or change interface text, and commit the catalog with the code.
+A change that adds or edits interface text also adds its translation in every shipped language, in the same pull request.
+Mark a translation that no native speaker has reviewed, such as a machine draft, as needing review.
+[TRANSLATION.md](TRANSLATION.md) holds the glossary and says how to draft and review a translation.
 Mark a literal that reads like text but is never shown, such as a file header, with `// Not interface text` on its line or the line above.
 To see Miri in another language without changing the Mac's, run `verify-miri relaunch --language <code>` during a run.
 

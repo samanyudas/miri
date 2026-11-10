@@ -21,6 +21,8 @@ struct ShortcutPreview: View {
                     SketchView(sketch: showsAfter ? scene.after : scene.before, arrangement: scene.before)
                 }
                 .frame(width: 330, height: 100)
+                // The sketches show the screen's real left and right, also in Arabic.
+                .environment(\.layoutDirection, .leftToRight)
                 .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(action.title)

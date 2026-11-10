@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Checks that every interface literal in Sources is localized, and keeps Localization/Localizable.xcstrings equal to
-# the strings the Swift compiler extracts (#350).
+# Checks that every interface literal in Sources is localized, keeps Localization/Localizable.xcstrings equal to
+# the strings the Swift compiler extracts, and checks that every string has a translation in each shipped language (#350).
 # Usage: scripts/sync-strings.sh          adds new strings and removes ones the code no longer uses
 #        scripts/sync-strings.sh --check  exits 1 when the catalog is out of date, and changes nothing
 set -euo pipefail
@@ -47,6 +47,8 @@ if [[ "${1:-}" == --check ]]; then
         exit 1
     fi
     echo "$catalog matches the strings in Sources."
+    # New or changed English text is a new key, so it fails here until it is translated. TRANSLATION.md says how.
+    python3 scripts/check-strings.py --translations "$catalog"
 else
     cp "$work/catalog/Localizable.xcstrings" "$catalog"
     echo "Updated $catalog."

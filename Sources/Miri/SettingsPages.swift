@@ -79,6 +79,7 @@ struct GeneralSettings: View {
                     Button("Show in Finder") {
                         NSWorkspace.shared.activateFileViewerSelecting([model.paths.configuration])
                     }
+                    .fixedSize()
                 }
             }
         }
@@ -194,6 +195,8 @@ private struct StripPicture: View {
             }
         }
         .frame(width: 200)
+        // A picture of the screen keeps the screen's real left and right, also in Arabic.
+        .environment(\.layoutDirection, .leftToRight)
         .accessibilityHidden(true)
     }
 
@@ -365,7 +368,7 @@ struct LayoutSettings: View {
     private var cycleShortcutText: String {
         let action = ShortcutAction.cyclePresetWidths
         guard let shortcuts = model.shortcuts else { return "" }
-        let labels = shortcuts.chords(for: action).map(model.keyLayout.label(for:))
+        let labels = shortcuts.chords(for: action).map(model.keyLayout.sentenceLabel(for:))
         return labels.isEmpty
             ? String(localized: "\(action.title) has no shortcut. Add one in Shortcuts.")
             // A no-break space keeps the shortcut on the same line as its verb.
@@ -525,8 +528,7 @@ struct SetupCheckItem: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if check.status != .passed, check.isGestureCheck || check.settingsURL != nil {
-                    HStack(spacing: 8) {
-                        Spacer(minLength: 0)
+                    ButtonRow {
                         if check.isGestureCheck, let openGestures {
                             Button("Open Gestures", action: openGestures)
                         }
@@ -641,20 +643,16 @@ struct DiagnosticsSettings: View {
                 // The log box is dark in both appearances, so its scroll bar is too.
                 .environment(\.colorScheme, .dark)
             }
-            HStack(spacing: 10) {
-                // A failed engine has Restart Engine in the banner above.
-                switch model.engineState {
-                // A healthy engine needs no next step, so Restart Engine is a plain button here.
-                case .running:
-                    Button("Restart Engine") { model.restart() }
-                case .restarting:
-                    Button("Restart Engine") {}.disabled(true)
-                case .failed, .stopped: EmptyView()
+            // When a translation makes the row too long, the note moves under the buttons instead of cutting them off.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) {
+                    logButtons
+                    privacyNote
                 }
-                Button("Copy Diagnostics…") { presenter?.show(.diagnostics) }
-                Text("Logs stay on this Mac. Miri sends no telemetry.")
-                    .font(.detail)
-                    .foregroundStyle(Palette.secondaryText)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 10) { logButtons }
+                    privacyNote
+                }
             }
             SettingsSection(String(localized: "Feedback")) {
                 SettingsRow(
@@ -662,6 +660,8 @@ struct DiagnosticsSettings: View {
                     detail: String(localized: "Opens GitHub, where you pick a bug report or a feature request.")
                 ) {
                     Button("Send Feedback…") { NSWorkspace.shared.open(Feedback.formList) }
+                        // A long translated title stays whole, and the row's text wraps instead.
+                        .fixedSize()
                 }
             }
             SettingsSection(String(localized: "Developer")) {
@@ -670,7 +670,7 @@ struct DiagnosticsSettings: View {
                     detail: String(
                         localized: "Checks which process macOS credits with Miri's Accessibility permission.")
                 ) {
-                    Button("Permission Experiment…") { presenter?.show(.permissionExperiment) }
+                    Button("Permission Experiment…") { presenter?.show(.permissionExperiment) }.fixedSize()
                 }
             }
         }
@@ -681,6 +681,26 @@ struct DiagnosticsSettings: View {
                 try? await Task.sleep(for: .seconds(1))
             }
         }
+    }
+
+    @ViewBuilder private var logButtons: some View {
+        // A failed engine has Restart Engine in the banner above.
+        switch model.engineState {
+        // A healthy engine needs no next step, so Restart Engine is a plain button here.
+        case .running:
+            Button("Restart Engine") { model.restart() }.fixedSize()
+        case .restarting:
+            Button("Restart Engine") {}.disabled(true).fixedSize()
+        case .failed, .stopped: EmptyView()
+        }
+        Button("Copy Diagnostics…") { presenter?.show(.diagnostics) }.fixedSize()
+    }
+
+    private var privacyNote: some View {
+        Text("Logs stay on this Mac. Miri sends no telemetry.")
+            .font(.detail)
+            .foregroundStyle(Palette.secondaryText)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private var engineFacts: some View {

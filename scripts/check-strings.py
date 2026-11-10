@@ -12,6 +12,8 @@ the Swift compiler writes with `-emit-localized-strings`: one entry for each str
 looks up, with its line. A literal that only matches a catalog key elsewhere, such as text passed to a `String`
 parameter, is not localized. `scripts/sync-strings.sh --check` builds the files and runs this check.
 Interpolations such as `\\(count)`, Swift escapes, and placeholders such as `%lld` or `%1$@` compare as equal.
+With `--translations CATALOG` it exits 1 when a key lacks a translation in one of LANGUAGES, or when a translation's
+placeholders differ from the English text's. A draft marked `needs_review` counts as a translation.
 """
 import argparse
 import json
@@ -27,6 +29,10 @@ ESCAPE = re.compile(r"\\(u\{[0-9A-Fa-f]+\}|.)")
 NOT_TEXT = re.compile(r"^\(\?|://|^x-apple|^com\.apple|^io\.github|\.(svg|txt|toml|plist|log)$")
 PLACEHOLDER = "\u0000"
 CATALOG_PLACEHOLDER = re.compile(r"%(\d+\$)?(ll|l|h)?[@dDuUxXoOfFeEgGcCsSaAp]")
+# The languages Miri ships, as string catalog codes. Sam chose them on 8 November 2026 (#350).
+LANGUAGES = ("en", "zh-Hans", "zh-Hant", "es", "fr", "de", "ja", "ko", "pt-BR", "pt-PT", "it",
+             "ru", "ar", "hi", "nl", "tr", "pl", "id", "vi", "th", "uk", "sv")
+TRANSLATED = ("translated", "needs_review")
 
 
 def literals(source: str):
@@ -187,12 +193,65 @@ def localized_lines(folder: Path, root: Path) -> set[tuple[str, int, str]]:
     return found
 
 
+def placeholders(text: str) -> list[tuple[int, str]]:
+    """The placeholders in catalog text as sorted (position, type) pairs, so `%@ %lld` equals `%2$lld %1$@`."""
+    found = []
+    for number, match in enumerate(CATALOG_PLACEHOLDER.finditer(text.replace("%%", "")), start=1):
+        position = int(match.group(1)[:-1]) if match.group(1) else number
+        found.append((position, (match.group(2) or "") + match.group(0)[-1]))
+    return sorted(found)
+
+
+def forms(localization: dict) -> dict[str, dict]:
+    """The string units of one language: one for plain text, or one per plural form."""
+    if "stringUnit" in localization:
+        return {"": localization["stringUnit"]}
+    plural = localization.get("variations", {}).get("plural", {})
+    return {name: variation.get("stringUnit", {}) for name, variation in plural.items()}
+
+
+def translation_problems(catalog: dict) -> list[str]:
+    """Each missing or broken translation in the catalog, as `language: problem: key`."""
+    problems = []
+    for key, entry in sorted(catalog["strings"].items()):
+        if entry.get("shouldTranslate") is False:
+            continue
+        localizations = entry.get("localizations", {})
+        english = forms(localizations["en"]) if "en" in localizations else {"": {"value": key}}
+        expected = placeholders(english.get("", english.get("other", {})).get("value", key))
+        for language in LANGUAGES[1:]:
+            units = forms(localizations.get(language, {}))
+            if not units:
+                problems.append(f"{language}: missing: {key}")
+                continue
+            if "" not in units and "other" not in units:
+                problems.append(f"{language}: plural form other missing: {key}")
+            for name, unit in units.items():
+                value = unit.get("value", "")
+                if unit.get("state") not in TRANSLATED or not value.strip():
+                    problems.append(f"{language}: missing: {key}")
+                elif placeholders(value) != expected and not (
+                        name in ("zero", "one", "two") and set(placeholders(value)) <= set(expected)):
+                    problems.append(f"{language}: placeholders differ from the English text: {key}")
+    extra = {language for entry in catalog["strings"].values() for language in entry.get("localizations", {})}
+    problems += [f"{language}: not in LANGUAGES" for language in sorted(extra - set(LANGUAGES))]
+    return problems
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("root", nargs="?", default=Path(__file__).resolve().parents[1], type=Path)
     parser.add_argument("--check", metavar="STRINGSDATA", type=Path,
                         help="fail on a literal that the compiler did not localize, from this .stringsdata folder")
+    parser.add_argument("--translations", metavar="CATALOG", type=Path,
+                        help="fail on a key that lacks a translation in one of LANGUAGES, in this string catalog")
     arguments = parser.parse_args()
+    if arguments.translations:
+        problems = translation_problems(json.loads(arguments.translations.read_text(encoding="utf-8")))
+        for problem in problems:
+            print(problem)
+        print(f"{len(problems)} translations missing or broken in {len(LANGUAGES)} languages", file=sys.stderr)
+        return 1 if problems else 0
     localized = localized_lines(arguments.check, arguments.root) if arguments.check else set()
     found = [(path, line, text) for path, line, text in candidates(arguments.root)
              if not arguments.check or (path, line, decode(text)) not in localized]

@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import subprocess
 import sys
@@ -6,6 +7,18 @@ import unittest
 from pathlib import Path
 
 CHECKER = Path(__file__).resolve().parents[1] / "check-strings.py"
+_spec = importlib.util.spec_from_file_location("check_strings", CHECKER)
+check_strings = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(check_strings)
+
+
+def unit(value: str, state: str = "needs_review") -> dict:
+    return {"stringUnit": {"state": state, "value": value}}
+
+
+def translated(value: str) -> dict:
+    """A localization in every shipped language other than English, each a machine draft."""
+    return {language: unit(value) for language in check_strings.LANGUAGES[1:]}
 
 VIEW = '''import SwiftUI
 // Text("A comment is not interface text")
@@ -114,6 +127,47 @@ let g = "Also shown"
 """})
         self.assertEqual((code, lines), (0, ["Sources/MiriCore/R.swift:9: Shown to people",
                                              "Sources/MiriCore/R.swift:15: Also shown"]))
+
+
+class TranslationCheckTest(unittest.TestCase):
+    def check(self, strings: dict) -> tuple[int, list[str]]:
+        with tempfile.TemporaryDirectory() as directory:
+            catalog = Path(directory) / "Localizable.xcstrings"
+            catalog.write_text(json.dumps({"sourceLanguage": "en", "strings": strings, "version": "1.0"}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(CHECKER), "--translations", str(catalog)],
+                                    capture_output=True, text=True)
+            return result.returncode, result.stdout.splitlines()
+
+    def test_passes_when_every_language_has_a_draft_or_a_review(self):
+        localizations = translated("Weiter")
+        localizations["de"] = unit("Weiter", "translated")
+        self.assertEqual(self.check({"Next": {"localizations": localizations}, "": {"shouldTranslate": False}}), (0, []))
+
+    def test_fails_on_a_new_key_and_a_missing_language(self):
+        localizations = translated("Weiter")
+        del localizations["sv"]
+        localizations["fr"] = unit("", "new")
+        code, lines = self.check({"Next": {"localizations": localizations}})
+        self.assertEqual((code, sorted(lines)), (1, ["fr: missing: Next", "sv: missing: Next"]))
+        code, lines = self.check({"Changed text": {}})
+        self.assertEqual((code, len(lines)), (1, len(check_strings.LANGUAGES) - 1))
+
+    def test_fails_on_placeholders_that_differ_from_the_english_text(self):
+        english = {"en": unit("%1$@ is used by %2$@.", "new")}
+        good = translated("%2$@ verwendet %1$@.")
+        bad = {**good, "de": unit("%@ verwendet %lld.")}
+        self.assertEqual(self.check({"%@ is used by %@.": {"localizations": {**english, **good}}}), (0, []))
+        self.assertEqual(self.check({"%@ is used by %@.": {"localizations": {**english, **bad}}}),
+                         (1, ["de: placeholders differ from the English text: %@ is used by %@."]))
+
+    def test_accepts_plural_forms_that_drop_the_number_for_one(self):
+        localizations = translated("%lld Bildschirme")
+        localizations["ru"] = {"variations": {"plural": {
+            "one": unit("Один экран"), "few": unit("%lld экрана"), "other": unit("%lld экранов")}}}
+        self.assertEqual(self.check({"%lld displays": {"localizations": localizations}}), (0, []))
+        localizations["ru"] = {"variations": {"plural": {"one": unit("%lld экран")}}}
+        self.assertEqual(self.check({"%lld displays": {"localizations": localizations}}),
+                         (1, ["ru: plural form other missing: %lld displays"]))
 
 
 if __name__ == "__main__":

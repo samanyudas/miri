@@ -107,6 +107,18 @@ public struct KeyLayout: Equatable, Sendable {
         Self.label(for: chord.modifiers) + keyLabel(chord.key)
     }
 
+    /// The chord for use inside a sentence, marked as `isolated(_:)` says.
+    public func sentenceLabel(for chord: Chord) -> String {
+        Self.isolated(label(for: chord))
+    }
+
+    /// A label between two left-to-right marks, so its symbols keep keyboard order, left to right, in a right-to-left
+    /// language such as Arabic. Symbols such as `⌃⌥` take the direction of the text around them, so without the marks
+    /// `⌃⌥R` reads `R⌥⌃` in an Arabic sentence. Unicode isolates did not keep the order inside a sentence.
+    public static func isolated(_ label: String) -> String {
+        "\u{200E}" + label + "\u{200E}"
+    }
+
     /// Modifiers in the order macOS menus show them, such as `⌃⌥⇧⌘`.
     public static func label(for modifiers: Set<ChordModifier>) -> String {
         let symbols: [(ChordModifier, String)] = [(.control, "⌃"), (.option, "⌥"), (.shift, "⇧"), (.command, "⌘")]
