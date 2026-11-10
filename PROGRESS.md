@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `fix/410-new-window-width`, based on `main` at `04ae4c7a`
+Updated: 2026-11-10 on branch `fix/410-pin-engine`, based on `main` at `b0d1bf18`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -18,9 +18,11 @@ The public release path and the complete acceptance runs follow.
 
 [#410](https://github.com/samanyudas/miri/issues/410): T3 Code relaunched after an update 2560 points wide, and the engine put it in the built-in display's strip at that width, so 520 points ran past the right edge.
 A new window joined the active strip at the width it opened with, and nothing limited it to the tiling area.
-[paneru#157](https://github.com/samanyudas/paneru/pull/157) narrows such a window to the tiling area, Sol approved it in 1 round, and it awaits Sam's merge.
-`verify-miri` runs `20261110-171803` (`main` at `04ae4c7a`) and `20261110-173043` (engine `387adf7`) show the overflow and the fix on the live desktop, with the new `V fixture --width --display --background` options.
-Next: after paneru#157 merges, pin it in Miri with the same `verify-miri` recipe, [new window width](.claude/skills/verify-miri/features/new-window-width.md), then close #410.
+[paneru#157](https://github.com/samanyudas/paneru/pull/157) narrows such a window to the tiling area, and merged on 10 November 2026 as `578e228`, which this branch pins.
+[#411](https://github.com/samanyudas/miri/pull/411) merged as `b0d1bf18` with the `V fixture --width --display --background` options and the [new window width](.claude/skills/verify-miri/features/new-window-width.md) recipe.
+`verify-miri` runs `20261110-171803` and `20261110-173813` on `main` at `04ae4c7a` show the overflow with fixtures and with GitHub Desktop, and runs `20261110-173043` and `20261110-174121` on engine `387adf7`, the same tree as `578e228`, show the fix.
+paneru#157 got no GitHub Actions run, so its three CI jobs ran only locally; Miri's CI runs the engine tests on this pin.
+Next: after this pin merges, recheck the recipe on `main`, then close #410. T3 Code's own relaunch is Sam's check, because quitting T3 Code ends the agent session.
 
 ## Bug reports, shortcut illustrations, and localization
 
