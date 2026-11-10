@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `fix/377-engine-pin`, based on `main` at `547f9777`
+Updated: 2026-11-10 on branch `fix/333-pin-screen-order`, based on `main` at `3e5523ac`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -152,7 +152,10 @@ Before, the crossing focused the destination's last-focused window, which could 
 Run `20261108-225330` on `main` `3dc50c83` focused Y on ⌃⌥→ instead.
 Sam also hand-checked both directions on the #396 build.
 A stacked edge column was not checked on hardware, and an engine test covers it.
-[#333](https://github.com/samanyudas/miri/issues/333), the ⌃⌥N screen order in [paneru#149](https://github.com/samanyudas/paneru/pull/149), is held until its three-display check can run, so `main` leaves it out.
+[#333](https://github.com/samanyudas/miri/issues/333): ⌃⌥N now visits the displays in screen order, left to right by left edge and then top to bottom, and wraps from the last to the first.
+Before, it took the first other display in the engine's storage order, so four displays could skip one.
+[paneru#149](https://github.com/samanyudas/paneru/pull/149) holds the engine change and merged into `miri/v0.5.2` as `f1c14be`, and branch `fix/333-pin-screen-order` pins it.
+#333 stays open after the pin merges, because its three-display check waits for hardware.
 
 ## Command-Shift Left and Right stay on their display
 
@@ -163,7 +166,7 @@ An upgrade removes those defaults only where the user kept them unchanged, and a
 [paneru#137](https://github.com/samanyudas/paneru/pull/137) makes a swap to the end that the column already holds do nothing, instead of swapping inside its stack.
 [#354](https://github.com/samanyudas/miri/pull/354) pinned its merge `b5ae4bd` and reached `main` at `a35bb5f4`.
 #331 closed on 8 November 2026 after `verify-miri` run `20261108-140758` on `a35bb5f4` passed both directions and the Settings check, against run `20261107-013236` on `main` `54e4e5f4`, which crossed.
-Of the rest of the 7 November shortcut decisions, [#332](https://github.com/samanyudas/miri/issues/332) and [#334](https://github.com/samanyudas/miri/issues/334) are closed, and [#333](https://github.com/samanyudas/miri/issues/333) is held.
+Of the rest of the 7 November shortcut decisions, [#332](https://github.com/samanyudas/miri/issues/332) and [#334](https://github.com/samanyudas/miri/issues/334) are closed, and [#333](https://github.com/samanyudas/miri/issues/333) waits for its three-display check.
 
 ## Pointer stays after a click
 
