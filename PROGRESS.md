@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `fix/265-replug-space`, based on `main` at `923d84e6`
+Updated: 2026-11-10 on branch `docs/265-done`, based on `main` at `f79eb93d`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -22,8 +22,8 @@ macOS moves the windows into a Space it does not show, and a frame write cannot 
 [paneru#158](https://github.com/samanyudas/paneru/pull/158) adds `ecs/shown_space.rs`: after a display change that moved a display's Spaces, the engine focuses a window in the Space that holds them, macOS switches the display, and focus goes back.
 Sol approved it in 2 rounds, and Sam merged it as `87d7a81`, whose tree matches the tested head `af10d64`. This branch pins `87d7a81`. On `af10d64`, run `20261110-212943` switched the external display back in 0.7 s and returned focus to Notes.
 Not checked live: the built-in display case on the fix (a mock replay covers it), a cable replug, and three or more displays.
-Seen in the same runs and not filed: when the main display changes by arrangement, the restore sometimes leaves two busy Helium windows in their old Spaces, on the other display.
-Next: Sam merges the pin PR, then a check on a `main` build closes #265.
+Seen 3 times in the fix runs and not filed: when the main display changed by arrangement, the restore left two busy Helium windows in their old Spaces, on the other display. It did not recur in 13 display changes on `main` `f79eb93d`.
+#419 landed the pin on `main` as `f79eb93d`. On that build, run `20261110-215223` switched the external display back in 0.67 s after a software replug, and Sam's cable replug kept every window on its display and in its order. #265 closed on 10 November.
 
 ## A window lost while it slides back after a drop
 
