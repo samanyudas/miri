@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-10 on branch `docs/265-done`, based on `main` at `f79eb93d`
+Updated: 2026-11-11 on branch `fix/350-back-translation`, based on `main` at `dfb012cf`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -63,10 +63,11 @@ It draws a before and after sketch of the action under the pointer or keyboard f
 The scenes live in `Sources/MiriCore/ShortcutSceneCatalog.swift`, and `ShortcutSceneTests` checks them against `decisions/keybinding reference.md`.
 [#401](https://github.com/samanyudas/miri/pull/401) merged as `3454d61d`, and Sam confirmed the pictures and Reduce Motion on 10 November 2026.
 [#403](https://github.com/samanyudas/miri/pull/403) made the panel follow keyboard focus and VoiceOver, and #351 closed on 10 November 2026.
-Branch `feat/350-translations` adds the translations for all 22 languages of #350.
+[#408](https://github.com/samanyudas/miri/pull/408) merged as `d6e6439b` and adds the translations for all 22 languages of #350.
 Claude Opus 5.5 drafted them from the glossary in [TRANSLATION.md](TRANSLATION.md), GPT-6.1 Sol checked them, and each is marked `needs_review` until a native speaker reviews it.
 `make strings` now fails on a missing translation, and `verify-miri cutoff` with `relaunch --double-length` checks every Settings page for cut-off text.
-Next: Sam merges the PR, an agent verifies #350 on `main`, and Sam changes the Mac's language once as the hand check that criterion 2 names.
+Branch `fix/350-back-translation` fixes 22 translations that a blind back-translation check found: Grok 4.7 translated each language back to English without the original, and Grok 4.7 or GPT-6.1 Sol compared the result with the English.
+Next: an agent verifies #350 on `main`, and Sam changes the Mac's language once as the hand check that criterion 2 names.
 [#407](https://github.com/samanyudas/miri/pull/407) merged as `04ae4c7a`, so the Settings window no longer loses 32 points of height at each launch.
 
 ## Desktop at the shared edge while columns slide back in
