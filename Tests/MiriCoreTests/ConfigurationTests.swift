@@ -411,25 +411,25 @@ struct GestureConfigurationTests {
         #expect(document.value(at: ["miri", "reverse_swipe"]) == .boolean(false))
         #expect(
             document.value(at: ["swipe", "gesture"])
-                == .table(["direction": .string("Natural"), "vertical": .boolean(false), "paging": .boolean(false)]))
+                == .table([
+                    "direction": .string("Natural"), "vertical": .boolean(false), "window_landing": .boolean(false),
+                ]))
     }
 
     @Test func writesTheFingerCountOnlyWhileASwipeIsActive() throws {
         let store = try store("[miri]\nstrip_gesture = \"four\"\n")
-        var active = false
-        store.stripSwipe = { settings in
-            active ? settings.stripGesture.fingers.map { StripSwipe(fingers: $0, isTest: false) } : nil
-        }
+        var active: GestureFingers?
+        store.gestureFingers = { settings in active == nil ? nil : settings.stripGesture.fingers }
         store.load(reduceMotion: false)
         #expect(store.settings.stripGesture == .four)
         #expect(try TOMLDocument(contents()).value(at: ["swipe", "gesture", "fingers_count"]) == nil)
-        active = true
-        try store.applyStripSwipe(reduceMotion: false)
+        active = .four
+        try store.applyGestureFingers(reduceMotion: false)
         #expect(try TOMLDocument(contents()).value(at: ["swipe", "gesture", "fingers_count"]) == .integer(4))
         try store.update(reduceMotion: false) { $0.stripGesture = .three }
         #expect(try TOMLDocument(contents()).value(at: ["swipe", "gesture", "fingers_count"]) == .integer(3))
-        active = false
-        try store.applyStripSwipe(reduceMotion: false)
+        active = nil
+        try store.applyGestureFingers(reduceMotion: false)
         let document = try TOMLDocument(contents())
         #expect(document.value(at: ["swipe", "gesture", "fingers_count"]) == nil)
         #expect(document.value(at: ["miri", "strip_gesture"]) == .string("three"))
@@ -468,7 +468,9 @@ struct GestureConfigurationTests {
         #expect(document.value(at: ["options", "swipe_gesture_direction"]) == nil)
         #expect(
             document.value(at: ["swipe", "gesture"])
-                == .table(["direction": .string("Natural"), "vertical": .boolean(false), "paging": .boolean(false)]))
+                == .table([
+                    "direction": .string("Natural"), "vertical": .boolean(false), "window_landing": .boolean(false),
+                ]))
     }
 
     @Test func reportsAnUnknownStripGestureByKey() throws {
@@ -487,18 +489,18 @@ struct GestureConfigurationTests {
         #expect(store.settings.stripScrolling == .continuous)
         let document = try TOMLDocument(contents())
         #expect(document.value(at: ["miri", "strip_scrolling"]) == .string("continuous"))
-        #expect(document.value(at: ["swipe", "gesture", "paging"]) == .boolean(false))
+        #expect(document.value(at: ["swipe", "gesture", "window_landing"]) == .boolean(false))
         #expect(document.value(at: ["swipe", "scroll"]) == .table(["window_step": .boolean(false)]))
     }
 
-    @Test func windowByWindowTurnsOnPagingAndWheelStepsAndSurvivesARestart() throws {
+    @Test func windowByWindowTurnsOnWindowLandingAndWheelStepsAndSurvivesARestart() throws {
         let store = try store()
         store.load(reduceMotion: false)
         try store.update(reduceMotion: false) { $0.stripScrolling = .window }
         let document = try TOMLDocument(contents())
         #expect(document.value(at: ["miri", "strip_scrolling"]) == .string("window"))
-        #expect(document.value(at: ["swipe", "gesture", "paging"]) == .boolean(true))
-        #expect(document.value(at: ["swipe", "gesture", "page_distance_cm"]) == nil)
+        #expect(document.value(at: ["swipe", "gesture", "window_landing"]) == .boolean(true))
+        #expect(document.value(at: ["swipe", "gesture", "paging"]) == nil)
         #expect(document.value(at: ["swipe", "gesture", "haptics"]) == nil)
         #expect(document.value(at: ["swipe", "scroll"]) == .table(["window_step": .boolean(true)]))
         let relaunched = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
@@ -508,21 +510,12 @@ struct GestureConfigurationTests {
         #expect(try contents() == document.text)
     }
 
-    @Test func aGestureTestScrollsFreelyButKeepsWheelSteps() throws {
-        let store = try store("[miri]\nstrip_gesture = \"four\"\nstrip_scrolling = \"window\"\n")
-        var testing = true
-        store.stripSwipe = { _ in StripSwipe(fingers: .four, isTest: testing) }
+    @Test func removesPagingThatWouldStopTheStripFollowingTheFingers() throws {
+        let store = try store("[miri]\nstrip_scrolling = \"window\"\n[swipe.gesture]\npaging = true\n")
         store.load(reduceMotion: false)
-        var document = try TOMLDocument(contents())
-        #expect(document.value(at: ["swipe", "gesture", "fingers_count"]) == .integer(4))
-        #expect(document.value(at: ["swipe", "gesture", "paging"]) == .boolean(false))
-        #expect(document.value(at: ["swipe", "scroll", "window_step"]) == .boolean(true))
-        testing = false
-        try store.applyStripSwipe(reduceMotion: false)
-        document = try TOMLDocument(contents())
-        #expect(document.value(at: ["swipe", "gesture", "fingers_count"]) == .integer(4))
-        #expect(document.value(at: ["swipe", "gesture", "paging"]) == .boolean(true))
-        #expect(document.value(at: ["swipe", "scroll", "window_step"]) == .boolean(true))
+        let document = try TOMLDocument(contents())
+        #expect(document.value(at: ["swipe", "gesture", "paging"]) == nil)
+        #expect(document.value(at: ["swipe", "gesture", "window_landing"]) == .boolean(true))
     }
 
     @Test func reportsAnUnknownStripScrollingByKey() throws {

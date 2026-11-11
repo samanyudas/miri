@@ -223,8 +223,10 @@ A strip that already fits the display slides a little with resistance, then spri
 Modifier-scroll with a mouse wheel settles the same way after a short pause.
 Settling applies to Continuous scrolling, which is the default and which existing configurations keep.
 Sam added a Window by window scrolling mode on 11 November 2026 ([#281](https://github.com/samanyudas/miri/issues/281)).
-In it, each 2 cm of strip swipe, or each modifier-scroll wheel input, moves focus one window or column, with the same focus rules as keyboard focus.
-While the fingers are on the trackpad, it gives one pulse for each step, and no pulse at a strip end.
+In it, the strip follows the fingers, then lands on the column under the display center, or on the next one for a quick flick.
+It never glides past that column on momentum.
+The trackpad clicks each time the column it would land on changes, so a swipe that stays on its column, or a strip end, gives no click.
+Each modifier-scroll wheel input moves focus one column, with the same focus rules as keyboard focus.
 
 ## V1 interactions
 

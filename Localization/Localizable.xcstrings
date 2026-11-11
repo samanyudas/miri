@@ -60884,132 +60884,132 @@
         }
       }
     },
-    "Window by window moves focus one window for each short swipe or each Option-scroll step, with a tap you can feel on the trackpad.": {
+    "Window by window lets each swipe follow your fingers, then land on one window. The trackpad clicks when the window it would land on changes. Each Option-scroll step moves one window.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "يؤدي \"نافذة تلو الأخرى\" إلى نقل التركيز نافذة واحدة مع كل تمرير سريع قصير أو كل خطوة تمرير مع Option، مع نقرة تشعر بها على لوحة التعقب."
+            "value": "مع \"نافذة تلو الأخرى\" يتبع كل تمرير سريع أصابعك، ثم يستقر على نافذة واحدة. تنقر لوحة التعقب عندما تتغير النافذة التي سيستقر عليها. وكل خطوة تمرير مع Option تنقل نافذة واحدة."
           }
         },
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "„Fenster für Fenster“ bewegt den Fokus bei jeder kurzen Wischbewegung oder jedem Scrollschritt mit Option um ein Fenster weiter, mit einem spürbaren Tippen auf dem Trackpad."
+            "value": "Bei „Fenster für Fenster“ folgt jede Wischbewegung deinen Fingern und endet dann auf einem Fenster. Das Trackpad klickt, sobald sich das Fenster ändert, auf dem sie enden würde. Jeder Scrollschritt mit Option bewegt um ein Fenster."
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "«Ventana a ventana» activa la ventana siguiente con cada deslizamiento corto o cada paso de desplazamiento con Opción, con un toque que notas en el trackpad."
+            "value": "Con «Ventana a ventana», cada deslizamiento sigue tus dedos y luego se detiene en una ventana. El trackpad hace clic cuando cambia la ventana en la que se detendría. Cada paso de desplazamiento con Opción mueve una ventana."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "« Fenêtre par fenêtre » active la fenêtre suivante à chaque balayage court ou à chaque cran de défilement avec Option, avec une légère pression ressentie sur le trackpad."
+            "value": "Avec « Fenêtre par fenêtre », chaque balayage suit vos doigts, puis s’arrête sur une fenêtre. Le trackpad émet un clic quand la fenêtre où il s’arrêterait change. Chaque cran de défilement avec Option passe d’une fenêtre."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "\"एक-एक विंडो\" हर छोटे स्वाइप या Option के साथ हर स्क्रॉल स्टेप पर फ़ोकस को एक विंडो आगे ले जाता है, और ट्रैकपैड पर हल्का टैप महसूस होता है।"
+            "value": "\"एक-एक विंडो\" में हर स्वाइप आपकी उंगलियों के साथ चलता है, फिर एक विंडो पर रुकता है। जिस विंडो पर वह रुकेगा, उसके बदलने पर ट्रैकपैड क्लिक करता है। Option के साथ स्क्रॉल का हर कदम एक विंडो आगे ले जाता है।"
           }
         },
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "\"Jendela demi jendela\" memindahkan fokus satu jendela untuk setiap gesekan pendek atau setiap langkah gulir dengan Option, disertai ketukan yang terasa di trackpad."
+            "value": "Dengan \"Jendela demi jendela\", setiap usapan mengikuti jari Anda, lalu berhenti di satu jendela. Trackpad berbunyi klik saat jendela tempat usapan akan berhenti berubah. Setiap langkah gulir dengan Option berpindah satu jendela."
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "«Finestra per finestra» attiva la finestra successiva a ogni scorrimento breve o a ogni scatto di scorrimento con Opzione, con un tocco che senti sul trackpad."
+            "value": "Con \"Finestra per finestra\" ogni scorrimento segue le dita, poi si ferma su una finestra. Il trackpad fa clic quando cambia la finestra su cui si fermerebbe. Ogni scatto di scorrimento con Opzione sposta di una finestra."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "「ウインドウごと」では、短くスワイプするか、Optionを押しながら1段階スクロールするたびに、フォーカスが1つのウインドウ分移動し、トラックパッドに軽い振動を感じます。"
+            "value": "「ウインドウごと」では、スワイプは指に合わせて動き、1つのウインドウで止まります。止まる先のウインドウが変わるとトラックパッドがクリックします。Optionを押したスクロールは1段階ごとに1ウインドウ移動します。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "‘윈도우별’은 짧게 쓸어넘기거나 Option을 누른 채 한 단계 스크롤할 때마다 초점을 윈도우 하나만큼 옮기며, 트랙패드에서 가벼운 탭을 느낄 수 있습니다."
+            "value": "'윈도우별'에서는 스와이프가 손가락을 따라 움직인 다음 윈도우 하나에 멈춥니다. 멈출 윈도우가 바뀌면 트랙패드가 클릭합니다. Option 스크롤은 한 단계마다 윈도우 하나씩 이동합니다."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "'Venster voor venster' verplaatst de focus één venster bij elke korte veeg of elke scrollstap met Option, met een tik die je op het trackpad voelt."
+            "value": "Met ‘Venster voor venster’ volgt elke veegbeweging je vingers en eindigt dan op één venster. Het trackpad klikt wanneer het venster waarop hij zou eindigen verandert. Elke scrollstap met Option gaat één venster verder."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "„Okno po oknie” uaktywnia następne okno przy każdym krótkim przesunięciu lub każdym kroku przewijania z Option, a gładzik odpowiada wyczuwalnym stuknięciem."
+            "value": "W trybie „Okno po oknie” każde przesunięcie podąża za palcami, a potem zatrzymuje się na jednym oknie. Gładzik klika, gdy zmienia się okno, na którym by się zatrzymało. Każdy krok przewijania z Option przesuwa o jedno okno."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "“Janela por janela” move o foco uma janela a cada gesto curto ou a cada passo de rolagem com Option, com um toque que você sente no trackpad."
+            "value": "Com \"Janela por janela\", cada gesto acompanha seus dedos e depois para em uma janela. O trackpad dá um clique quando muda a janela em que ele pararia. Cada passo de rolagem com Option avança uma janela."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "“Janela a janela” move o foco uma janela a cada gesto curto ou a cada passo de deslocamento com Opção, com um toque que sente no trackpad."
+            "value": "Com \"Janela a janela\", cada gesto acompanha os seus dedos e depois para numa janela. O trackpad faz um clique quando muda a janela em que pararia. Cada passo de deslocamento com Option avança uma janela."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "«По окнам» переводит фокус на одно окно при каждом коротком смахивании или каждом шаге прокрутки с Option, а трекпад отвечает ощутимым касанием."
+            "value": "В режиме «По окнам» каждый жест следует за пальцами, а затем останавливается на одном окне. Трекпад щёлкает, когда меняется окно, на котором он остановится. Каждый шаг прокрутки с Option сдвигает на одно окно."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "”Fönster för fönster” flyttar fokus ett fönster för varje kort svep eller varje rullningssteg med Alternativ, med ett tryck du känner på styrplattan."
+            "value": "Med ”Fönster för fönster” följer varje svep dina fingrar och stannar sedan på ett fönster. Styrplattan klickar när fönstret det skulle stanna på ändras. Varje rullningssteg med Alternativ flyttar ett fönster."
           }
         },
         "th": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "\"ทีละหน้าต่าง\" จะย้ายโฟกัสไปหนึ่งหน้าต่างทุกครั้งที่ปัดสั้นๆ หรือเลื่อนหนึ่งขั้นพร้อมกด Option พร้อมการแตะที่รู้สึกได้บนแทร็คแพด"
+            "value": "เมื่อเลือก \"ทีละหน้าต่าง\" การปัดแต่ละครั้งจะเคลื่อนตามนิ้วของคุณ แล้วหยุดที่หน้าต่างเดียว แทร็คแพดจะคลิกเมื่อหน้าต่างที่จะหยุดเปลี่ยนไป การเลื่อนพร้อม Option แต่ละขั้นจะย้ายไปหนึ่งหน้าต่าง"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "\"Pencere pencere\", her kısa kaydırmada veya Option ile her kaydırma adımında odağı bir pencere taşır ve izleme dörtgeninde hissedilen bir dokunuş verir."
+            "value": "\"Pencere pencere\" ile her kaydırma parmaklarınızı izler, ardından tek bir pencerede durur. Duracağı pencere değiştiğinde izleme dörtgeni tıklar. Option ile her kaydırma adımı bir pencere ilerler."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "«По вікнах» переводить фокус на одне вікно за кожного короткого змахування або кожного кроку прокручування з Option, а трекпед відповідає відчутним дотиком."
+            "value": "У режимі «По вікнах» кожен жест слідує за пальцями, а потім зупиняється на одному вікні. Трекпад клацає, коли змінюється вікно, на якому він зупиниться. Кожен крок прокручування з Option зсуває на одне вікно."
           }
         },
         "vi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "\"Từng cửa sổ\" chuyển tiêu điểm một cửa sổ cho mỗi lần vuốt ngắn hoặc mỗi nấc cuộn với Option, kèm một cú chạm bạn cảm nhận được trên bàn di chuột."
+            "value": "Với \"Từng cửa sổ\", mỗi lần vuốt sẽ đi theo ngón tay của bạn rồi dừng ở một cửa sổ. Bàn di chuột sẽ kêu tách khi cửa sổ nó sẽ dừng lại thay đổi. Mỗi bước cuộn kèm Option di chuyển một cửa sổ."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "选择“逐个窗口”时，每次短轻扫或每次按住 Option 滚动一格，焦点都会移动一个窗口，并在触控板上产生可感觉到的轻触。"
+            "value": "选择“逐个窗口”后，每次轻扫都会跟随手指移动，然后停在一个窗口上。即将停靠的窗口改变时，触控板会发出一次点按。按住 Option 滚动时，每一步移动一个窗口。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "選擇「逐一視窗」時，每次短滑動或每次按住 Option 捲動一格，焦點都會移動一個視窗，並在觸控式軌跡板上產生可感覺到的輕觸。"
+            "value": "選擇「逐一視窗」後，每次滑動都會跟著手指移動，然後停在一個視窗上。即將停靠的視窗改變時，觸控式軌跡板會發出一次按壓回饋。按住 Option 捲動時，每一步移動一個視窗。"
           }
         }
       }

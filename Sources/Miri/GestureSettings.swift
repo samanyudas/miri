@@ -49,7 +49,7 @@ struct GestureSettings: View {
                     title: String(localized: "Scroll by"),
                     detail: String(
                         localized:
-                            "Window by window moves focus one window for each short swipe or each Option-scroll step, with a tap you can feel on the trackpad."
+                            "Window by window lets each swipe follow your fingers, then land on one window. The trackpad clicks when the window it would land on changes. Each Option-scroll step moves one window."
                     )
                 ) {
                     SegmentedChoice(
