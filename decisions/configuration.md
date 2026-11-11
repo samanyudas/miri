@@ -122,7 +122,7 @@ They do not by themselves encode Miri's verification status or conflict policy.
 | `[swipe.gesture].direction` | Follow finger movement by default, with a persistent reversal setting. | Source values are `"Natural"` and `"Reversed"`. |
 | `[swipe.gesture].fingers_count` | Three fingers, four fingers, or Off, subject to the accepted enablement policy. | Exact-count interception starts at three fingers. Omission or zero disables it. |
 | `[swipe.gesture].vertical` | Strip swipes are horizontal only. | Vertical interception defaults to enabled. |
-| `[swipe.gesture].window_landing` | Off for Continuous scrolling, on for Window by window scrolling. | The strip follows the fingers, then lands on the column under the display center, or the next one for a quick flick, and never glides on with momentum. `haptics`, on by default, clicks the trackpad each time that column changes. |
+| `[swipe.gesture].window_landing` | Off for Continuous scrolling, on for Window by window scrolling. | The strip follows the fingers, then lands one column on from where the swipe began, once the fingers have moved it 5% of the display width or flicked, and never glides on with momentum. `haptics`, on by default, clicks the trackpad each time that column changes. |
 | `[swipe.scroll].window_step` | Off for Continuous scrolling, on for Window by window scrolling. | Each modifier-scroll wheel input focuses one adjacent column. Momentum adds no step, and repeats in the same direction within 180 ms are dropped. The modifier defaults to Option. |
 
 `swipe_natural` is absent from this release.
