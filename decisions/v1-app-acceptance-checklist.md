@@ -177,7 +177,8 @@ Never leave windows stranded off-screen.
     Each change invalidates the prior user-test result.
     The selected preference remains saved, but the gesture stays Off until another successful test and explicit user confirmation.
 14. Upgrade macOS, then separately upgrade the bundled engine.
-    Each upgrade invalidates the prior user-test result and requires retesting before gesture enablement.
+    The macOS upgrade invalidates the prior user-test result and requires retesting before gesture enablement.
+    The engine upgrade keeps the result, and the gesture stays on.
 15. Detect a change to relevant macOS gestures, then separately report such a change through Miri.
     Each case invalidates the prior user-test result and requires retesting.
     Miri does not claim to detect changes when automatic detection is unavailable.

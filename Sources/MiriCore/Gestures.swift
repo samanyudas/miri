@@ -57,15 +57,14 @@ public struct GestureSettingsSnapshot: Codable, Equatable, Sendable {
     }
 }
 
-/// What a gesture test result depends on. A change to any of it requires a new test.
+/// What a gesture test result depends on. A change to any of it requires a new test. The engine is not part of it:
+/// the test checks that macOS does not also act on the swipe, which an engine update cannot change.
 public struct GestureEnvironment: Codable, Equatable, Sendable {
     public var macOSVersion: String
-    public var engineRevision: String
     public var gestureSettings: GestureSettingsSnapshot
 
-    public init(macOSVersion: String, engineRevision: String, gestureSettings: GestureSettingsSnapshot) {
+    public init(macOSVersion: String, gestureSettings: GestureSettingsSnapshot) {
         self.macOSVersion = macOSVersion
-        self.engineRevision = engineRevision
         self.gestureSettings = gestureSettings
     }
 }
@@ -90,7 +89,7 @@ public struct GestureVerification: Codable, Equatable, Sendable {
 /// that matches the current setup turns the swipe on.
 public enum GestureState: Equatable, Sendable {
     public enum TestReason: Equatable, Sendable {
-        case neverTested, fingersChanged, directionChanged, macOSChanged, engineChanged, gestureSettingsChanged
+        case neverTested, fingersChanged, directionChanged, macOSChanged, gestureSettingsChanged
     }
 
     case off
@@ -118,8 +117,6 @@ public enum GestureState: Equatable, Sendable {
                 .directionChanged
             } else if tested.macOSVersion != environment.macOSVersion {
                 .macOSChanged
-            } else if tested.engineRevision != environment.engineRevision {
-                .engineChanged
             } else if tested.gestureSettings.differs(from: environment.gestureSettings) {
                 .gestureSettingsChanged
             } else {

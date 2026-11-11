@@ -223,7 +223,6 @@ extension MiriCore.GestureState.TestReason {
         case .fingersChanged: String(localized: "the finger count changed")
         case .directionChanged: String(localized: "the direction changed")
         case .macOSChanged: String(localized: "macOS was updated")
-        case .engineChanged: String(localized: "Miri's engine was updated")
         case .gestureSettingsChanged: String(localized: "macOS trackpad gestures changed")
         }
     }
@@ -235,7 +234,6 @@ extension MiriCore.GestureState.TestReason {
         case .fingersChanged: String(localized: "The finger count changed.")
         case .directionChanged: String(localized: "The direction changed.")
         case .macOSChanged: String(localized: "macOS was updated.")
-        case .engineChanged: String(localized: "Miri's engine was updated.")
         case .gestureSettingsChanged: String(localized: "Your macOS trackpad gestures changed.")
         }
     }
