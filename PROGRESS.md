@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-11 on branch `fix/issue-308`, based on `main` at `d755306d`
+Updated: 2026-11-11 on branch `fix/issue-324`, based on `main` at `2c505050`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,19 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## An app you switch to while holding the mouse button
+
+[#324](https://github.com/samanyudas/miri/issues/324) reported that an app you switch to while you hold the mouse button, as during a file drag, stays off screen.
+A held button held back every newly focused window, and the release scrolled back to the pressed window even after focus had moved.
+Sam chose on 11 November 2026 to hold back only the pressed window, and to scroll to it on release only while it still has focus.
+[paneru#163](https://github.com/samanyudas/paneru/pull/163), merged as `927b0f6`, makes that change, and this branch pins it.
+On verify-miri runs `20261111-034903` and `20261111-104758`, a test window activated during a synthetic hold stayed off screen in 2 of 2 tries on `main`, and came into view during the hold and stayed after the release in 2 of 2 tries with the fix.
+Sam's hand check with a real Finder drag and Command-Tab to Music passed on 11 November 2026: Music slid back off screen after the release without the fix, and stayed in view with it.
+Music and Notion already came into view during the hold without the fix, so real apps showed only the release half of the bug.
+A click that does not move focus, such as a Command-click on a background window, no longer scrolls that window into view on release.
+
+**Next:** after this PR merges, check the release case on `main`, tick the four acceptance criteria, and close #324.
 
 ## Desktop beside a column that changes width
 
