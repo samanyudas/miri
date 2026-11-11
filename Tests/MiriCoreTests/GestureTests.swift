@@ -8,7 +8,7 @@ struct GestureStateTests {
     private static let settings = GestureSettingsSnapshot(
         threeFingerSwipe: 2, fourFingerSwipe: 0, threeFingerDrag: false)
     private static let environment = GestureEnvironment(
-        macOSVersion: "Version 27.0 (Build 27A100)", engineRevision: "a15682f", gestureSettings: settings)
+        macOSVersion: "Version 27.0 (Build 27A100)", gestureSettings: settings)
     private static let fourFingers = GestureVerification(
         fingers: .four, reversed: false, environment: environment, date: tested)
     private static let unreadable = SetupStatus.unableToVerify("Miri could not read the macOS settings.")
@@ -24,12 +24,12 @@ struct GestureStateTests {
     }
 
     private func environment(
-        macOS: String = environment.macOSVersion, engine: String = environment.engineRevision,
+        macOS: String = environment.macOSVersion,
         _ change: (inout GestureSettingsSnapshot) -> Void = { _ in }
     ) -> GestureEnvironment {
         var settings = Self.settings
         change(&settings)
-        return GestureEnvironment(macOSVersion: macOS, engineRevision: engine, gestureSettings: settings)
+        return GestureEnvironment(macOSVersion: macOS, gestureSettings: settings)
     }
 
     @Test func aNewSetupIsOff() {
@@ -71,13 +71,19 @@ struct GestureStateTests {
         #expect(state(reversed: true, verification: reversed) == .enabled(verifiedAt: Self.tested))
     }
 
-    @Test func upgradingMacOSOrTheEngineNeedsANewTest() {
+    @Test func upgradingMacOSNeedsANewTest() {
         #expect(
             state(environment: environment(macOS: "Version 27.1 (Build 27B50)"))
                 == .needsTest(.macOSChanged, detectionUnavailable: false))
-        #expect(
-            state(environment: environment(engine: "b2c3d4e"))
-                == .needsTest(.engineChanged, detectionUnavailable: false))
+    }
+
+    /// A test saved before the engine stopped counting recorded its engine revision. It still turns the swipe on.
+    @Test func aTestSavedWithAnEngineRevisionStillCounts() throws {
+        let saved = Data(
+            #"{"date":800000000,"environment":{"engineRevision":"a15682f","gestureSettings":{"fourFingerSwipe":0,"threeFingerDrag":false,"threeFingerSwipe":2},"macOSVersion":"Version 27.0 (Build 27A100)"},"fingers":4,"reversed":false}"#
+                .utf8)
+        let verification = try JSONDecoder().decode(GestureVerification.self, from: saved)
+        #expect(state(verification: verification) == .enabled(verifiedAt: Self.tested))
     }
 
     @Test func aDetectedMacOSGestureChangeNeedsANewTest() {
@@ -101,7 +107,7 @@ struct GestureStateTests {
         let unreadableAtTest = GestureVerification(
             fingers: .four, reversed: false,
             environment: GestureEnvironment(
-                macOSVersion: Self.environment.macOSVersion, engineRevision: Self.environment.engineRevision,
+                macOSVersion: Self.environment.macOSVersion,
                 gestureSettings: GestureSettingsSnapshot(
                     threeFingerSwipe: nil, fourFingerSwipe: nil, threeFingerDrag: nil)
             ), date: Self.tested)
@@ -131,7 +137,7 @@ struct GestureVerificationTests {
         let verification = GestureVerification(
             fingers: .four, reversed: true,
             environment: GestureEnvironment(
-                macOSVersion: "Version 27.0 (Build 27A100)", engineRevision: "a15682f",
+                macOSVersion: "Version 27.0 (Build 27A100)",
                 gestureSettings: GestureSettingsSnapshot(
                     threeFingerSwipe: 2, fourFingerSwipe: nil, threeFingerDrag: false)
             ),
@@ -141,7 +147,7 @@ struct GestureVerificationTests {
         let data = try encoder.encode(verification)
         #expect(
             String(decoding: data, as: UTF8.self)
-                == #"{"date":0,"environment":{"engineRevision":"a15682f","gestureSettings":{"threeFingerDrag":false,"threeFingerSwipe":2},"macOSVersion":"Version 27.0 (Build 27A100)"},"fingers":4,"reversed":true}"#
+                == #"{"date":0,"environment":{"gestureSettings":{"threeFingerDrag":false,"threeFingerSwipe":2},"macOSVersion":"Version 27.0 (Build 27A100)"},"fingers":4,"reversed":true}"#
         )
         #expect(try JSONDecoder().decode(GestureVerification.self, from: data) == verification)
     }

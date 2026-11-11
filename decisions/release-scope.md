@@ -206,7 +206,8 @@ This result does not claim that the underlying macOS gesture configuration was a
 Miri persists the gesture preference and provides an option to retest.
 Known confirmed conflicts still prevent gesture enablement, and failed or inconclusive tests leave the gesture Off.
 User-test results remain valid across ordinary restarts.
-Changing the finger count or direction, upgrading macOS or the bundled engine, or detecting a relevant macOS gesture change invalidates the result.
+Changing the finger count or direction, upgrading macOS, or detecting a relevant macOS gesture change invalidates the result.
+An update of the bundled engine does not, because the test checks that macOS does not also act on the swipe, and the engine cannot change that.
 A user-reported change to relevant macOS gestures also invalidates the result.
 The gesture preference remains saved, but the gesture stays Off until another successful test and explicit user confirmation.
 Keyboard window management continues while retesting is required.

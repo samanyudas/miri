@@ -34,8 +34,10 @@ import ServiceManagement
     private(set) var stoppedByUser: Bool
     /// The confirmed gesture test. It is app state, so editing the configuration file cannot mark a swipe as tested.
     private(set) var gestureVerification: GestureVerification?
-    /// The macOS version, engine revision, and macOS gesture settings that a gesture test result depends on.
+    /// The macOS version and macOS gesture settings that a gesture test result depends on.
     private(set) var gestureEnvironment: GestureEnvironment
+    /// The bundled engine's source revision, for the version line and diagnostics.
+    let engineRevision: String
     /// The finger count a running gesture test turned on.
     private(set) var gestureTestFingers: GestureFingers?
     /// Miri turned the shared-edge switch off, or kept it off, because Screen Recording permission was missing.
@@ -65,9 +67,9 @@ import ServiceManagement
         gestureVerification = UserDefaults.standard.data(forKey: Self.gestureVerificationKey).flatMap {
             try? JSONDecoder().decode(GestureVerification.self, from: $0)
         }
+        engineRevision = Self.engineRevision(bundle: bundle)
         gestureEnvironment = GestureEnvironment(
             macOSVersion: ProcessInfo.processInfo.operatingSystemVersionString,
-            engineRevision: Self.engineRevision(bundle: bundle),
             gestureSettings: GestureSettingsSnapshot(threeFingerSwipe: nil, fourFingerSwipe: nil, threeFingerDrag: nil))
         supervisor = EngineSupervisor(
             launcher: ProcessEngineLauncher(paths: paths, log: log),
@@ -408,7 +410,7 @@ import ServiceManagement
         let info = Bundle.main.infoDictionary ?? [:]
         let version =
             "\(info["CFBundleShortVersionString"] as? String ?? "?") (\(info["CFBundleVersion"] as? String ?? "?"))"
-        let revision = gestureEnvironment.engineRevision
+        let revision = engineRevision
         let main = NSScreen.screens.first
         let displays = NSScreen.screens.map { screen in
             DiagnosticsReport.Display(

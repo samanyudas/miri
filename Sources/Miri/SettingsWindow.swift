@@ -188,7 +188,7 @@ struct SettingsSidebar: View {
 
     private var versionLine: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
-        let revision = model.gestureEnvironment.engineRevision
+        let revision = model.engineRevision
         let engine = revision == "unknown" ? String(localized: "unknown") : String(revision.prefix(7))
         return String(localized: "Version \(version) · Engine \(engine)")
     }
