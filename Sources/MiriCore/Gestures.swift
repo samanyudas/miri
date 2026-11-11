@@ -83,10 +83,24 @@ public struct GestureVerification: Codable, Equatable, Sendable {
         self.environment = environment
         self.date = date
     }
+
+    /// Why this test no longer counts for a swipe with `fingers` and `reversed` in `environment`, or `nil` when it
+    /// still does.
+    public func retestReason(
+        fingers: GestureFingers, reversed: Bool, environment: GestureEnvironment
+    ) -> GestureState.TestReason? {
+        if self.fingers != fingers { return .fingersChanged }
+        if self.reversed != reversed { return .directionChanged }
+        if self.environment.macOSVersion != environment.macOSVersion { return .macOSChanged }
+        if self.environment.gestureSettings.differs(from: environment.gestureSettings) {
+            return .gestureSettingsChanged
+        }
+        return nil
+    }
 }
 
-/// Whether the strip swipe is on, and why not. Automatic detection only finds conflicts, and only a user test
-/// that matches the current setup turns the swipe on.
+/// Whether the strip swipe is on, and why not. When Miri reads the macOS gesture settings and finds no conflict, the
+/// selected swipe is on. Only when it cannot read them does a user test that matches the current setup turn it on.
 public enum GestureState: Equatable, Sendable {
     public enum TestReason: Equatable, Sendable {
         case neverTested, fingersChanged, directionChanged, macOSChanged, gestureSettingsChanged
@@ -95,10 +109,12 @@ public enum GestureState: Equatable, Sendable {
     case off
     /// macOS uses the selected swipe. The text says which setting to change.
     case conflict(String)
-    /// The swipe stays off until a new test passes. `detectionUnavailable` means Miri could not read the macOS
-    /// settings, so it shows **Unable to verify**.
-    case needsTest(TestReason, detectionUnavailable: Bool)
-    case enabled(verifiedAt: Date)
+    /// Miri could not read the macOS settings, so it shows **Unable to verify**, and the swipe stays off until a new
+    /// test passes.
+    case needsTest(TestReason)
+    /// The swipe is on. `verifiedAt` is the date of the user test that turned it on, or `nil` when Miri read the macOS
+    /// settings and found no conflict.
+    case enabled(verifiedAt: Date?)
 
     /// `conflict` is the setup check status for the selected finger count.
     public static func evaluate(
@@ -106,23 +122,15 @@ public enum GestureState: Equatable, Sendable {
         environment: GestureEnvironment, conflict: SetupStatus
     ) -> GestureState {
         guard let fingers = preference.fingers else { return .off }
-        if case .problem(let message) = conflict { return .conflict(message) }
-        let unavailable = if case .unableToVerify = conflict { true } else { false }
-        guard let verification else { return .needsTest(.neverTested, detectionUnavailable: unavailable) }
-        let tested = verification.environment
-        let reason: TestReason? =
-            if verification.fingers != fingers {
-                .fingersChanged
-            } else if verification.reversed != reversed {
-                .directionChanged
-            } else if tested.macOSVersion != environment.macOSVersion {
-                .macOSChanged
-            } else if tested.gestureSettings.differs(from: environment.gestureSettings) {
-                .gestureSettingsChanged
-            } else {
-                nil
-            }
-        if let reason { return .needsTest(reason, detectionUnavailable: unavailable) }
+        switch conflict {
+        case .problem(let message): return .conflict(message)
+        case .passed: return .enabled(verifiedAt: nil)
+        case .notChecked, .unableToVerify: break
+        }
+        guard let verification else { return .needsTest(.neverTested) }
+        if let reason = verification.retestReason(fingers: fingers, reversed: reversed, environment: environment) {
+            return .needsTest(reason)
+        }
         return .enabled(verifiedAt: verification.date)
     }
 

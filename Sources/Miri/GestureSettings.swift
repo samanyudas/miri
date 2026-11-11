@@ -2,11 +2,11 @@ import AppKit
 import MiriCore
 import SwiftUI
 
-/// Settings > Gestures: the strip swipe's state and test, its finger count and direction, and the change report.
+/// Settings > Gestures: the strip swipe's state, its finger count and direction, and the test Miri offers when it
+/// cannot read the macOS gesture settings.
 struct GestureSettings: View {
     let model: AppModel
     @State private var testing = false
-    @State private var confirmingReport = false
 
     var body: some View {
         SettingsPage(
@@ -28,10 +28,7 @@ struct GestureSettings: View {
                             (String(localized: "Off"), .off),
                         ])
                 }
-                SettingsRow(
-                    title: String(localized: "Direction"),
-                    detail: String(localized: "Changing fingers or direction needs a new test.")
-                ) {
+                SettingsRow(title: String(localized: "Direction")) {
                     SegmentedChoice(
                         label: String(localized: "Direction"), selection: setting(\.reverseSwipe),
                         options: [(String(localized: "Follow fingers"), false), (String(localized: "Reversed"), true)])
@@ -66,11 +63,6 @@ struct GestureSettings: View {
         }
         .onAppear { model.refreshSetup() }
         .sheet(isPresented: $testing) { GestureTestSheet(model: model) }
-        .confirmationDialog("Report a macOS gesture change?", isPresented: $confirmingReport) {
-            Button("Report Change") { model.reportGestureChange() }
-        } message: {
-            Text("Miri turns the strip swipe off until you test it again.")
-        }
     }
 
     private var hero: some View {
@@ -92,12 +84,14 @@ struct GestureSettings: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            VStack(alignment: .trailing, spacing: 8) {
+            // The test is offered only when Miri cannot read the macOS gesture settings.
+            if case .needsTest = model.gestureState {
                 // A disabled test is an ordinary button, so it does not look like the next step.
                 if model.gestureTestBlocker == nil {
                     Button("Test Gesture…") { testing = true }
                         .buttonStyle(.borderedProminent)
                         .tint(Palette.accentFill)
+                        .fixedSize()
                 } else {
                     // macOS shows no tooltip on a disabled button, so the help sits on a wrapper around it.
                     Button("Test Gesture…") {}
@@ -106,12 +100,9 @@ struct GestureSettings: View {
                         .padding(1)
                         .contentShape(.rect)
                         .help(model.gestureTestBlocker ?? "")
-                }
-                if model.gestureVerification != nil {
-                    Button("Report a macOS Gesture Change") { confirmingReport = true }
+                        .fixedSize()
                 }
             }
-            .fixedSize()
         }
         .padding(20)
         .background(heroTint, in: .rect(cornerRadius: 10))
@@ -142,17 +133,16 @@ struct GestureSettings: View {
         switch model.gestureState {
         case .off:
             String(localized: "Choose three or four fingers below to use the swipe.")
-        case .enabled(let date): AppModel.confirmedSentence(date)
-        case .needsTest(let reason, let detectionUnavailable):
+        case .enabled(let date?): AppModel.confirmedSentence(date)
+        case .enabled(nil): String(localized: "Miri checked your macOS trackpad gestures and found no conflict.")
+        case .needsTest(let reason):
             [
                 reason.sentence, String(localized: "Test it to turn it on."),
-                detectionUnavailable
-                    ? String(localized: "Miri can't read your macOS gesture settings, so the test is the only check.")
-                    : nil,
+                String(localized: "Miri can't read your macOS gesture settings, so the test is the only check."),
                 model.gestureTestBlocker,
             ].compactMap(\.self).joined(separator: " ")
         case .conflict:
-            String(localized: "Resolve the macOS conflict below, then test again.")
+            String(localized: "Change the macOS setting below to turn the swipe on.")
         }
     }
 
@@ -208,9 +198,10 @@ extension AppModel {
     var gestureSummary: String {
         switch gestureState {
         case .off: String(localized: "Off")
-        case .enabled(let date):
+        case .enabled(let date?):
             String(localized: "On, verified by user test on \(date.formatted(date: .abbreviated, time: .omitted))")
-        case .needsTest(let reason, _): String(localized: "Off until tested: \(reason.explanation)")
+        case .enabled(nil): String(localized: "On")
+        case .needsTest(let reason): String(localized: "Off until tested: \(reason.explanation)")
         case .conflict: String(localized: "Off: macOS uses this swipe")
         }
     }
