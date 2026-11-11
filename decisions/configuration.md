@@ -122,6 +122,8 @@ They do not by themselves encode Miri's verification status or conflict policy.
 | `[swipe.gesture].direction` | Follow finger movement by default, with a persistent reversal setting. | Source values are `"Natural"` and `"Reversed"`. |
 | `[swipe.gesture].fingers_count` | Three fingers, four fingers, or Off, subject to the accepted enablement policy. | Exact-count interception starts at three fingers. Omission or zero disables it. |
 | `[swipe.gesture].vertical` | Strip swipes are horizontal only. | Vertical interception defaults to enabled. |
+| `[swipe.gesture].window_landing` | Off for Continuous scrolling, on for Window by window scrolling. | The strip follows the fingers, then lands one column on from where the swipe began, once the fingers have moved it 5% of the display width or flicked, and never glides on with momentum. `haptics`, on by default, clicks the trackpad each time that column changes. |
+| `[swipe.scroll].window_step` | Off for Continuous scrolling, on for Window by window scrolling. | Each modifier-scroll wheel input focuses one adjacent column. Momentum adds no step, and repeats in the same direction within 180 ms are dropped. The modifier defaults to Option. |
 
 `swipe_natural` is absent from this release.
 Legacy `[options].swipe_gesture_fingers` and `[options].swipe_gesture_direction` are deprecated.
@@ -131,6 +133,11 @@ Miri stores the choice in `[miri].strip_gesture` as `"off"`, `"three"`, or `"fou
 It always writes `[swipe.gesture].direction` from the reversal and sets `[swipe.gesture].vertical` to `false`.
 It writes `[swipe.gesture].fingers_count` only while the selected swipe is enabled or a gesture test is running, and removes it otherwise.
 It removes the legacy `[options]` swipe keys, because the engine falls back to them and would keep a swipe on that Miri turned off.
+Miri stores the scrolling choice in `[miri].strip_scrolling` as `"continuous"` or `"window"`, and writes `[swipe.gesture].window_landing` and `[swipe.scroll].window_step` from it.
+A file without the key keeps Continuous scrolling.
+Miri does not write `haptics` or `[swipe.scroll].modifier`, so the engine defaults of pulses on and Option apply, as Sam decided on 11 November 2026 ([#281](https://github.com/samanyudas/miri/issues/281)).
+Miri removes `[swipe.gesture].paging`, because paging moves focus in steps while the strip stays still under the fingers, and it overrides `window_landing`.
+Sam tried paging on 11 November 2026 and found it unnatural, since the windows do not move during the swipe.
 The gesture test result is app state outside the file, so a file edit cannot mark a swipe as tested.
 The effect of `vertical = false` on Mission Control and App Exposé swipes still needs hardware verification.
 

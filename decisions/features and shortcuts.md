@@ -53,7 +53,8 @@ Handle recording conflicts as described in [Binding customization](keybinding%20
 Support non-US keyboard layouts.
 
 Horizontal strip gestures follow [Strip gestures](release-scope.md#strip-gestures).
-The strip follows the fingers and settles at the nearest column on release.
+In Continuous scrolling, the strip follows the fingers and settles at the nearest column on release.
+In Window by window scrolling, the strip also follows the fingers, then lands on one window, as [Settling after a swipe](release-scope.md#settling-after-a-swipe) describes.
 
 Clicking a window changes focus.
 Dragging a window follows [Dragging windows](release-scope.md#dragging-windows).
