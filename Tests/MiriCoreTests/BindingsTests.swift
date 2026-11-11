@@ -531,7 +531,7 @@ struct DefaultBindingsTests {
         #expect(try String(contentsOf: url, encoding: .utf8) == original)
     }
 
-    @Test(arguments: ["ctrl+alt-=", "ctrl + lalt - leftarrow", "f5", "cmd+fn-keypad7"])
+    @Test(arguments: ["ctrl+alt-=", "ctrl + lalt - leftarrow", "f5", "cmd+fn-keypad7", "ctrl+alt+shift+cmd-h"])
     func acceptsBindingsTheEngineReads(chord: String) throws {
         let (store, _) = try load("[bindings]\nquit = \"\(chord)\"\n")
         #expect(store.issue == nil)

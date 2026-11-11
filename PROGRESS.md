@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-11 on branch `docs/377-verified`, based on `main` at `814f18f3`
+Updated: 2026-11-11 on branch `docs/324-closed`, based on `main` at `439249a8`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,44 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## An app you switch to while holding the mouse button
+
+[#324](https://github.com/samanyudas/miri/issues/324) reported that an app you switch to while you hold the mouse button, as during a file drag, stays off screen.
+A held button held back every newly focused window, and the release scrolled back to the pressed window even after focus had moved.
+Sam chose on 11 November 2026 to hold back only the pressed window, and to scroll to it on release only while it still has focus.
+[paneru#163](https://github.com/samanyudas/paneru/pull/163), merged as `927b0f6`, makes that change, and this branch pins it.
+On verify-miri runs `20261111-034903` and `20261111-104758`, a test window activated during a synthetic hold stayed off screen in 2 of 2 tries on `main`, and came into view during the hold and stayed after the release in 2 of 2 tries with the fix.
+Sam's hand check with a real Finder drag and Command-Tab to Music passed on 11 November 2026: Music slid back off screen after the release without the fix, and stayed in view with it.
+Music and Notion already came into view during the hold without the fix, so real apps showed only the release half of the bug.
+A click that does not move focus, such as a Command-click on a background window, no longer scrolls that window into view on release.
+
+[#432](https://github.com/samanyudas/miri/pull/432) merged as `439249a8`.
+On verify-miri run `20261111-153651` on that `main`, the activated test window came into view during the hold and stayed after the release in 2 of 2 tries.
+All four acceptance criteria are ticked, and #324 closed on 11 November 2026.
+
+## Desktop beside a column that changes width
+
+[#308](https://github.com/samanyudas/miri/issues/308) reported that desktop shows beside a column while it changes width.
+Row pacing held each column only by its left edge, so a column that widened about its center left its right neighbor free to run ahead.
+[paneru#159](https://github.com/samanyudas/paneru/pull/159), merged as `597afe2`, paces each pair of windows at the edge they share, and this branch pins it.
+On verify-miri run `20261111-020017`, widening from 665 to 1012 points opened 47 to 77 points of desktop on all 6 presses on `main`, and none past the 8 point rest gap on the fix.
+Narrowing from the largest preset to the smallest still opens 101 to 136 points with the fix, against 148 to 254 on `main`, because the narrowing column's right edge runs ahead of its right neighbor.
+Sam chose on 11 November 2026 to ship the widening fix first and to hold the narrowing column's width in the next PR for #308, so #308 stays open.
+
+**Next:** verify widening on the landed `main`, then build the width hold for narrowing with a failing engine test first.
+
+## Karabiner-Elements and Hyper key chords
+
+[#302](https://github.com/samanyudas/miri/issues/302) needs no code change.
+The engine and the shortcut recorder already read chords with all four modifiers, and the defaults already use twelve of them.
+Sam accepted reworded checks on 11 November 2026, because ⌃⌥⇧⌘H is the default for Move column to first position.
+#424 moved Hyper key recording into v1 in the decision documents and the v1 specification, and added a Karabiner-Elements section to the keybinding reference.
+`ShortcutsTests.aHyperKeyChordSavesAndReadsBackUnchanged` checks that a Hyper chord saves, reads back unchanged, and is rejected on a chord a default holds.
+Sam's hand checks with Karabiner-Elements 16.3.0 passed on 11 November 2026: Hyper and H, a recorded Hyper and U, the conflict warning, a remapped ⌃⌥←, and the defaults with no rules.
+The test profiles are removed from Karabiner-Elements.
+[#424](https://github.com/samanyudas/miri/pull/424) merged as `f68a3610`, and #302 closed on 11 November 2026.
+Sam decided that Miri ships no Karabiner-Elements profile or rule, so people set up a Hyper key in Karabiner-Elements themselves.
 
 ## A display left on an empty desktop after a replug
 

@@ -80,6 +80,7 @@ Working notes in PROGRESS.md and issue comments do not count as documentation.
 | When Finder is frontmost with no window, the previously focused stack window can stay above its overlapped place. | Scope exclusion | Click the desktop or close Finder's last window. The order returns when focus reaches a managed window. | Focus any managed window. | [Stacks](../decisions/release-scope.md#stacks), [#42](https://github.com/samanyudas/miri/issues/42). |
 | An app that applies a new size more than 500 ms late can have its old height recorded as a minimum. | Unverified, previously undocumented | Slow apps, such as some Chromium browsers. Inferred from the engine design and not observed. | None known. | [#40](https://github.com/samanyudas/miri/issues/40), closed. Next step: stack a fixture window that applies each new size 1 second late, then check whether the engine records a false minimum height. |
 | Fixed-size windows float automatically. A fixed-size window that you tile keeps its own size, so empty space shows beside or below it. | Scope exclusion | Tile a fixed-size window with Control-Option-T. | None. | [V1 interactions](../decisions/release-scope.md#v1-interactions), [Stacks](../decisions/release-scope.md#stacks), [#93](https://github.com/samanyudas/miri/issues/93). |
+| When a column narrows, desktop can show between it and the window on its right. | Confirmed defect | Cycle a column from a wide preset width to a narrow one with Control-Option-R. The column's right edge moves left faster than the window on its right follows. On 11 November 2026, narrowing from 1522 to about 500 points showed up to 136 points of desktop with engine `597afe2`. Widening shows none. | None known. | verify-miri run `20261111-020017`, [#308](https://github.com/samanyudas/miri/issues/308). |
 | A window with a maximum size maximizes only to that size, at the top-left of the usable area. | Platform constraint | Maximize such a window. | None. | [Maximizing a window](../decisions/release-scope.md#maximizing-a-window). |
 
 ## Dragging, gestures, and focus
@@ -106,7 +107,7 @@ Each one has an open issue with the next investigation step.
 ## Deferred to v2
 
 V1 leaves out the optional Miri dock, portable display layouts, tabbed columns, the minimap, inactive-window dimming, and advanced window rules.
-It also leaves out focus borders, a focus-follows-mouse control, display exclusions, fixed-pixel presets, animation tuning, Hyper-key recording, five-finger gestures, and the guided shortcut tutorial.
+It also leaves out focus borders, a focus-follows-mouse control, display exclusions, fixed-pixel presets, animation tuning, five-finger gestures, and the guided shortcut tutorial.
 A deferral does not commit Miri to building the feature in v2.
 Miri does not offer virtual workspaces, which are extra strips within one macOS Space.
 Use macOS Spaces instead, because each Space has its own strip.

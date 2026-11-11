@@ -259,7 +259,8 @@ Miri adds no second binding for the action.
 
 Provide a shortcut recorder and allow several bindings per action.
 Respect AZERTY, QWERTZ, and Dvorak layouts.
-Recording Hyper-key combinations created with tools such as Karabiner-Elements is deferred to v2.
+Record chords that tools such as Karabiner-Elements send, including a Hyper key chord ([#302](https://github.com/samanyudas/miri/issues/302)).
+Sam moved Hyper key recording into v1 on 5 November 2026.
 Reject a recorded shortcut already assigned to a different Miri action.
 Warn about known macOS shortcut conflicts.
 Never silently replace another binding when recording a shortcut.
@@ -271,6 +272,21 @@ Add each of the default's chords that is free, and skip the chords another bindi
 For example, if the user assigned ⌃⌥H to another action, Focus column left still gets ⌃⌥←.
 Leave `[bindings]` unchanged when the file defines it in a form Miri does not rewrite, such as an inline table.
 Offer an explicit action to switch to the current default set.
+
+## Karabiner-Elements and Hyper keys
+
+Miri needs no setup to work with Karabiner-Elements.
+Karabiner-Elements sends keys through a virtual keyboard, and Miri reads them as it reads any keyboard.
+A Karabiner-Elements rule that sends a Miri shortcut runs that shortcut.
+
+Miri does not create a Hyper key.
+A person who wants one makes a Karabiner-Elements rule that holds Control, Option, Shift, and Command, for example on Caps Lock.
+Miri then reads Hyper and a key as ⌃⌥⇧⌘ and that key.
+The configuration file writes the chord as `ctrl+alt+cmd+shift-<key>`, and also reads the modifiers in any order.
+It has no `hyper` modifier name, so each chord has one spelling.
+
+The default set already uses ⌃⌥⇧⌘ with the arrow keys, H, J, K, and L, and W, A, S, and D.
+Hyper and one of those keys therefore runs its default, and the recorder rejects it for another action until the user removes that default.
 
 ## Actions without selected bindings
 

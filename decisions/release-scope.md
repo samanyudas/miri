@@ -266,7 +266,8 @@ Each direction also accepts H, J, K, and L, and W, A, S, and D.
 [Keybinding reference](keybinding%20reference.md) records these bindings.
 Shortcut recording follows [Binding customization](keybinding%20reference.md#binding-customization).
 Tabbed columns, the minimap, inactive-window dimming, and advanced window rules are deferred to v2.
-Focus borders, a focus-follows-mouse control, display exclusions, fixed-pixel presets, animation tuning, and Hyper-key recording are also deferred to v2.
+Focus borders, a focus-follows-mouse control, display exclusions, fixed-pixel presets, and animation tuning are also deferred to v2.
+Recording Hyper key chords is v1 work, as Sam decided on 5 November 2026 in [#302](https://github.com/samanyudas/miri/issues/302).
 The switch that moves the pointer to windows that Miri focuses is v1 work, as Sam decided on 8 November 2026 in [#360](https://github.com/samanyudas/miri/issues/360).
 Deferral excludes these proposals from v1 without committing to their inclusion in v2.
 
