@@ -231,6 +231,10 @@ The column takes focus once the strip has landed, so an app slow to take focus c
 It never glides past that column on momentum.
 The trackpad clicks each time the column it would land on changes, so a swipe that stays on its column, or a strip end, gives no click.
 Each modifier-scroll wheel input moves focus one column, with the same focus rules as keyboard focus.
+In both scrolling modes, the slide to the column after the fingers lift takes 0.5 s at Miri's animation speed.
+The slide carries on the speed the strip had toward that column when the fingers lifted, then slows to a stop on it without overshooting.
+A strip that is still, or moving away from its column, starts the slide gently from rest.
+Sam chose this on 12 November 2026 in [#438](https://github.com/samanyudas/miri/issues/438), after trying an exponential ease-out and an exponential ease-in-out.
 
 ## V1 interactions
 
