@@ -206,7 +206,7 @@ Sam chose this on 12 November 2026 in [#440](https://github.com/samanyudas/miri/
 If gesture conflict detection is unavailable, Miri shows **Unable to verify** and offers a gesture test.
 Consistent strip movement without unintended macOS actions, followed by explicit user confirmation, counts as **Verified by user test**.
 This result does not claim that the underlying macOS gesture configuration was automatically verified.
-Miri persists the gesture preference and provides an option to retest.
+Miri persists the gesture preference, and offers the test again whenever the swipe needs one.
 Known confirmed conflicts still prevent gesture enablement, and failed or inconclusive tests leave the gesture Off.
 User-test results remain valid across ordinary restarts.
 Changing the finger count or direction, upgrading macOS, or detecting a relevant macOS gesture change invalidates the result.

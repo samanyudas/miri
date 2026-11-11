@@ -71,7 +71,7 @@ The native app is implemented, but no complete acceptance run has passed.
 - Five-finger support is deferred.
 - When Miri reads the macOS gesture settings and finds no conflict, the selected strip gesture is on, with no test ([#440](https://github.com/samanyudas/miri/issues/440)).
 - When automatic conflict detection is unavailable, consistent real strip movement without unintended macOS actions and explicit user confirmation count as **Verified by user test**.
-  Miri persists the gesture preference and provides an option to retest.
+  Miri persists the gesture preference, and offers the test again whenever the swipe needs one.
   This result does not claim automatic verification of the underlying macOS gesture configuration.
   Known confirmed conflicts still prevent enablement, and failed or inconclusive tests leave the gesture Off.
 - User-test results remain valid across ordinary restarts.

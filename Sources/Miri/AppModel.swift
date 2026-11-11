@@ -275,6 +275,16 @@ import ServiceManagement
     func beginGestureTest() throws(GestureTestBlocked) -> GestureVerification {
         refreshSetup()
         if let blocker = gestureTestBlocker { throw GestureTestBlocked(message: blocker) }
+        // The settings can become readable while the test sheet is open, so a Try Again checks the state again.
+        switch gestureState {
+        case .needsTest: break
+        case .conflict(let message): throw GestureTestBlocked(message: message)
+        case .enabled:
+            throw GestureTestBlocked(
+                message: String(localized: "Miri checked your macOS trackpad gestures and found no conflict."))
+        case .off:
+            throw GestureTestBlocked(message: String(localized: "Choose three or four fingers to test the swipe."))
+        }
         guard let fingers = settings.stripGesture.fingers else {
             throw GestureTestBlocked(message: String(localized: "Choose three or four fingers to test the swipe."))
         }

@@ -167,7 +167,7 @@ Never leave windows stranded off-screen.
    After explicit user confirmation, Miri shows **Verified by user test**.
    The underlying macOS gesture configuration is not presented as automatically verified.
 10. Relaunch Miri after selecting and persisting a gesture preference.
-    The preference remains stored, and an option to retest is available.
+    The preference remains stored, and the test is offered again whenever the swipe needs one.
     Ordinary restarts do not invalidate the user-test result.
 11. Fail or leave a gesture test inconclusive.
     The gesture remains Off, and keyboard window management remains available when its startup prerequisites are satisfied.
