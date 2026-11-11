@@ -4,20 +4,24 @@ Miri is a native macOS scrolling window manager with a bundled Paneru-based engi
 Today the repository holds the product design and a menu bar app that supervises the engine.
 Read this map first, then the linked document for the area you touch.
 
-## A note from Sam
+## Engineering philosophy
 
-I like ambitious ideas, simple systems, and software that feels obvious.
-Do not preserve complexity just because it already exists.
-Do not introduce machinery because it looks architecturally impressive.
-Understand the real constraint, then fight for the smallest model that makes the correct behavior unsurprising.
+We value ambitious ideas, simple systems, and software that feels obvious to use.
 
-Channel both "measure twice, cut once" and "yagni".
-Fight scope creep.
-Try to honor the dev's intent in both a minimal and realistic fashion.
+- Understand the real problem and constraints before proposing a solution.
+- Prefer the smallest robust design that makes correct behavior unsurprising.
+- Do not preserve complexity merely because it already exists.
+- Do not introduce abstractions, dependencies, or infrastructure without a demonstrated need.
+- Follow "measure twice, cut once": understand the consequences before making changes.
+- Apply YAGNI. Resist scope creep and avoid speculative features.
+- Respect the developer's intent. Choose solutions that are minimal, realistic, and maintainable.
+- Prioritize correctness, reliability, and native macOS behavior over architectural sophistication.
+- When a simpler design can replace an existing complex one, consider simplifying it.
 
-The rest of this document is meant to help you navigate the codebase and make changes effectively.
-Think of these instructions less as "hard rules", more as "good defaults".
-The developer's preferences should be able to override anything here.
+These are guiding principles, not rigid rules.
+Specific task requirements and documented project decisions take precedence.
+
+The rest of this document explains how to navigate the codebase and make changes effectively.
 
 ## Start and end every session
 
