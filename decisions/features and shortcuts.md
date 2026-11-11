@@ -93,6 +93,7 @@ Follow the Reduce Motion and disable-animation behavior in [V1 interactions](rel
 
 Apply valid settings as users change them.
 Provide the controls in a native settings window.
+Keep Miri's own windows, such as Settings and Set Up Miri, above other apps' windows, like Picture-in-Picture, so that a window that scrolls into view or takes focus never covers them ([#435](https://github.com/samanyudas/miri/issues/435)).
 Migrate configuration as described in [Release scope](release-scope.md#configuration).
 
 ## Respect macOS window behavior
