@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-13 on branch `docs/326-closeout-progress`, based on `main` at `cef3d591`
+Updated: 2026-11-13 on branch `docs/305-closeout-progress`, based on `main` at `cef3d591`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -99,20 +99,19 @@ Both acceptance criteria are ticked, and #377 closed on 11 November 2026.
 
 ## New windows at half the display width
 
-[#305](https://github.com/samanyudas/miri/issues/305) is implemented on branch `feat/305-new-window-half-width`, with the engine from [paneru#160](https://github.com/samanyudas/paneru/pull/160), merged as `d5eff6e`.
-`main` already pins `189fd9a`, which contains `d5eff6e`, so the engine has the option and this branch adds Miri's default.
-The engine option `[options].new_window_width` sizes a window that opens while the engine runs, and Miri writes `0.5` when the key is absent.
+[#305](https://github.com/samanyudas/miri/issues/305) closed on 13 November 2026 after `verify-miri` run `20261113-023408` on `main` at `cef3d591`, engine `189fd9a`.
+[paneru#160](https://github.com/samanyudas/paneru/pull/160), merged as `d5eff6e`, adds the engine option `[options].new_window_width`, and [#455](https://github.com/samanyudas/miri/pull/455) makes Miri write `0.5` when the key is absent.
+A window that opens while the engine runs starts at that share of its display's width.
 Windows found at startup, windows in `LaunchWindows` that a scan finds late, and windows that session restore places keep their widths.
 A `[windows]` rule's `width` wins over the option.
 A new window joins the active display's strip, so the active display is the window's own display, as Sam chose on 11 November 2026.
 A window that session restore can match only by a title that arrives late keeps its own width until restore places it.
 If the startup grace period ends without a match, it gets the new width then, unless a width rule, the user, or a native tab group gave it its width.
-`verify-miri` run `20261111-032938` on `a752921` passed all four live checks:
-a new fixture tiled at 1280 of 2560 points, a 900-point fixture opened with Miri quit kept 908 after launch and after a relaunch, and a background fixture on the external display joined the built-in display's strip at 1024 of 2048 points.
-`verify-miri` run `20261113-011137` compared engine `52061c6` with `7487494`, with an 8-second grace period.
-A window reopened in the grace period, with its title after 1 second, went 1272 then 1676 on `52061c6`, and 380 then 1676 on `7487494`.
-An untitled window that matched nothing kept 380 until the grace period ended on `7487494`, then took 1272.
-Next: the Miri PR merges, then the agent rechecks on `main` and closes #305.
+On `main`, a new fixture tiled at 1280 of 2560 points, a background fixture on the external display joined the built-in strip at 1024 of 2048 points, and a 900-point fixture opened with Miri quit kept 900 after launch and after a relaunch.
+The late-title window went 380 then its saved 1676, and an untitled window that matched nothing kept 380 until the grace period ended, then took 1272.
+In that run, `verify-miri end` found System Settings at the end of the external display's strip.
+The agent moved it back between Notes and Notion with `send-cmd`, but its fixed-width pane stays 748 points against the 2040 that `begin` recorded.
+The cause is not known, and Sam decides whether the layout stands.
 
 ## A new window wider than its display
 
