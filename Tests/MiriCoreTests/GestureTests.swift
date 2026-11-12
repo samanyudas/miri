@@ -16,7 +16,7 @@ struct GestureStateTests {
     private func state(
         _ preference: StripGesture = .four, reversed: Bool = false,
         verification: GestureVerification? = fourFingers, environment: GestureEnvironment = environment,
-        conflict: SetupStatus = .passed
+        conflict: SetupStatus = unreadable
     ) -> GestureState {
         GestureState.evaluate(
             preference: preference, reversed: reversed, verification: verification, environment: environment,
@@ -39,21 +39,25 @@ struct GestureStateTests {
 
     @Test func offStaysOffWhateverElseHolds() {
         #expect(state(.off) == .off)
+        #expect(state(.off, conflict: .passed) == .off)
         #expect(state(.off, conflict: .problem("Four-finger swipes switch full-screen apps.")) == .off)
     }
 
-    @Test func aMatchingUserTestWithoutAConflictTurnsTheSwipeOn() {
-        #expect(state() == .enabled(verifiedAt: Self.tested))
+    /// Miri read the macOS settings and found no conflict, so the selected swipe is on with no test. An old test that
+    /// no longer matches does not matter.
+    @Test func readableSettingsWithoutAConflictTurnTheSwipeOnWithoutATest() {
+        #expect(state(verification: nil, conflict: .passed) == .enabled(verifiedAt: nil))
+        #expect(state(.three, verification: nil, conflict: .passed) == .enabled(verifiedAt: nil))
+        #expect(state(.three, reversed: true, conflict: .passed) == .enabled(verifiedAt: nil))
     }
 
     @Test func aMatchingUserTestTurnsTheSwipeOnWhenDetectionIsUnavailable() {
         #expect(state(conflict: Self.unreadable) == .enabled(verifiedAt: Self.tested))
     }
 
-    @Test func untestedSwipesStayOffAndSayWhetherDetectionWorked() {
-        #expect(state(verification: nil) == .needsTest(.neverTested, detectionUnavailable: false))
-        #expect(
-            state(verification: nil, conflict: Self.unreadable) == .needsTest(.neverTested, detectionUnavailable: true))
+    @Test func anUntestedSwipeStaysOffWhenDetectionIsUnavailable() {
+        #expect(state(verification: nil) == .needsTest(.neverTested))
+        #expect(state(verification: nil, conflict: .notChecked("Miri could not check.")) == .needsTest(.neverTested))
     }
 
     @Test func aConfirmedConflictBlocksEvenAPassedUserTest() {
@@ -64,8 +68,8 @@ struct GestureStateTests {
     }
 
     @Test func changingTheFingerCountOrDirectionNeedsANewTest() {
-        #expect(state(.three) == .needsTest(.fingersChanged, detectionUnavailable: false))
-        #expect(state(reversed: true) == .needsTest(.directionChanged, detectionUnavailable: false))
+        #expect(state(.three) == .needsTest(.fingersChanged))
+        #expect(state(reversed: true) == .needsTest(.directionChanged))
         let reversed = GestureVerification(
             fingers: .four, reversed: true, environment: Self.environment, date: Self.tested)
         #expect(state(reversed: true, verification: reversed) == .enabled(verifiedAt: Self.tested))
@@ -74,7 +78,7 @@ struct GestureStateTests {
     @Test func upgradingMacOSNeedsANewTest() {
         #expect(
             state(environment: environment(macOS: "Version 27.1 (Build 27B50)"))
-                == .needsTest(.macOSChanged, detectionUnavailable: false))
+                == .needsTest(.macOSChanged))
     }
 
     /// A test saved before the engine stopped counting recorded its engine revision. It still turns the swipe on.
@@ -92,10 +96,10 @@ struct GestureStateTests {
                 == .conflict("switches apps"))
         #expect(
             state(environment: environment { $0.threeFingerSwipe = 0 })
-                == .needsTest(.gestureSettingsChanged, detectionUnavailable: false))
+                == .needsTest(.gestureSettingsChanged))
         #expect(
             state(environment: environment { $0.threeFingerDrag = true })
-                == .needsTest(.gestureSettingsChanged, detectionUnavailable: false))
+                == .needsTest(.gestureSettingsChanged))
     }
 
     @Test func aSettingMiriCannotReadIsNotReportedAsChanged() {

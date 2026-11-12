@@ -194,21 +194,23 @@ The decision is recorded in [ADR 0008](../docs/adr/0008-follow-macos-space-migra
 ## Strip gestures
 
 Strip gestures support three fingers, four fingers, and Off.
-Initial setup recommends four fingers but enables it only when the gesture is verified as usable without a macOS conflict.
+Initial setup recommends four fingers but enables it only when the gesture is usable without a macOS conflict.
 Otherwise, strip gestures default to Off.
 The scrolling strip follows finger movement by default, with a persistent setting to reverse its direction.
 Five-finger strip gestures are deferred.
 When a known conflicting macOS gesture is confirmed, Miri disables its conflicting strip gesture, preserves keyboard window management, and shows manual setup instructions.
 Miri never modifies macOS settings automatically.
+When Miri reads the macOS gesture settings and finds no conflict, the selected strip gesture is on, with no test.
+The swipe goes off when a conflicting setting appears, and comes back on when it goes.
+Sam chose this on 12 November 2026 in [#440](https://github.com/samanyudas/miri/issues/440), in place of a required test and a button to report a macOS gesture change.
 If gesture conflict detection is unavailable, Miri shows **Unable to verify** and offers a gesture test.
 Consistent strip movement without unintended macOS actions, followed by explicit user confirmation, counts as **Verified by user test**.
 This result does not claim that the underlying macOS gesture configuration was automatically verified.
-Miri persists the gesture preference and provides an option to retest.
+Miri persists the gesture preference, and offers the test again whenever the swipe needs one.
 Known confirmed conflicts still prevent gesture enablement, and failed or inconclusive tests leave the gesture Off.
 User-test results remain valid across ordinary restarts.
 Changing the finger count or direction, upgrading macOS, or detecting a relevant macOS gesture change invalidates the result.
 An update of the bundled engine does not, because the test checks that macOS does not also act on the swipe, and the engine cannot change that.
-A user-reported change to relevant macOS gestures also invalidates the result.
 The gesture preference remains saved, but the gesture stays Off until another successful test and explicit user confirmation.
 Keyboard window management continues while retesting is required.
 

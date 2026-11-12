@@ -63,18 +63,19 @@ The native app is implemented, but no complete acceptance run has passed.
 - Diagnostics contain versions, monitor setup, permission status, engine status, and redacted logs, with a preview before copying.
   Window titles, document paths, usernames, and raw configuration are excluded by default.
 - Strip gestures support three fingers, four fingers, and Off.
-  Initial setup recommends four fingers but enables it only when the gesture is verified as usable without a macOS conflict.
+  Initial setup recommends four fingers but enables it only when the gesture is usable without a macOS conflict.
   Otherwise, strip gestures default to Off.
 - The strip follows finger movement by default, with a persistent setting to reverse direction.
 - A confirmed known macOS gesture conflict disables Miri's conflicting strip gesture and preserves keyboard window management.
   Miri provides manual setup instructions and never modifies macOS settings automatically.
 - Five-finger support is deferred.
+- When Miri reads the macOS gesture settings and finds no conflict, the selected strip gesture is on, with no test ([#440](https://github.com/samanyudas/miri/issues/440)).
 - When automatic conflict detection is unavailable, consistent real strip movement without unintended macOS actions and explicit user confirmation count as **Verified by user test**.
-  Miri persists the gesture preference and provides an option to retest.
+  Miri persists the gesture preference, and offers the test again whenever the swipe needs one.
   This result does not claim automatic verification of the underlying macOS gesture configuration.
   Known confirmed conflicts still prevent enablement, and failed or inconclusive tests leave the gesture Off.
 - User-test results remain valid across ordinary restarts.
-  A finger-count or direction change, a macOS or bundled-engine upgrade, or a detected or user-reported change to relevant macOS gestures invalidates the result.
+  A finger-count or direction change, a macOS upgrade, or a detected change to relevant macOS gestures invalidates the result.
   Miri preserves the preference, keeps the gesture Off until another successful test and explicit confirmation, and preserves keyboard window management.
 
 These decisions appear in [Release scope](release-scope.md) and [ADRs 0001 through 0009](../docs/adr/).

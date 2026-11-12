@@ -140,7 +140,9 @@ struct InitialSetupView: View {
                         (String(localized: "Off"), .off),
                     ])
             }
-            if model.settings.stripGesture != .off {
+            // The swipe is on once three or four fingers are chosen. Only when Miri cannot read the macOS settings does
+            // it need a test first.
+            if case .needsTest = model.gestureState {
                 SettingsRow(title: String(localized: "Swipe test"), detail: testDetail) {
                     Button("Test Gesture…") { testing = true }
                         .disabled(model.gestureTestBlocker != nil)
@@ -150,26 +152,20 @@ struct InitialSetupView: View {
                         .contentShape(.rect)
                         .help(model.gestureTestBlocker ?? "")
                 }
-                if case .conflict(let message) = model.gestureState {
-                    NoticeRow(kind: .warning, text: message) {
-                        if let url = model.settings.stripGesture.fingers.flatMap(model.gestureCheck)?.settingsURL {
-                            Button("Open Trackpad Settings") { NSWorkspace.shared.open(url) }
-                        }
+            }
+            if case .conflict(let message) = model.gestureState {
+                NoticeRow(kind: .warning, text: message) {
+                    if let url = model.settings.stripGesture.fingers.flatMap(model.gestureCheck)?.settingsURL {
+                        Button("Open Trackpad Settings") { NSWorkspace.shared.open(url) }
                     }
                 }
             }
         }
     }
 
-    /// The swipe's state, and why the test is not available yet. Only a macOS conflict gets a warning.
+    /// Why the swipe needs a test, or why the test is not available yet, as on the Gestures page.
     private var testDetail: String {
-        switch model.gestureState {
-        case .off: String(localized: "Off.")
-        case .enabled(let date): AppModel.confirmedSentence(date)
-        // The same reason as on the Gestures page, such as "Start window management to test the swipe."
-        case .needsTest: model.gestureTestBlocker ?? String(localized: "The swipe stays off until you test it.")
-        case .conflict: String(localized: "Off, because macOS uses this swipe.")
-        }
+        model.gestureTestBlocker ?? String(localized: "The swipe stays off until you test it.")
     }
 
     private var footer: some View {

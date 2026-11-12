@@ -256,15 +256,10 @@ import ServiceManagement
         setupChecks.first { $0.id == fingers.setupCheck }
     }
 
-    /// Why the gesture test cannot start, or `nil` when it can.
+    /// Why the gesture test cannot start, or `nil` when it can. Miri offers the test only when it cannot read the macOS
+    /// gesture settings.
     var gestureTestBlocker: String? {
         guard engineState.isRunning else { return String(localized: "Start window management to test the swipe.") }
-        guard settings.stripGesture != .off else {
-            return String(localized: "Choose three or four fingers to test the swipe.")
-        }
-        if case .conflict = gestureState {
-            return String(localized: "Change the macOS gesture setting before testing the swipe.")
-        }
         return nil
     }
 
@@ -280,6 +275,16 @@ import ServiceManagement
     func beginGestureTest() throws(GestureTestBlocked) -> GestureVerification {
         refreshSetup()
         if let blocker = gestureTestBlocker { throw GestureTestBlocked(message: blocker) }
+        // The settings can become readable while the test sheet is open, so a Try Again checks the state again.
+        switch gestureState {
+        case .needsTest: break
+        case .conflict(let message): throw GestureTestBlocked(message: message)
+        case .enabled:
+            throw GestureTestBlocked(
+                message: String(localized: "Miri checked your macOS trackpad gestures and found no conflict."))
+        case .off:
+            throw GestureTestBlocked(message: String(localized: "Choose three or four fingers to test the swipe."))
+        }
         guard let fingers = settings.stripGesture.fingers else {
             throw GestureTestBlocked(message: String(localized: "Choose three or four fingers to test the swipe."))
         }
@@ -299,24 +304,14 @@ import ServiceManagement
         }
     }
 
-    /// The user says a relevant macOS gesture changed, so the last test no longer counts.
-    func reportGestureChange() {
-        saveGestureVerification(nil)
-    }
-
     /// A change that needs a new test also ends the old result, so changing back cannot turn the swipe on untested.
-    /// A conflict is ignored here, because it blocks the swipe without saying whether the tested setup changed. While
-    /// the swipe is Off, the tested finger count stands in for it, so other changes made while Off still count.
+    /// While the swipe is Off, the tested finger count stands in for it, so other changes made while Off still count.
     private func dropStaleGestureVerification() {
         guard let verification = gestureVerification else { return }
-        let tested: StripGesture = verification.fingers == .three ? .three : .four
-        guard
-            case .needsTest = GestureState.evaluate(
-                preference: settings.stripGesture == .off ? tested : settings.stripGesture,
-                reversed: settings.reverseSwipe, verification: verification, environment: gestureEnvironment,
-                conflict: .passed)
-        else { return }
-        saveGestureVerification(nil)
+        let reason = verification.retestReason(
+            fingers: settings.stripGesture.fingers ?? verification.fingers, reversed: settings.reverseSwipe,
+            environment: gestureEnvironment)
+        if reason != nil { saveGestureVerification(nil) }
     }
 
     private func saveGestureVerification(_ verification: GestureVerification?) {
