@@ -13,7 +13,7 @@ Understand the real constraint, then fight for the smallest model that makes the
 
 Channel both "measure twice, cut once" and "yagni".
 Fight scope creep.
-Try to honor the dev's intent in both a minimal and realistic fashion.
+Honor the developer's intent, minimally and realistically.
 
 The rest of this document is meant to help you navigate the codebase and make changes effectively.
 Think of these instructions less as "hard rules", more as "good defaults".
@@ -33,7 +33,7 @@ The developer's preferences should be able to override anything here.
 | `Sources/MiriCore/` | Testable logic: TOML editing, settings, engine supervision, window recovery, setup checks, diagnostics. |
 | `Tests/MiriCoreTests/` | Swift Testing suites for `MiriCore`. |
 | `Sources/AXFixture/` | Harmless window that the selftests read and move. |
-| `vendor/paneru/` | Engine submodule, pinned to a commit on `samanyudas/paneru` branch `miri/v0.5.2`. |
+| `vendor/paneru/` | Engine submodule, pinned to a commit on `samanyudas/paneru` branch `miri/v0.5.2`. Engine PRs start from `miri/v0.5.2`, not from the `testing` branch that `vendor/paneru/AGENTS.md` names. |
 | `scripts/` | Build, packaging, selftest, and repository checks, with tests in `scripts/tests/`. |
 | `.claude/` | Project hooks: the command guard and the session-start handoff. |
 | `.github/` | CI and issue and PR templates. |
@@ -65,7 +65,7 @@ If your change contradicts an ADR, say so explicitly instead of overriding it.
 | `make format` | Formats Swift sources with `.swift-format`. |
 | `make verify-engine-lifecycle` | Model-checks engine start, stop, restart, and quit. Use it when you change that code. |
 
-Run cargo from the repository root so `rust-toolchain.toml` and `.cargo/config.toml` apply.
+Run cargo from the repository root, also for the engine checks in `vendor/paneru/AGENTS.md` (`make engine-lint`, `make engine-test`, `cargo fmt --manifest-path vendor/paneru/Cargo.toml`), so `rust-toolchain.toml` and `.cargo/config.toml` apply instead of the engine's own `stable` toolchain.
 CI in `.github/workflows/ci.yml` runs the same make targets, with the macOS stages as parallel jobs.
 Fix what the pre-push hook reports instead of skipping it.
 Before any step that changes the real desktop, including `make e2e`, take the [live-test lock](docs/AI-CONTRIBUTIONS.md#take-the-live-test-lock).
