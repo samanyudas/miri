@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-12 on branch `docs/308-narrowing-progress`, based on `main` at `62c57834`
+Updated: 2026-11-12 on branch `docs/308-closeout-progress`, based on `main` at `c6b01293`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -39,7 +39,13 @@ On verify-miri run `20261112-193442`, narrowing from 1522 points opened 156 to 2
 Widening and strip scrolls stayed at rest on both builds, and with animation off each width change took one step.
 With animation off, 1 of 3 narrowing presses on the fix still showed 442 points for one window-server read, against 518 points on 2 of 3 on `main`. It is not filed.
 
-**Next:** after Sam merges paneru#170, pin it in Miri with a PR that says `Refs #308`, verify all four criteria on the `main` build, and close #308.
+[#448](https://github.com/samanyudas/miri/pull/448) pinned paneru#170 and merged as `c6b01293`.
+On verify-miri run `20261112-225201` on that `main`, narrowing showed no gap past 8 points on 6 of 6 presses, against 136 to 260 points on `68d9b1e9`.
+Widening and strip scrolls stayed at rest, and with animation off each width change took one step.
+With Reduce Motion on, run `20261112-223804` showed one step on 6 of 6 presses.
+A right neighbor that applies its move 0.3 s late no longer opens desktop while it is on screen (run `20261112-222348`).
+The one-read gap with animation off came back at 552 points on 1 of 3 presses in each run. It is not filed.
+All four acceptance criteria are ticked, and #308 is closed.
 
 ## Karabiner-Elements and Hyper key chords
 
