@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-13 on branch `feat/305-new-window-half-width`, based on `main` at `4d6ce472`
+Updated: 2026-11-13 on branch `feat/305-new-window-half-width`, based on `main` at `89db512e`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,29 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A keyboard slide that starts late
+
+[#326](https://github.com/samanyudas/miri/issues/326) reported keyboard slides to a Finder column that started up to half a second late.
+Timing logs on 6 November 2026 showed the cause: focusing a window called `AXRaise` on the engine's main loop, and no frame ran until the app answered, 66 to 154 ms for Finder and up to 206 ms for System Settings.
+Sam chose on 11 November 2026 to move the raise off the main loop, and to measure criterion 2 from the engine's key log line, counting the engine's photo panels.
+[paneru#162](https://github.com/samanyudas/paneru/pull/162) queues the raise in `focus_with_raise` on the app's window writer.
+Each writer keeps only the newest raise, so an older raise landing late cannot take focus back. Sol approved it after 2 rounds.
+`raise_without_focus` stays synchronous, because the stack and strip raises depend on when each raise lands.
+On 13 November 2026 paneru#162 merged `miri/v0.5.2` as `5970df1`, which passes 1256 engine tests and engine CI.
+Sam merged paneru#162 as `83e5da7`, which has the same tree as `5970df1`.
+Miri CI then failed `a_window_leaving_past_the_edge_waits_for_a_slow_window_behind_it`, because the slow app's raise now goes on its writer before its first move, and the test used up most of pacing's 250 ms limit before that.
+Sam chose to shorten the test's hold, and [paneru#173](https://github.com/samanyudas/paneru/pull/173) does that.
+This branch pins `189fd9a`, the merge of paneru#173.
+No engine commit has both paneru#173 and the [#430](https://github.com/samanyudas/miri/issues/430) fix that `main` pins at `6e6086b` without also having [paneru#160](https://github.com/samanyudas/paneru/pull/160), the [#305](https://github.com/samanyudas/miri/issues/305) fix, so the pin carries #305's engine change too.
+That pin also carries [paneru#171](https://github.com/samanyudas/paneru/pull/171) and [paneru#172](https://github.com/samanyudas/paneru/pull/172), the [#451](https://github.com/samanyudas/miri/issues/451) fix that held PR [#452](https://github.com/samanyudas/miri/pull/452) was to pin, because `5970df1` merged #171 from `miri/v0.5.2` and paneru#173 is based on #172.
+On verify-miri run `20261113-003226`, `main`'s engine `0c76d5f` started slides to an adjacent Finder column 57 to 114 ms after the key, 1 of 10 later than 100 ms, with `focus_with_raise` at 11.7 to 81.7 ms.
+On run `20261113-003644`, `5970df1` started them 56 to 86 ms after the key, 0 of 10 later than 100 ms, with `focus_with_raise` at 3.4 to 10.7 ms.
+The 13 to 38 ms of the 11 November run on `45b6117` did not come back.
+Finder's first position write now waits on its writer behind its own raise, and edge pacing holds the T3 Code column at the shared edge until Finder moves, so a slow Finder raise still delays the visible start.
+Even a 0.8 ms raise gave a first move at 56 ms, because Finder shows a position write about 50 ms after it.
+
+**Next:** after Sam merges this pin PR, check criterion 2 again on the landed `main` and close #326, then close #452 as replaced and verify #451 and #305 on `main`.
 
 ## An app you switch to while holding the mouse button
 
@@ -89,6 +112,7 @@ Both acceptance criteria are ticked, and #377 closed on 11 November 2026.
 ## New windows at half the display width
 
 [#305](https://github.com/samanyudas/miri/issues/305) is implemented on branch `feat/305-new-window-half-width`, with the engine from [paneru#160](https://github.com/samanyudas/paneru/pull/160), merged as `d5eff6e`.
+`main` already pins `189fd9a`, which contains `d5eff6e`, so the engine has the option and this branch adds Miri's default.
 The engine option `[options].new_window_width` sizes a window that opens while the engine runs, and Miri writes `0.5` when the key is absent.
 Windows found at startup, windows in `LaunchWindows` that a scan finds late, and windows that session restore places keep their widths.
 A `[windows]` rule's `width` wins over the option.
