@@ -151,6 +151,19 @@ class VerifyMiriTest(unittest.TestCase):
         self.assertEqual(len(differences), 1, differences)
         self.assertIn("App11 window 11 was 854 pt wide, now 1070 pt", differences[0])
 
+    def test_end_waits_for_a_restored_width_that_is_still_settling(self):
+        # Run 20261112-193442: Helium window 304 read 678 points wide 0.1 s after the restore, and 673 a minute later.
+        before = self.vm.layout(self.state((6, 1, [(10, 1, False)]), widths={10: 673}))
+        reads = iter([self.vm.layout(self.state((6, 1, [(10, 1, False)]), widths={10: 678})), before])
+        _, differences = self.vm.settled_layout_differences(before, lambda: next(reads), step=0)
+        self.assertEqual(differences, [])
+
+    def test_end_reports_a_width_that_stays_different(self):
+        before = self.vm.layout(self.state((6, 1, [(10, 1, False)]), widths={10: 673}))
+        moved = self.vm.layout(self.state((6, 1, [(10, 1, False)]), widths={10: 1070}))
+        _, differences = self.vm.settled_layout_differences(before, lambda: moved, timeout=0, step=0)
+        self.assertEqual(len(differences), 1, differences)
+
     def test_a_width_within_the_tolerance_or_unrecorded_is_not_reported(self):
         before = self.vm.layout(self.state((6, 1, [(10, 1, False)]), widths={10: 854}))
         after = self.vm.layout(self.state((6, 1, [(10, 1, False)]), widths={10: 856}))
