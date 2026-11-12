@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-11 on branch `fix/issue-326`, based on `main` at `2c505050`
+Updated: 2026-11-13 on branch `fix/issue-326`, based on `main` at `4d6ce472`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -29,16 +29,38 @@ The raise does not explain that, and it is not tracked yet.
 
 **Next:** after Sam merges paneru#162, pin its merge commit, then check criterion 2 again on the landed `main` and close #326.
 
+## An app you switch to while holding the mouse button
+
+[#324](https://github.com/samanyudas/miri/issues/324) reported that an app you switch to while you hold the mouse button, as during a file drag, stays off screen.
+A held button held back every newly focused window, and the release scrolled back to the pressed window even after focus had moved.
+Sam chose on 11 November 2026 to hold back only the pressed window, and to scroll to it on release only while it still has focus.
+[paneru#163](https://github.com/samanyudas/paneru/pull/163), merged as `927b0f6`, makes that change, and this branch pins it.
+On verify-miri runs `20261111-034903` and `20261111-104758`, a test window activated during a synthetic hold stayed off screen in 2 of 2 tries on `main`, and came into view during the hold and stayed after the release in 2 of 2 tries with the fix.
+Sam's hand check with a real Finder drag and Command-Tab to Music passed on 11 November 2026: Music slid back off screen after the release without the fix, and stayed in view with it.
+Music and Notion already came into view during the hold without the fix, so real apps showed only the release half of the bug.
+A click that does not move focus, such as a Command-click on a background window, no longer scrolls that window into view on release.
+
+[#432](https://github.com/samanyudas/miri/pull/432) merged as `439249a8`.
+On verify-miri run `20261111-153651` on that `main`, the activated test window came into view during the hold and stayed after the release in 2 of 2 tries.
+All four acceptance criteria are ticked, and #324 closed on 11 November 2026.
+
 ## Desktop beside a column that changes width
 
 [#308](https://github.com/samanyudas/miri/issues/308) reported that desktop shows beside a column while it changes width.
 Row pacing held each column only by its left edge, so a column that widened about its center left its right neighbor free to run ahead.
-[paneru#159](https://github.com/samanyudas/paneru/pull/159), merged as `597afe2`, paces each pair of windows at the edge they share, and this branch pins it.
-On verify-miri run `20261111-020017`, widening from 665 to 1012 points opened 47 to 77 points of desktop on all 6 presses on `main`, and none past the 8 point rest gap on the fix.
-Narrowing from the largest preset to the smallest still opens 101 to 136 points with the fix, against 148 to 254 on `main`, because the narrowing column's right edge runs ahead of its right neighbor.
-Sam chose on 11 November 2026 to ship the widening fix first and to hold the narrowing column's width in the next PR for #308, so #308 stays open.
+[paneru#159](https://github.com/samanyudas/paneru/pull/159), merged as `597afe2`, paces each pair of windows at the edge they share, which fixed widening.
+[paneru#170](https://github.com/samanyudas/paneru/pull/170) holds the width of a column that narrows ahead of its right neighbor, moves a narrowing write before its size, and holds no width when animation is off.
+On verify-miri run `20261112-193442`, narrowing from 1522 points opened 156 to 240 points of desktop on all 6 presses on `main`, and none past the 8 point rest gap with the fix.
+Widening and strip scrolls stayed at rest on both builds, and with animation off each width change took one step.
+With animation off, 1 of 3 narrowing presses on the fix still showed 442 points for one window-server read, against 518 points on 2 of 3 on `main`. It is not filed.
 
-**Next:** verify widening on the landed `main`, then build the width hold for narrowing with a failing engine test first.
+[#448](https://github.com/samanyudas/miri/pull/448) pinned paneru#170 and merged as `c6b01293`.
+On verify-miri run `20261112-225201` on that `main`, narrowing showed no gap past 8 points on 6 of 6 presses, against 136 to 260 points on `68d9b1e9`.
+Widening and strip scrolls stayed at rest, and with animation off each width change took one step.
+With Reduce Motion on, run `20261112-223804` showed one step on 6 of 6 presses.
+A right neighbor that applies its move 0.3 s late no longer opens desktop while it is on screen (run `20261112-222348`).
+The one-read gap with animation off came back at 552 points on 1 of 3 presses in each run. It is not filed.
+All four acceptance criteria are ticked, and #308 is closed.
 
 ## Karabiner-Elements and Hyper key chords
 

@@ -194,20 +194,23 @@ The decision is recorded in [ADR 0008](../docs/adr/0008-follow-macos-space-migra
 ## Strip gestures
 
 Strip gestures support three fingers, four fingers, and Off.
-Initial setup recommends four fingers but enables it only when the gesture is verified as usable without a macOS conflict.
+Initial setup recommends four fingers but enables it only when the gesture is usable without a macOS conflict.
 Otherwise, strip gestures default to Off.
 The scrolling strip follows finger movement by default, with a persistent setting to reverse its direction.
 Five-finger strip gestures are deferred.
 When a known conflicting macOS gesture is confirmed, Miri disables its conflicting strip gesture, preserves keyboard window management, and shows manual setup instructions.
 Miri never modifies macOS settings automatically.
+When Miri reads the macOS gesture settings and finds no conflict, the selected strip gesture is on, with no test.
+The swipe goes off when a conflicting setting appears, and comes back on when it goes.
+Sam chose this on 12 November 2026 in [#440](https://github.com/samanyudas/miri/issues/440), in place of a required test and a button to report a macOS gesture change.
 If gesture conflict detection is unavailable, Miri shows **Unable to verify** and offers a gesture test.
 Consistent strip movement without unintended macOS actions, followed by explicit user confirmation, counts as **Verified by user test**.
 This result does not claim that the underlying macOS gesture configuration was automatically verified.
-Miri persists the gesture preference and provides an option to retest.
+Miri persists the gesture preference, and offers the test again whenever the swipe needs one.
 Known confirmed conflicts still prevent gesture enablement, and failed or inconclusive tests leave the gesture Off.
 User-test results remain valid across ordinary restarts.
-Changing the finger count or direction, upgrading macOS or the bundled engine, or detecting a relevant macOS gesture change invalidates the result.
-A user-reported change to relevant macOS gestures also invalidates the result.
+Changing the finger count or direction, upgrading macOS, or detecting a relevant macOS gesture change invalidates the result.
+An update of the bundled engine does not, because the test checks that macOS does not also act on the swipe, and the engine cannot change that.
 The gesture preference remains saved, but the gesture stays Off until another successful test and explicit user confirmation.
 Keyboard window management continues while retesting is required.
 
@@ -221,7 +224,19 @@ A settle never leaves empty space beside a strip that overflows the display, so 
 Landing on a stack focuses the window in that stack that was used last.
 A strip that already fits the display slides a little with resistance, then springs back.
 Modifier-scroll with a mouse wheel settles the same way after a short pause.
-Settling is always on in v1 and has no setting.
+Settling applies to Continuous scrolling, which is the default and which existing configurations keep.
+Sam added a Window by window scrolling mode on 11 November 2026 ([#281](https://github.com/samanyudas/miri/issues/281)).
+In it, the strip follows the fingers, then lands one column on from where the swipe began, whatever the column widths.
+A swipe steps once the fingers have moved the strip 5% of the display width, about 2 cm, or on a quick flick, and a shorter, slower swipe springs back.
+The strip moves one to one with the fingers and resists past the next column, so a landing never jumps back across columns.
+The column takes focus once the strip has landed, so an app slow to take focus cannot stall the landing.
+It never glides past that column on momentum.
+The trackpad clicks each time the column it would land on changes, so a swipe that stays on its column, or a strip end, gives no click.
+Each modifier-scroll wheel input moves focus one column, with the same focus rules as keyboard focus.
+In both scrolling modes, the slide to the column after the fingers lift takes 0.5 s at Miri's animation speed.
+The slide carries on the speed the strip had toward that column when the fingers lifted, then slows to a stop on it without overshooting.
+A strip that is still, or moving away from its column, starts the slide gently from rest.
+Sam chose this on 12 November 2026 in [#438](https://github.com/samanyudas/miri/issues/438), after trying an exponential ease-out and an exponential ease-in-out.
 
 ## V1 interactions
 

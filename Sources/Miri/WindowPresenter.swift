@@ -66,6 +66,9 @@ final class WindowPresenter {
         window.isReleasedWhenClosed = false
         // macOS keeps a closed window on its last desktop, and showing it again would switch the display back there.
         window.collectionBehavior.insert(.moveToActiveSpace)
+        // Miri's windows stay above other apps' windows, like Picture-in-Picture, so a window that scrolls into view
+        // or takes focus never covers them. The engine floats them, which keeps them out of the strip but not on top.
+        window.level = .floating
         if designSize != nil || kind == .initialSetup {
             // The content runs under the title bar, so the window buttons sit on it, as in the design.
             // This comes before the restore: added after it, AppKit keeps the content size, and the saved frame

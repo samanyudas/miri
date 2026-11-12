@@ -146,14 +146,14 @@ Never leave windows stranded off-screen.
 2. Run initial setup without verified gesture usability.
    Miri recommends four fingers, but strip gestures default to Off.
    Keyboard window management remains available when its startup prerequisites are satisfied.
-3. Run initial setup with four-finger usability verified and no macOS conflict.
-   Four-finger strip gestures can be enabled.
+3. Run initial setup with readable macOS gesture settings and no macOS conflict.
+   Four-finger strip gestures turn on with no gesture test.
 4. Exercise the supported three-finger and four-finger strip gestures on real hardware.
    The strip follows finger movement by default.
    The actual supported gesture and macOS setting combinations have recorded hardware evidence.
 5. Reverse swipe direction through Settings and relaunch Miri.
-   The selected reverse preference persists, but the gesture remains Off pending retesting.
-   After a successful retest and explicit user confirmation, the selected reverse direction controls strip movement.
+   The selected reverse preference persists, and with no macOS conflict the reversed swipe stays on with no test.
+   When conflict detection is unavailable, the gesture remains Off pending retesting, and after a successful retest and explicit user confirmation, the selected reverse direction controls strip movement.
 6. Select Off.
    Miri does not intercept the strip gesture, and keyboard window management remains available.
 7. Confirm a known macOS conflict with the selected strip gesture.
@@ -167,20 +167,21 @@ Never leave windows stranded off-screen.
    After explicit user confirmation, Miri shows **Verified by user test**.
    The underlying macOS gesture configuration is not presented as automatically verified.
 10. Relaunch Miri after selecting and persisting a gesture preference.
-    The preference remains stored, and an option to retest is available.
+    The preference remains stored, and the test is offered again whenever the swipe needs one.
     Ordinary restarts do not invalidate the user-test result.
 11. Fail or leave a gesture test inconclusive.
     The gesture remains Off, and keyboard window management remains available when its startup prerequisites are satisfied.
 12. Confirm a known macOS conflict despite a user test or user confirmation.
     The known conflict still prevents the conflicting strip gesture from being enabled.
-13. Change the finger count, then separately change the direction.
+13. With conflict detection unavailable, change the finger count, then separately change the direction.
     Each change invalidates the prior user-test result.
     The selected preference remains saved, but the gesture stays Off until another successful test and explicit user confirmation.
 14. Upgrade macOS, then separately upgrade the bundled engine.
-    Each upgrade invalidates the prior user-test result and requires retesting before gesture enablement.
-15. Detect a change to relevant macOS gestures, then separately report such a change through Miri.
-    Each case invalidates the prior user-test result and requires retesting.
-    Miri does not claim to detect changes when automatic detection is unavailable.
+    The macOS upgrade invalidates the prior user-test result and requires retesting before gesture enablement.
+    The engine upgrade keeps the result, and the gesture stays on.
+15. Change a relevant macOS gesture setting so it clashes with the strip gesture, then change it back.
+    The strip gesture turns off with the fix shown, then turns back on with no test.
+    Miri offers no button to report a macOS gesture change, and does not claim to detect changes when automatic detection is unavailable.
 16. Check keyboard window management while a gesture is Off pending retesting.
     Keyboard window management continues when its startup prerequisites are satisfied.
 

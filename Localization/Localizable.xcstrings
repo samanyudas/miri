@@ -7480,132 +7480,132 @@
         }
       }
     },
-    "Change the macOS gesture setting before testing the swipe.": {
+    "Change the macOS setting below to turn the swipe on.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "غيّر إعداد إيماءات macOS قبل اختبار التمرير السريع."
+            "value": "غيّر إعداد macOS أدناه لتشغيل التمرير السريع."
           }
         },
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ändere die Gesteneinstellung von macOS, bevor du das Streichen testest."
+            "value": "Ändere die Einstellung von macOS unten, um das Streichen einzuschalten."
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Cambia el ajuste de gestos de macOS antes de probar el deslizamiento."
+            "value": "Cambia el ajuste de macOS de abajo para activar el deslizamiento."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Modifiez le réglage de geste de macOS avant de tester le balayage."
+            "value": "Modifiez le réglage macOS ci-dessous pour activer le balayage."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "स्वाइप का टेस्ट करने से पहले macOS जेस्चर सेटिंग बदलें।"
+            "value": "स्वाइप चालू करने के लिए नीचे दी गई macOS सेटिंग बदलें।"
           }
         },
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ubah pengaturan gerakan macOS sebelum menguji gesekan."
+            "value": "Ubah pengaturan macOS di bawah untuk menyalakan gesekan."
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Modifica l’impostazione del gesto di macOS prima di provare lo scorrimento."
+            "value": "Modifica l’impostazione di macOS qui sotto per attivare lo scorrimento."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "スワイプをテストする前に、macOSのジェスチャ設定を変更してください。"
+            "value": "スワイプをオンにするには、下のmacOSの設定を変更してください。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "쓸어넘기기를 테스트하기 전에 macOS 제스처 설정을 변경하십시오."
+            "value": "쓸어넘기기를 켜려면 아래의 macOS 설정을 변경하십시오."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Wijzig de gebaarinstelling van macOS voordat je het vegen test."
+            "value": "Wijzig de instelling van macOS hieronder om het veeggebaar aan te zetten."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Zmień ustawienie gestów macOS przed testem przesunięcia."
+            "value": "Zmień poniższe ustawienie macOS, aby włączyć przesunięcie."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Altere o ajuste de gestos do macOS antes de testar o gesto."
+            "value": "Altere o ajuste do macOS abaixo para ativar o gesto."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Altere a definição de gestos do macOS antes de testar o gesto."
+            "value": "Altere a definição do macOS abaixo para ativar o gesto."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Измените настройку жестов macOS, прежде чем проверять смахивание."
+            "value": "Измените настройку macOS ниже, чтобы включить смахивание."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ändra gestinställningen i macOS innan du testar svepet."
+            "value": "Ändra inställningen i macOS nedan för att slå på svepet."
           }
         },
         "th": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "เปลี่ยนการตั้งค่าคำสั่งนิ้วของ macOS ก่อนทดสอบการปัด"
+            "value": "เปลี่ยนการตั้งค่า macOS ด้านล่างเพื่อเปิดการปัด"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Kaydırmayı test etmeden önce macOS hareket ayarını değiştirin."
+            "value": "Kaydırmayı açmak için aşağıdaki macOS ayarını değiştirin."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Змініть параметр жестів macOS, перш ніж перевіряти змахування."
+            "value": "Змініть параметр macOS нижче, щоб увімкнути змахування."
           }
         },
         "vi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Hãy thay đổi cài đặt cử chỉ của macOS trước khi kiểm tra thao tác vuốt."
+            "value": "Thay đổi cài đặt macOS bên dưới để bật thao tác vuốt."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "请先更改 macOS 手势设置，再测试轻扫。"
+            "value": "更改下方的 macOS 设置即可开启轻扫。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "請先更改macOS手勢設定，再測試滑動。"
+            "value": "更改下方的macOS設定即可開啟滑動。"
           }
         }
       }
@@ -7736,136 +7736,6 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "此處的更改會立即生效。其他工具的設定不受影響。"
-          }
-        }
-      }
-    },
-    "Changing fingers or direction needs a new test.": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "يتطلب تغيير الأصابع أو الاتجاه اختبارًا جديدًا."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Wenn du die Anzahl der Finger oder die Richtung änderst, ist ein neuer Test nötig."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Si cambias los dedos o la dirección, hace falta una nueva prueba."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Changer le nombre de doigts ou le sens nécessite un nouveau test."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "उँगलियाँ या दिशा बदलने पर नया टेस्ट ज़रूरी है।"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Mengubah jumlah jari atau arah memerlukan tes baru."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Se cambi dita o direzione, serve un nuovo test."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "指の本数や方向を変えると、再テストが必要です。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "손가락 수나 방향을 변경하면 다시 테스트해야 합니다."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Als je het aantal vingers of de richting wijzigt, is een nieuwe test nodig."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Zmiana liczby palców lub kierunku wymaga nowego testu."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Alterar o número de dedos ou a direção exige um novo teste."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Alterar o número de dedos ou a direção exige um novo teste."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "После смены числа пальцев или направления нужна новая проверка."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Om du ändrar antalet fingrar eller riktningen behövs ett nytt test."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "การเปลี่ยนจำนวนนิ้วหรือทิศทางต้องทดสอบใหม่"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Parmak sayısını veya yönü değiştirmek yeni bir test gerektirir."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Після зміни кількості пальців або напрямку потрібна нова перевірка."
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Thay đổi số ngón tay hoặc hướng cần kiểm tra lại."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "更改手指数量或方向后需要重新测试。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "更改手指數量或方向後需要重新測試。"
           }
         }
       }
@@ -10342,6 +10212,136 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "設定檔"
+          }
+        }
+      }
+    },
+    "Continuous": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "مستمر"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fortlaufend"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continuo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continu"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "लगातार"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Berkelanjutan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Continuo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "連続"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "연속"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Doorlopend"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Płynnie"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Contínua"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Contínuo"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Непрерывно"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kontinuerligt"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ต่อเนื่อง"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sürekli"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Безперервно"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Liên tục"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "连续"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "連續"
           }
         }
       }
@@ -27134,6 +27134,136 @@
         }
       }
     },
+    "Miri checked your macOS trackpad gestures and found no conflict.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "فحص Miri إيماءات لوحة التعقب في macOS ولم يجد أي تعارض."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri hat deine Trackpad-Gesten von macOS geprüft und keinen Konflikt gefunden."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri revisó tus gestos del trackpad de macOS y no encontró ningún conflicto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri a vérifié vos gestes du trackpad macOS et n’a trouvé aucun conflit."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri ने आपके macOS ट्रैकपैड जेस्चर जाँचे और कोई टकराव नहीं मिला।"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri telah memeriksa gerakan trackpad macOS Anda dan tidak menemukan konflik."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri ha controllato i gesti del trackpad di macOS e non ha trovato conflitti."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "MiriはmacOSのトラックパッドジェスチャを確認し、競合は見つかりませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri가 macOS 트랙패드 제스처를 확인했으며 충돌이 없습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri heeft je trackpadgebaren van macOS gecontroleerd en geen conflict gevonden."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri sprawdził gesty gładzika w macOS i nie znalazł konfliktu."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Miri verificou seus gestos do trackpad do macOS e não encontrou conflito."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Miri verificou os seus gestos do trackpad do macOS e não encontrou conflitos."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri проверил жесты трекпада в macOS и не нашел конфликтов."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri har kontrollerat dina styrplattegester i macOS och hittade ingen konflikt."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri ตรวจสอบคำสั่งนิ้วบนแทร็คแพดของ macOS แล้ว และไม่พบความขัดแย้ง"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri, macOS izleme dörtgeni hareketlerinizi denetledi ve çakışma bulmadı."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri перевірив жести трекпада в macOS і не знайшов конфліктів."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri đã kiểm tra cử chỉ bàn di chuột của macOS và không thấy xung đột nào."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri 已检查你的 macOS 触控板手势，未发现冲突。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Miri已檢查你的macOS觸控式軌跡板手勢，未發現衝突。"
+          }
+        }
+      }
+    },
     "Miri checks your Mac for anything that blocks window management. It never changes your settings for you.": {
       "localizations": {
         "ar": {
@@ -29130,396 +29260,6 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "Miri受信任狀態：%1$@。AX讀取：%2$d。角色：%3$@。"
-          }
-        }
-      }
-    },
-    "Miri turns the strip swipe off until you test it again.": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "يوقف Miri التمرير السريع للشريط حتى تختبره مرة أخرى."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri schaltet die Streifengeste aus, bis du sie erneut testest."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri desactiva el deslizamiento de la tira hasta que vuelvas a probarlo."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri désactive le balayage de bande jusqu’à ce que vous le testiez à nouveau."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "जब तक आप दोबारा टेस्ट नहीं करते, Miri स्ट्रिप स्वाइप बंद रखता है।"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri mematikan gesek lajur sampai Anda mengujinya lagi."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri disattiva lo scorrimento della striscia finché non lo provi di nuovo."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "再度テストするまで、Miriはストリップのスワイプをオフにします。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "다시 테스트할 때까지 Miri가 스트립 쓸어넘기기를 끕니다."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri schakelt het strookgebaar uit totdat je het opnieuw test."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri wyłącza przesuwanie pasa do czasu kolejnego testu."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "O Miri desativa o gesto da faixa até você testá-lo novamente."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "O Miri desativa o gesto da faixa até o testar novamente."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri выключает смахивание по ленте до новой проверки."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri stänger av remsvepet tills du testar det igen."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri จะปิดการปัดแถวจนกว่าคุณจะทดสอบอีกครั้ง"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Siz yeniden test edene kadar Miri şerit kaydırmayı kapatır."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri вимикає змахування стрічки до нової перевірки."
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri tắt vuốt dải cho đến khi bạn kiểm tra lại."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri 会关闭条带轻扫，直到你再次测试。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri會關閉條帶滑動，直到你再次測試。"
-          }
-        }
-      }
-    },
-    "Miri's engine was updated": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "تم تحديث محرك Miri"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miris Engine wurde aktualisiert"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "se ha actualizado el motor de Miri"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "le moteur de Miri a été mis à jour"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri का इंजन अपडेट हुआ"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "mesin Miri diperbarui"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "il motore di Miri è stato aggiornato"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miriのエンジンがアップデートされました"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri 엔진이 업데이트됨"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "de engine van Miri is bijgewerkt"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "silnik Miri został uaktualniony"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "o motor do Miri foi atualizado"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "o motor do Miri foi atualizado"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "движок Miri обновлен"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miris motor uppdaterades"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "เอนจินของ Miri ได้รับการอัปเดต"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri’nin motoru güncellendi"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "рушій Miri оновлено"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "bộ máy của Miri đã được cập nhật"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri 的引擎已更新"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri的引擎已更新"
-          }
-        }
-      }
-    },
-    "Miri's engine was updated.": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "تم تحديث محرك Miri."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miris Engine wurde aktualisiert."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Se ha actualizado el motor de Miri."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Le moteur de Miri a été mis à jour."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri का इंजन अपडेट हुआ।"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Mesin Miri diperbarui."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Il motore di Miri è stato aggiornato."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miriのエンジンがアップデートされました。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri 엔진이 업데이트되었습니다."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "De engine van Miri is bijgewerkt."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Silnik Miri został uaktualniony."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "O motor do Miri foi atualizado."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "O motor do Miri foi atualizado."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Движок Miri обновлен."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miris motor uppdaterades."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "เอนจินของ Miri ได้รับการอัปเดตแล้ว"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri’nin motoru güncellendi."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Рушій Miri оновлено."
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Bộ máy của Miri đã được cập nhật."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri 的引擎已更新。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Miri的引擎已更新。"
           }
         }
       }
@@ -33816,266 +33556,6 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "測試前保持關閉：%@"
-          }
-        }
-      }
-    },
-    "Off, because macOS uses this swipe.": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "متوقف، لأن macOS يستخدم هذا التمرير السريع."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Aus, weil macOS dieses Streichen verwendet."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Desactivado, porque macOS usa este deslizamiento."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Désactivé, car macOS utilise ce balayage."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "बंद, क्योंकि macOS इस स्वाइप का उपयोग करता है।"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Mati, karena macOS menggunakan gesekan ini."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Disattivato, perché macOS usa questo scorrimento."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "macOSがこのスワイプを使用しているため、オフです。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "macOS가 이 쓸어넘기기를 사용하므로 꺼져 있습니다."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Uit, omdat macOS dit veeggebaar gebruikt."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Wyłączone, ponieważ macOS używa tego przesunięcia."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Desativado, porque o macOS usa este gesto."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Desativado, porque o macOS usa este gesto."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Выключено, потому что macOS использует это смахивание."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Av, eftersom macOS använder det här svepet."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "ปิดอยู่ เพราะ macOS ใช้การปัดนี้"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Kapalı, çünkü macOS bu kaydırmayı kullanıyor."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Вимкнено, бо macOS використовує це змахування."
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Tắt, vì macOS dùng thao tác vuốt này."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "已关闭，因为 macOS 使用了此轻扫。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "已關閉，因為macOS使用了此滑動。"
-          }
-        }
-      }
-    },
-    "Off.": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "متوقف."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Aus."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Desactivado."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Désactivé."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "बंद।"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Mati."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Disattivato."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "オフ。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "꺼짐."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Uit."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Wyłączone."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Desativado."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Desativado."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Выключено."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Av."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "ปิดอยู่"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Kapalı."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Вимкнено."
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Tắt."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "已关闭。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "已關閉。"
           }
         }
       }
@@ -39942,396 +39422,6 @@
         }
       }
     },
-    "Report Change": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "الإبلاغ عن التغيير"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Änderung melden"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Informar del cambio"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Signaler le changement"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "बदलाव रिपोर्ट करें"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Laporkan Perubahan"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Segnala modifica"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "変更を報告"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "변경 사항 보고"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Meld wijziging"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Zgłoś zmianę"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Relatar Alteração"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Comunicar alteração"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Сообщить об изменении"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Rapportera ändring"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "รายงานการเปลี่ยนแปลง"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Değişikliği Bildir"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Повідомити про зміну"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Báo cáo thay đổi"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "报告更改"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "回報更改"
-          }
-        }
-      }
-    },
-    "Report a macOS Gesture Change": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "الإبلاغ عن تغيير في إيماءات macOS"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Geänderte macOS-Geste melden"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Informar de un cambio en los gestos de macOS"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Signaler un changement des gestes macOS"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "macOS जेस्चर बदलाव रिपोर्ट करें"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Laporkan Perubahan Gerakan macOS"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Segnala una modifica ai gesti di macOS"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "macOSのジェスチャの変更を報告"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "macOS 제스처 변경 사항 보고"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Meld een gewijzigd macOS-gebaar"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Zgłoś zmianę gestów macOS"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Relatar uma Alteração de Gesto do macOS"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Comunicar uma alteração de gesto do macOS"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Сообщить об изменении жестов macOS"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Rapportera en ändrad macOS-gest"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "รายงานการเปลี่ยนแปลงคำสั่งนิ้วของ macOS"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "macOS Hareket Değişikliğini Bildir"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Повідомити про зміну жестів macOS"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Báo cáo thay đổi cử chỉ của macOS"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "报告 macOS 手势更改"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "回報macOS手勢更改"
-          }
-        }
-      }
-    },
-    "Report a macOS gesture change?": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "هل تريد الإبلاغ عن تغيير في إيماءات macOS؟"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Geänderte macOS-Geste melden?"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "¿Informar de un cambio en los gestos de macOS?"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Signaler un changement des gestes macOS ?"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "macOS जेस्चर बदलाव रिपोर्ट करें?"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Laporkan perubahan gerakan macOS?"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Segnalare una modifica ai gesti di macOS?"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "macOSのジェスチャの変更を報告しますか？"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "macOS 제스처 변경 사항을 보고하겠습니까?"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Een gewijzigd macOS-gebaar melden?"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Zgłosić zmianę gestów macOS?"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Relatar uma alteração de gesto do macOS?"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Comunicar uma alteração de gesto do macOS?"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Сообщить об изменении жестов macOS?"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Vill du rapportera en ändrad macOS-gest?"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "รายงานการเปลี่ยนแปลงคำสั่งนิ้วของ macOS หรือไม่"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "macOS hareket değişikliği bildirilsin mi?"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Повідомити про зміну жестів macOS?"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Báo cáo thay đổi cử chỉ của macOS?"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "要报告 macOS 手势更改吗？"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "要回報macOS手勢更改嗎？"
-          }
-        }
-      }
-    },
     "Required to start": {
       "localizations": {
         "ar": {
@@ -40588,136 +39678,6 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "重置為預設值⋯"
-          }
-        }
-      }
-    },
-    "Resolve the macOS conflict below, then test again.": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "حل تعارض macOS أدناه، ثم اختبر مرة أخرى."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Löse den Konflikt mit macOS unten und teste dann erneut."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Resuelve el conflicto con macOS de abajo y vuelve a probar."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Résolvez le conflit avec macOS ci-dessous, puis testez à nouveau."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "नीचे दिया गया macOS टकराव हल करें, फिर दोबारा टेस्ट करें।"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Selesaikan konflik macOS di bawah, lalu uji lagi."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Risolvi il conflitto con macOS qui sotto, poi riprova il test."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "下のmacOSとの競合を解決してから、もう一度テストしてください。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "아래의 macOS 충돌을 해결한 다음 다시 테스트하십시오."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Los het conflict met macOS hieronder op en test opnieuw."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Rozwiąż poniższy konflikt z macOS, a potem przetestuj ponownie."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Resolva o conflito do macOS abaixo e teste novamente."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Resolva o conflito do macOS abaixo e teste novamente."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Устраните конфликт с macOS ниже, затем проверьте снова."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Lös konflikten med macOS nedan och testa sedan igen."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "แก้ไขความขัดแย้งกับ macOS ด้านล่าง แล้วทดสอบอีกครั้ง"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Aşağıdaki macOS çakışmasını giderin, ardından yeniden test edin."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Усуньте конфлікт із macOS нижче, потім перевірте знову."
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Giải quyết xung đột macOS bên dưới, rồi kiểm tra lại."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "请解决下方的 macOS 冲突，然后再次测试。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "請解決下方的macOS衝突，然後再次測試。"
           }
         }
       }
@@ -42894,6 +41854,136 @@
         }
       }
     },
+    "Scroll by": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "التمرير حسب"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scrollart"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Desplazar por"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Faire défiler par"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "स्क्रॉल का तरीका"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Gulir per"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scorri per"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "スクロール単位"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "스크롤 단위"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scrollen per"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Przewijaj"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rolar por"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Deslocar por"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Шаг прокрутки"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rulla per"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "เลื่อนแบบ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kaydırma biçimi"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Крок прокручування"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Cuộn theo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "滚动方式"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "捲動方式"
+          }
+        }
+      }
+    },
     "Scroll the strip with a swipe on the trackpad.": {
       "localizations": {
         "ar": {
@@ -43020,6 +42110,136 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "在觸控式軌跡板上滑動以捲動條帶。"
+          }
+        }
+      }
+    },
+    "Scrolling": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "التمرير"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scrollen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Desplazamiento"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Défilement"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "स्क्रॉलिंग"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pengguliran"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scorrimento"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "スクロール"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "스크롤"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scrollen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Przewijanie"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rolagem"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Deslocamento"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Прокрутка"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rullning"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "การเลื่อน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kaydırma"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Прокручування"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Cuộn"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "滚动"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "捲動"
           }
         }
       }
@@ -60364,6 +59584,266 @@
         }
       }
     },
+    "Window by window": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "نافذة تلو الأخرى"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fenster für Fenster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ventana a ventana"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fenêtre par fenêtre"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "एक-एक विंडो"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Jendela demi jendela"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Finestra per finestra"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ウインドウごと"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "윈도우별"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Venster voor venster"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Okno po oknie"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Janela por janela"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Janela a janela"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "По окнам"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fönster för fönster"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ทีละหน้าต่าง"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pencere pencere"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "По вікнах"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Từng cửa sổ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "逐个窗口"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "逐一視窗"
+          }
+        }
+      }
+    },
+    "Window by window lets each swipe follow your fingers, then land on one window. The trackpad clicks when the window it would land on changes. Each Option-scroll step moves one window.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "مع \"نافذة تلو الأخرى\" يتبع كل تمرير سريع أصابعك، ثم يستقر على نافذة واحدة. تنقر لوحة التعقب عندما تتغير النافذة التي سيستقر عليها. وكل خطوة تمرير مع Option تنقل نافذة واحدة."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Bei „Fenster für Fenster“ folgt jede Wischbewegung deinen Fingern und endet dann auf einem Fenster. Das Trackpad klickt, sobald sich das Fenster ändert, auf dem sie enden würde. Jeder Scrollschritt mit Option bewegt um ein Fenster."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Con «Ventana a ventana», cada deslizamiento sigue tus dedos y luego se detiene en una ventana. El trackpad hace clic cuando cambia la ventana en la que se detendría. Cada paso de desplazamiento con Opción mueve una ventana."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Avec « Fenêtre par fenêtre », chaque balayage suit vos doigts, puis s’arrête sur une fenêtre. Le trackpad émet un clic quand la fenêtre où il s’arrêterait change. Chaque cran de défilement avec Option passe d’une fenêtre."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"एक-एक विंडो\" में हर स्वाइप आपकी उंगलियों के साथ चलता है, फिर एक विंडो पर रुकता है। जिस विंडो पर वह रुकेगा, उसके बदलने पर ट्रैकपैड क्लिक करता है। Option के साथ स्क्रॉल का हर कदम एक विंडो आगे ले जाता है।"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dengan \"Jendela demi jendela\", setiap usapan mengikuti jari Anda, lalu berhenti di satu jendela. Trackpad berbunyi klik saat jendela tempat usapan akan berhenti berubah. Setiap langkah gulir dengan Option berpindah satu jendela."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Con \"Finestra per finestra\" ogni scorrimento segue le dita, poi si ferma su una finestra. Il trackpad fa clic quando cambia la finestra su cui si fermerebbe. Ogni scatto di scorrimento con Opzione sposta di una finestra."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "「ウインドウごと」では、スワイプは指に合わせて動き、1つのウインドウで止まります。止まる先のウインドウが変わるとトラックパッドがクリックします。Optionを押したスクロールは1段階ごとに1ウインドウ移動します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "'윈도우별'에서는 스와이프가 손가락을 따라 움직인 다음 윈도우 하나에 멈춥니다. 멈출 윈도우가 바뀌면 트랙패드가 클릭합니다. Option 스크롤은 한 단계마다 윈도우 하나씩 이동합니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Met ‘Venster voor venster’ volgt elke veegbeweging je vingers en eindigt dan op één venster. Het trackpad klikt wanneer het venster waarop hij zou eindigen verandert. Elke scrollstap met Option gaat één venster verder."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "W trybie „Okno po oknie” każde przesunięcie podąża za palcami, a potem zatrzymuje się na jednym oknie. Gładzik klika, gdy zmienia się okno, na którym by się zatrzymało. Każdy krok przewijania z Option przesuwa o jedno okno."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Com \"Janela por janela\", cada gesto acompanha seus dedos e depois para em uma janela. O trackpad dá um clique quando muda a janela em que ele pararia. Cada passo de rolagem com Option avança uma janela."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Com \"Janela a janela\", cada gesto acompanha os seus dedos e depois para numa janela. O trackpad faz um clique quando muda a janela em que pararia. Cada passo de deslocamento com Option avança uma janela."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "В режиме «По окнам» каждый жест следует за пальцами, а затем останавливается на одном окне. Трекпад щёлкает, когда меняется окно, на котором он остановится. Каждый шаг прокрутки с Option сдвигает на одно окно."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Med ”Fönster för fönster” följer varje svep dina fingrar och stannar sedan på ett fönster. Styrplattan klickar när fönstret det skulle stanna på ändras. Varje rullningssteg med Alternativ flyttar ett fönster."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "เมื่อเลือก \"ทีละหน้าต่าง\" การปัดแต่ละครั้งจะเคลื่อนตามนิ้วของคุณ แล้วหยุดที่หน้าต่างเดียว แทร็คแพดจะคลิกเมื่อหน้าต่างที่จะหยุดเปลี่ยนไป การเลื่อนพร้อม Option แต่ละขั้นจะย้ายไปหนึ่งหน้าต่าง"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"Pencere pencere\" ile her kaydırma parmaklarınızı izler, ardından tek bir pencerede durur. Duracağı pencere değiştiğinde izleme dörtgeni tıklar. Option ile her kaydırma adımı bir pencere ilerler."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "У режимі «По вікнах» кожен жест слідує за пальцями, а потім зупиняється на одному вікні. Трекпад клацає, коли змінюється вікно, на якому він зупиниться. Кожен крок прокручування з Option зсуває на одне вікно."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Với \"Từng cửa sổ\", mỗi lần vuốt sẽ đi theo ngón tay của bạn rồi dừng ở một cửa sổ. Bàn di chuột sẽ kêu tách khi cửa sổ nó sẽ dừng lại thay đổi. Mỗi bước cuộn kèm Option di chuyển một cửa sổ."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "选择“逐个窗口”后，每次轻扫都会跟随手指移动，然后停在一个窗口上。即将停靠的窗口改变时，触控板会发出一次点按。按住 Option 滚动时，每一步移动一个窗口。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "選擇「逐一視窗」後，每次滑動都會跟著手指移動，然後停在一個視窗上。即將停靠的視窗改變時，觸控式軌跡板會發出一次按壓回饋。按住 Option 捲動時，每一步移動一個視窗。"
+          }
+        }
+      }
+    },
     "Window management": {
       "localizations": {
         "ar": {
@@ -63356,6 +62836,136 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "miri.strip_gesture必須是\"off\"、\"three\"或\"four\"。"
+          }
+        }
+      }
+    },
+    "miri.strip_scrolling must be \"continuous\" or \"window\".": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "يجب أن تكون miri.strip_scrolling \"continuous\" أو \"window\"."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling muss \"continuous\" oder \"window\" sein."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling debe ser \"continuous\" o \"window\"."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling doit valoir \"continuous\" ou \"window\"."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling \"continuous\" या \"window\" होना चाहिए।"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling harus berupa \"continuous\" atau \"window\"."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling deve essere \"continuous\" o \"window\"."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrollingは\"continuous\"か\"window\"にする必要があります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling는 \"continuous\" 또는 \"window\"여야 합니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling moet \"continuous\" of \"window\" zijn."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling musi mieć wartość \"continuous\" lub \"window\"."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling deve ser \"continuous\" ou \"window\"."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling tem de ser \"continuous\" ou \"window\"."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling должно быть \"continuous\" или \"window\"."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling måste vara \"continuous\" eller \"window\"."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling ต้องเป็น \"continuous\" หรือ \"window\""
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling \"continuous\" veya \"window\" olmalı."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling має бути \"continuous\" або \"window\"."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling phải là \"continuous\" hoặc \"window\"."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling 必须是 \"continuous\" 或 \"window\"。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.strip_scrolling必須是\"continuous\"或\"window\"。"
           }
         }
       }

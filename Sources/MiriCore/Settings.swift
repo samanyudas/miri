@@ -21,6 +21,7 @@ public struct MiriSettings: Equatable, Sendable {
     public var stripGesture = StripGesture.off
     /// Reverses the strip swipe. Off means the strip follows the fingers.
     public var reverseSwipe = false
+    public var stripScrolling = StripScrolling.continuous
     /// Lets the engine show the contents of a hidden window on an edge next to another display. It needs Screen
     /// Recording permission.
     public var sharedEdgeSlices = false
@@ -53,6 +54,14 @@ public struct MiriSettings: Equatable, Sendable {
         }
         if let value = document.value(at: ["miri", "reverse_swipe"]) {
             reverseSwipe = try Self.boolean(value, key: "miri.reverse_swipe")
+        }
+        if let value = document.value(at: ["miri", "strip_scrolling"]) {
+            guard case .string(let name) = value, let scrolling = StripScrolling(rawValue: name) else {
+                throw .invalidValue(
+                    key: "miri.strip_scrolling",
+                    message: String(localized: "miri.strip_scrolling must be \"continuous\" or \"window\"."))
+            }
+            stripScrolling = scrolling
         }
         if let value = document.value(at: ["options", "preset_column_widths"]) {
             guard case .array(let items) = value else { throw Self.presetIssue }
@@ -108,20 +117,8 @@ public struct MiriSettings: Equatable, Sendable {
     /// Writes these settings and the engine keys derived from them, changing only values that differ.
     /// `appBundleIdentifier` names Miri's own app, whose windows always float. `gestureFingers` is the strip swipe
     /// the engine intercepts, which is on only while it is tested or being tested. `nil` leaves macOS gestures alone.
-    public func applied(
-        to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String, layout: KeyLayout = .positional,
-        gestureFingers: GestureFingers? = nil
-    ) throws
-        -> TOMLDocument
-    {
-        try applying(
-            to: document, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier, layout: layout,
-            gestureFingers: gestureFingers
-        ).document
-    }
-
-    /// Like `applied`, but leaves each key the file defines in a form Miri does not rewrite, such as an inline table,
-    /// and returns each of those keys in `skipped` with the value Miri wanted there, or `nil` to remove it.
+    /// Leaves each key the file defines in a form Miri does not rewrite, such as an inline table, and returns each of
+    /// those keys in `skipped` with the value Miri wanted there, or `nil` to remove it.
     func applying(
         to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String, layout: KeyLayout = .positional,
         gestureFingers: GestureFingers? = nil
@@ -146,6 +143,7 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.boolean(showInDock), ["miri"], "show_in_dock")
         try set(.string(stripGesture.rawValue), ["miri"], "strip_gesture")
         try set(.boolean(reverseSwipe), ["miri"], "reverse_swipe")
+        try set(.string(stripScrolling.rawValue), ["miri"], "strip_scrolling")
         try set(.array(widthPresets.map(TOMLValue.float)), ["options"], "preset_column_widths")
         try set(stackLimit.tomlValue, ["options"], "stack_limit")
         try set(.string(maximizedWindowSide.rawValue), ["options"], "maximized_window_side")
@@ -182,6 +180,10 @@ public struct MiriSettings: Equatable, Sendable {
         // V1 strip swipes are horizontal. The engine otherwise takes vertical swipes with the same finger count,
         // which macOS uses for Mission Control and App Exposé.
         try set(.boolean(false), gesture, "vertical")
+        try set(.boolean(stripScrolling == .window), gesture, "window_landing")
+        try set(.boolean(stripScrolling == .window), ["swipe", "scroll"], "window_step")
+        // Paging steps focus while the strip stays still under the fingers, and it overrides window_landing.
+        try edit(nil) { try result.removing(table: gesture, key: "paging") }
         // The engine falls back to these deprecated keys, which would keep a swipe on that Miri turned off.
         for legacy in ["swipe_gesture_fingers", "swipe_gesture_direction"] {
             try edit(nil) { try result.removing(table: ["options"], key: legacy) }
@@ -224,6 +226,15 @@ public struct MiriSettings: Equatable, Sendable {
         key: "options.stack_limit",
         message: String(localized: "options.stack_limit must be a whole number from 1 or \"fit\".")
     )
+}
+
+/// How a strip swipe and a modifier-scroll wheel input move the strip, stored in `[miri].strip_scrolling`.
+public enum StripScrolling: String, CaseIterable, Sendable {
+    /// The strip follows the fingers or the wheel, then settles on a column.
+    case continuous
+    /// A strip swipe follows the fingers, then lands on one window, and each wheel input focuses the adjacent window:
+    /// the engine's `[swipe.gesture].window_landing` and `[swipe.scroll].window_step`.
+    case window
 }
 
 /// The side of its stack where a maximized stacked window opens as a column of its own. The raw value is the engine's

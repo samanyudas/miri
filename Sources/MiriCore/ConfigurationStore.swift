@@ -15,6 +15,7 @@ public final class ConfigurationStore {
         # [bindings] starts with Miri's default shortcuts. Miri never changes a shortcut you set.
         # miri.default_bindings_version records which defaults Miri has offered, so a shortcut you delete stays deleted.
         # Miri owns [swipe.gesture]. fingers_count is present only while a tested strip swipe is on or being tested.
+        # Miri also owns [swipe.scroll].window_step. It and [swipe.gesture].window_landing come from miri.strip_scrolling.
 
         """
 

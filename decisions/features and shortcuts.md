@@ -53,7 +53,8 @@ Handle recording conflicts as described in [Binding customization](keybinding%20
 Support non-US keyboard layouts.
 
 Horizontal strip gestures follow [Strip gestures](release-scope.md#strip-gestures).
-The strip follows the fingers and settles at the nearest column on release.
+In Continuous scrolling, the strip follows the fingers and settles at the nearest column on release.
+In Window by window scrolling, the strip also follows the fingers, then lands on one window, as [Settling after a swipe](release-scope.md#settling-after-a-swipe) describes.
 
 Clicking a window changes focus.
 Dragging a window follows [Dragging windows](release-scope.md#dragging-windows).
@@ -93,6 +94,7 @@ Follow the Reduce Motion and disable-animation behavior in [V1 interactions](rel
 
 Apply valid settings as users change them.
 Provide the controls in a native settings window.
+Keep Miri's own windows, such as Settings and Set Up Miri, above other apps' windows, like Picture-in-Picture, so that a window that scrolls into view or takes focus never covers them ([#435](https://github.com/samanyudas/miri/issues/435)).
 Migrate configuration as described in [Release scope](release-scope.md#configuration).
 
 ## Respect macOS window behavior
