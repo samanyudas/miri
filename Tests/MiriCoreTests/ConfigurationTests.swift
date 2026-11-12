@@ -20,6 +20,7 @@ struct ConfigurationStoreTests {
             document.value(at: ["options", "preset_column_widths"])
                 == .array([0.25, 0.33, 0.5, 0.66, 0.75].map(TOMLValue.float)))
         #expect(document.value(at: ["options", "animation_speed"]) == .float(14))
+        #expect(document.value(at: ["options", "new_window_width"]) == .float(0.5))
         #expect(document.value(at: ["options", "stack_limit"]) == .integer(5))
         #expect(document.value(at: ["options", "maximized_window_side"]) == .string("right"))
         for side in ["top", "right", "bottom", "left"] {
@@ -129,6 +130,18 @@ struct ConfigurationStoreTests {
         #expect(try TOMLDocument(contents()).value(at: ["options", "animation_speed"]) == .float(14))
         try store.update(reduceMotion: false) { $0.animations = false }
         #expect(try TOMLDocument(contents()).value(at: ["options", "animation_speed"]) == nil)
+    }
+
+    @Test func writesTheNewWindowWidthOnlyWhenTheKeyIsAbsent() throws {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let width = { (text: String) throws -> TOMLValue? in
+            try text.write(to: url, atomically: true, encoding: .utf8)
+            ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri").load(reduceMotion: false)
+            return try TOMLDocument(contents()).value(at: ["options", "new_window_width"])
+        }
+        #expect(try width("") == .float(0.5))
+        #expect(try width("[options]\nnew_window_width = 0.75\n") == .float(0.75))
+        #expect(try width("[options]\nnew_window_width = 1\n") == .integer(1))
     }
 
     @Test func reportsAFormMiriCannotRewrite() throws {
