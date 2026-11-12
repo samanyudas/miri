@@ -19,15 +19,17 @@ The public release path and the complete acceptance runs follow.
 [#326](https://github.com/samanyudas/miri/issues/326) reported keyboard slides to a Finder column that started up to half a second late.
 Timing logs on 6 November 2026 showed the cause: focusing a window called `AXRaise` on the engine's main loop, and no frame ran until the app answered, 66 to 154 ms for Finder and up to 206 ms for System Settings.
 Sam chose on 11 November 2026 to move the raise off the main loop, and to measure criterion 2 from the engine's key log line, counting the engine's photo panels.
-[paneru#162](https://github.com/samanyudas/paneru/pull/162) queues the raise in `focus_with_raise` on the app's window writer, and this branch pins its head `c367966`.
+[paneru#162](https://github.com/samanyudas/paneru/pull/162) queues the raise in `focus_with_raise` on the app's window writer.
 Each writer keeps only the newest raise, so an older raise landing late cannot take focus back. Sol approved it after 2 rounds.
 `raise_without_focus` stays synchronous, because the stack and strip raises depend on when each raise lands.
-On verify-miri run `20261111-022802`, engine `87d7a81` started 3 of 10 slides to Finder later than 100 ms (30 to 119 ms).
-On run `20261111-033301`, the fix `45b6117` started all 10 within 13 to 38 ms, and Finder answered the raise on its writer in 3.5 to 70.5 ms while the slide moved.
-Slides back to T3 Code first moved 50 to 95 ms after the key on both builds.
-The raise does not explain that, and it is not tracked yet.
+On 13 November 2026 paneru#162 merged `miri/v0.5.2` as `5970df1`, which passes 1256 engine tests and engine CI, and this branch pins it.
+On verify-miri run `20261113-003226`, `main`'s engine `0c76d5f` started slides to an adjacent Finder column 57 to 114 ms after the key, 1 of 10 later than 100 ms, with `focus_with_raise` at 11.7 to 81.7 ms.
+On run `20261113-003644`, `5970df1` started them 56 to 86 ms after the key, 0 of 10 later than 100 ms, with `focus_with_raise` at 3.4 to 10.7 ms.
+The 13 to 38 ms of the 11 November run on `45b6117` did not come back.
+Finder's first position write now waits on its writer behind its own raise, and edge pacing holds the T3 Code column at the shared edge until Finder moves, so a slow Finder raise still delays the visible start.
+Even a 0.8 ms raise gave a first move at 56 ms, because Finder shows a position write about 50 ms after it.
 
-**Next:** after Sam merges paneru#162, pin its merge commit, then check criterion 2 again on the landed `main` and close #326.
+**Next:** Sam decides whether paneru#162 is enough for #326. After it merges, pin its merge commit, then check criterion 2 again on the landed `main` and close #326.
 
 ## An app you switch to while holding the mouse button
 
