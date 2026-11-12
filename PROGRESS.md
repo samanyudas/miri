@@ -22,14 +22,16 @@ Sam chose on 11 November 2026 to move the raise off the main loop, and to measur
 [paneru#162](https://github.com/samanyudas/paneru/pull/162) queues the raise in `focus_with_raise` on the app's window writer.
 Each writer keeps only the newest raise, so an older raise landing late cannot take focus back. Sol approved it after 2 rounds.
 `raise_without_focus` stays synchronous, because the stack and strip raises depend on when each raise lands.
-On 13 November 2026 paneru#162 merged `miri/v0.5.2` as `5970df1`, which passes 1256 engine tests and engine CI, and this branch pins it.
+On 13 November 2026 paneru#162 merged `miri/v0.5.2` as `5970df1`, which passes 1256 engine tests and engine CI.
+Sam merged paneru#162 as `83e5da7`, which has the same tree as `5970df1`, and this branch pins it.
+That pin also carries [paneru#171](https://github.com/samanyudas/paneru/pull/171), the [#451](https://github.com/samanyudas/miri/issues/451) fix that held PR [#452](https://github.com/samanyudas/miri/pull/452) pins, because `5970df1` merged it from `miri/v0.5.2` and no engine commit has #162 without it.
 On verify-miri run `20261113-003226`, `main`'s engine `0c76d5f` started slides to an adjacent Finder column 57 to 114 ms after the key, 1 of 10 later than 100 ms, with `focus_with_raise` at 11.7 to 81.7 ms.
 On run `20261113-003644`, `5970df1` started them 56 to 86 ms after the key, 0 of 10 later than 100 ms, with `focus_with_raise` at 3.4 to 10.7 ms.
 The 13 to 38 ms of the 11 November run on `45b6117` did not come back.
 Finder's first position write now waits on its writer behind its own raise, and edge pacing holds the T3 Code column at the shared edge until Finder moves, so a slow Finder raise still delays the visible start.
 Even a 0.8 ms raise gave a first move at 56 ms, because Finder shows a position write about 50 ms after it.
 
-**Next:** Sam decides whether paneru#162 is enough for #326. After it merges, pin its merge commit, then check criterion 2 again on the landed `main` and close #326.
+**Next:** after Sam merges this pin PR, check criterion 2 again on the landed `main` and close #326.
 
 ## An app you switch to while holding the mouse button
 
