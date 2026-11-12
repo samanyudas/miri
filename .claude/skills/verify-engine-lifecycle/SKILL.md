@@ -101,7 +101,7 @@ A change that touches a covered file but no lifecycle step, such as a new label 
 ### Coverage
 
 ```text
-sync-commit: 7dae1cd3
+sync-commit: 62c57834
 covers: Sources/MiriCore/Engine.swift
 covers: Sources/MiriCore/EngineProcess.swift
 covers: Sources/Miri/AppModel.swift
