@@ -36,6 +36,7 @@ The initial default installation also backs up the file before adding its versio
 | Stack limit | `5` windows | `[options].stack_limit`, a number from 1 or `"fit"`. The engine caps it at what fits on each display. |
 | Maximized stacked window opens | Right of its stack | `[options].maximized_window_side`, `"left"` or `"right"`. |
 | Show window contents on edges next to another display | Off | `[options].shared_edge_slices`, `true` or `false`. Absent means off. |
+| New window width | `0.5` of the display | `[options].new_window_width`, a ratio above 0 and up to 1. Miri writes it when the key is absent. A `[windows]` rule's `width` wins. |
 
 Paneru v0.5.2 has no `gap_inner` or `gap_outer` configuration keys.
 Its outer padding has separate top, right, bottom, and left fields.
@@ -50,8 +51,7 @@ The final Miri validation range is not yet selected.
 The preset list is editable.
 The fourth width preset is `0.66`.
 [Release scope](release-scope.md#default-shortcuts-and-layout) defines the accepted new-window width and resize increment.
-Paneru's width rules also apply to existing windows discovered at startup.
-The new-window-only width behavior therefore requires integration beyond a blanket width rule.
+The engine option `[options].new_window_width` applies only to windows that open while the engine runs, so windows found at startup and windows a restored session places keep their widths.
 Miri binds the engine's `window_step_grow` and `window_step_shrink`, which change the width by `window_resize_step` of the display, 0.05 by default.
 
 ## Layout behavior and remaining controls
