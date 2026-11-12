@@ -123,6 +123,7 @@ They do not by themselves encode Miri's verification status or conflict policy.
 | `[swipe.gesture].fingers_count` | Three fingers, four fingers, or Off, subject to the accepted enablement policy. | Exact-count interception starts at three fingers. Omission or zero disables it. |
 | `[swipe.gesture].vertical` | Strip swipes are horizontal only. | Vertical interception defaults to enabled. |
 | `[swipe.gesture].window_landing` | Off for Continuous scrolling, on for Window by window scrolling. | The strip follows the fingers, then lands one column on from where the swipe began, once the fingers have moved it 5% of the display width or flicked, and never glides on with momentum. `haptics`, on by default, clicks the trackpad each time that column changes. |
+| `[swipe.gesture].target` | The strip under the pointer by default, or the focused window's strip. | A swipe or modifier-scroll picks its strip when it starts and drives that strip until it lands, even if focus or the active display changes. `"pointer"` is the default. |
 | `[swipe.scroll].window_step` | Off for Continuous scrolling, on for Window by window scrolling. | Each modifier-scroll wheel input focuses one adjacent column. Momentum adds no step, and repeats in the same direction within 180 ms are dropped. The modifier defaults to Option. |
 
 `swipe_natural` is absent from this release.
@@ -142,9 +143,8 @@ The gesture test result is app state outside the file, so a file edit cannot mar
 The effect of `vertical = false` on Mission Control and App Exposé swipes still needs hardware verification.
 
 The accepted strip target for trackpad scrolling and keyboard commands is in [Multiple monitors](release-scope.md#multiple-monitors).
-The pinned engine moves the strip on the display whose menu bar is active, so the pointer target and the setting need an engine change that is not built yet ([#212](https://github.com/samanyudas/miri/issues/212)).
-The inspected swipe path selects the active workspace rather than a strip from pointer coordinates.
-Miri's accepted pointer-target and focused-target behavior remains required integration work.
+Miri stores the target in `[miri].swipe_target` as `"pointer"` or `"focused"`, and writes `[swipe.gesture].target` from it ([#212](https://github.com/samanyudas/miri/issues/212)).
+Settings > Gestures offers it as **Swipe moves**, with **Under pointer** and **Focused window**.
 
 The setup experience is recorded in [Setup](setup.md).
 

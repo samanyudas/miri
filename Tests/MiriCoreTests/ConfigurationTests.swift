@@ -413,6 +413,7 @@ struct GestureConfigurationTests {
             document.value(at: ["swipe", "gesture"])
                 == .table([
                     "direction": .string("Natural"), "vertical": .boolean(false), "window_landing": .boolean(false),
+                    "target": .string("pointer"),
                 ]))
     }
 
@@ -470,6 +471,7 @@ struct GestureConfigurationTests {
             document.value(at: ["swipe", "gesture"])
                 == .table([
                     "direction": .string("Natural"), "vertical": .boolean(false), "window_landing": .boolean(false),
+                    "target": .string("pointer"),
                 ]))
     }
 
@@ -528,6 +530,41 @@ struct GestureConfigurationTests {
                     key: "miri.strip_scrolling",
                     message: "miri.strip_scrolling must be \"continuous\" or \"window\"."))
         #expect(store.settings.stripScrolling == .continuous)
+        #expect(try contents() == text)
+    }
+
+    @Test func swipesTheStripUnderThePointerByDefault() throws {
+        let store = try store()
+        store.load(reduceMotion: false)
+        #expect(store.settings.swipeTarget == .pointer)
+        let document = try TOMLDocument(contents())
+        #expect(document.value(at: ["miri", "swipe_target"]) == .string("pointer"))
+        #expect(document.value(at: ["swipe", "gesture", "target"]) == .string("pointer"))
+    }
+
+    @Test func theFocusedTargetIsWrittenForTheEngineAndSurvivesARestart() throws {
+        let store = try store()
+        store.load(reduceMotion: false)
+        try store.update(reduceMotion: false) { $0.swipeTarget = .focused }
+        let document = try TOMLDocument(contents())
+        #expect(document.value(at: ["miri", "swipe_target"]) == .string("focused"))
+        #expect(document.value(at: ["swipe", "gesture", "target"]) == .string("focused"))
+        let relaunched = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
+        relaunched.load(reduceMotion: false)
+        #expect(relaunched.issue == nil)
+        #expect(relaunched.settings.swipeTarget == .focused)
+        #expect(try contents() == document.text)
+    }
+
+    @Test func reportsAnUnknownSwipeTargetByKey() throws {
+        let text = "[miri]\nswipe_target = \"window\"\n"
+        let store = try store(text)
+        store.load(reduceMotion: false)
+        #expect(
+            store.issue
+                == .invalidValue(
+                    key: "miri.swipe_target", message: "miri.swipe_target must be \"pointer\" or \"focused\"."))
+        #expect(store.settings.swipeTarget == .pointer)
         #expect(try contents() == text)
     }
 

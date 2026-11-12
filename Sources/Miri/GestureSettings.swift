@@ -56,6 +56,20 @@ struct GestureSettings: View {
                             (String(localized: "Window by window"), .window),
                         ])
                 }
+                SettingsRow(
+                    title: String(localized: "Swipe moves"),
+                    detail: String(
+                        localized:
+                            "Under pointer moves the strip on the display the pointer is on. Focused window moves the strip of the window you are using, wherever the pointer is. This also applies to Option-scroll."
+                    )
+                ) {
+                    SegmentedChoice(
+                        label: String(localized: "Swipe moves"), selection: setting(\.swipeTarget),
+                        options: [
+                            (String(localized: "Under pointer"), .pointer),
+                            (String(localized: "Focused window"), .focused),
+                        ])
+                }
             }
             Text("Keyboard shortcuts work whether the swipe is on or off. Miri never changes macOS settings.")
                 .font(.detail)
