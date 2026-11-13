@@ -142,6 +142,7 @@ Trackpad scrolling moves the strip on the display under the pointer by default.
 A setting lets the user choose the focused window's strip instead.
 Keyboard commands always act on the focused strip.
 A swipe keeps its strip until it lands, even if focus moves to another display meanwhile, and the window it lands on takes focus ([#212](https://github.com/samanyudas/miri/issues/212)).
+If you move focus to a window outside the swiped strip before it lands, for example with Command-Tab, the strip still lands and your choice keeps focus ([#463](https://github.com/samanyudas/miri/issues/463)).
 Paneru's experimental virtual workspaces stay turned off, with their commands and menu bar indicator hidden.
 Sam dropped them on 1 November 2026, because macOS Spaces already give each display several strips.
 The earlier reference to "vertically arranged" sets was accidental and does not request additional virtual workspace rows.
