@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-13 on branch `docs/460-closeout-progress`, based on `main` at `7032dd5f`
+Updated: 2026-11-13 on branch `fix/431-hidden-launch`, based on `main` at `366256cf`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,17 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A window of an app that launched hidden
+
+[#431](https://github.com/samanyudas/miri/issues/431) reported that a window of an app that launches hidden never tiles when you show the app more than 10 seconds later.
+While the app is hidden, its window reads as `AXDialog`, the engine lists a new app's windows only for 10 seconds after launch, and the show sends no `AXCreated`.
+[paneru#176](https://github.com/samanyudas/paneru/pull/176) gives a shown app the same 10 second listing watch as a launch, and merged as `2cd1efa`, which [#461](https://github.com/samanyudas/miri/pull/461) pins.
+Verify-miri run `20261113-143031` on `main` at `10246741` left the window untiled after shows at 20 and 60 seconds, and run `20261113-143150` on the fix tiled it 0.27 and 0.36 seconds after the show.
+On the pinned build, two of ten windows shown after 60 seconds took about 2 seconds to tile. The debug log of one shows the engine heard of the show about 1.9 seconds late, then tiled the window at its next check. In run `20261113-164649`, five more such windows tiled 0.17 to 0.32 seconds after they appeared on screen.
+A fixture app launched hidden and never shown took no column in both runs.
+An app hidden with Command-H that opens a window while hidden already tiled on `main` when shown, in run `20261113-154640`.
+Next: after #461 merges, check the three hidden-launch cases on `main` and close #431.
 
 ## A keyboard slide that starts late
 
