@@ -179,7 +179,7 @@ The [decision record](https://github.com/samanyudas/miri/blob/design/350-351-352
 [#352](https://github.com/samanyudas/miri/issues/352) closed on 10 November 2026 after [#398](https://github.com/samanyudas/miri/pull/398) merged as `766ea76b`.
 [#394](https://github.com/samanyudas/miri/issues/394) tracks simpler public issue forms before the public release.
 Branch `chore/394-public-issue-forms` drops Acceptance criteria from the bug report form, and Acceptance criteria, Requested by, and Release from the feature request form.
-Agents still write those sections by the rules in `CONTRIBUTING.md`, but the command guard no longer checks them for bugs and features.
+Agents still write Acceptance criteria, and name who asked for a feature, by the rules in `CONTRIBUTING.md`, but the command guard no longer checks either for bugs and features.
 Whether to hide or mark the maintainer forms Task or spec and Decision waits for Sam, and the check of `issues/new/choose` as a non-collaborator runs after the merge.
 [#399](https://github.com/samanyudas/miri/pull/399) merged on 10 November 2026 as `015bfd0d`, and moves every interface text in `Sources/Miri` and `Sources/MiriCore` into `Localization/Localizable.xcstrings`, which holds only English so far.
 `make strings` fails on text that is not localized where it stands, and `verify-miri relaunch --language` starts Miri in another language without changing the Mac's.
