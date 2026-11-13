@@ -113,7 +113,7 @@ They describe documented intent, not separately accepted product choices or comp
 48. As a Miri user, I want the same scrolling layout on all connected displays, so that using another monitor preserves the interaction model.
 49. As a Miri user, I want window order and focus independent between strips, so that work on one strip does not rearrange another.
 50. As a Miri user, I want each strip's scroll position independent, so that scrolling one strip leaves other strips unchanged.
-51. As a Miri user, I want new resizable windows to start at 50% of display width, so that their initial size is predictable.
+51. As a Miri user, I want new resizable windows to start at 50% of the display's tiling area, so that their initial size is predictable and two of them fit side by side.
 52. As a Miri user, I want existing windows to retain their widths, so that starting management or opening another window preserves their sizes.
 53. As a Miri user, I want default width presets of 0.25, 0.33, 0.5, 0.66, and 0.75, so that preset cycling uses the accepted sizes.
 54. As a Miri user, I want to edit the width preset list, so that preset cycling fits my preferred window widths.
@@ -333,7 +333,7 @@ They do not establish completed modules or verified engine capabilities.
 - If strip re-attachment fails within the engine's timeout, make its windows floating and reachable.
   Keep the display record in memory only, and offer no reconnection settings in v1.
   The timeout and this behavior require verification against the selected engine and hardware.
-- Start new resizable windows at 50% of display width and retain existing window widths.
+- Start new resizable windows at 50% of the display's tiling area, as wide as the 50% width preset, and retain existing window widths.
   Each width or height adjustment changes size by five percentage points of the display's corresponding dimension, subject to window size constraints.
 - Default width presets are `[0.25, 0.33, 0.5, 0.66, 0.75]`, using `[options].preset_column_widths`.
   The fourth preset is `0.66`, not a rounded substitute.

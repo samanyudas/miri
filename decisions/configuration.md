@@ -36,7 +36,7 @@ The initial default installation also backs up the file before adding its versio
 | Stack limit | `5` windows | `[options].stack_limit`, a number from 1 or `"fit"`. The engine caps it at what fits on each display. |
 | Maximized stacked window opens | Right of its stack | `[options].maximized_window_side`, `"left"` or `"right"`. |
 | Show window contents on edges next to another display | Off | `[options].shared_edge_slices`, `true` or `false`. Absent means off. |
-| New window width | `0.5` of the display | `[options].new_window_width`, a ratio above 0 and up to 1. Miri writes it when the key is absent. A `[windows]` rule's `width` wins. |
+| New window width | `0.5` of the display's tiling area | `[options].new_window_width`, a ratio above 0 and up to 1, of the width inside the display padding, as the width presets use. Miri writes it when the key is absent. A `[windows]` rule's `width` wins. |
 
 Paneru v0.5.2 has no `gap_inner` or `gap_outer` configuration keys.
 Its outer padding has separate top, right, bottom, and left fields.

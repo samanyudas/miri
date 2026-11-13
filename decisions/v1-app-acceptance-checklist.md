@@ -104,7 +104,7 @@ Never leave windows stranded off-screen.
    Numbered jumps select columns and restore the selected stack's last-focused window.
    Dedicated monitor commands follow physical monitor directions.
 5. Open a new resizable window.
-   Its initial width is 50% of display width, and existing windows retain their widths.
+   Its initial width is 50% of the display's tiling area, as wide as the 50% width preset, and existing windows retain their widths.
 6. Adjust column width and window height.
    Each press changes size by five percentage points of the corresponding display dimension, subject to window size constraints.
 7. Open fixed-size windows and Miri's settings.

@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-13 on branch `docs/305-closeout-progress`, based on `main` at `cef3d591`
+Updated: 2026-11-13 on branch `fix/460-new-column-tiling-share`, based on `main` at `10246741`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -96,6 +96,16 @@ Sam chose to track the wider column as [#414](https://github.com/samanyudas/miri
 On `main` `3e5523ac`, `verify-miri` runs `20261110-181524`, `20261110-182323`, and `20261111-002842` dragged T3 Code below the display 40 times at a load average of 10.4 to 15.9, and all 40 drops ended at the slot at the column's width.
 CI's `make engine-test` on the same pin passed the new test `drag::a_busy_apps_window_sliding_back_after_a_drop_stays_in_its_column`, which fails before the fix.
 Both acceptance criteria are ticked, and #377 closed on 11 November 2026.
+
+## Two half-width columns that do not fit
+
+[#460](https://github.com/samanyudas/miri/issues/460) reported that two new columns at `new_window_width = 0.5` overflowed the tiling area, so the left one ran past the display edge.
+The engine took the new column's share of the full display width, while the width presets and a display move take theirs of the tiling area inside the padding.
+[paneru#175](https://github.com/samanyudas/paneru/pull/175), merged as `7ade747`, takes the new column's share of the tiling area, and `decisions/` now says so.
+On `main` `10246741`, `verify-miri` run `20261113-141746` gave two 1280-point columns on the 27-inch display, two 1024-point columns on the built-in display, and two 1281-point columns after a move to the 27-inch display.
+On the fix build, run `20261113-142913` gave 1276, 1020, and 1276 points, each pair filling its tiling area to the point.
+
+**Next:** after Sam merges the Miri pin PR, verify on `main` and close #460.
 
 ## New windows at half the display width
 
