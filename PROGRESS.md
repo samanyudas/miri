@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-13 on branch `fix/464-rule-width-pin`, based on `main` at `560024b9`
+Updated: 2026-11-13 on branch `fix/464-rule-width-pin`, based on `main` at `5bb8ff25`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -40,6 +40,16 @@ A fixture app launched hidden and never shown took no column in both runs.
 An app hidden with Command-H that opens a window while hidden already tiled on `main` when shown, in run `20261113-154640`.
 #461 merged as `92956623`.
 Verify-miri run `20261113-170452` on that `main` tiled windows shown after 20 and 60 seconds 0.19 seconds after the show, left a never-shown app with no column, and #431 closed.
+
+## A swipe moves the strip under the pointer
+
+[#212](https://github.com/samanyudas/miri/issues/212), [#443](https://github.com/samanyudas/miri/issues/443), and [#463](https://github.com/samanyudas/miri/issues/463) closed on 13 November 2026.
+[paneru#169](https://github.com/samanyudas/paneru/pull/169) makes a swipe or Option-scroll move the strip under the pointer and drive it until it lands, which also stopped a strip staying stretched when the active display changed mid-swipe (#443).
+[#444](https://github.com/samanyudas/miri/pull/444) added Settings > Gestures > **Swipe moves**, with **Under pointer** and **Focused window**, and merged as `6e61b9a6`.
+[paneru#177](https://github.com/samanyudas/paneru/pull/177) keeps focus on a window you switch to on another display during a swipe, as Sam decided, and [#467](https://github.com/samanyudas/miri/pull/467) pins it as `560024b9`.
+Verify-miri runs `20261113-170322` and `20261113-170620` checked both targets, the setting, and the mid-swipe switch on two displays with Option-scroll.
+Sam checked both targets and the switch with a real three-finger swipe on the merged builds.
+Acceptance check S-1 stays Pending until a release candidate is frozen.
 
 ## A keyboard slide that starts late
 
@@ -2015,7 +2025,7 @@ Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
 
 1. Finish the remaining v1 features.
-   - Check the under-pointer swipe and the Swipe moves setting on a real trackpad with two displays, acceptance check S-1 (#212). The engine (paneru#169) and Settings are built.
+   - Record acceptance check S-1 on the frozen release candidate. Sam's hand check of both swipe targets passed on 13 November 2026 (#212).
    - Run the stack overflow (S-5) and stack limit (S-7) hardware checks, and record them against the frozen release candidate.
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.
