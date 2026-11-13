@@ -17,17 +17,22 @@ File an issue only for a real need that you have evidence for.
 Write the title as one plain sentence about what changes for the person using Miri.
 Give every issue exactly one type label: `bug`, `enhancement`, `task`, or `decision`.
 The [issue templates](.github/ISSUE_TEMPLATE) set the type label and list the required sections for each type.
-When you file with `gh issue create`, write each required field label from the template as a `###` heading, such as `### Acceptance criteria`.
+When you file with `gh issue create`, write each required field label from the template as a `###` heading, such as `### Steps to reproduce`.
+The bug and feature forms are public, so they ask only what a reporter knows.
+They do not require acceptance criteria, who asked, or a release.
 
 Each acceptance criterion states an observable result and how to check it.
 Name the automated test, the `make` target, or the manual or hardware check from the [v1 acceptance checklist](decisions/v1-acceptance-checklist.md).
 If you cannot write acceptance criteria yet, file a `decision` issue for the open question, or ask Sam.
+Triage adds acceptance criteria to a public report before it gets `ready-for-agent`.
 
 An agent files a bug only after it reproduces the bug on the surface a user sees.
 If the agent cannot reproduce the bug, it reports to Sam what it saw and what it tried, and it does not file the issue.
-A feature names who asked for it, or the decision or issue it comes from.
+An agent that files any issue writes a `### Acceptance criteria` section.
+A feature that an agent files also names who asked for it, or the decision or issue it comes from.
 
 In Claude Code sessions, `.claude/hooks/guard-command.py` reads the templates and blocks `gh issue create` without exactly one type label and every required section.
+It checks only the sections that each form requires.
 
 ## Take up an issue
 
@@ -47,7 +52,7 @@ Sam removes `needs-info` after answering, and the work continues from step 2.
 ## Plan the change
 
 Discuss a substantial change in an issue first, using the task or feature template.
-The issue states the outcome, acceptance criteria, and the verification level.
+Before work starts, the issue states the outcome, acceptance criteria, and the verification level.
 Read [release scope](decisions/release-scope.md) and [design tree status](decisions/design-tree-status.md) before you propose product behavior.
 Some features are deliberately deferred to v2.
 

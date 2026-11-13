@@ -86,9 +86,9 @@ class GuardCommandTest(unittest.TestCase):
     def test_issue_create_names_each_missing_section(self):
         blocked = {
             "gh issue create -t Gap -l bug -b 'Windows overlap.'": "Missing: Steps to reproduce, Expected result, "
-            "Actual result, Acceptance criteria, Miri version or commit, macOS version and Mac model.",
+            "Actual result, Miri version or commit, macOS version and Mac model.",
             f"gh issue create -t Gap -l bug -b '{BUG.replace('Actual result', 'Result')}'": "Missing: Actual result.",
-            f"gh issue create -t Strip -l enhancement -b '{FEATURE_WITHOUT_SOURCE}'": "Missing: Requested by, Release.",
+            f"gh issue create -t Strip -l enhancement -b '{FEATURE_WITHOUT_PROPOSAL}'": "Missing: Proposed behavior.",
             "gh issue create -t Gap -l task -b '## Acceptance\n- works'": "Missing: Outcome, Acceptance criteria",
             "bash -c 'gh issue create -t Gap -l decision -b nothing'": "Missing: Question, Options, Acceptance criteria.",
         }
@@ -132,6 +132,13 @@ class GuardCommandTest(unittest.TestCase):
                 with self.subTest(type_label=type_label, section=section):
                     self.assertIn(f"Missing: {section}.", self.decide(f"gh issue create -t T -l {type_label} -b '{without}'"))
 
+    def test_public_forms_require_no_maintainer_section(self):
+        types = template_sections()
+        for type_label in ("bug", "enhancement"):
+            for section in ("Acceptance criteria", "Requested by", "Release"):
+                with self.subTest(type_label=type_label, section=section):
+                    self.assertNotIn(section, types[type_label])
+
 
 def template_sections() -> dict[str, list[str]]:
     spec = importlib.util.spec_from_file_location("guard_command", HOOK)
@@ -152,12 +159,12 @@ BUG = sections(
     "Miri version or commit", "fabf16d4",
     "macOS version and Mac model", "macOS 27.0, MacBook Air M3",
 )
-FEATURE_WITHOUT_SOURCE = sections(
+FEATURE = sections(
     "Problem", "One strip spans both displays.",
     "Proposed behavior", "Each display scrolls its own strip.",
     "Acceptance criteria", "- With two displays, each strip scrolls alone.",
 )
-FEATURE = FEATURE_WITHOUT_SOURCE + "\n\n" + sections("Requested by", "Sam", "Release", "v2")
+FEATURE_WITHOUT_PROPOSAL = FEATURE.replace("Proposed behavior", "Idea")
 TASK = sections(
     "Outcome", "Miri names the missing permission at launch.",
     "Acceptance criteria", "- make test passes.",

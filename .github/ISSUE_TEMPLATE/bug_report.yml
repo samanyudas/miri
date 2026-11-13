@@ -13,7 +13,7 @@ body:
     id: steps
     attributes:
       label: Steps to reproduce
-      description: The steps you ran that show the problem, and the build or commit you ran them on.
+      description: The steps you ran that show the problem.
       placeholder: |
         1. Connect a second display to the right of the built-in display.
         2. Press Control-Option-Command-D.
@@ -33,20 +33,11 @@ body:
       description: Include whether any window became unreachable or off-screen.
     validations:
       required: true
-  - type: textarea
-    id: acceptance
-    attributes:
-      label: Acceptance criteria
-      description: Observable results that show the bug is fixed, and how to check each one. One per line.
-      placeholder: |
-        - Following the steps above, every window stays reachable on the built-in display.
-    validations:
-      required: true
   - type: input
     id: version
     attributes:
       label: Miri version or commit
-      placeholder: The commit you built, such as fabf16d4
+      placeholder: The line at the bottom of the Miri Settings sidebar, such as Version 0.0.1 · Engine 893f906, or the commit you built
     validations:
       required: true
   - type: input

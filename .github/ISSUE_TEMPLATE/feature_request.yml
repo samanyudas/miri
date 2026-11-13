@@ -22,33 +22,6 @@ body:
       label: Proposed behavior
     validations:
       required: true
-  - type: input
-    id: requested-by
-    attributes:
-      label: Requested by
-      description: Who asked for this, or the decision or issue it comes from.
-      placeholder: Sam, or decisions/release-scope.md, or #142
-    validations:
-      required: true
-  - type: dropdown
-    id: release
-    attributes:
-      label: Release
-      options:
-        - v1
-        - v2
-        - Undecided
-    validations:
-      required: true
-  - type: textarea
-    id: acceptance
-    attributes:
-      label: Acceptance criteria
-      description: Observable results that show the feature works. One per line.
-      placeholder: |
-        - With two displays, the strip on each display scrolls independently.
-    validations:
-      required: true
   - type: textarea
     id: alternatives
     attributes:
