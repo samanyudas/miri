@@ -1,0 +1,80 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "linear-gradient": [
+          "srgb:1.00000,1.00000,1.00000,1.00000",
+          "srgb:0.91373,0.92549,0.95294,1.00000"
+        ]
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "srgb:0.21176,0.22745,0.27059,1.00000",
+          "srgb:0.09020,0.09804,0.12157,1.00000"
+        ]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "Windows",
+      "layers": [
+        {
+          "name": "Front window",
+          "image-name-specializations": [
+            {
+              "value": "front-light.svg"
+            },
+            {
+              "appearance": "dark",
+              "value": "front-dark.svg"
+            }
+          ],
+          "glass": false
+        },
+        {
+          "name": "Short rear window",
+          "image-name-specializations": [
+            {
+              "value": "rear-short-light.svg"
+            },
+            {
+              "appearance": "dark",
+              "value": "rear-short-dark.svg"
+            }
+          ],
+          "glass": false
+        },
+        {
+          "name": "Tall rear window",
+          "image-name-specializations": [
+            {
+              "value": "rear-tall-light.svg"
+            },
+            {
+              "appearance": "dark",
+              "value": "rear-tall-dark.svg"
+            }
+          ],
+          "glass": false
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": [
+      "macOS"
+    ]
+  }
+}
