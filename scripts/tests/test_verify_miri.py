@@ -129,6 +129,26 @@ class VerifyMiriTest(unittest.TestCase):
         self.assertIn("Space 3773 row 1 on display 3", differences[0])
         self.assertIn("Space 6 row 1 on display 1", differences[0])
 
+    def test_tabs_of_one_group_count_as_one_column(self):
+        session = {"workspaces": [{"strips": [{"columns": [
+            {"Single": {"window_id": 10}},
+            {"Tabs": [{"window_id": 12}, {"window_id": 11}]},
+        ]}]}]}
+        tabs = self.vm.tab_groups(session)
+        self.assertEqual(tabs, {12: 12, 11: 12})
+        before = self.vm.layout(self.state((6, 1, [(10, 1, False), (12, 1, False), (11, 1, False)])))
+        swapped_tabs = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False), (12, 1, False)])))
+        self.assertEqual(self.vm.layout_differences(before, swapped_tabs, tabs), [])
+        moved_group = self.vm.layout(self.state((6, 1, [(11, 1, False), (12, 1, False), (10, 1, False)])))
+        differences = self.vm.layout_differences(before, moved_group, tabs)
+        self.assertEqual(len(differences), 3, differences)
+        self.assertIn("App10 window 10 was at position 1 of 2", differences[0])
+
+    def test_two_columns_that_trade_places_are_reported(self):
+        before = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False)])))
+        after = self.vm.layout(self.state((6, 1, [(11, 1, False), (10, 1, False)])))
+        self.assertEqual(len(self.vm.layout_differences(before, after, {})), 2)
+
     def test_a_window_in_another_row_or_position_is_reported(self):
         before = self.vm.layout(self.state((6, 1, [(10, 1, False), (11, 1, False), (12, 1, False)])))
         after = self.vm.layout(self.state((6, 1, [(11, 1, False), (10, 1, False)]), (6, 2, [(12, 1, False)])))
