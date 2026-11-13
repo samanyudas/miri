@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-11 on branch `docs/324-closed`, based on `main` at `439249a8`
+Updated: 2026-11-13 on branch `docs/305-closeout-progress`, based on `main` at `cef3d591`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,17 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A keyboard slide that starts late
+
+[#326](https://github.com/samanyudas/miri/issues/326) reported keyboard slides to a Finder column that started up to half a second late, because focusing a window called `AXRaise` on the engine's main loop.
+[paneru#162](https://github.com/samanyudas/paneru/pull/162) queues that raise on the app's window writer, and [paneru#173](https://github.com/samanyudas/paneru/pull/173) gave a pacing test time for it.
+[#453](https://github.com/samanyudas/miri/pull/453) pins both at `189fd9a` and merged as `89db512e`.
+That pin also carries the [#451](https://github.com/samanyudas/miri/issues/451) engine fix that [#452](https://github.com/samanyudas/miri/pull/452) was to pin, and the [#305](https://github.com/samanyudas/miri/issues/305) engine fix [paneru#160](https://github.com/samanyudas/paneru/pull/160).
+On 13 November 2026, verify-miri run `20261113-020643` on `main` started all 10 slides to Finder 76 to 98 ms after the key, and #326 closed.
+Finder's first move still waits behind its own raise, so an app with a much slower raise would still start its own slide late, though the engine keeps drawing.
+
+**Next:** verify #451 on `main`, then close #452 as replaced.
 
 ## An app you switch to while holding the mouse button
 
@@ -33,12 +44,19 @@ All four acceptance criteria are ticked, and #324 closed on 11 November 2026.
 
 [#308](https://github.com/samanyudas/miri/issues/308) reported that desktop shows beside a column while it changes width.
 Row pacing held each column only by its left edge, so a column that widened about its center left its right neighbor free to run ahead.
-[paneru#159](https://github.com/samanyudas/paneru/pull/159), merged as `597afe2`, paces each pair of windows at the edge they share, and this branch pins it.
-On verify-miri run `20261111-020017`, widening from 665 to 1012 points opened 47 to 77 points of desktop on all 6 presses on `main`, and none past the 8 point rest gap on the fix.
-Narrowing from the largest preset to the smallest still opens 101 to 136 points with the fix, against 148 to 254 on `main`, because the narrowing column's right edge runs ahead of its right neighbor.
-Sam chose on 11 November 2026 to ship the widening fix first and to hold the narrowing column's width in the next PR for #308, so #308 stays open.
+[paneru#159](https://github.com/samanyudas/paneru/pull/159), merged as `597afe2`, paces each pair of windows at the edge they share, which fixed widening.
+[paneru#170](https://github.com/samanyudas/paneru/pull/170) holds the width of a column that narrows ahead of its right neighbor, moves a narrowing write before its size, and holds no width when animation is off.
+On verify-miri run `20261112-193442`, narrowing from 1522 points opened 156 to 240 points of desktop on all 6 presses on `main`, and none past the 8 point rest gap with the fix.
+Widening and strip scrolls stayed at rest on both builds, and with animation off each width change took one step.
+With animation off, 1 of 3 narrowing presses on the fix still showed 442 points for one window-server read, against 518 points on 2 of 3 on `main`. It is not filed.
 
-**Next:** verify widening on the landed `main`, then build the width hold for narrowing with a failing engine test first.
+[#448](https://github.com/samanyudas/miri/pull/448) pinned paneru#170 and merged as `c6b01293`.
+On verify-miri run `20261112-225201` on that `main`, narrowing showed no gap past 8 points on 6 of 6 presses, against 136 to 260 points on `68d9b1e9`.
+Widening and strip scrolls stayed at rest, and with animation off each width change took one step.
+With Reduce Motion on, run `20261112-223804` showed one step on 6 of 6 presses.
+A right neighbor that applies its move 0.3 s late no longer opens desktop while it is on screen (run `20261112-222348`).
+The one-read gap with animation off came back at 552 points on 1 of 3 presses in each run. It is not filed.
+All four acceptance criteria are ticked, and #308 is closed.
 
 ## Karabiner-Elements and Hyper key chords
 
@@ -79,6 +97,22 @@ On `main` `3e5523ac`, `verify-miri` runs `20261110-181524`, `20261110-182323`, a
 CI's `make engine-test` on the same pin passed the new test `drag::a_busy_apps_window_sliding_back_after_a_drop_stays_in_its_column`, which fails before the fix.
 Both acceptance criteria are ticked, and #377 closed on 11 November 2026.
 
+## New windows at half the display width
+
+[#305](https://github.com/samanyudas/miri/issues/305) closed on 13 November 2026 after `verify-miri` run `20261113-023408` on `main` at `cef3d591`, engine `189fd9a`.
+[paneru#160](https://github.com/samanyudas/paneru/pull/160), merged as `d5eff6e`, adds the engine option `[options].new_window_width`, and [#455](https://github.com/samanyudas/miri/pull/455) makes Miri write `0.5` when the key is absent.
+A window that opens while the engine runs starts at that share of its display's width.
+Windows found at startup, windows in `LaunchWindows` that a scan finds late, and windows that session restore places keep their widths.
+A `[windows]` rule's `width` wins over the option.
+A new window joins the active display's strip, so the active display is the window's own display, as Sam chose on 11 November 2026.
+A window that session restore can match only by a title that arrives late keeps its own width until restore places it.
+If the startup grace period ends without a match, it gets the new width then, unless a width rule, the user, or a native tab group gave it its width.
+On `main`, a new fixture tiled at 1280 of 2560 points, a background fixture on the external display joined the built-in strip at 1024 of 2048 points, and a 900-point fixture opened with Miri quit kept 900 after launch and after a relaunch.
+The late-title window went 380 then its saved 1676, and an untitled window that matched nothing kept 380 until the grace period ended, then took 1272.
+In that run, `verify-miri end` found System Settings at the end of the external display's strip.
+The agent moved it back between Notes and Notion with `send-cmd`, but its fixed-width pane stays 748 points against the 2040 that `begin` recorded.
+The cause is not known, and Sam decides whether the layout stands.
+
 ## A new window wider than its display
 
 [#410](https://github.com/samanyudas/miri/issues/410) closed on 10 November 2026 after `verify-miri` run `20261110-180854` on `main` at `547f9777`, engine `578e228`.
@@ -86,7 +120,8 @@ T3 Code relaunched after an update 2560 points wide, and the engine had put it i
 [paneru#157](https://github.com/samanyudas/paneru/pull/157), pinned by [#412](https://github.com/samanyudas/miri/pull/412), narrows a new window that joins the active strip to the tiling area.
 [#411](https://github.com/samanyudas/miri/pull/411) added `V fixture --width --display --background` and the [new window width](.claude/skills/verify-miri/features/new-window-width.md) recipe.
 Sam relaunched T3 Code on the fix build, and it fit the built-in display.
-Not narrowed: a window that joins the strip after the above-ordinary level check in `recheck_window_level`, and a window that opens during a cross-display focus handoff, which can get the previous display's limit. Neither was observed.
+Not narrowed: a window that opens during a cross-display focus handoff, which can get the previous display's limit. It was not observed.
+Since paneru#160, a window that joins the strip after the above-ordinary level check in `recheck_window_level` is narrowed too.
 
 ## Bug reports, shortcut illustrations, and localization
 

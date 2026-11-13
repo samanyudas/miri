@@ -331,10 +331,23 @@ struct OrphanedEnginesTests {
             try await Task.sleep(for: .milliseconds(20))
             found = OrphanedEngines.find(executableName: name)
         }
-        #expect(found == [orphan])
+        #expect(found == [orphan], "\(Self.describe(orphan))")
         OrphanedEngines.stop([orphan], timeout: .milliseconds(200))
         #expect(kill(orphan, 0) == -1)
         #expect(OrphanedEngines.find(executableName: name).isEmpty)
+    }
+
+    /// What `find` reads about `pid`, so a failure shows which of its checks the process did not pass.
+    private static func describe(_ pid: pid_t) -> String {
+        let alive = kill(pid, 0) == 0 ? "alive" : "gone (errno \(errno))"
+        var info = proc_bsdinfo()
+        let size = Int32(MemoryLayout<proc_bsdinfo>.size)
+        let parent = proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &info, size) == size ? "\(info.pbi_ppid)" : "unreadable"
+        var buffer = [CChar](repeating: 0, count: 4 * Int(MAXPATHLEN))
+        let path =
+            proc_pidpath(pid, &buffer, UInt32(buffer.count)) > 0
+            ? String(decoding: buffer.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }, as: UTF8.self) : "unreadable"
+        return "process \(pid) is \(alive), parent \(parent), path \(path)"
     }
 
     @Test func leavesAnEngineThatStillHasItsApp() throws {

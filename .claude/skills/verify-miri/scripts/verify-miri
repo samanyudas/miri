@@ -291,6 +291,24 @@ def display_windows(state: dict, display: int) -> list[dict]:
     return list(found.values())
 
 
+# How long `end` lets a restored build settle before it reports a window that is not where it was at `begin`. A slow
+# app, such as Helium, can still be taking its restored width when the build reports the restore applied.
+LAYOUT_SETTLE_SECONDS = 3.0
+
+
+def settled_layout_differences(before: list[dict], read, timeout: float = LAYOUT_SETTLE_SECONDS,
+                               step: float = 0.5) -> tuple[list[dict], list[str]]:
+    """Reads the layout with `read` until it matches `before` or `timeout` passes, and returns the last layout read
+    and its differences from `before`."""
+    deadline = time.monotonic() + timeout
+    while True:
+        after = read()
+        differences = layout_differences(before, after)
+        if not differences or time.monotonic() >= deadline:
+            return after, differences
+        time.sleep(step)
+
+
 # How far a window's width may differ from `begin`, for rounding between the engine's frames.
 WIDTH_TOLERANCE = 2
 
@@ -617,12 +635,11 @@ def cmd_end(args) -> int:
     if back and recorded.exists():
         before_layout = json.loads(recorded.read_text())
         try:
-            after_layout = layout(query("state", back))
+            after_layout, differences = settled_layout_differences(before_layout, lambda: layout(query("state", back)))
         except Failure as error:
             log(run, f"PROBLEM: could not read the restored build's strips: {error}. The lock and the run record stay. "
                      "Run `verify-miri end --owner` with this run's owner again.")
             return 1
-        differences = layout_differences(before_layout, after_layout)
         present = {w["window_id"] for w in after_layout}
         gone = [f"{w['app']} window {w['window_id']}" for w in before_layout if w["window_id"] not in present]
         if gone:

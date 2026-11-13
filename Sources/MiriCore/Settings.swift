@@ -6,6 +6,9 @@ public struct MiriSettings: Equatable, Sendable {
     public static let presetCountRange = 1...10
     /// The engine's exponential ease-out rate when animation is on. Unset in the engine means instant movement.
     public static let animationSpeed = 14.0
+    /// The share of the display width a window that opens while the engine runs starts at. Windows open when the
+    /// engine starts keep their widths.
+    public static let newWindowWidth = 0.5
     public static let gapRuleName = "miri-gaps"
     public static let floatingRuleName = "miri-settings"
 
@@ -165,6 +168,9 @@ public struct MiriSettings: Equatable, Sendable {
             }
         } else {
             try edit(nil) { try result.removing(table: ["options"], key: "animation_speed") }
+        }
+        if result.value(at: ["options", "new_window_width"]) == nil {
+            try set(.float(Self.newWindowWidth), ["options"], "new_window_width")
         }
         for side in ["top", "right", "bottom", "left"] {
             try set(.integer(Int64(edgePadding)), ["padding"], side)
