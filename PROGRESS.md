@@ -20,6 +20,7 @@ The public release path and the complete acceptance runs follow.
 While the app is hidden, its window reads as `AXDialog`, the engine lists a new app's windows only for 10 seconds after launch, and the show sends no `AXCreated`.
 [paneru#176](https://github.com/samanyudas/paneru/pull/176) gives a shown app the same 10 second listing watch as a launch, and merged as `2cd1efa`, which [#461](https://github.com/samanyudas/miri/pull/461) pins.
 Verify-miri run `20261113-143031` on `main` at `10246741` left the window untiled after shows at 20 and 60 seconds, and run `20261113-143150` on the fix tiled it 0.27 and 0.36 seconds after the show.
+On the pinned build, two of ten windows shown after 60 seconds took about 2 seconds to tile. The debug log of one shows the engine heard of the show about 1.9 seconds late, then tiled the window at its next check. In run `20261113-164649`, five more such windows tiled 0.17 to 0.32 seconds after they appeared on screen.
 A fixture app launched hidden and never shown took no column in both runs.
 An app hidden with Command-H that opens a window while hidden already tiled on `main` when shown, in run `20261113-154640`.
 Next: after #461 merges, check the three hidden-launch cases on `main` and close #431.
