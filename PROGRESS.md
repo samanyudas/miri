@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-13 on branch `docs/305-closeout-progress`, based on `main` at `cef3d591`
+Updated: 2026-11-13 on branch `t3/hidden-app-window-tiling`, based on `main` at `10246741`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,15 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A window of an app that launched hidden
+
+[#431](https://github.com/samanyudas/miri/issues/431) reported that a window of an app that launches hidden never tiles when you show the app more than 10 seconds later.
+While the app is hidden, its window reads as `AXDialog`, the engine lists a new app's windows only for 10 seconds after launch, and the show sends no `AXCreated`.
+[paneru#176](https://github.com/samanyudas/paneru/pull/176) gives a shown app the same 10 second listing watch as a launch, and awaits Sam's merge.
+Verify-miri run `20261113-143031` on `main` at `10246741` left the window untiled after shows at 20 and 60 seconds, and run `20261113-143150` on the fix tiled it 0.27 and 0.36 seconds after the show.
+A fixture app launched hidden and never shown took no column in both runs.
+Next: after paneru#176 merges, pin its merge commit in this branch's PR, then close #431 after a check on `main`.
 
 ## A keyboard slide that starts late
 
