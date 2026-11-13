@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-14 on branch `fix/451-tucked-photo-pin`, based on `main` at `163b6f0b`
+Updated: 2026-11-14 on branch `docs/451-closeout`, based on `main` at `1dde3624`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -20,12 +20,15 @@ The public release path and the complete acceptance runs follow.
 [paneru#171](https://github.com/samanyudas/paneru/pull/171), [#172](https://github.com/samanyudas/paneru/pull/172), [#174](https://github.com/samanyudas/paneru/pull/174) and [#178](https://github.com/samanyudas/paneru/pull/178) photograph a window before it tucks, and `main` pins all four.
 A tucked window's picture still never changed, because every photo of a tucked window came back blank.
 The engine set a ScreenCaptureKit source rectangle, which leaves out the part of a window off screen.
-[paneru#181](https://github.com/samanyudas/paneru/pull/181) removes it, and this branch pins its merge `e5ccc47`.
+[paneru#181](https://github.com/samanyudas/paneru/pull/181) removes it, and [#477](https://github.com/samanyudas/miri/pull/477) pins its merge `e5ccc47` and merged as `1dde3624`.
 Live, a tucked test window gave 6 blank photos of 6 and 1 distinct edge picture in 5 screenshots on `main` `f33a40fb`, and 0 blank of 8, 7 repaints and 5 distinct pictures with the fix.
 A Chromium browser such as Helium stops drawing a window it treats as hidden, so its tucked picture stays still even with the fix.
 Sam decides separately whether to try a browser launch flag.
+On 14 November 2026, on `main` at `1dde3624`, the colour-switch probe showed the new colour at the edge 0.15 to 0.16 s after the window left the screen in 4 of 4 trials (verify-miri run `20261114-031723`).
+The same build gave a test window tucked beside the edge 7 photos, none blank, and 7 repaints in about 13 s (run `20261114-031518`), and #451 closed.
+`docs/limitations.md` now names the Helium behaviour.
 
-**Next:** after this pin merges, verify on `main`, and close [#451](https://github.com/samanyudas/miri/issues/451) with the browser behaviour in `docs/limitations.md`.
+**Next:** nothing for #451.
 
 ## An app icon that follows Light and Dark
 
@@ -82,7 +85,7 @@ That pin also carries the [#451](https://github.com/samanyudas/miri/issues/451) 
 On 13 November 2026, verify-miri run `20261113-020643` on `main` started all 10 slides to Finder 76 to 98 ms after the key, and #326 closed.
 Finder's first move still waits behind its own raise, so an app with a much slower raise would still start its own slide late, though the engine keeps drawing.
 
-**Next:** verify #451 on `main`, then close #452 as replaced.
+**Next:** nothing. #451 closed on 14 November 2026 after its check on `main` at `1dde3624`, and #452 merged.
 
 ## An app you switch to while holding the mouse button
 
