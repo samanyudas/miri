@@ -101,11 +101,11 @@ Both acceptance criteria are ticked, and #377 closed on 11 November 2026.
 
 [#460](https://github.com/samanyudas/miri/issues/460) reported that two new columns at `new_window_width = 0.5` overflowed the tiling area, so the left one ran past the display edge.
 The engine took the new column's share of the full display width, while the width presets and a display move take theirs of the tiling area inside the padding.
-[paneru#175](https://github.com/samanyudas/paneru/pull/175) at `07111f0` takes the new column's share of the tiling area, and `decisions/` now says so.
+[paneru#175](https://github.com/samanyudas/paneru/pull/175), merged as `7ade747`, takes the new column's share of the tiling area, and `decisions/` now says so.
 On `main` `10246741`, `verify-miri` run `20261113-141746` gave two 1280-point columns on the 27-inch display, two 1024-point columns on the built-in display, and two 1281-point columns after a move to the 27-inch display.
 On the fix build, run `20261113-142913` gave 1276, 1020, and 1276 points, each pair filling its tiling area to the point.
 
-**Next:** after Sam merges paneru#175, pin its merge commit on `fix/460-new-column-tiling-share`, open the Miri PR, then verify on `main` and close #460.
+**Next:** after Sam merges the Miri pin PR, verify on `main` and close #460.
 
 ## New windows at half the display width
 
