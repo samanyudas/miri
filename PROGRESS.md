@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-13 on branch `t3/hidden-app-window-tiling`, based on `main` at `10246741`
+Updated: 2026-11-13 on branch `fix/431-hidden-launch`, based on `main` at `7032dd5f`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -18,10 +18,11 @@ The public release path and the complete acceptance runs follow.
 
 [#431](https://github.com/samanyudas/miri/issues/431) reported that a window of an app that launches hidden never tiles when you show the app more than 10 seconds later.
 While the app is hidden, its window reads as `AXDialog`, the engine lists a new app's windows only for 10 seconds after launch, and the show sends no `AXCreated`.
-[paneru#176](https://github.com/samanyudas/paneru/pull/176) gives a shown app the same 10 second listing watch as a launch, and awaits Sam's merge.
+[paneru#176](https://github.com/samanyudas/paneru/pull/176) gives a shown app the same 10 second listing watch as a launch, and merged as `2cd1efa`, which [#461](https://github.com/samanyudas/miri/pull/461) pins.
 Verify-miri run `20261113-143031` on `main` at `10246741` left the window untiled after shows at 20 and 60 seconds, and run `20261113-143150` on the fix tiled it 0.27 and 0.36 seconds after the show.
 A fixture app launched hidden and never shown took no column in both runs.
-Next: after paneru#176 merges, pin its merge commit in this branch's PR, then close #431 after a check on `main`.
+An app hidden with Command-H that opens a window while hidden already tiled on `main` when shown, in run `20261113-154640`.
+Next: after #461 merges, check the three hidden-launch cases on `main` and close #431.
 
 ## A keyboard slide that starts late
 
@@ -105,6 +106,16 @@ Sam chose to track the wider column as [#414](https://github.com/samanyudas/miri
 On `main` `3e5523ac`, `verify-miri` runs `20261110-181524`, `20261110-182323`, and `20261111-002842` dragged T3 Code below the display 40 times at a load average of 10.4 to 15.9, and all 40 drops ended at the slot at the column's width.
 CI's `make engine-test` on the same pin passed the new test `drag::a_busy_apps_window_sliding_back_after_a_drop_stays_in_its_column`, which fails before the fix.
 Both acceptance criteria are ticked, and #377 closed on 11 November 2026.
+
+## Two half-width columns that do not fit
+
+[#460](https://github.com/samanyudas/miri/issues/460) reported that two new columns at `new_window_width = 0.5` overflowed the tiling area, so the left one ran past the display edge.
+The engine took the new column's share of the full display width, while the width presets and a display move take theirs of the tiling area inside the padding.
+[paneru#175](https://github.com/samanyudas/paneru/pull/175), merged as `7ade747`, takes the new column's share of the tiling area, and `decisions/` now says so.
+On `main` `10246741`, `verify-miri` run `20261113-141746` gave two 1280-point columns on the 27-inch display, two 1024-point columns on the built-in display, and two 1281-point columns after a move to the 27-inch display.
+On the fix build, run `20261113-142913` gave 1276, 1020, and 1276 points, each pair filling its tiling area to the point.
+
+**Next:** after Sam merges the Miri pin PR, verify on `main` and close #460.
 
 ## New windows at half the display width
 

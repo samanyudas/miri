@@ -69,7 +69,8 @@ Actions it does not cover have no default shortcut, because Paneru's default con
 Default width presets are `[0.25, 0.33, 0.5, 0.66, 0.75]`, and the inner and outer gaps are 8 points each.
 The width preset list uses Paneru's `[options].preset_column_widths` key.
 Miri writes half the inner gap as per-window padding and the rest of the outer gap as display padding.
-New windows start at 50% of display width, and existing windows retain their widths.
+New windows start at 50% of the display's tiling area, as wide as the 50% width preset, so two new windows fit side by side.
+Existing windows retain their widths.
 Each width or height adjustment changes the size by five percentage points of the display's corresponding dimension, subject to window size constraints.
 
 ### Startup and crash recovery

@@ -24,7 +24,7 @@ The native app is implemented, but no complete acceptance run has passed.
   The other windows of its old stack stay in place.
   Each further press moves the window one more column in that direction.
   In the first or last column, the command does nothing.
-- New windows start at 50% of display width, while existing windows retain their widths.
+- New windows start at 50% of the display's tiling area, as wide as the 50% width preset, while existing windows retain their widths.
 - Resize commands change size by five percentage points of the display's corresponding dimension, subject to window size constraints.
 - Control-Option-Command with an arrow focuses the neighboring display in that direction at once, from any column of the strip.
   Adding Shift with Up or Down moves the focused column to the display above or below.
