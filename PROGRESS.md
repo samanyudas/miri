@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-13 on branch `fix/464-rule-width-pin`, based on `main` at `5bb8ff25`
+Updated: 2026-11-13 on branch `feat/app-icon-appearance`, based on `main` at `f33a40fb`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,15 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## An app icon that follows Light and Dark
+
+[#475](https://github.com/samanyudas/miri/issues/475) makes the app icon follow the macOS icon style.
+Sam approved the Dark design on the Doop canvas "Miri app icon" on 13 November 2026.
+`assets/AppIcon.icon` (blue) and `assets/AppIcon-Developer.icon` (yellow) are Icon Composer files with Light and Dark artwork for each of three window layers.
+`scripts/build-app.sh` now compiles the Developer icon with `actool` into `Assets.car` and an `.icns` fallback, and sets `CFBundleIconName`.
+IconServices on macOS 27.0.1 returned the Light icon for the Light appearance and the graphite Dark icon for the Dark appearance from the built bundle.
+Next: Sam checks Finder and the Dock with the Dark and tinted icon styles, and the macOS 15 VM shows the icon.
 
 ## A window rule's width that does not fit
 

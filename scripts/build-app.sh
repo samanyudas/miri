@@ -30,33 +30,20 @@ bin=$(swift build --show-bin-path)
 bundle="$PWD/.build/app/Miri Developer.app"
 rm -rf "$bundle"
 mkdir -p "$bundle/Contents/MacOS" "$bundle/Contents/Helpers" "$bundle/Contents/Resources"
-iconset="$PWD/.build/app/AppIcon.iconset"
-icon="$PWD/.build/app/AppIcon.svg"
-rm -rf "$iconset"
-mkdir "$iconset"
-# Miri Developer draws the mark in yellow so it never passes for the released Miri, which keeps the blue icon.svg.
-# Each yellow sits 35% of the way from its blue's OKLCH lightness to white, which keeps the gradients visible.
-# Pale yellow rear windows blend together on the white tile, so the taller one gets lighter and the shorter one more solid.
-cp assets/icon.svg "$icon"
-while read -r from to; do
-    grep -q "$from" "$icon" || { echo "assets/icon.svg no longer contains $from. Update the Developer icon swaps in $0." >&2; exit 1; }
-    sed -i '' "s/$from/$to/g" "$icon"
-done <<'SWAPS'
-#A9D0FF #ECE191
-#5F95FA #DEB70B
-#5A63F2 #D69A09
-#C4DCFF #F4E8B1
-#B7B1F6 #FFC68A
-#3446C8 #B68806
-opacity="0.62" opacity="0.4"
-opacity="0.5" opacity="0.9"
-SWAPS
-for size in 16 32 128 256 512; do
-    sips -s format png -z "$size" "$size" "$icon" --out "$iconset/icon_${size}x${size}.png" >/dev/null
-    sips -s format png -z $((size * 2)) $((size * 2)) "$icon" --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
-done
-iconutil -c icns "$iconset" -o "$bundle/Contents/Resources/AppIcon.icns"
-rm -rf "$iconset" "$icon"
+# Miri Developer uses the yellow icon so it never passes for the released Miri, which uses the blue AppIcon.icon.
+# actool compiles the Icon Composer file into Assets.car, which holds the Light, Dark, and tinted icons, and an .icns fallback.
+icon_name=AppIcon-Developer
+icon_log="$PWD/.build/app/actool.log"
+xcrun actool "assets/$icon_name.icon" --compile "$bundle/Contents/Resources" --app-icon "$icon_name" \
+    --platform macosx --target-device mac --minimum-deployment-target 15.0 --enable-on-demand-resources NO \
+    --output-partial-info-plist "$PWD/.build/app/icon-info.plist" >"$icon_log" 2>&1 || {
+    cat "$icon_log" >&2
+    exit 1
+}
+[[ -s "$bundle/Contents/Resources/Assets.car" && -s "$bundle/Contents/Resources/$icon_name.icns" ]] || {
+    echo "actool did not write Assets.car and $icon_name.icns. See $icon_log." >&2
+    exit 1
+}
 cp assets/menubar-icon.svg assets/menubar-icon-stopped.svg "$bundle/Contents/Resources/"
 cp "$bin/Miri" "$bundle/Contents/MacOS/Miri"
 cp vendor/paneru/target/debug/paneru "$bundle/Contents/Helpers/miri-engine"
@@ -88,7 +75,8 @@ cat > "$bundle/Contents/Info.plist" <<PLIST
 <key>CFBundleIdentifier</key><string>io.github.samanyudas.miri.dev</string>
 <key>CFBundleName</key><string>Miri Developer</string>
 <key>CFBundleDisplayName</key><string>Miri Developer</string>
-<key>CFBundleIconFile</key><string>AppIcon</string>
+<key>CFBundleIconFile</key><string>$icon_name</string>
+<key>CFBundleIconName</key><string>$icon_name</string>
 <key>CFBundleExecutable</key><string>Miri</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleVersion</key><string>1</string>
