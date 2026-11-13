@@ -758,7 +758,8 @@ def cmd_fixture(args) -> int:
         name = f"fixture-{len(run['fixtures']) + 1}"
         ready = folder / f"{name}.pid"
         bundle = fixture_bundle(binary, folder, name)
-        options = ["--ready-file", str(ready), "--label", name] + ([] if args.background else ["--activate"])
+        quiet = args.background or args.hidden
+        options = ["--ready-file", str(ready), "--label", name] + ([] if quiet else ["--activate"])
         options += [] if args.fixed else ["--resizable"]
         if args.min_height:
             options += ["--min-height", str(args.min_height)]
@@ -766,7 +767,8 @@ def cmd_fixture(args) -> int:
             options += ["--width", str(args.width)]
         if args.display:
             options += ["--display", str(args.display)]
-        subprocess.run(["open", "-n", *(["-g"] if args.background else []), str(bundle), "--args", *options], check=True)
+        launch = ["-j"] if args.hidden else ["-g"] if args.background else []
+        subprocess.run(["open", "-n", *launch, str(bundle), "--args", *options], check=True)
         if not wait(ready.exists, 10, 0.05):
             raise Failure(f"{name} did not start")
         pid = int(ready.read_text())
@@ -774,22 +776,59 @@ def cmd_fixture(args) -> int:
         run["fixtures"].append(item)
         save_run(run)
 
-        def window_id():
-            rows = [line.split()[0] for line in tool("axdo", str(pid), "windows").splitlines()
-                    if f"title={FIXTURE_TITLE}" in line]
-            return int(rows[0]) if rows else None
-
-        item["window_id"] = wait(window_id, 5)
-
-        def managed():
-            return any(w["window_id"] == item["window_id"] for w in fixture_windows(run, query("state", run["test_pid"])))
-
-        seen = wait(managed, 5, 0.2)
         save_run(run)
-        log(run, f"opened {name}: pid {pid}, window {item['window_id']}, "
-                 f"{'the engine manages it' if seen else 'NOT in the engine state after 5 s'}")
+        if args.hidden:
+            log(run, f"opened {name} hidden: pid {pid}. Its window has no number until `show`, as it is off screen")
+        else:
+            item["window_id"] = wait(lambda: fixture_window_id(pid), 5)
+            save_run(run)
+            seen = wait(lambda: any(w["window_id"] == item["window_id"]
+                                    for w in fixture_windows(run, query("state", run["test_pid"]))), 5, 0.2)
+            log(run, f"opened {name}: pid {pid}, window {item['window_id']}, "
+                     f"{'the engine manages it' if seen else 'NOT in the engine state after 5 s'}")
         time.sleep(args.settle)
     return 0
+
+
+def fixture_window_id(pid: int) -> int | None:
+    rows = [line.split()[0] for line in tool("axdo", str(pid), "windows").splitlines()
+            if f"title={FIXTURE_TITLE}" in line]
+    return int(rows[0]) if rows else None
+
+
+def tiled(run: dict, item: dict) -> bool:
+    rows = fixture_windows(run, query("state", run["test_pid"]))
+    return any(w["window_id"] == item["window_id"] and not w["floating"] for w in rows)
+
+
+def cmd_show(args) -> int:
+    """Show a hidden fixture app, as a click on its Dock icon does, and time how long its window takes to tile."""
+    run = load_run()
+    test_pid(run)
+    item = next((f for f in run.get("fixtures", []) if f["name"] == args.name), None)
+    if item is None:
+        raise Failure(f"No fixture named {args.name} in this run.")
+    start = time.monotonic()
+    tool("axdo", "unhide", str(item["pid"]))
+
+    on_screen = None
+
+    def tiled_after():
+        nonlocal on_screen
+        if on_screen is None and (number := fixture_window_id(item["pid"])):
+            item["window_id"] = number
+            on_screen = time.monotonic() - start
+        return item["window_id"] and tiled(run, item) and time.monotonic() - start
+
+    took = wait(tiled_after, args.timeout, 0.05)
+    save_run(run)
+    seen = "never on screen" if on_screen is None else f"on screen {on_screen:.2f} s after the show"
+    if took and took <= args.timeout:
+        log(run, f"showed {args.name}: its window {item['window_id']} was {seen}, and tiled {took:.2f} s after the show")
+        return 0
+    log(run, f"showed {args.name}: its window {item['window_id']} was {seen}, and did NOT tile within "
+             f"{args.timeout:g} s of the show")
+    return 1
 
 
 def parse_chord(chord: str) -> tuple[int, int]:
@@ -1064,7 +1103,14 @@ def main() -> int:
     p.add_argument("--display", type=int, help="the display ID whose top left the window opens at")
     p.add_argument("--background", action="store_true",
                    help="opens without taking focus, as an app that an updater relaunches does")
+    p.add_argument("--hidden", action="store_true",
+                   help="opens the app hidden, as a login item set to hide does. `show` shows it")
     p.set_defaults(func=cmd_fixture)
+    p = sub.add_parser("show", help="show a hidden fixture app, as a click on its Dock icon does. "
+                                    "Exit 1 unless its window tiles within --timeout seconds")
+    p.add_argument("name", help="the fixture, such as fixture-1")
+    p.add_argument("--timeout", type=float, default=2)
+    p.set_defaults(func=cmd_show)
     p = sub.add_parser("key", help='press a chord in Miri\'s format, such as "ctrl+alt-leftarrow"')
     p.add_argument("chord")
     p.set_defaults(func=cmd_key)
