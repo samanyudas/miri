@@ -6,6 +6,7 @@ on:
   pull_request:
     paths:
       - .github/workflows/release.yml
+      - Makefile
       - scripts/build-app.sh
       - scripts/package-dmg.sh
       - scripts/test-permission-prototype.sh

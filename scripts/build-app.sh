@@ -14,14 +14,12 @@ fi
 if $release; then
     name=Miri
     app_id=io.github.samanyudas.miri
-    profile=release
-    features=(--no-default-features)
+    engine_flags=(--release --no-default-features)
     engine_build=vendor/paneru/target/release/paneru
 else
     name="Miri Developer"
     app_id=io.github.samanyudas.miri.dev
-    profile=dev
-    features=(--no-default-features --features miri-developer)
+    engine_flags=(--no-default-features --features miri-developer)
     engine_build=vendor/paneru/target/debug/paneru
 fi
 [[ "$(uname -m)" == arm64 ]] || { echo "This prototype requires an arm64 Mac." >&2; exit 1; }
@@ -40,8 +38,9 @@ fi
 # Without -isysroot it records the minimum macOS version as the SDK, and newer macOS then runs Miri in a compatibility mode.
 sdk=$(xcrun --sdk macosx --show-sdk-path)
 swift build -Xswiftc -Xclang-linker -Xswiftc -isysroot -Xswiftc -Xclang-linker -Xswiftc "$sdk"
+echo "Engine: cargo build --locked --bin paneru ${engine_flags[*]}"
 env -u CARGO_BUILD_TARGET cargo build --manifest-path vendor/paneru/Cargo.toml \
-    --target-dir "$PWD/vendor/paneru/target" --locked --bin paneru --profile "$profile" "${features[@]}"
+    --target-dir "$PWD/vendor/paneru/target" --locked --bin paneru "${engine_flags[@]}"
 bin=$(swift build --show-bin-path)
 bundle="$PWD/.build/app/$name.app"
 rm -rf "$bundle"
@@ -133,7 +132,7 @@ if [[ "$identity" == - ]] && ! $release; then
     echo "Signed ad-hoc. Run scripts/setup-signing.sh to keep the Accessibility grant across rebuilds."
 fi
 # The bundled digest is the selftest provenance engineSHA256, which hashes the engine after signing.
-printf 'Engine profile %s, features %s, built %s, bundled %s\n' "$profile" "${features[*]}" \
+printf 'Engine %s from %s, built %s, bundled %s\n' "${engine_flags[*]}" "$engine_build" \
     "$(shasum -a 256 "$engine_build" | cut -d ' ' -f 1)" \
     "$(shasum -a 256 "$bundle/Contents/Helpers/miri-engine" | cut -d ' ' -f 1)"
 printf 'Built %s\nEngine source %s\nSigned with %s\n' "$bundle" "$revision" "$identity"
