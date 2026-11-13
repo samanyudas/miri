@@ -773,16 +773,23 @@ def cmd_show(args) -> int:
     start = time.monotonic()
     tool("axdo", "unhide", str(item["pid"]))
 
+    on_screen = None
+
     def tiled_after():
-        item["window_id"] = item["window_id"] or fixture_window_id(item["pid"])
+        nonlocal on_screen
+        if not item["window_id"]:
+            item["window_id"] = fixture_window_id(item["pid"])
+            on_screen = item["window_id"] and time.monotonic() - start
         return item["window_id"] and tiled(run, item) and time.monotonic() - start
 
     took = wait(tiled_after, args.timeout, 0.05)
     save_run(run)
+    seen = f"on screen {on_screen:.2f} s after the show" if on_screen else "never on screen"
     if took and took <= args.timeout:
-        log(run, f"showed {args.name}: its window {item['window_id']} tiled {took:.2f} s after the show")
+        log(run, f"showed {args.name}: its window {item['window_id']} was {seen}, and tiled {took:.2f} s after the show")
         return 0
-    log(run, f"showed {args.name}: its window {item['window_id']} did NOT tile within {args.timeout:g} s of the show")
+    log(run, f"showed {args.name}: its window {item['window_id']} was {seen}, and did NOT tile within "
+             f"{args.timeout:g} s of the show")
     return 1
 
 
