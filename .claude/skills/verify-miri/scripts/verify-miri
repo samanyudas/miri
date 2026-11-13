@@ -777,14 +777,14 @@ def cmd_show(args) -> int:
 
     def tiled_after():
         nonlocal on_screen
-        if not item["window_id"]:
-            item["window_id"] = fixture_window_id(item["pid"])
-            on_screen = item["window_id"] and time.monotonic() - start
+        if on_screen is None and (number := fixture_window_id(item["pid"])):
+            item["window_id"] = number
+            on_screen = time.monotonic() - start
         return item["window_id"] and tiled(run, item) and time.monotonic() - start
 
     took = wait(tiled_after, args.timeout, 0.05)
     save_run(run)
-    seen = f"on screen {on_screen:.2f} s after the show" if on_screen else "never on screen"
+    seen = "never on screen" if on_screen is None else f"on screen {on_screen:.2f} s after the show"
     if took and took <= args.timeout:
         log(run, f"showed {args.name}: its window {item['window_id']} was {seen}, and tiled {took:.2f} s after the show")
         return 0
