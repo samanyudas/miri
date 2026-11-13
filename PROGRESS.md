@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-13 on branch `build/395-release-engine`, based on `main` at `5bb8ff25`
+Updated: 2026-11-13 on branch `build/395-release-engine`, based on `main` at `f33a40fb`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -22,6 +22,19 @@ The `Release candidate` workflow runs it on demand and on pull requests that cha
 The release bundle is signed ad-hoc, because Developer ID signing and notarization belong to [#82](https://github.com/samanyudas/miri/issues/82).
 The Swift app in both bundles is still a debug build.
 Next: Sam merges the PR, then an agent runs the workflow on `main` and closes #395.
+
+## A window rule's width that does not fit
+
+[#464](https://github.com/samanyudas/miri/issues/464) reported that two windows under a `[windows]` rule with `width = 0.5` overflowed the tiling area, as #460 did for `new_window_width`.
+A rule's width took its share of the full display width, `complement_focused` took the focused window's share of it, and a floated window tiled again lost the padding twice.
+[paneru#179](https://github.com/samanyudas/paneru/pull/179), merged as `dbd9652`, sizes all three from the tiling area, as the preset widths are.
+It also makes an upstream test run its assertions, which it skipped because its verifier came after the last command.
+On `main` `366256cf`, `verify-miri` run `20261113-171016` gave 1280 and 1024 points per column with the rule.
+On the fix build, runs `20261113-172803` and `20261113-172947` gave 1276 and 1020, each pair filling its tiling area.
+
+The pin also carries [paneru#178](https://github.com/samanyudas/paneru/pull/178), which merged before it on `miri/v0.5.2`.
+
+**Next:** after Sam merges the Miri pin PR, verify on `main` and close #464.
 
 ## A window of an app that launched hidden
 
