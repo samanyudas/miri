@@ -8,6 +8,7 @@ A window that the user widens past the display afterwards keeps that width and p
 
 - `wider-than-display`: a window that opens wider than the tiling area, as an app that remembers its size from a larger display does, gets the tiling area's width.
 - `background-open`: a window that opens on another display without taking focus, as after an updater relaunch, joins the active display's strip and gets that display's limit.
+- `half-width`: with `new_window_width = 0.5`, a new column is as wide as the 0.5 width preset, half the tiling area, so two new columns fill it side by side ([#460](https://github.com/samanyudas/miri/issues/460)).
 
 ## How to get to it (user POV)
 
@@ -24,6 +25,9 @@ Preconditions:
 - **Open a wide window in the background.** Run `V fixture --width 2560 --display <wider display ID> --background`, then `V snapshot after-open`. The fixture's `display_id` is the active display, and its `frame.width` is at most that display's tiling width: its point width minus the left and right `[padding]` in `config.toml`.
 - **Focus it.** Press `ctrl+alt-rightarrow` until `V focused --wait-for fixture-1` passes, then `V snapshot focused`. The fixture's macOS frame lies inside the display: read it with `CGWindowListCopyWindowInfo` for the fixture's window ID.
 - **Open a wide window with focus.** Run `V fixture --width 2560 --display <display ID>`. Its column is at most that display's tiling width.
+- **Open two half-width windows.** Run `V empty-display --display <display ID>` for the active display, then `V fixture --count 2` and `V snapshot two-open`.
+  The left fixture's `frame.x` is the display's left edge plus the left `[padding]`, and the right fixture's `frame.x + frame.width` is the right edge minus the right `[padding]`, each within 1 point.
+  Move both to the other display with `ctrl+alt+shift-leftarrow` or `-rightarrow`, which moves the end column of a strip across, and check the same edges there.
 
 ## Gotchas
 
