@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-13 on branch `feat/app-icon-appearance`, based on `main` at `f33a40fb`
+Updated: 2026-11-14 on branch `fix/451-tucked-photo-pin`, based on `main` at `163b6f0b`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,19 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A tucked window's edge picture that never refreshes
+
+[#451](https://github.com/samanyudas/miri/issues/451) reported a stale picture at an edge shared with another display.
+[paneru#171](https://github.com/samanyudas/paneru/pull/171), [#172](https://github.com/samanyudas/paneru/pull/172), [#174](https://github.com/samanyudas/paneru/pull/174) and [#178](https://github.com/samanyudas/paneru/pull/178) photograph a window before it tucks, and `main` pins all four.
+A tucked window's picture still never changed, because every photo of a tucked window came back blank.
+The engine set a ScreenCaptureKit source rectangle, which leaves out the part of a window off screen.
+[paneru#181](https://github.com/samanyudas/paneru/pull/181) removes it, and this branch pins its merge `e5ccc47`.
+Live, a tucked test window gave 6 blank photos of 6 and 1 distinct edge picture in 5 screenshots on `main` `f33a40fb`, and 0 blank of 8, 7 repaints and 5 distinct pictures with the fix.
+A Chromium browser such as Helium stops drawing a window it treats as hidden, so its tucked picture stays still even with the fix.
+Sam decides separately whether to try a browser launch flag.
+
+**Next:** after this pin merges, verify on `main`, and close [#451](https://github.com/samanyudas/miri/issues/451) with the browser behaviour in `docs/limitations.md`.
 
 ## An app icon that follows Light and Dark
 
