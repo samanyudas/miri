@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-13 on branch `fix/460-new-column-tiling-share`, based on `main` at `10246741`
+Updated: 2026-11-13 on branch `docs/460-closeout-progress`, based on `main` at `7032dd5f`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -105,7 +105,9 @@ The engine took the new column's share of the full display width, while the widt
 On `main` `10246741`, `verify-miri` run `20261113-141746` gave two 1280-point columns on the 27-inch display, two 1024-point columns on the built-in display, and two 1281-point columns after a move to the 27-inch display.
 On the fix build, run `20261113-142913` gave 1276, 1020, and 1276 points, each pair filling its tiling area to the point.
 
-**Next:** after Sam merges the Miri pin PR, verify on `main` and close #460.
+[#462](https://github.com/samanyudas/miri/pull/462) pins it and merged as `7032dd5f`.
+On that `main`, `verify-miri` run `20261113-163331` gave 1276 and 1020 points per new column, and #460 closed on 13 November 2026.
+A `[windows]` rule's `width` ratio still takes its share of the full display width, which [#464](https://github.com/samanyudas/miri/issues/464) tracks.
 
 ## New windows at half the display width
 
