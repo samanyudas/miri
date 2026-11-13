@@ -744,7 +744,8 @@ def cmd_fixture(args) -> int:
         else:
             item["window_id"] = wait(lambda: fixture_window_id(pid), 5)
             save_run(run)
-            seen = wait(lambda: tiled(run, item), 5, 0.2)
+            seen = wait(lambda: any(w["window_id"] == item["window_id"]
+                                    for w in fixture_windows(run, query("state", run["test_pid"]))), 5, 0.2)
             log(run, f"opened {name}: pid {pid}, window {item['window_id']}, "
                      f"{'the engine manages it' if seen else 'NOT in the engine state after 5 s'}")
         time.sleep(args.settle)
@@ -771,11 +772,15 @@ def cmd_show(args) -> int:
         raise Failure(f"No fixture named {args.name} in this run.")
     start = time.monotonic()
     tool("axdo", "unhide", str(item["pid"]))
-    item["window_id"] = wait(lambda: fixture_window_id(item["pid"]), args.timeout, 0.05)
+
+    def tiled_after():
+        item["window_id"] = item["window_id"] or fixture_window_id(item["pid"])
+        return item["window_id"] and tiled(run, item) and time.monotonic() - start
+
+    took = wait(tiled_after, args.timeout, 0.05)
     save_run(run)
-    seen = item["window_id"] and wait(lambda: tiled(run, item), args.timeout - (time.monotonic() - start), 0.05)
-    if seen:
-        log(run, f"showed {args.name}: its window {item['window_id']} tiled {time.monotonic() - start:.2f} s after the show")
+    if took and took <= args.timeout:
+        log(run, f"showed {args.name}: its window {item['window_id']} tiled {took:.2f} s after the show")
         return 0
     log(run, f"showed {args.name}: its window {item['window_id']} did NOT tile within {args.timeout:g} s of the show")
     return 1
