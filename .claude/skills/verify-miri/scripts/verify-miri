@@ -296,14 +296,15 @@ def display_windows(state: dict, display: int) -> list[dict]:
 LAYOUT_SETTLE_SECONDS = 3.0
 
 
-def settled_layout_differences(before: list[dict], read, timeout: float = LAYOUT_SETTLE_SECONDS,
+def settled_layout_differences(before: list[dict], read, tabs: dict[int, int] | None = None,
+                               timeout: float = LAYOUT_SETTLE_SECONDS,
                                step: float = 0.5) -> tuple[list[dict], list[str]]:
     """Reads the layout with `read` until it matches `before` or `timeout` passes, and returns the last layout read
     and its differences from `before`."""
     deadline = time.monotonic() + timeout
     while True:
         after = read()
-        differences = layout_differences(before, after)
+        differences = layout_differences(before, after, tabs)
         if not differences or time.monotonic() >= deadline:
             return after, differences
         time.sleep(step)
@@ -313,10 +314,41 @@ def settled_layout_differences(before: list[dict], read, timeout: float = LAYOUT
 WIDTH_TOLERANCE = 2
 
 
-def layout_differences(before: list[dict], after: list[dict]) -> list[str]:
-    """Each window from `before` that is now in another strip, tiles or floats differently, sits in another order
+def tab_groups(session: dict) -> dict[int, int]:
+    """Each window in a native tab group of a saved session, mapped to the group's first window ID. The tabs of a
+    group share one column, and the app, not Miri, decides their order."""
+    groups = {}
+
+    def window_ids(node) -> list[int]:
+        if isinstance(node, dict):
+            own = [node["window_id"]] if isinstance(node.get("window_id"), int) else []
+            return own + [wid for value in node.values() for wid in window_ids(value)]
+        if isinstance(node, list):
+            return [wid for value in node for wid in window_ids(value)]
+        return []
+
+    def walk(node) -> None:
+        if isinstance(node, dict):
+            if isinstance(node.get("Tabs"), list):
+                tabs = window_ids(node["Tabs"])
+                for wid in tabs:
+                    groups[wid] = tabs[0]
+            for value in node.values():
+                walk(value)
+        elif isinstance(node, list):
+            for value in node:
+                walk(value)
+
+    walk(session)
+    return groups
+
+
+def layout_differences(before: list[dict], after: list[dict], tabs: dict[int, int] | None = None) -> list[str]:
+    """Each window from `before` that is now in another strip, tiles or floats differently, sits in another column
     among the windows that stayed in its strip, or is more than WIDTH_TOLERANCE points narrower or wider. Closed and
-    new windows do not count, and do not shift the others. A layout recorded without widths skips the width check."""
+    new windows do not count, and do not shift the others. The windows that `tabs` maps to one group count as one
+    column. A layout recorded without widths skips the width check."""
+    tabs = tabs or {}
     now = {w["window_id"]: w for w in after}
     memberships = {(w["window_id"], w["space"], w["row"]): w for w in after}
     lines = []
@@ -343,11 +375,14 @@ def layout_differences(before: list[dict], after: list[dict]) -> list[str]:
             if was.get("width") is not None and current.get("width") is not None \
                     and abs(was["width"] - current["width"]) > WIDTH_TOLERANCE:
                 lines.append(f"{label(was)} was {was['width']:g} pt wide, now {current['width']:g} pt, in {place(current)}")
+    def column(window: dict) -> int:
+        return tabs.get(window["window_id"], window["window_id"])
+
     for pairs in stayed.values():
-        old = [was["window_id"] for was, _ in sorted(pairs, key=lambda pair: pair[0]["position"])]
-        new = [current["window_id"] for _, current in sorted(pairs, key=lambda pair: pair[1]["position"])]
+        old = list(dict.fromkeys(column(was) for was, _ in sorted(pairs, key=lambda pair: pair[0]["position"])))
+        new = list(dict.fromkeys(column(current) for _, current in sorted(pairs, key=lambda pair: pair[1]["position"])))
         for was, _ in pairs:
-            i, j = old.index(was["window_id"]), new.index(was["window_id"])
+            i, j = old.index(column(was)), new.index(column(was))
             if i != j:
                 lines.append(f"{label(was)} was at position {i + 1} of {len(old)} in {place(was)}, now at position {j + 1}")
     return lines
@@ -634,8 +669,11 @@ def cmd_end(args) -> int:
     recorded = folder / "backup/layout.json"
     if back and recorded.exists():
         before_layout = json.loads(recorded.read_text())
+        session_backup = folder / "backup/state.json"
+        tabs = tab_groups(json.loads(session_backup.read_text())) if session_backup.exists() else {}
         try:
-            after_layout, differences = settled_layout_differences(before_layout, lambda: layout(query("state", back)))
+            after_layout, differences = settled_layout_differences(before_layout, lambda: layout(query("state", back)),
+                                                                   tabs)
         except Failure as error:
             log(run, f"PROBLEM: could not read the restored build's strips: {error}. The lock and the run record stay. "
                      "Run `verify-miri end --owner` with this run's owner again.")

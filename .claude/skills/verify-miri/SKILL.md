@@ -151,6 +151,7 @@ Report that as a failure. Do not wait longer or retry until it passes.
    The command guard blocks `defaults write`, so put it back with the Settings button that the report names.
 6. Compares the restored build's strips with `layout.json`.
    It prints a `MOVED:` line for each window that is in another strip, on another display, in another position, or that floats or tiles differently.
+   The tabs of one native tab group, as the session backup records them, count as one column, because the app decides their order.
    It lists windows that are no longer managed, such as a window Sam closed during the run, but does not fail for them.
    When a window moved, `end` stops here, keeps the lock and the run record, and exits 1.
 7. Releases the lock and deletes `~/.cache/miri/verify-miri/current.json`.
