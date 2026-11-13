@@ -293,6 +293,9 @@ struct RotatingLogTests {
 /// Runs a sleeping process under a test name, the way an engine runs either as Miri's child or after Miri dies.
 struct OrphanedEnginesTests {
     private let name = "fake-engine-\(UUID().uuidString.prefix(8))"
+    /// Seconds the sleeper runs. A CI runner stalled one test run for over 30 seconds, so the sleeper must outlive
+    /// such a stall, and still end by itself when a crashed run never kills it.
+    private let lifetime = "600"
 
     /// Compiles the sleeper, because macOS 15 kills a copy of `/bin/sleep` at launch even after it is signed again.
     private func executable() throws -> URL {
@@ -315,7 +318,7 @@ struct OrphanedEnginesTests {
         let pidFile = executable.deletingLastPathComponent().appending(path: "pid")
         let shell = Process()
         shell.executableURL = URL(filePath: "/bin/sh")
-        shell.arguments = ["-c", "'\(executable.path)' 30 & echo $! > '\(pidFile.path)'"]
+        shell.arguments = ["-c", "'\(executable.path)' \(lifetime) & echo $! > '\(pidFile.path)'"]
         try shell.run()
         shell.waitUntilExit()
         let pid = String(decoding: try Data(contentsOf: pidFile), as: UTF8.self)
@@ -353,7 +356,7 @@ struct OrphanedEnginesTests {
     @Test func leavesAnEngineThatStillHasItsApp() throws {
         let child = Process()
         child.executableURL = try executable()
-        child.arguments = ["30"]
+        child.arguments = [lifetime]
         try child.run()
         defer { child.terminate() }
         try #require(child.isRunning)
