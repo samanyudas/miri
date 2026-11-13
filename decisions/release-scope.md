@@ -141,7 +141,7 @@ Native fullscreen windows stay unmanaged and return to their original column whe
 Trackpad scrolling moves the strip on the display under the pointer by default.
 A setting lets the user choose the focused window's strip instead.
 Keyboard commands always act on the focused strip.
-The pinned engine moves the strip on the display whose menu bar is active, so the pointer target and the setting need an engine change that is not built yet.
+A swipe keeps its strip until it lands, even if focus moves to another display meanwhile, and the window it lands on takes focus ([#212](https://github.com/samanyudas/miri/issues/212)).
 Paneru's experimental virtual workspaces stay turned off, with their commands and menu bar indicator hidden.
 Sam dropped them on 1 November 2026, because macOS Spaces already give each display several strips.
 The earlier reference to "vertically arranged" sets was accidental and does not request additional virtual workspace rows.

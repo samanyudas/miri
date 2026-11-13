@@ -19972,6 +19972,136 @@
         }
       }
     },
+    "Focused window": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "النافذة النشطة"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Aktives Fenster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ventana activa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Fenêtre active"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "सक्रिय विंडो"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Jendela aktif"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Finestra attiva"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "アクティブなウインドウ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "활성 윈도우"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Actief venster"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Aktywne okno"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Janela ativa"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Janela ativa"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Активное окно"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Aktivt fönster"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "หน้าต่างที่ใช้งาน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Etkin pencere"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Активне вікно"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Cửa sổ đang dùng"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "当前窗口"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "目前視窗"
+          }
+        }
+      }
+    },
     "Follow fingers": {
       "localizations": {
         "ar": {
@@ -47704,6 +47834,136 @@
         }
       }
     },
+    "Swipe moves": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "التمرير السريع يحرّك"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Wischen bewegt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "El deslizamiento mueve"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Le balayage déplace"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "स्वाइप किसे खिसकाए"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Usapan menggeser"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Lo scorrimento sposta"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "スワイプで動かす対象"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "스와이프 대상"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vegen verplaatst"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Przesunięcie rusza"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O gesto move"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O gesto move"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Жест двигает"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Svepet flyttar"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "การปัดเลื่อน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kaydırma şunu taşır"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Жест рухає"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Thao tác vuốt di chuyển"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "轻扫移动"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "滑動移動"
+          }
+        }
+      }
+    },
     "Swipe test": {
       "localizations": {
         "ar": {
@@ -56700,6 +56960,266 @@
         }
       }
     },
+    "Under pointer": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "تحت المؤشر"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Unter dem Zeiger"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Bajo el puntero"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sous le pointeur"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "पॉइंटर के नीचे"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Di bawah penunjuk"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sotto il puntatore"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ポインタの下"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "포인터 아래"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Onder de aanwijzer"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pod wskaźnikiem"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sob o ponteiro"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sob o ponteiro"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Под указателем"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Under pekaren"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ใต้ตัวชี้"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "İmlecin altındaki"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Під вказівником"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dưới con trỏ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "指针下方"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "指標下方"
+          }
+        }
+      }
+    },
+    "Under pointer moves the strip on the display the pointer is on. Focused window moves the strip of the window you are using, wherever the pointer is. This also applies to Option-scroll.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "مع \"تحت المؤشر\" يتحرك الشريط على الشاشة التي عليها المؤشر. مع \"النافذة النشطة\" يتحرك شريط النافذة التي تستخدمها، أينما كان المؤشر. ينطبق هذا أيضًا على التمرير مع Option."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "„Unter dem Zeiger“ bewegt den Streifen auf dem Bildschirm, auf dem der Zeiger ist. „Aktives Fenster“ bewegt den Streifen des Fensters, das du gerade verwendest, egal wo der Zeiger ist. Das gilt auch für das Scrollen mit Option."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "«Bajo el puntero» mueve la tira de la pantalla donde está el puntero. «Ventana activa» mueve la tira de la ventana que estás usando, esté donde esté el puntero. También se aplica al desplazamiento con Option."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "« Sous le pointeur » déplace la bande de l’écran où se trouve le pointeur. « Fenêtre active » déplace la bande de la fenêtre que vous utilisez, où que soit le pointeur. Cela vaut aussi pour le défilement avec Option."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"पॉइंटर के नीचे\" उस डिस्प्ले की पट्टी खिसकाता है जिस पर पॉइंटर है। \"सक्रिय विंडो\" उस विंडो की पट्टी खिसकाता है जिसका आप उपयोग कर रहे हैं, पॉइंटर कहीं भी हो। यह Option-स्क्रॉल पर भी लागू होता है।"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"Di bawah penunjuk\" menggeser strip di layar tempat penunjuk berada. \"Jendela aktif\" menggeser strip jendela yang sedang Anda gunakan, di mana pun penunjuk berada. Ini juga berlaku untuk gulir dengan Option."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"Sotto il puntatore\" sposta la striscia dello schermo su cui si trova il puntatore. \"Finestra attiva\" sposta la striscia della finestra che stai usando, ovunque sia il puntatore. Vale anche per lo scorrimento con Opzione."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "「ポインタの下」では、ポインタがあるディスプレイのストリップが動きます。「アクティブなウインドウ」では、ポインタの位置に関係なく、使用中のウインドウのストリップが動きます。Optionを押したスクロールにも適用されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "'포인터 아래'는 포인터가 있는 디스플레이의 스트립을 움직입니다. '활성 윈도우'는 포인터 위치와 관계없이 사용 중인 윈도우의 스트립을 움직입니다. Option 스크롤에도 적용됩니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "‘Onder de aanwijzer’ verplaatst de strook op het scherm waar de aanwijzer is. ‘Actief venster’ verplaatst de strook van het venster dat je gebruikt, waar de aanwijzer ook is. Dit geldt ook voor scrollen met Option."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "„Pod wskaźnikiem” przesuwa pasek na ekranie, na którym jest wskaźnik. „Aktywne okno” przesuwa pasek okna, którego używasz, niezależnie od położenia wskaźnika. Dotyczy to też przewijania z klawiszem Option."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"Sob o ponteiro\" move a faixa da tela onde está o ponteiro. \"Janela ativa\" move a faixa da janela que você está usando, onde quer que esteja o ponteiro. Isso também vale para a rolagem com Option."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"Sob o ponteiro\" move a faixa do ecrã onde está o ponteiro. \"Janela ativa\" move a faixa da janela que está a usar, esteja o ponteiro onde estiver. Isto também se aplica ao deslocamento com Option."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "«Под указателем» двигает ленту на дисплее, где находится указатель. «Активное окно» двигает ленту окна, с которым вы работаете, где бы ни был указатель. Это касается и прокрутки с Option."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "”Under pekaren” flyttar remsan på skärmen där pekaren är. ”Aktivt fönster” flyttar remsan för fönstret du använder, var pekaren än är. Det gäller även rullning med Alternativ."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"ใต้ตัวชี้\" จะเลื่อนแถบบนจอภาพที่ตัวชี้อยู่ \"หน้าต่างที่ใช้งาน\" จะเลื่อนแถบของหน้าต่างที่คุณกำลังใช้ ไม่ว่าตัวชี้จะอยู่ที่ใด ใช้กับการเลื่อนแบบกด Option ด้วย"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"İmlecin altındaki\", imlecin bulunduğu ekrandaki şeridi taşır. \"Etkin pencere\", imleç nerede olursa olsun kullandığınız pencerenin şeridini taşır. Bu, Option ile kaydırma için de geçerlidir."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "«Під вказівником» рухає стрічку на дисплеї, де є вказівник. «Активне вікно» рухає стрічку вікна, з яким ви працюєте, хоч би де був вказівник. Це стосується і прокручування з Option."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "\"Dưới con trỏ\" di chuyển dải trên màn hình có con trỏ. \"Cửa sổ đang dùng\" di chuyển dải của cửa sổ bạn đang dùng, dù con trỏ ở đâu. Điều này cũng áp dụng cho cuộn bằng Option."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "选择“指针下方”时，移动指针所在显示器上的窗口带。选择“当前窗口”时，无论指针在哪里，都移动你正在使用的窗口所在的窗口带。按住 Option 滚动时也是如此。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "選擇「指標下方」時，移動指標所在顯示器上的視窗帶。選擇「目前視窗」時，無論指標在哪裡，都移動你正在使用的視窗所在的視窗帶。按住 Option 捲動時也是如此。"
+          }
+        }
+      }
+    },
     "Undo": {
       "localizations": {
         "ar": {
@@ -62966,6 +63486,136 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "miri.strip_scrolling必須是\"continuous\"或\"window\"。"
+          }
+        }
+      }
+    },
+    "miri.swipe_target must be \"pointer\" or \"focused\".": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "يجب أن تكون miri.swipe_target \"pointer\" أو \"focused\"."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target muss \"pointer\" oder \"focused\" sein."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target debe ser \"pointer\" o \"focused\"."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target doit valoir \"pointer\" ou \"focused\"."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target \"pointer\" या \"focused\" होना चाहिए।"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target harus berupa \"pointer\" atau \"focused\"."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target deve essere \"pointer\" o \"focused\"."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_targetは\"pointer\"か\"focused\"にする必要があります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target는 \"pointer\" 또는 \"focused\"여야 합니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target moet \"pointer\" of \"focused\" zijn."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target musi mieć wartość \"pointer\" lub \"focused\"."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target deve ser \"pointer\" ou \"focused\"."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target tem de ser \"pointer\" ou \"focused\"."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target должно быть \"pointer\" или \"focused\"."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target måste vara \"pointer\" eller \"focused\"."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target ต้องเป็น \"pointer\" หรือ \"focused\""
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target \"pointer\" veya \"focused\" olmalı."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target має бути \"pointer\" або \"focused\"."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target phải là \"pointer\" hoặc \"focused\"."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target 必须是 \"pointer\" 或 \"focused\"。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "miri.swipe_target必須是\"pointer\"或\"focused\"。"
           }
         }
       }

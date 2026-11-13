@@ -1988,7 +1988,7 @@ Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
 
 1. Finish the remaining v1 features.
-   - Add pointer-default and focused-strip gesture targeting to the engine, the configuration, and Settings (#212).
+   - Check the under-pointer swipe and the Swipe moves setting on a real trackpad with two displays, acceptance check S-1 (#212). The engine (paneru#169) and Settings are built.
    - Run the stack overflow (S-5) and stack limit (S-7) hardware checks, and record them against the frozen release candidate.
    - Verify every Strip gestures checklist item and the settling behavior on a real trackpad.
 2. Build the public release path, in parallel with phase 1.

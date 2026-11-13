@@ -25,6 +25,7 @@ public struct MiriSettings: Equatable, Sendable {
     /// Reverses the strip swipe. Off means the strip follows the fingers.
     public var reverseSwipe = false
     public var stripScrolling = StripScrolling.continuous
+    public var swipeTarget = SwipeTarget.pointer
     /// Lets the engine show the contents of a hidden window on an edge next to another display. It needs Screen
     /// Recording permission.
     public var sharedEdgeSlices = false
@@ -65,6 +66,14 @@ public struct MiriSettings: Equatable, Sendable {
                     message: String(localized: "miri.strip_scrolling must be \"continuous\" or \"window\"."))
             }
             stripScrolling = scrolling
+        }
+        if let value = document.value(at: ["miri", "swipe_target"]) {
+            guard case .string(let name) = value, let target = SwipeTarget(rawValue: name) else {
+                throw .invalidValue(
+                    key: "miri.swipe_target",
+                    message: String(localized: "miri.swipe_target must be \"pointer\" or \"focused\"."))
+            }
+            swipeTarget = target
         }
         if let value = document.value(at: ["options", "preset_column_widths"]) {
             guard case .array(let items) = value else { throw Self.presetIssue }
@@ -147,6 +156,7 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.string(stripGesture.rawValue), ["miri"], "strip_gesture")
         try set(.boolean(reverseSwipe), ["miri"], "reverse_swipe")
         try set(.string(stripScrolling.rawValue), ["miri"], "strip_scrolling")
+        try set(.string(swipeTarget.rawValue), ["miri"], "swipe_target")
         try set(.array(widthPresets.map(TOMLValue.float)), ["options"], "preset_column_widths")
         try set(stackLimit.tomlValue, ["options"], "stack_limit")
         try set(.string(maximizedWindowSide.rawValue), ["options"], "maximized_window_side")
@@ -188,6 +198,7 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.boolean(false), gesture, "vertical")
         try set(.boolean(stripScrolling == .window), gesture, "window_landing")
         try set(.boolean(stripScrolling == .window), ["swipe", "scroll"], "window_step")
+        try set(.string(swipeTarget.rawValue), gesture, "target")
         // Paging steps focus while the strip stays still under the fingers, and it overrides window_landing.
         try edit(nil) { try result.removing(table: gesture, key: "paging") }
         // The engine falls back to these deprecated keys, which would keep a swipe on that Miri turned off.
@@ -241,6 +252,15 @@ public enum StripScrolling: String, CaseIterable, Sendable {
     /// A strip swipe follows the fingers, then lands on one window, and each wheel input focuses the adjacent window:
     /// the engine's `[swipe.gesture].window_landing` and `[swipe.scroll].window_step`.
     case window
+}
+
+/// Which strip a strip swipe or a modifier-scroll wheel input moves, stored in `[miri].swipe_target`. The raw value is
+/// the engine's `[swipe.gesture].target`. Keyboard commands always act on the focused strip.
+public enum SwipeTarget: String, CaseIterable, Sendable {
+    /// The strip on the display under the pointer.
+    case pointer
+    /// The strip of the focused window, wherever the pointer is.
+    case focused
 }
 
 /// The side of its stack where a maximized stacked window opens as a column of its own. The raw value is the engine's
