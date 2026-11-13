@@ -25,7 +25,7 @@ Live, a tucked test window gave 6 blank photos of 6 and 1 distinct edge picture 
 A Chromium browser such as Helium stops drawing a window it treats as hidden, so its tucked picture stays still even with the fix.
 Sam decides separately whether to try a browser launch flag.
 
-**Next:** after this pin merges, verify on `main`, and close #451 with the browser behaviour in `docs/limitations.md`.
+**Next:** after this pin merges, verify on `main`, and close [#451](https://github.com/samanyudas/miri/issues/451) with the browser behaviour in `docs/limitations.md`.
 
 ## An app icon that follows Light and Dark
 
