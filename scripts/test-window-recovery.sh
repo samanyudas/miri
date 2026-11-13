@@ -3,15 +3,16 @@
 # It moves only the fixture window. Without an Accessibility grant it reports a skip, never a pass.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-exec python3 - <<'PY'
+exec python3 - "$@" <<'PY'
 import json
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import time
 
 root = Path.cwd()
-app = root / '.build/app/Miri Developer.app'
+app = root / (sys.argv[1] if len(sys.argv) > 1 else '.build/app/Miri Developer.app')
 fixture = root / '.build/debug/AXFixture'
 assert app.is_dir() and fixture.is_file(), 'Run scripts/build-app.sh first'
 evidence = Path(tempfile.mkdtemp(prefix='miri-recovery-', dir='/tmp'))
@@ -38,7 +39,7 @@ try:
     result = json.loads(report.read_text())
     assert result['schemaVersion'] == 1
     if not result['trusted']:
-        print('skipped-ungranted. Window recovery needs the Miri Developer Accessibility grant.')
+        print(f'skipped-ungranted. Window recovery needs the {app.stem} Accessibility grant.')
     else:
         assert 'failure' not in result, result.get('failure')
         assert result['strandedNeededRecovery'] is True, f'The fixture was not stranded: {result}'

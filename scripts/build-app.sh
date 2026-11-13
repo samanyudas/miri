@@ -2,11 +2,27 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 development=false
+release=false
 if [[ "${1:-}" == "--allow-dirty-engine" && $# == 1 ]]; then
     development=true
+elif [[ "${1:-}" == "--release" && $# == 1 ]]; then
+    release=true
 elif [[ $# != 0 ]]; then
-    echo "Usage: $0 [--allow-dirty-engine]" >&2
+    echo "Usage: $0 [--allow-dirty-engine | --release]" >&2
     exit 2
+fi
+if $release; then
+    name=Miri
+    app_id=io.github.samanyudas.miri
+    profile=release
+    features=(--no-default-features)
+    engine_build=vendor/paneru/target/release/paneru
+else
+    name="Miri Developer"
+    app_id=io.github.samanyudas.miri.dev
+    profile=dev
+    features=(--no-default-features --features miri-developer)
+    engine_build=vendor/paneru/target/debug/paneru
 fi
 [[ "$(uname -m)" == arm64 ]] || { echo "This prototype requires an arm64 Mac." >&2; exit 1; }
 revision=$(git -C vendor/paneru rev-parse HEAD)
@@ -25,9 +41,9 @@ fi
 sdk=$(xcrun --sdk macosx --show-sdk-path)
 swift build -Xswiftc -Xclang-linker -Xswiftc -isysroot -Xswiftc -Xclang-linker -Xswiftc "$sdk"
 env -u CARGO_BUILD_TARGET cargo build --manifest-path vendor/paneru/Cargo.toml \
-    --target-dir "$PWD/vendor/paneru/target" --locked --bin paneru --no-default-features --features miri-developer
+    --target-dir "$PWD/vendor/paneru/target" --locked --bin paneru --profile "$profile" "${features[@]}"
 bin=$(swift build --show-bin-path)
-bundle="$PWD/.build/app/Miri Developer.app"
+bundle="$PWD/.build/app/$name.app"
 rm -rf "$bundle"
 mkdir -p "$bundle/Contents/MacOS" "$bundle/Contents/Helpers" "$bundle/Contents/Resources"
 iconset="$PWD/.build/app/AppIcon.iconset"
@@ -38,10 +54,11 @@ mkdir "$iconset"
 # Each yellow sits 35% of the way from its blue's OKLCH lightness to white, which keeps the gradients visible.
 # Pale yellow rear windows blend together on the white tile, so the taller one gets lighter and the shorter one more solid.
 cp assets/icon.svg "$icon"
-while read -r from to; do
-    grep -q "$from" "$icon" || { echo "assets/icon.svg no longer contains $from. Update the Developer icon swaps in $0." >&2; exit 1; }
-    sed -i '' "s/$from/$to/g" "$icon"
-done <<'SWAPS'
+if ! $release; then
+    while read -r from to; do
+        grep -q "$from" "$icon" || { echo "assets/icon.svg no longer contains $from. Update the Developer icon swaps in $0." >&2; exit 1; }
+        sed -i '' "s/$from/$to/g" "$icon"
+    done <<'SWAPS'
 #A9D0FF #ECE191
 #5F95FA #DEB70B
 #5A63F2 #D69A09
@@ -51,6 +68,7 @@ done <<'SWAPS'
 opacity="0.62" opacity="0.4"
 opacity="0.5" opacity="0.9"
 SWAPS
+fi
 for size in 16 32 128 256 512; do
     sips -s format png -z "$size" "$size" "$icon" --out "$iconset/icon_${size}x${size}.png" >/dev/null
     sips -s format png -z $((size * 2)) $((size * 2)) "$icon" --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
@@ -59,7 +77,7 @@ iconutil -c icns "$iconset" -o "$bundle/Contents/Resources/AppIcon.icns"
 rm -rf "$iconset" "$icon"
 cp assets/menubar-icon.svg assets/menubar-icon-stopped.svg "$bundle/Contents/Resources/"
 cp "$bin/Miri" "$bundle/Contents/MacOS/Miri"
-cp vendor/paneru/target/debug/paneru "$bundle/Contents/Helpers/miri-engine"
+cp "$engine_build" "$bundle/Contents/Helpers/miri-engine"
 [[ "$(lipo -archs "$bundle/Contents/MacOS/Miri")" == arm64 ]]
 [[ "$(lipo -archs "$bundle/Contents/Helpers/miri-engine")" == arm64 ]]
 linked_sdk=$(vtool -show-build "$bundle/Contents/MacOS/Miri" | awk '$1 == "sdk" {print $2}')
@@ -85,9 +103,9 @@ cat > "$bundle/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-<key>CFBundleIdentifier</key><string>io.github.samanyudas.miri.dev</string>
-<key>CFBundleName</key><string>Miri Developer</string>
-<key>CFBundleDisplayName</key><string>Miri Developer</string>
+<key>CFBundleIdentifier</key><string>$app_id</string>
+<key>CFBundleName</key><string>$name</string>
+<key>CFBundleDisplayName</key><string>$name</string>
 <key>CFBundleIconFile</key><string>AppIcon</string>
 <key>CFBundleExecutable</key><string>Miri</string>
 <key>CFBundlePackageType</key><string>APPL</string>
@@ -101,14 +119,21 @@ cat > "$bundle/Contents/Info.plist" <<PLIST
 </dict></plist>
 PLIST
 # A stable identity keeps the Accessibility grant across rebuilds. Without one, ad-hoc signing still works.
+# The release flavor always signs ad-hoc until Developer ID signing lands (#82).
 identity=-
-if security unlock-keychain -p miri-developer-signing "$HOME/Library/Keychains/miri-developer-signing.keychain-db" 2>/dev/null \
+if ! $release && security unlock-keychain -p miri-developer-signing "$HOME/Library/Keychains/miri-developer-signing.keychain-db" 2>/dev/null \
     && security find-identity -p codesigning | grep -q '"Miri Developer Local Signing"'; then
     identity="Miri Developer Local Signing"
 fi
-codesign --force --sign "$identity" --identifier io.github.samanyudas.miri.dev.engine "$bundle/Contents/Helpers/miri-engine"
+codesign --force --sign "$identity" --identifier "$app_id.engine" "$bundle/Contents/Helpers/miri-engine"
 codesign --force --sign "$identity" "$bundle"
 codesign --verify --strict "$bundle/Contents/Helpers/miri-engine"
 codesign --verify --strict "$bundle"
-[[ "$identity" == - ]] && echo "Signed ad-hoc. Run scripts/setup-signing.sh to keep the Accessibility grant across rebuilds."
+if [[ "$identity" == - ]] && ! $release; then
+    echo "Signed ad-hoc. Run scripts/setup-signing.sh to keep the Accessibility grant across rebuilds."
+fi
+# The bundled digest is the selftest provenance engineSHA256, which hashes the engine after signing.
+printf 'Engine profile %s, features %s, built %s, bundled %s\n' "$profile" "${features[*]}" \
+    "$(shasum -a 256 "$engine_build" | cut -d ' ' -f 1)" \
+    "$(shasum -a 256 "$bundle/Contents/Helpers/miri-engine" | cut -d ' ' -f 1)"
 printf 'Built %s\nEngine source %s\nSigned with %s\n' "$bundle" "$revision" "$identity"

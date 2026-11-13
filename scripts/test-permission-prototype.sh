@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-exec python3 - <<'PY'
+exec python3 - "$@" <<'PY'
 import hashlib
 import json
 import os
@@ -11,11 +11,12 @@ import re
 import shutil
 import signal
 import subprocess
+import sys
 import tempfile
 import time
 
 root = Path.cwd()
-app = root / '.build/app/Miri Developer.app'
+app = root / (sys.argv[1] if len(sys.argv) > 1 else '.build/app/Miri Developer.app')
 engine = app / 'Contents/Helpers/miri-engine'
 fixture = root / '.build/debug/AXFixture'
 evidence = Path(tempfile.mkdtemp(prefix='miri-permission-', dir='/tmp'))
@@ -98,6 +99,11 @@ def observe(bundle, name, target):
         launch.wait(timeout=5)
 
 assert engine.is_file() and fixture.is_file(), 'Run build-app.sh first'
+app_ids = {'Miri Developer': 'io.github.samanyudas.miri.dev', 'Miri': 'io.github.samanyudas.miri'}
+assert app.stem in app_ids, f'{app.name} is neither Miri Developer.app nor Miri.app'
+app_id = app_ids[app.stem]
+engine_id = app_id + '.engine'
+assert plistlib.loads((app / 'Contents/Info.plist').read_bytes())['CFBundleIdentifier'] == app_id
 metadata = {
     'macOS': run('sw_vers'), 'swift': run('swift', '--version'),
     'rust': run('rustc', '--version'), 'cargo': run('cargo', '--version'), 'appPath': str(app),
@@ -109,8 +115,8 @@ metadata = {
     'appSignature': run('codesign', '-dvv', str(app)),
     'engineSignature': run('codesign', '-dvv', str(engine)),
 }
-assert 'Identifier=io.github.samanyudas.miri.dev\n' in metadata['appSignature']
-assert 'Identifier=io.github.samanyudas.miri.dev.engine\n' in metadata['engineSignature']
+assert f'Identifier={app_id}\n' in metadata['appSignature']
+assert f'Identifier={engine_id}\n' in metadata['engineSignature']
 run('codesign', '--verify', '--strict', str(app))
 run('codesign', '--verify', '--strict', str(engine))
 plist_dump = run('otool', '-X', '-s', '__TEXT', '__info_plist', str(engine))
@@ -120,7 +126,7 @@ for line in plist_dump.splitlines():
     if fields and re.fullmatch(r'[0-9a-f]{8,16}', fields[0]):
         sections.extend(field for field in fields[1:] if re.fullmatch(r'(?:[0-9a-f]{8}|[0-9a-f]{2})', field))
 embedded = plistlib.loads(b''.join(bytes.fromhex(word)[::-1] for word in sections).rstrip(b'\x00'))
-assert embedded['CFBundleIdentifier'] == 'io.github.samanyudas.miri.dev.engine'
+assert embedded['CFBundleIdentifier'] == engine_id
 metadata['engineEmbeddedPlist'] = embedded
 (evidence / 'provenance.json').write_text(json.dumps(metadata, indent=2))
 fixture_process = None
@@ -143,8 +149,8 @@ try:
         assert Path(result['bundlePath']).resolve(strict=True) == bundle.resolve(strict=True)
         assert result['engineRevision'] == metadata['engineSource']
         for key, identifier, executable in [
-            ('app', 'io.github.samanyudas.miri.dev', bundle / 'Contents/MacOS/Miri'),
-            ('engine', 'io.github.samanyudas.miri.dev.engine', bundle / 'Contents/Helpers/miri-engine'),
+            ('app', app_id, bundle / 'Contents/MacOS/Miri'),
+            ('engine', engine_id, bundle / 'Contents/Helpers/miri-engine'),
         ]:
             value = result[key]
             assert value['schemaVersion'] == 1 and value['targetPid'] == target

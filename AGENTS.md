@@ -61,7 +61,7 @@ If your change contradicts an ADR, say so explicitly instead of overriding it.
 | `make lint` | Docs links and style, harness tests, ShellCheck, actionlint, version compatibility. Works on Linux. |
 | `make native` | Swift and engine lint, build, Swift and engine unit tests, end-to-end selftests, DMG packaging. Needs macOS 27 arm64. |
 | `make check` | `make lint` and `make native`. This is the gate before a PR. |
-| `make build`, `make test`, `make e2e`, `make package` | One stage of `make native`. `make test` is `make swift-test` and `make engine-test`. |
+| `make build`, `make test`, `make e2e`, `make package` | One stage of `make native`. `make test` is `make swift-test` and `make engine-test`. `make release-candidate` runs build, e2e, and package on the stable `Miri.app` with a release-profile engine. |
 | `make format` | Formats Swift sources with `.swift-format`. |
 | `make verify-engine-lifecycle` | Model-checks engine start, stop, restart, and quit. Use it when you change that code. |
 
