@@ -73,6 +73,7 @@ First it rejects new commits that add a screen recording, or an image outside `a
 | `make build`, `make test` | The signed app bundle builds, and the Swift and engine unit tests pass. |
 | `make e2e` | The packaged app and engine run a real Accessibility observation through Launch Services, and with the Accessibility grant, the app recovers a stranded fixture window. |
 | `make package` | Miri Developer packs into a DMG that mounts with valid signatures. |
+| `make release-candidate` | The stable Miri app builds with a release-profile engine, passes the same selftests, and packs into a DMG. |
 
 `make e2e` reports `observed-ungranted` on a Mac without the Accessibility grant, which is a pass.
 It never establishes which permission entry controls the engine.

@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-13 on branch `fix/464-rule-width-pin`, based on `main` at `5bb8ff25`
+Updated: 2026-11-13 on branch `build/395-release-engine`, based on `main` at `f33a40fb`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,15 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## The stable Miri app's release engine
+
+[#395](https://github.com/samanyudas/miri/issues/395) found that nothing built the stable Miri app or a release-profile engine.
+`make release-candidate` now builds `.build/app/Miri.app` with `cargo build --locked --bin paneru --release --no-default-features`, runs the selftests against that bundle, and packages `Miri-<revision>.dmg`.
+The `Release candidate` workflow runs it on demand and on pull requests that change the release path.
+The release bundle is signed ad-hoc, because Developer ID signing and notarization belong to [#82](https://github.com/samanyudas/miri/issues/82).
+The Swift app in both bundles is still a debug build.
+Next: Sam merges the PR, then an agent runs the workflow on `main` and closes #395.
 
 ## A window rule's width that does not fit
 

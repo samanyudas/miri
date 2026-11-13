@@ -66,9 +66,9 @@ def main() -> int:
             problems.append(f"{name} is macOS {value}; release scope supports macOS {SUPPORTED_MACOS} and later")
 
     # Development builds must never share the release identity, or they share its Accessibility grant.
-    if f"<key>CFBundleIdentifier</key><string>{DEVELOPER_APP_ID}</string>" not in build:
+    if f"    app_id={DEVELOPER_APP_ID}\n" not in build:
         problems.append(f"scripts/build-app.sh must give the app the developer identity {DEVELOPER_APP_ID}")
-    if f"--identifier {DEVELOPER_ENGINE_ID}" not in build or "--features miri-developer" not in build:
+    if '--identifier "$app_id.engine"' not in build or "--features miri-developer" not in build:
         problems.append(f"scripts/build-app.sh must build and sign the engine as {DEVELOPER_ENGINE_ID}")
     release_scope = (ROOT / "decisions/release-scope.md").read_text()
     if f"The bundle ID is `{RELEASE_APP_ID}`" not in release_scope:
