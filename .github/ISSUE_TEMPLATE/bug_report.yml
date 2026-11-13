@@ -37,7 +37,7 @@ body:
     id: version
     attributes:
       label: Miri version or commit
-      placeholder: The line at the bottom of the Miri Settings sidebar, such as Version 0.0.1 · Engine 893f906, or the commit you built
+      placeholder: As the bottom of the Settings sidebar shows it, such as Version 0.0.1 · Engine 893f906
     validations:
       required: true
   - type: input
