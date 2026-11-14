@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-15 on branch `fix/210-locked-wake`, based on `main` at `d7dbbbad`
+Updated: 2026-11-15 on branch `fix/210-one-read`, based on `main` at `ac81a250`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -21,16 +21,20 @@ On `main` at `2f86ef91`, engine `a2f7c13`, a sleep and wake moved a Helium windo
 A test window on a hidden native Space of the external display stayed managed in that run.
 [paneru#185](https://github.com/samanyudas/paneru/pull/185) makes `cleanup_unordered_windows` wait while the screen is locked, and makes a Space notification during a lock wait for the window's new AX element.
 [paneru#187](https://github.com/samanyudas/paneru/pull/187) logs at info level every window the engine stops managing, with the path that dropped it.
-This branch moves the pin from `ca374cd` to their merge, `57f1f9d`.
-On a build of the paneru#185 commit (run `20261114-205936`), sleeps 3 and 4 kept 12 of 12 windows, and sleep 2 kept the three test windows but dropped Sam's Notes window through a path that the log did not name.
-On a build with both engine PRs (run `20261114-213949`), a window closed with its close button logged its path and the drop, and a window whose app quit logged the drop.
-On a build of this pin, `3cd02160` (run `20261115-004736`), 3 of 3 sleeps by Sam kept 11 of 11 windows, with Notes and two test windows on the built-in display, and the log had no drop line.
-In none of those wakes did macOS move a window to the other display.
-`make verify-engine-lifecycle` cannot catch this bug, because its model covers only engine start, stop, restart, and quit, so the engine tests in `src/ecs/triggers.rs` stand in for it.
+[#488](https://github.com/samanyudas/miri/pull/488) pinned their merge, `57f1f9d`, and merged as `ac81a250`.
+On that `main` build, the first sleep still dropped Sam's Notes window, parked on the built-in display, though it never closed (verify-miri run `20261115-012621`).
+A diagnostic build showed the cause (run `20261115-014410`).
+On the wake, the engine read Notes' AX role twice, 0.4 s apart.
+The first read went unanswered, which counts as alive, so the window was not held for the unlock.
+The second read answered "invalid element", so the engine closed the window while the screen was still locked.
+[paneru#189](https://github.com/samanyudas/paneru/pull/189) decides each Space departure from one read: it keeps the window, holds it for a new element, or marks it for the close.
+This branch pins its merge, `20173e1`.
+On builds of the fix, 4 of 4 sleeps kept 11 of 11 windows, Notes included (runs `20261115-021507` and `20261115-022415`).
+A Lua `window_destroyed` handler still runs once per closed window, which an engine test checks.
+`make verify-engine-lifecycle` cannot catch this bug, because its model covers only engine start, stop, restart, and quit, so the engine tests in `src/ecs/triggers.rs` and `src/lua.rs` stand in for it.
 
-**Next:** after this pin merges, Sam sleeps and wakes a build of `main` a few times.
-If a window drops, the engine log names its path.
-If none drops, the second criterion of #210 can be ticked and the limitation row removed.
+**Next:** after this pin merges, Sam sleeps and wakes a build of `main` three times.
+If no window drops, the second criterion of #210 is ticked, the limitation row is removed, and #210 closes.
 
 ## A dropped window that ends on the other display
 
