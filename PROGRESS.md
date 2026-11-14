@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-14 on branch `fix/478-dead-strip-entry`, based on `main` at `58f06eec`
+Updated: 2026-11-14 on branch `docs/478-closeout`, based on `main` at `bdd96c7e`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -19,10 +19,12 @@ The public release path and the complete acceptance runs follow.
 [#478](https://github.com/samanyudas/miri/issues/478) reported that Control-Option-Left and Right stopped at a column after its app quit while hidden, or while one of its windows was minimized or floating.
 The engine put the dying window back into its strip during the despawn, so the strip kept a dead entry until the engine restarted.
 [paneru#183](https://github.com/samanyudas/paneru/pull/183) skips that re-insert on a despawn and adds a system that prunes any dead strip entry.
-This branch pins its merge, `c8d5303`.
-A Miri Developer bundle with engine `dd7b429` passed the live check (verify-miri run `20261114-032642`).
+[#481](https://github.com/samanyudas/miri/pull/481) pins its merge, `c8d5303`.
+On `main` at `bdd96c7e`, Control-Option-Right passed the quit column after a hidden app quit (verify-miri run `20261114-162743`) and after a minimized window's app quit (run `20261114-163139`).
+The minimized case used a separate TextEdit instance, because the AXFixture window cannot be minimized.
+#478 closed on 14 November 2026, with the evidence in its [verification comment](https://github.com/samanyudas/miri/issues/478#issuecomment-6872791165).
 
-**Next:** after this PR merges, repeat the live check on a `main` build, then close #478.
+**Next:** nothing for #478.
 
 ## A tucked window's edge picture that never refreshes
 
