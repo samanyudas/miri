@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-14 on branch `docs/475-closeout`, based on `main` at `e19d1066`
+Updated: 2026-11-14 on branch `docs/451-helium-correction`, based on `main` at `2d1d918c`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -22,7 +22,8 @@ A tucked window's picture still never changed, because every photo of a tucked w
 The engine set a ScreenCaptureKit source rectangle, which leaves out the part of a window off screen.
 [paneru#181](https://github.com/samanyudas/paneru/pull/181) removes it, and [#477](https://github.com/samanyudas/miri/pull/477) pins its merge `e5ccc47` and merged as `1dde3624`.
 Live, a tucked test window gave 6 blank photos of 6 and 1 distinct edge picture in 5 screenshots on `main` `f33a40fb`, and 0 blank of 8, 7 repaints and 5 distinct pictures with the fix.
-An earlier note said that Helium stops drawing a hidden window. A later check disproved it: on `main` at `1dde3624`, the tucked photo changed at every refresh for Google Chrome, Helium and VS Code while their content changed, and Notion's photos were not blank.
+An earlier note said that Helium stops drawing a hidden window.
+A later check disproved it: on `main` at `1dde3624`, the tucked photo changed at every refresh for Google Chrome, Helium and VS Code while their content changed, and Notion's photos were not blank.
 On 14 November 2026, on `main` at `1dde3624`, the colour-switch probe showed the new colour at the edge 0.15 to 0.16 s after the window left the screen in 4 of 4 trials (verify-miri run `20261114-031723`).
 The same build gave a test window tucked beside the edge 7 photos, none blank, and 7 repaints in about 13 s (run `20261114-031518`), and #451 closed.
 `docs/limitations.md` records these results, and the 2 pixels per point built-in display gave the same result.
