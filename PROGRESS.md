@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-14 on branch `docs/478-closeout`, based on `main` at `bdd96c7e`
+Updated: 2026-11-14 on branch `t3/issue-414-drag-width-restoration`, based on `main` at `d1d5dae4`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,19 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A dropped window that comes back wider than its column
+
+[#414](https://github.com/samanyudas/miri/issues/414) reported that a tiled window dropped below the display could come back a few points wider than its column, with its left edge moved left.
+T3 Code widens its own window by 1 to 5 points during a drag.
+When the engine missed the press, or the drag was not confirmed yet, no hold protected the window, and the engine kept that size 200 ms after the frame held still.
+[paneru#182](https://github.com/samanyudas/paneru/pull/182) uses one definition of a held window for the resize check, the layout, and native membership, and returns a window to its slot when its new size came with a move.
+It merged as `a2f7c13`, which this PR pins.
+Before the merge, on the fix commit `7827e2d`, 40 of 40 plain drops of T3 Code ended home at the column's width at load 13 to 43 (verify-miri run `20261114-180700`), and Sam's 18 drags by hand did too (run `20261114-181444`).
+With a trigger that makes the engine miss the press, `main` at `5bb8ff25` widened the column in 6 of 10 drops (run `20261114-180208`), and the fix in 0 of 10 (run `20261114-180336`).
+`make verify-engine-lifecycle` cannot catch this bug, because its model has no window width or drag state, so the engine tests in `src/tests/drag/drop_width.rs` stand in for it.
+
+**Next:** after this PR merges, drag T3 Code below the 27-inch display 40 times on a `main` build with load above 10, tick both #414 boxes, and close #414.
 
 ## A quit app's column that focus moves cannot pass
 
