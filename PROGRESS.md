@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-14 on branch `fix/478-dead-strip-entry`, based on `main` at `e19d1066`
+Updated: 2026-11-14 on branch `fix/478-dead-strip-entry`, based on `main` at `2d1d918c`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -46,8 +46,10 @@ The same build gave a test window tucked beside the edge 7 photos, none blank, a
 Sam approved the Dark design on the Doop canvas "Miri app icon" on 13 November 2026.
 `assets/AppIcon.icon` (blue) and `assets/AppIcon-Developer.icon` (yellow) are Icon Composer files with Light and Dark artwork for each of three window layers.
 `scripts/build-app.sh` now compiles the Developer icon with `actool` into `Assets.car` and an `.icns` fallback, and sets `CFBundleIconName`.
-IconServices on macOS 27.0.1 returned the Light icon for the Light appearance and the graphite Dark icon for the Dark appearance from the built bundle.
-Next: Sam checks Finder and the Dock with the Dark and tinted icon styles, and the macOS 15 VM shows the icon.
+[#476](https://github.com/samanyudas/miri/pull/476) merged, and #475 closed on 14 November 2026 after verification on `main` at `163b6f0b`.
+On macOS 27.0.1, Finder and the Dock showed the right icon in the Default, Dark, clear, and tinted icon styles, for both the blue and the yellow icon.
+On macOS 15.7.7, in a new `sequoia15` Tart virtual machine, Finder showed the Light icon of the `main` build.
+macOS 15 has no icon style setting, and in Dark mode its Finder kept the Light icon, as it does for Apple's apps.
 
 ## A window rule's width that does not fit
 
