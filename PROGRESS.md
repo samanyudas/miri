@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-14 on branch `docs/177-closeout`, based on `main` at `477c51f8`
+Updated: 2026-11-15 on branch `fix/390-drop-display`, based on `main` at `92da0ca1`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,22 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A dropped window that ends on the other display
+
+[#390](https://github.com/samanyudas/miri/issues/390) reported that T3 Code, dropped below the 27-inch display's middle, sometimes ended in the built-in display's strip instead of its column.
+With "Displays have separate Spaces" on, macOS can carry a dragged window to the display that holds most of it, and T3 Code then moves the window back there after each of the engine's writes.
+The drop's placement ended as soon as the engine stopped writing, so a later read of macOS's Spaces admitted the other display.
+[paneru#186](https://github.com/samanyudas/paneru/pull/186) records at release whether macOS carried the window, and then holds the window at its place until it stays there for 500 ms, for at most 5 s, or until a new press takes it.
+It merged into `miri/v0.5.2` as `ca374cd`, which branch `fix/390-drop-display` pins.
+Plain drags no longer meet the issue's precondition: macOS carried T3 Code during the drag in 0 of 37 drops on 14 November 2026, against 11 of 12 on 8 November.
+So the drag tool `~/.cache/miri/390/axdrag390.swift` reproduces the carry and T3 Code's moves back.
+With it, `main` at `477c51f8` failed on the first drop, and the fix commit `9b3d42f` brought 73 of 74 valid drops home (verify-miri run `20261114-211357`).
+The one failure was a drag the engine had already ended 0.34 s before release, so it saw no drop, which is not this bug.
+`make verify-engine-lifecycle` passes but cannot catch this bug, because its model has no drags or displays, so the engine tests in `src/tests/drag/part_c.rs` stand in for it.
+
+**Next:** Sam merges the pin PR, then a check on the `main` build with the drag tool, and #390 closes.
+After that, #388's 20 of 20 check can run again.
 
 ## A dropped window that comes back wider than its column
 
@@ -433,7 +449,7 @@ In `verify-miri` run `20261108-xdisplay` (load average 4 to 8), 20 of 20 drops r
 It merged into `miri/v0.5.2` as `24fef41`, which branch `fix/388-pin-engine` pins.
 In `verify-miri` runs `20261110-034914`, `-035139`, `-035535`, and `-040113` on that pin, 17 of 20 valid quarter drops returned T3 Code to its full 1676 by 1394 frame, and none came back narrower.
 The other 3 ended on the built-in display, which is [#390](https://github.com/samanyudas/miri/issues/390), so #388's 20 of 20 criterion stays unticked.
-Next: Sam merges [#406](https://github.com/samanyudas/miri/pull/406), and the 20 of 20 check runs again after #390 is fixed.
+Next: the 20 of 20 check runs again after the #390 pin is on `main`.
 #277 closed on 6 November 2026 after `verify-miri` run `20261106-131827` on `main` at `5eb9366f`: the row named Rectangle and Magnet, management still started, and the row passed after both quit.
 
 ## Picture-in-Picture resizing
