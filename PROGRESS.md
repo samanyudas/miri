@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-14 on branch `docs/451-helium-correction`, based on `main` at `2d1d918c`
+Updated: 2026-11-14 on branch `fix/478-dead-strip-entry`, based on `main` at `58f06eec`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,16 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A quit app's column that focus moves cannot pass
+
+[#478](https://github.com/samanyudas/miri/issues/478) reported that Control-Option-Left and Right stopped at a column after its app quit while hidden, or while one of its windows was minimized or floating.
+The engine put the dying window back into its strip during the despawn, so the strip kept a dead entry until the engine restarted.
+[paneru#183](https://github.com/samanyudas/paneru/pull/183) skips that re-insert on a despawn and adds a system that prunes any dead strip entry.
+This branch pins its merge, `c8d5303`.
+A Miri Developer bundle with engine `dd7b429` passed the live check (verify-miri run `20261114-032642`).
+
+**Next:** after this PR merges, repeat the live check on a `main` build, then close #478.
 
 ## A tucked window's edge picture that never refreshes
 
