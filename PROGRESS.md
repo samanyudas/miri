@@ -24,6 +24,8 @@ A test window on a hidden native Space of the external display stayed managed in
 This branch moves the pin from `ca374cd` to their merge, `57f1f9d`.
 On a build of the paneru#185 commit (run `20261114-205936`), sleeps 3 and 4 kept 12 of 12 windows, and sleep 2 kept the three test windows but dropped Sam's Notes window through a path that the log did not name.
 On a build with both engine PRs (run `20261114-213949`), a window closed with its close button logged its path and the drop, and a window whose app quit logged the drop.
+On a build of this pin, `3cd02160` (run `20261115-004736`), 3 of 3 sleeps by Sam kept 11 of 11 windows, with Notes and two test windows on the built-in display, and the log had no drop line.
+In none of those wakes did macOS move a window to the other display.
 `make verify-engine-lifecycle` cannot catch this bug, because its model covers only engine start, stop, restart, and quit, so the engine tests in `src/ecs/triggers.rs` stand in for it.
 
 **Next:** after this pin merges, Sam sleeps and wakes a build of `main` a few times.
