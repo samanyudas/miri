@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-14 on branch `t3/issue-414-drag-width-restoration`, based on `main` at `d1d5dae4`
+Updated: 2026-11-14 on branch `docs/414-closeout`, based on `main` at `2f86ef91`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -20,12 +20,15 @@ The public release path and the complete acceptance runs follow.
 T3 Code widens its own window by 1 to 5 points during a drag.
 When the engine missed the press, or the drag was not confirmed yet, no hold protected the window, and the engine kept that size 200 ms after the frame held still.
 [paneru#182](https://github.com/samanyudas/paneru/pull/182) uses one definition of a held window for the resize check, the layout, and native membership, and returns a window to its slot when its new size came with a move.
-It merged as `a2f7c13`, which this PR pins.
+It merged as `a2f7c13`, which [#484](https://github.com/samanyudas/miri/pull/484) pins, and #484 merged as `2f86ef91`.
 Before the merge, on the fix commit `7827e2d`, 40 of 40 plain drops of T3 Code ended home at the column's width at load 13 to 43 (verify-miri run `20261114-180700`), and Sam's 18 drags by hand did too (run `20261114-181444`).
 With a trigger that makes the engine miss the press, `main` at `5bb8ff25` widened the column in 6 of 10 drops (run `20261114-180208`), and the fix in 0 of 10 (run `20261114-180336`).
 `make verify-engine-lifecycle` cannot catch this bug, because its model has no window width or drag state, so the engine tests in `src/tests/drag/drop_width.rs` stand in for it.
 
-**Next:** after this PR merges, drag T3 Code below the 27-inch display 40 times on a `main` build with load above 10, tick both #414 boxes, and close #414.
+On `main` at `2f86ef91`, 40 of 40 plain drops ended home at the column's width at load 60 to 77, and 10 of 10 drops with the trigger did too (verify-miri run `20261114-183944`).
+Both criteria are ticked, and #414 closed on 14 November 2026, with the evidence in its [verification comment](https://github.com/samanyudas/miri/issues/414#issuecomment-6874413096).
+
+**Next:** nothing for #414.
 
 ## A quit app's column that focus moves cannot pass
 
