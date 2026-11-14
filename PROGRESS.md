@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-14 on branch `docs/177-closeout`, based on `main` at `477c51f8`
+Updated: 2026-11-15 on branch `fix/210-locked-wake`, based on `main` at `92da0ca1`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,22 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A window that a locked wake moves between displays
+
+[#210](https://github.com/samanyudas/miri/issues/210) asked whether two engine paths drop a window that is off screen while the screen is locked.
+On `main` at `2f86ef91`, engine `a2f7c13`, a sleep and wake moved a Helium window from the built-in display to the external display, and the engine dropped it while the screen was still locked (verify-miri run `20261114-201714`).
+A test window on a hidden native Space of the external display stayed managed in that run.
+[paneru#185](https://github.com/samanyudas/paneru/pull/185) makes `cleanup_unordered_windows` wait while the screen is locked, and makes a Space notification during a lock wait for the window's new AX element.
+[paneru#187](https://github.com/samanyudas/paneru/pull/187) logs at info level every window the engine stops managing, with the path that dropped it.
+This branch pins their merge, `57f1f9d`, which also carries [paneru#186](https://github.com/samanyudas/paneru/pull/186) for [#390](https://github.com/samanyudas/miri/issues/390).
+On a build of the paneru#185 commit (run `20261114-205936`), sleeps 3 and 4 kept 12 of 12 windows, and sleep 2 kept the three test windows but dropped Sam's Notes window through a path that the log did not name.
+On a build with both engine PRs (run `20261114-213949`), a window closed with its close button logged its path and the drop, and a window whose app quit logged the drop.
+`make verify-engine-lifecycle` cannot catch this bug, because its model covers only engine start, stop, restart, and quit, so the engine tests in `src/ecs/triggers.rs` stand in for it.
+
+**Next:** after this pin merges, Sam sleeps and wakes a build of `main` a few times.
+If a window drops, the engine log names its path.
+If none drops, the second criterion of #210 can be ticked and the limitation row removed.
 
 ## A dropped window that comes back wider than its column
 
