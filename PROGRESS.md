@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-14 on branch `docs/414-closeout`, based on `main` at `2f86ef91`
+Updated: 2026-11-14 on branch `docs/177-closeout`, based on `main` at `477c51f8`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -691,7 +691,9 @@ A probe that made the engine's macOS calls kept focus on the 27-inch display 3 t
 On a `main` build at de3e051f, ⌃⌥⌘← from T3 Code toward the built-in display, emptied with a virtual workspace, failed 2 of 4 times.
 Sam checked by hand on the first fix build, engine `362988a`, with the built-in display on an empty native Space, and the first press moved focus there from T3 Code and from Finder.
 Not verified: another macOS version, a third display, and a Mac with Finder's desktop turned off, which now gets the "did not switch" message.
-[#177](https://github.com/samanyudas/miri/issues/177) did not reproduce on `main` on 2 November 2026 and waits on `needs-info`.
+[#177](https://github.com/samanyudas/miri/issues/177) is done and closed on 14 November 2026, verified on `main` at `477c51f8` with engine `a2f7c13`.
+Its two pacing tests pass there and fail with the fix from [paneru#136](https://github.com/samanyudas/paneru/pull/136) removed.
+The desktop gap was never seen on screen, and Sam chose to skip a live before and after.
 
 ## Stack overlap with real minimum heights
 
