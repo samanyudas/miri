@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-15 on branch `fix/390-quiet-pin`, based on `main` at `dada1f9f`
+Updated: 2026-11-15 on branch `fix/494-swipe-pin`, based on `main` at `5a35c158`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,16 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## A Window by window swipe that slides back to its start
+
+[#494](https://github.com/samanyudas/miri/issues/494): a long, quick three-finger swipe in Window by window mode often slid back to the window it started on.
+A passive capture of Sam's trackpad showed why: near the trackpad edge, a finger's touch ended and began again 1 to 14 ms apart, and the engine took that as a lift and a new swipe with no travel.
+[paneru#192](https://github.com/samanyudas/paneru/pull/192) continues the same swipe when a touch-down comes within 40 ms of the latest lift, before the strip starts to settle.
+It merged into `miri/v0.5.2` as `0de4eb0`, which branch `fix/494-swipe-pin` pins.
+On its fix commit `0b08549`, every swipe in Sam's hand check landed, and a replay of 79 captured swipes landed all 79, against 12 on the old engine `4016c1c`.
+
+**Next:** Sam merges the pin PR, then Sam swipes on the `main` build, and #494 closes.
 
 ## A window that a locked wake moves between displays
 
