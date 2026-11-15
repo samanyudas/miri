@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-15 on branch `fix/386-rewrite-beside-slot`, based on `main` at `8f7bdc87`
+Updated: 2026-11-15 on branch `fix/390-quiet-pin`, based on `main` at `dada1f9f`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -67,8 +67,14 @@ So the drag tool `~/.cache/miri/390/axdrag390.swift` reproduces the carry and T3
 With it, `main` at `477c51f8` failed on the first drop, and the fix commit `9b3d42f` brought 73 of 74 valid drops home (verify-miri run `20261114-211357`).
 The one failure was a drag the engine had already ended 0.34 s before release, so it saw no drop, which is not this bug.
 `make verify-engine-lifecycle` passes but cannot catch this bug, because its model has no drags or displays, so the engine tests in `src/tests/drag/part_c.rs` stand in for it.
+That fix is on `main` through [#487](https://github.com/samanyudas/miri/pull/487), and there 53 of 55 forced drops came home.
+In a debug trace of a failure, the engine ran no frame for 180 to 350 ms at a time while T3 Code was busy, and T3 Code's moves came and went in those gaps, so the hold never saw them and ended too early.
+[paneru#190](https://github.com/samanyudas/paneru/pull/190) restarts the 500 ms on each move notification for the window, within the same 5 s limit.
+It merged into `miri/v0.5.2` as `4016c1c`, which branch `fix/390-quiet-pin` pins.
+On its fix commit `0e676cf`, 25 of 25 forced drops and 10 of 10 plain drops came home (verify-miri run `20261115-034201`).
+In 11 hand drags by Sam on that build, macOS never carried T3 Code on its own (run `20261115-123921`).
 
-**Next:** Sam merges the pin PR, then a check on the `main` build with the drag tool, and #390 closes.
+**Next:** Sam merges the pin PR, then 20 forced drops on the `main` build, and #390 closes.
 After that, #388's 20 of 20 check can run again.
 
 ## A dropped window that comes back wider than its column
