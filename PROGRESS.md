@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-15 on branch `fix/496-pacing-flake-pin`, based on `main` at `56834746`
+Updated: 2026-11-15 on branch `docs/496-closeout`, based on `main` at `c0fc80a0`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -29,10 +29,9 @@ The CI flake that #495 hit once is [#496](https://github.com/samanyudas/miri/iss
 [#496](https://github.com/samanyudas/miri/issues/496): engine CI failed at random on tests that pace windows beside a slow app.
 Pacing stops waiting for a window shown late for 250 ms of engine time, and those tests let the slow app answer on the real clock, so a loaded runner passed the 250 ms first.
 [paneru#193](https://github.com/samanyudas/paneru/pull/193) changes only tests: the slow app's writes land between frames, so it shows each move one frame late on any machine.
-It merged into `miri/v0.5.2` as `2b0b096`, which branch `fix/496-pacing-flake-pin` pins.
+It merged into `miri/v0.5.2` as `2b0b096`, and [#498](https://github.com/samanyudas/miri/pull/498) pinned it on `main` as `c0fc80a0`.
 With the app's writes forced to 120 ms, the old tests failed with CI's messages, and the new ones passed, as they did 50 of 50 times each under load.
-
-**Next:** Sam merges the pin PR, then CI passes on `main`, and #496 closes.
+CI passed on `main` `c0fc80a0`, so #496 closed on 15 November.
 
 ## A window that a locked wake moves between displays
 
