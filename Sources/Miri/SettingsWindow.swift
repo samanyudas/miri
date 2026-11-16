@@ -155,35 +155,17 @@ struct SettingsSidebar: View {
     }
 
     /// Uses the same title as the page and menu buttons, so the action has one name everywhere.
-    /// A title too long for one line, as in some translations, wraps in a drawn button of the same shape,
-    /// because a bordered macOS button keeps one line and cuts the rest off.
+    /// A drawn button, because the system bordered fill nearly matches the sidebar gray and keeps one line.
     private func sidebarButton(_ title: String, action: @escaping () -> Void) -> some View {
-        ViewThatFits(in: .horizontal) {
-            Button(action: action) {
-                Text(title)
-                    .font(.detail.weight(.medium))
-                    .lineLimit(1)
-                    .fixedSize()
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.large)
-            .buttonBorderShape(.roundedRectangle)
-            Button(action: action) {
-                Text(title)
-                    .font(.detail.weight(.medium))
-                    .foregroundStyle(Palette.primaryText)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .frame(maxWidth: .infinity, minHeight: 28)
-                    .background(Palette.chip, in: .rect(cornerRadius: 6))
-                    .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Palette.groupRing, lineWidth: 0.5))
-                    .contentShape(.rect)
-            }
-            .buttonStyle(.plain)
+        Button(action: action) {
+            Text(title)
+                .font(.detail.weight(.medium))
+                .foregroundStyle(Palette.primaryText)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity)
         }
+        .buttonStyle(SidebarButtonStyle())
     }
 
     private var versionLine: String {
@@ -195,6 +177,24 @@ struct SettingsSidebar: View {
 
     private func badge(for page: SettingsView.Page) -> Int {
         page == .setup ? model.setupReviewCount : 0
+    }
+}
+
+/// A raised button on the sidebar: a lighter surface, a visible ring, and a small shadow, like a macOS push button.
+/// A title too long for one line, as in some translations, wraps inside the same shape.
+private struct SidebarButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .frame(maxWidth: .infinity, minHeight: 28)
+            .background(
+                configuration.isPressed ? Palette.sidebarButtonPressed : Palette.sidebarButton,
+                in: .rect(cornerRadius: 6)
+            )
+            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Palette.fieldRing, lineWidth: 0.5))
+            .shadow(color: .black.opacity(0.08), radius: 0.5, y: 0.5)
+            .contentShape(.rect)
     }
 }
 
