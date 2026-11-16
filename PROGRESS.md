@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-16 on branch `fix/500-lockstep`, based on `main` at `d555ddf8`
+Updated: 2026-11-16 on branch `fix/500-follow-travel-pin`, based on `main` at `920494ac`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -28,12 +28,17 @@ Live checks of stacks, a slow animation speed, and two displays then found three
 [paneru#195](https://github.com/samanyudas/paneru/pull/195) keeps the windows of a stack together while one of them shows late, and lets a slide finish whose first step rounds to no move.
 [paneru#196](https://github.com/samanyudas/paneru/pull/196) limits only the column that leads a row in to its first step, so a window pushed by a photo or by a quick window keeps its slide.
 With it, a photo that slides in on the external display covers a pushed Helium window by over 100 pt for about 60 ms, against about 36 ms on `main` and about 112 ms without it.
-All three merged into `miri/v0.5.2`, and branch `fix/500-lockstep` pins the last merge, `f014195`.
+All three merged into `miri/v0.5.2`, and `main` `920494ac` pins the last of them, `f014195`.
+The recheck on that `main` build found a fault in paneru#196: with a hidden window directly behind the window that comes in, that window lost its first-step limit, and the worst cover went back from about 284 pt to about 550 pt.
+A tucked window that its app reports a few points from where the engine asked counted as a column the engine had moved.
+[paneru#197](https://github.com/samanyudas/paneru/pull/197) lifts the limit only when a window of the column behind has gone further than the column's own first step.
+With it, the first shown move in that layout is at most 255 pt in 28 of 30 presses, and the worst cover is 316 to 408 pt.
+It merged as `72b4873`, which branch `fix/500-follow-travel-pin` pins.
 One limit stays: a focus change inside a stack of three apps in the middle of a slide leaves one window a step apart for a few frames.
 The issue's 100 pt criterion is not met, because the second cause remains, so #500 stays open.
 The two-display runs also showed two defects that `main` has as well, filed as [#502](https://github.com/samanyudas/miri/issues/502) and [#503](https://github.com/samanyudas/miri/issues/503).
 
-**Next:** Sam merges the pin PR, then an agent repeats the live runs on the `main` build.
+**Next:** Sam merges the pin PR, then an agent repeats the live runs on the `main` build, with a hidden window on both sides of the test row.
 Sam chooses what to do about the remaining cover from the options on the issue: a cap on the slide's top speed, moving the pushed window ahead of what is shown, photos of both windows, or a changed criterion.
 
 ## A Window by window swipe that slides back to its start
