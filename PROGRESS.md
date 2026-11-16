@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-16 on branch `fix/500-follow-travel-pin`, based on `main` at `920494ac`
+Updated: 2026-11-17 on branch `docs/500-recheck`, based on `main` at `9518d78c`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -33,12 +33,13 @@ The recheck on that `main` build found a fault in paneru#196: with a hidden wind
 A tucked window that its app reports a few points from where the engine asked counted as a column the engine had moved.
 [paneru#197](https://github.com/samanyudas/paneru/pull/197) lifts the limit only when a window of the column behind has gone further than the column's own first step.
 With it, the first shown move in that layout is at most 255 pt in 28 of 30 presses, and the worst cover is 316 to 408 pt.
-It merged as `72b4873`, which branch `fix/500-follow-travel-pin` pins.
+It merged as `72b4873`, which `main` `9518d78c` pins.
+A live run on that `main` build on the built-in display alone gave a worst cover of 252 and 332 pt for Excel and Helium, against 599 and 592 pt before, and a first shown move of at most 205 pt in every press.
 One limit stays: a focus change inside a stack of three apps in the middle of a slide leaves one window a step apart for a few frames.
 The issue's 100 pt criterion is not met, because the second cause remains, so #500 stays open.
 The two-display runs also showed two defects that `main` has as well, filed as [#502](https://github.com/samanyudas/miri/issues/502) and [#503](https://github.com/samanyudas/miri/issues/503).
 
-**Next:** Sam merges the pin PR, then an agent repeats the live runs on the `main` build, with a hidden window on both sides of the test row.
+**Next:** nothing is in flight for #500.
 Sam chooses what to do about the remaining cover from the options on the issue: a cap on the slide's top speed, moving the pushed window ahead of what is shown, photos of both windows, or a changed criterion.
 
 ## A Window by window swipe that slides back to its start
