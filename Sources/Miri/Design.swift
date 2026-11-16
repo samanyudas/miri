@@ -16,6 +16,9 @@ enum Palette {
     static let tertiaryText = dynamic(0x6E6E73, 0x8E8E96, contrast: (0x48484D, 0xB4B4BC))
 
     static let sidebar = dynamic(0xF4F4F6, 0x252528)
+    /// The fill of a button on the sidebar, lighter than the sidebar so the button stands out.
+    static let sidebarButton = dynamic(0xFFFFFF, 0x3A3A3D)
+    static let sidebarButtonPressed = dynamic(0xE8E8EC, 0x48484C)
     static let sidebarBorder = dynamic(0xE3E3E7, 0x38383B, contrast: (0xA8A8AF, 0x6A6A70))
     static let content = dynamic(0xFFFFFF, 0x1E1E20)
     static let group = dynamic(0xFFFFFF, 0x2A2A2D)
