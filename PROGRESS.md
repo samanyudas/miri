@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-15 on branch `docs/496-closeout`, based on `main` at `c0fc80a0`
+Updated: 2026-11-16 on branch `fix/500-lockstep`, based on `main` at `d555ddf8`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,22 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## An incoming window that covers the window it pushes
+
+[#500](https://github.com/samanyudas/miri/issues/500): on one display, a focus switch slides the incoming window over the window it pushes, which seems to freeze and then jump.
+A trace of each engine pass showed three causes.
+The engine counted 45 to 55 ms of slide time before the incoming app showed anything, so that window's first shown move was a jump of 330 to 560 pt.
+The pushed window follows where the incoming window is shown, so it trails by its own app's delay, a median 17 ms for Excel and 30 ms for Helium.
+A window that pacing held eased on from where it waited, and trailed for 100 ms or more.
+[paneru#194](https://github.com/samanyudas/paneru/pull/194) fixes the first and the third cause.
+It merged into `miri/v0.5.2` as `b73a851`, which branch `fix/500-lockstep` pins.
+On its fix commit `35bb0c6`, four live runs on the built-in display (main, fix, fix, main) took the worst cover per press from about 580 pt to about 250 pt, and the time above 100 pt of cover from about 150 ms to about 70 ms.
+No press showed the desktop between the pair.
+The issue's 100 pt criterion is not met, because the second cause remains, so #500 stays open.
+
+**Next:** Sam merges the pin PR, then an agent repeats the live runs on the `main` build.
+Sam chooses what to do about the remaining cover from the options on the issue: a cap on the slide's top speed, moving the pushed window ahead of what is shown, photos of both windows, or a changed criterion.
 
 ## A Window by window swipe that slides back to its start
 
