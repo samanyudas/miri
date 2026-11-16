@@ -57,21 +57,16 @@ final class WindowPresenter {
             case .diagnostics: NSSize(width: 640, height: 540)
             case .initialSetup, .permissionExperiment: nil
             }
-        // A window never gets smaller than the design, which its pages are laid out for.
-        // Settings grows for long pages such as Shortcuts, and a little wider for larger text.
-        // Copy Diagnostics grows without a limit to show more of its long report.
-        let maximumSize = NSSize(
-            width: kind == .settings ? 1100 : CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
         let host: NSHostingController<AnyView>
         if let designSize {
-            // The hosting controller sets the window's content size limits from these, and replaces any limits set on
+            // The window never gets smaller than the design, which its pages are laid out for.
+            // It has no maximum size: a maximum stops the animation when the title bar's double-click fills the display.
+            // The hosting controller sets the window's minimum size from the view's, and replaces any minimum set on
             // the window itself. It adds the title bar's height to the view's, as the content runs under the title bar.
             let titleBar = NSWindow.frameRect(forContentRect: .zero, styleMask: .titled).height
-            let limited = content.frame(
-                minWidth: designSize.width, maxWidth: maximumSize.width,
-                minHeight: designSize.height - titleBar, maxHeight: maximumSize.height)
+            let limited = content.frame(minWidth: designSize.width, minHeight: designSize.height - titleBar)
             host = NSHostingController(rootView: AnyView(limited.environment(\.presenter, self)))
-            host.sizingOptions = [.minSize, .maxSize]
+            host.sizingOptions = [.minSize]
         } else {
             host = NSHostingController(rootView: AnyView(content.environment(\.presenter, self)))
             host.sizingOptions = [.preferredContentSize]
@@ -100,15 +95,15 @@ final class WindowPresenter {
         let restored = window.setFrameUsingName(autosaveName)
         if !restored { window.center() }
         if let designSize {
-            // A new window opens at the design's size, and a reopened one keeps the size the user chose within the
-            // limits. Both keep their top-left corner.
+            // A new window opens at the design's size, and a reopened one keeps the size the user chose, at least the
+            // design's. Both keep their top-left corner.
             var frame = window.frame
             if !restored {
                 frame.origin.y += frame.height - designSize.height
                 frame.size = designSize
             }
-            window.setFrame(WindowSizeLimits.frame(frame, minimum: designSize, maximum: maximumSize), display: false)
-            window.keepSize(minimum: designSize, maximum: maximumSize)
+            window.setFrame(WindowSizeLimits.frame(frame, minimum: designSize), display: false)
+            window.keepMinimumSize(designSize)
         }
         if kind == .initialSetup {
             NotificationCenter.default.addObserver(
@@ -125,15 +120,15 @@ final class WindowPresenter {
 }
 
 extension NSWindow {
-    /// Resizes the window back within the size limits after any resize.
-    /// AppKit applies a window's limits only when the user drags its edge. A resize through Accessibility, such as one
-    /// from the engine or another window tool, sets any size and could make Settings too small for its layout.
-    fileprivate func keepSize(minimum: NSSize, maximum: NSSize) {
+    /// Resizes the window back to at least `minimum` after any resize.
+    /// AppKit applies a window's minimum size only when the user drags its edge. A resize through Accessibility, such as
+    /// one from the engine or another window tool, sets any size and could make Settings too small for its layout.
+    fileprivate func keepMinimumSize(_ minimum: NSSize) {
         NotificationCenter.default.addObserver(forName: NSWindow.didResizeNotification, object: self, queue: .main) {
             [weak self] _ in
             MainActor.assumeIsolated {
                 guard let window = self else { return }
-                let limited = WindowSizeLimits.frame(window.frame, minimum: minimum, maximum: maximum)
+                let limited = WindowSizeLimits.frame(window.frame, minimum: minimum)
                 if limited != window.frame { window.setFrame(limited, display: true) }
             }
         }
