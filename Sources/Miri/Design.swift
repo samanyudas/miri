@@ -112,12 +112,18 @@ extension Font {
     static let monoSmall = Font.subheadline.monospaced()
 }
 
+extension EnvironmentValues {
+    /// The height of the window's title bar, which the Settings content runs under.
+    @Entry var titleBarHeight: CGFloat = 0
+}
+
 /// A scrolling Settings page: a title, a short description, and its sections.
 struct SettingsPage<Trailing: View, Content: View>: View {
     let title: String
     let subtitle: String
     @ViewBuilder var trailing: Trailing
     @ViewBuilder var content: Content
+    @Environment(\.titleBarHeight) private var titleBarHeight
 
     var body: some View {
         ScrollView {
@@ -140,11 +146,13 @@ struct SettingsPage<Trailing: View, Content: View>: View {
                 content
             }
             .padding(.horizontal, 40)
-            .padding(.top, 44)
             .padding(.bottom, 32)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .scrollContentBackground(.hidden)
+        // The scroll view starts 12 points below the title bar, so content that scrolls up, and a section header
+        // that a page pins, stops there instead of under the window buttons.
+        .padding(.top, titleBarHeight + 12)
         .background(Palette.content)
     }
 }
