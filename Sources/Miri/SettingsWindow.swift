@@ -193,7 +193,7 @@ private struct SidebarButtonStyle: ButtonStyle {
                 configuration.isPressed ? Palette.sidebarButtonPressed : Palette.sidebarButton,
                 in: .rect(cornerRadius: 6)
             )
-            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Palette.fieldRing, lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Palette.groupRing, lineWidth: 1))
             .contentShape(.rect)
     }
 }
