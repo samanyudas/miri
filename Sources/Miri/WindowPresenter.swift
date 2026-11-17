@@ -1,4 +1,5 @@
 import AppKit
+import MiriCore
 import SwiftUI
 
 /// Opens Miri's windows. AppKit owns them, so the menu bar, a Dock reopen, and code all open the same window.
@@ -48,7 +49,6 @@ final class WindowPresenter {
                 )
             case .initialSetup: (String(localized: "Set Up Miri"), AnyView(InitialSetupView(model: model)))
             }
-        let host = NSHostingController(rootView: content.environment(\.presenter, self))
         // Settings and Copy Diagnostics draw under their title bars at the design's size.
         // Set Up Miri draws under its title bar too, and takes the height of its content.
         let designSize: NSSize? =
@@ -57,7 +57,20 @@ final class WindowPresenter {
             case .diagnostics: NSSize(width: 640, height: 540)
             case .initialSetup, .permissionExperiment: nil
             }
-        host.sizingOptions = designSize == nil ? [.preferredContentSize] : []
+        let host: NSHostingController<AnyView>
+        if let designSize {
+            // The window never gets smaller than the design, which its pages are laid out for.
+            // It has no maximum size: a maximum stops the animation when the title bar's double-click fills the display.
+            // The hosting controller sets the window's minimum size from the view's, and replaces any minimum set on
+            // the window itself. It adds the title bar's height to the view's, as the content runs under the title bar.
+            let titleBar = NSWindow.frameRect(forContentRect: .zero, styleMask: .titled).height
+            let limited = content.frame(minWidth: designSize.width, minHeight: designSize.height - titleBar)
+            host = NSHostingController(rootView: AnyView(limited.environment(\.presenter, self)))
+            host.sizingOptions = [.minSize]
+        } else {
+            host = NSHostingController(rootView: AnyView(content.environment(\.presenter, self)))
+            host.sizingOptions = [.preferredContentSize]
+        }
         let window = NSWindow(contentViewController: host)
         window.title = title
         window.styleMask = [.titled, .closable, .miniaturizable]
@@ -82,30 +95,15 @@ final class WindowPresenter {
         let restored = window.setFrameUsingName(autosaveName)
         if !restored { window.center() }
         if let designSize {
-            // The content covers the whole frame, so the frame is the design's size. Keep the saved top-left corner.
-            var size = designSize
-            if kind == .settings {
-                // Settings grows for long pages such as Shortcuts, and a little wider for larger text.
-                window.contentMinSize = NSSize(width: designSize.width, height: 560)
-                window.contentMaxSize = NSSize(width: 1100, height: CGFloat.greatestFiniteMagnitude)
-                // It opens at least the design's size, and keeps a larger size the user chose.
-                if restored {
-                    size.width = min(max(window.frame.width, designSize.width), 1100)
-                    size.height = max(window.frame.height, designSize.height)
-                }
-            }
-            if kind == .diagnostics {
-                // The report is long, so Copy Diagnostics can grow to show more of it.
-                window.contentMinSize = designSize
-                if restored {
-                    size.width = max(window.frame.width, designSize.width)
-                    size.height = max(window.frame.height, designSize.height)
-                }
-            }
+            // A new window opens at the design's size, and a reopened one keeps the size the user chose, at least the
+            // design's. Both keep their top-left corner.
             var frame = window.frame
-            frame.origin.y += frame.height - size.height
-            frame.size = size
-            window.setFrame(frame, display: false)
+            if !restored {
+                frame.origin.y += frame.height - designSize.height
+                frame.size = designSize
+            }
+            window.setFrame(WindowSizeLimits.frame(frame, minimum: designSize), display: false)
+            window.keepMinimumSize(designSize)
         }
         if kind == .initialSetup {
             NotificationCenter.default.addObserver(
@@ -118,6 +116,22 @@ final class WindowPresenter {
             }
         }
         return window
+    }
+}
+
+extension NSWindow {
+    /// Resizes the window back to at least `minimum` after any resize.
+    /// AppKit applies a window's minimum size only when the user drags its edge. A resize through Accessibility, such as
+    /// one from the engine or another window tool, sets any size and could make Settings too small for its layout.
+    fileprivate func keepMinimumSize(_ minimum: NSSize) {
+        NotificationCenter.default.addObserver(forName: NSWindow.didResizeNotification, object: self, queue: .main) {
+            [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let window = self else { return }
+                let limited = WindowSizeLimits.frame(window.frame, minimum: minimum)
+                if limited != window.frame { window.setFrame(limited, display: true) }
+            }
+        }
     }
 }
 

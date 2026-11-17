@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-17 on branch `docs/500-recheck`, based on `main` at `9518d78c`
+Updated: 2026-11-17 on branch `fix/settings-min-design-size`, based on `main` at `163abbd3`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,14 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Settings that shrinks smaller than its layout
+
+[#506](https://github.com/samanyudas/miri/issues/506): Settings had no working size limit, because the SwiftUI hosting controller replaced the limits that `WindowPresenter` set.
+The fix on branch `fix/settings-min-design-size` sets the minimum through the hosting controller and resizes Settings and Copy Diagnostics back to it after an Accessibility resize.
+Live on 17 November, Settings kept 880 by 640 points at least.
+A maximum width of 1100 points stopped the title bar double-click's Fill animation, so Settings has no maximum.
+Next: Sam merges, an agent rechecks on `main`, and Sam drags a Settings edge by hand, because synthetic drags do not resize windows.
 
 ## An incoming window that covers the window it pushes
 
