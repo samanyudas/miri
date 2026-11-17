@@ -37,23 +37,27 @@ struct SettingsView: View {
     @AppStorage(SettingsView.pageKey) private var page = Page.general
 
     var body: some View {
-        HStack(spacing: 0) {
-            SettingsSidebar(model: model, page: $page)
-            Group {
-                switch page {
-                case .setup: SetupSettings(model: model, page: $page)
-                case .general: GeneralSettings(model: model, page: $page)
-                case .layout: LayoutSettings(model: model)
-                case .shortcuts: ShortcutsSettings(model: model)
-                case .gestures: GestureSettings(model: model)
-                case .diagnostics: DiagnosticsSettings(model: model)
+        // The reader stays inside the safe area, so it measures the title bar that the content runs under.
+        GeometryReader { window in
+            HStack(spacing: 0) {
+                SettingsSidebar(model: model, page: $page)
+                Group {
+                    switch page {
+                    case .setup: SetupSettings(model: model, page: $page)
+                    case .general: GeneralSettings(model: model, page: $page)
+                    case .layout: LayoutSettings(model: model)
+                    case .shortcuts: ShortcutsSettings(model: model)
+                    case .gestures: GestureSettings(model: model)
+                    case .diagnostics: DiagnosticsSettings(model: model)
+                    }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .environment(\.titleBarHeight, window.safeAreaInsets.top)
             }
+            // The window presenter sets the 880 by 640 frame. The view fills it, under the title bar too.
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .ignoresSafeArea()
         }
-        // The window presenter sets the 880 by 640 frame. The view fills it, under the title bar too.
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea()
         .background(Palette.content)
     }
 }
