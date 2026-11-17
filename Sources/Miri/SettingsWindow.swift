@@ -180,7 +180,8 @@ struct SettingsSidebar: View {
     }
 }
 
-/// A raised button on the sidebar: a lighter surface, a visible ring, and a small shadow, like a macOS push button.
+/// A button on the sidebar: a lighter surface inside a one-point ring.
+/// The ring is a whole point wide, so it draws as an even line on a 1x display too, where a thinner ring blurs unevenly.
 /// A title too long for one line, as in some translations, wraps inside the same shape.
 private struct SidebarButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
@@ -192,8 +193,7 @@ private struct SidebarButtonStyle: ButtonStyle {
                 configuration.isPressed ? Palette.sidebarButtonPressed : Palette.sidebarButton,
                 in: .rect(cornerRadius: 6)
             )
-            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Palette.fieldRing, lineWidth: 0.5))
-            .shadow(color: .black.opacity(0.08), radius: 0.5, y: 0.5)
+            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Palette.groupRing, lineWidth: 1))
             .contentShape(.rect)
     }
 }
