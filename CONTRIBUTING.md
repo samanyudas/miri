@@ -120,6 +120,7 @@ Sam can read the diff and the verification evidence of any pull request.
 Hardware-dependent behavior needs Sam's hardware result before merge.
 
 An agent may merge a pull request once its CI checks pass and it meets the [definition of done](AGENTS.md#definition-of-done).
+A change that people can see or feel needs its Before and After images or video in the description first.
 If Sam asks to review a pull request first, wait for that review.
 CodeRabbit posts a summary on each pull request.
 Treat its findings as input, not as a review verdict.

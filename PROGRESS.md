@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-17 on branch `fix/settings-min-design-size`, based on `main` at `163abbd3`
+Updated: 2026-11-22 on branch `chore/agents-may-merge`, based on `main` at `742ce84f`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,15 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Agent merges and PR evidence
+
+[#514](https://github.com/samanyudas/miri/pull/514) lets agents merge once CI passes, the PR meets the definition of done, and a visible change shows Before and After evidence.
+It adds verify-miri `capture`, `record`, and `upload`, which capture only fixture windows and upload them as GitHub PR attachments through Ardia.
+A live run on 22 November 2026 produced the example table in the PR description, and a logged-out visitor can load its images.
+A second short run passed its recording check.
+Sam plugged in the external display during that run, so its `end` reported moved windows, and Sam accepted the new layout.
+Next: Sam merges #514, and the first agent PR with a visible change uses the new table.
 
 ## Settings that shrinks smaller than its layout
 

@@ -88,7 +88,7 @@ Before any step that changes the real desktop, including `make e2e`, take the [l
   End with the model and harness that did the work.
 - UI changes need before/after images.
   Motion or timing needs a short video.
-- Upload PR evidence to GitHub after Sam approves it, as [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#capture-evidence) describes.
+- Upload PR evidence to GitHub, with only disposable windows in the picture, as [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#capture-evidence) describes.
   Never commit PR-only screenshots or assets such as .github/pr-assets/.
 - One request is one PR.
   Split it only when the maintainer asks.

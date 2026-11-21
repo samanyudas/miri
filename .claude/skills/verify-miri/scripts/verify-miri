@@ -15,6 +15,7 @@ A run swaps the running Miri Developer for a test build, drives it, and puts eve
 from __future__ import annotations
 
 import argparse
+import base64
 import datetime
 import hashlib
 import json
@@ -187,7 +188,7 @@ def build_tools(quiet: bool = False) -> None:
     TOOLS.mkdir(parents=True, exist_ok=True)
     sources = SKILL / "scripts/tools"
     for name, source, compiler in (("axdo", "axdo.swift", ["swiftc", "-O"]), ("key", "key.swift", ["swiftc", "-O"]),
-                                   ("standin", "standin.c", ["cc", "-O"])):
+                                   ("fixturecap", "fixturecap.swift", ["swiftc", "-O"]), ("standin", "standin.c", ["cc", "-O"])):
         digest = hashlib.sha256((sources / source).read_bytes()).hexdigest()
         stamp = TOOLS / f"{name}.sha256"
         if (TOOLS / name).exists() and stamp.exists() and stamp.read_text() == digest:
@@ -619,9 +620,10 @@ def cmd_end(args) -> int:
     run = load_own_run(args.owner)
     problems = []
     folder = Path(run["dir"])
-    for item in run.get("fixtures", []) + run.get("standins", []):
+    recording = [run["recording"]] if run.get("recording") else []
+    for item in run.get("fixtures", []) + run.get("standins", []) + recording:
         pid = item["pid"]
-        if alive(pid) and item["path"] in command_of(pid):
+        if alive(pid) and (item["path"] in command_of(pid) or str(TOOLS / "fixturecap") in command_of(pid)):
             os.kill(pid, signal.SIGTERM)
             if not wait(lambda: not alive(pid), 3):
                 os.kill(pid, signal.SIGKILL)
@@ -892,6 +894,190 @@ def cmd_snapshot(args) -> int:
     return 0
 
 
+# ---------- PR media ----------
+# PR evidence shows only windows this run owns: the fixtures, and with --settings the test build's Settings window.
+# fixturecap draws nothing else, so Sam's apps, wallpaper, menu bar, and cursor never reach a picture.
+# Every file it writes is listed with its hash in <run>/media/manifest.json, and `upload` accepts only listed files.
+
+GITHUB_VIDEO_LIMIT = 10 * 1024 * 1024
+ATTACHMENT = re.compile(r"https://github\.com/user-attachments/assets/[0-9a-f-]+")
+
+
+def capture_targets(run: dict, args) -> tuple[str, list[str]]:
+    state = query("state", run["test_pid"])
+    rows = [w for w in fixture_windows(run, state) if w.get("visible")]
+    windows = [str(w["window_id"]) for w in rows]
+    if args.settings:
+        listing = tool("axdo", str(run["test_pid"]), "windows")
+        windows += [line.split()[0] for line in listing.splitlines() if " layer=0 " in line]
+    if not windows:
+        raise Failure("No visible fixture window to capture. Open one with `fixture`, or pass --settings.")
+    display = args.display or (rows[0]["display_id"] if rows else 1)
+    return str(display), windows
+
+
+def media_folder(run: dict) -> Path:
+    folder = Path(run["dir"]) / "media"
+    folder.mkdir(exist_ok=True)
+    return folder
+
+
+def add_to_manifest(folder: Path, path: Path, windows: list[str]) -> None:
+    manifest = folder / "manifest.json"
+    entries = json.loads(manifest.read_text()) if manifest.exists() else {}
+    entries[path.name] = {"sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "windows": windows}
+    manifest.write_text(json.dumps(entries, indent=2) + "\n")
+
+
+def cmd_capture(args) -> int:
+    run = load_run()
+    display, windows = capture_targets(run, args)
+    folder = media_folder(run)
+    image = folder / f"{args.label}.png"
+    tool("fixturecap", "still", str(image), display, *windows)
+    add_to_manifest(folder, image, windows)
+    log(run, f"capture {image.name}: display {display}, windows {' '.join(windows)}")
+    print(image)
+    return 0
+
+
+def cmd_record(args) -> int:
+    run = load_run()
+    folder = media_folder(run)
+    if args.action == "start":
+        if run.get("recording") and alive(run["recording"]["pid"]):
+            raise Failure(f"A recording already runs: {run['recording']['path']}. Run `record stop` first.")
+        display, windows = capture_targets(run, args)
+        build_tools(quiet=True)
+        movie = folder / f"{args.label}.mov"
+        # The recorder outlives this command, so it writes to a file rather than to a pipe that closes when V exits.
+        output = movie.with_suffix(".log")
+        with open(output, "w") as file:
+            process = subprocess.Popen([str(TOOLS / "fixturecap"), "record", str(movie), str(args.max_seconds), display,
+                                        *windows], stdout=file, stderr=subprocess.STDOUT, start_new_session=True)
+        if not wait(lambda: "recording " in output.read_text() or process.poll() is not None, 10):
+            process.kill()
+        if "recording " not in output.read_text():
+            raise Failure(f"fixturecap did not start: {output.read_text().strip()}")
+        run["recording"] = {"pid": process.pid, "path": str(movie), "label": args.label, "windows": windows,
+                            "name": "recording"}
+        save_run(run)
+        log(run, f"record start {movie.name}: display {display}, windows {' '.join(windows)}, at most {args.max_seconds} s")
+        print(f"recording {movie}; run `record stop` after the action")
+        return 0
+    recording = run.get("recording")
+    if not recording:
+        raise Failure("No recording runs. Start one with `record start <label>`.")
+    if alive(recording["pid"]):
+        os.kill(recording["pid"], signal.SIGINT)
+        if not wait(lambda: not alive(recording["pid"]), 15):
+            raise Failure(f"fixturecap {recording['pid']} did not stop.")
+    movie = Path(recording["path"])
+    video = movie.with_suffix(".mp4")
+    # H.264 in MP4 plays inline on GitHub. 1600 points wide keeps a short clip under GitHub's 10 MB video limit.
+    result = subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(movie), "-vf", "scale='min(1600,iw)':-2",
+                             "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "28", "-movflags", "+faststart", "-an",
+                             str(video)], capture_output=True, text=True)
+    if result.returncode:
+        raise Failure(f"ffmpeg could not convert {movie}: {result.stderr.strip()}")
+    add_to_manifest(movie.parent, video, recording["windows"])
+    run["recording"] = None
+    save_run(run)
+    size = video.stat().st_size
+    log(run, f"record stop {video.name}: {size} bytes")
+    print(video)
+    if size > GITHUB_VIDEO_LIMIT:
+        print(f"warning: {size} bytes is over GitHub's 10 MB video limit. Record a shorter clip.", file=sys.stderr)
+        return 1
+    return 0
+
+
+def ardia(*args: str, stdin: str | None = None) -> str:
+    result = subprocess.run(["ardia", *args], input=stdin, capture_output=True, text=True, timeout=300)
+    if result.returncode:
+        raise Failure(f"ardia {args[0]} {args[1] if len(args) > 1 else ''} failed: {(result.stdout + result.stderr).strip()}")
+    return result.stdout
+
+
+# The page script finds the new-comment box, which is the last visible Markdown editor on a pull request page.
+COMMENT_BOX = """const box = [...document.querySelectorAll("textarea")].filter(t => t.offsetParent).at(-1);
+const setValue = v => { Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value").set.call(box, v);
+  box.dispatchEvent(new Event("input", {bubbles: true})); };"""
+
+
+def upload_script(name: str, mime: str) -> str:
+    """Drops the file that earlier chunks put in window.__miriMedia on the comment box, and returns the box text."""
+    return f"""(async () => {{
+{COMMENT_BOX}
+if (box.value) return "NOT EMPTY";
+const bytes = Uint8Array.from(atob(window.__miriMedia.join("")), c => c.charCodeAt(0));
+delete window.__miriMedia;
+const data = new DataTransfer();
+data.items.add(new File([bytes], {json.dumps(name)}, {{type: {json.dumps(mime)}}}));
+for (const kind of ["dragenter", "dragover", "drop"])
+  box.dispatchEvent(new DragEvent(kind, {{dataTransfer: data, bubbles: true, cancelable: true}}));
+for (let i = 0; i < 480 && !/user-attachments.assets.[0-9a-f-]+/.test(box.value); i++) await new Promise(r => setTimeout(r, 250));
+const text = box.value;
+setValue("");
+return text;
+}})()"""
+
+
+def check_uploadable(path: Path) -> Path:
+    """Returns the resolved path of a file that `capture` or `record` wrote and nothing changed since, or fails."""
+    path = path.expanduser().resolve()
+    manifest = path.parent / "manifest.json"
+    entry = json.loads(manifest.read_text()).get(path.name) if manifest.exists() else None
+    if path.parent.name != "media" or path.parent.parent.parent != RUNS.resolve() or not entry:
+        raise Failure(f"{path} is not a capture from `capture` or `record`. Only those files may go to GitHub.")
+    if hashlib.sha256(path.read_bytes()).hexdigest() != entry["sha256"]:
+        raise Failure(f"{path} changed after its capture. Capture it again.")
+    if path.stat().st_size > GITHUB_VIDEO_LIMIT:
+        raise Failure(f"{path} is over GitHub's 10 MB attachment limit.")
+    return path
+
+
+def cmd_upload(args) -> int:
+    files = [check_uploadable(Path(f)) for f in args.files]
+    # Ardia can open a tab only while it has a window. Open one when it has none, and close it after.
+    # A new window's tab sleeps, and `open` fails, until the browser itself loads a page in it.
+    url = f"https://github.com/{args.repo}/pull/{args.pr}"
+    opened = None
+    lines = [json.dumps(["open", url])]
+    if not json.loads(ardia("windows", "--json") or "[]"):
+        opened = json.loads(ardia("call", "windows.create", "--params", "{}", "--json"))
+        ardia("call", "tabs.navigate", "--params", json.dumps({"tab": opened["activeTab"], "url": url}))
+        if not wait(lambda: subprocess.run(["ardia", "browse", "batch", "tab " + opened["activeTab"]],
+                                           capture_output=True, timeout=30).returncode == 0, 15, 0.5):
+            ardia("call", "windows.close", "--params", json.dumps({"window": opened["id"]}))
+            raise Failure(f"Ardia did not load {url} in its new window.")
+        lines = [json.dumps(["tab", opened["activeTab"]])]
+    lines.append(json.dumps(["wait", "--load", "networkidle"]))
+    for path in files:
+        encoded = base64.b64encode(path.read_bytes()).decode()
+        lines.append(json.dumps(["eval", "window.__miriMedia = []"]))
+        # Each Ardia request carries at most 1 MB.
+        for start in range(0, len(encoded), 600_000):
+            lines.append(json.dumps(["eval", f"window.__miriMedia.push({json.dumps(encoded[start:start + 600_000])}); 0"]))
+        mime = "video/mp4" if path.suffix == ".mp4" else "image/png"
+        lines.append(json.dumps(["eval", upload_script(path.name, mime)]))
+    lines.append(json.dumps(["close"]))
+    try:
+        output = ardia("browse", "batch", "--bail", stdin="\n".join(lines) + "\n")
+    finally:
+        if opened:
+            ardia("call", "windows.close", "--params", json.dumps({"window": opened["id"]}))
+    if "NOT EMPTY" in output:
+        raise Failure(f"The comment box on {url} holds a draft. Nothing was uploaded after it.")
+    links = ATTACHMENT.findall(output)
+    if len(links) != len(files):
+        raise Failure(f"Expected {len(files)} attachment links from {url}, got {len(links)}:\n{output[-2000:]}")
+    for path, link in zip(files, links):
+        markdown = link if path.suffix == ".mp4" else f'<img width="{args.width}" alt="{path.stem}" src="{link}" />'
+        print(f"{path.name}\t{markdown}")
+    return 0
+
+
 def cmd_ax(args) -> int:
     run = load_run(required=False)
     pid = str(test_pid(run)) if args.pid == "test" and run else args.pid
@@ -1121,6 +1307,25 @@ def main() -> int:
     p = sub.add_parser("snapshot", help="save focus state and fixture window images to the run folder")
     p.add_argument("label")
     p.set_defaults(func=cmd_snapshot)
+    for name, helper in (("capture", "save a PNG of the run's fixture windows and nothing else, for PR evidence"),
+                         ("record", "record a video of the run's fixture windows and nothing else, for PR evidence")):
+        p = sub.add_parser(name, help=helper)
+        if name == "record":
+            p.add_argument("action", choices=["start", "stop"])
+            p.add_argument("label", nargs="?", default="recording")
+            p.add_argument("--max-seconds", type=float, default=60, help="stop on its own after this long")
+        else:
+            p.add_argument("label")
+        p.add_argument("--display", type=int, help="CoreGraphics display ID; the first fixture's display by default")
+        p.add_argument("--settings", action="store_true", help="also show the test build's Settings window")
+        p.set_defaults(func=cmd_capture if name == "capture" else cmd_record)
+    p = sub.add_parser("upload", help="upload capture and record files to GitHub's attachment store through Ardia, "
+                                      "and print the Markdown for the PR body. Needs no run")
+    p.add_argument("--pr", type=int, required=True)
+    p.add_argument("--repo", default="samanyudas/miri")
+    p.add_argument("--width", type=int, default=480, help="display width of each image in the PR body")
+    p.add_argument("files", nargs="+")
+    p.set_defaults(func=cmd_upload)
     p = sub.add_parser("ax", help="axdo: dump, status, press <title>..., windows. PID 'test' means the test build")
     p.add_argument("pid")
     p.add_argument("rest", nargs=argparse.REMAINDER)
