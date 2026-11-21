@@ -37,7 +37,7 @@ Next: the pin PR merges, an agent checks every #513 criterion on `main`, and #51
 [paneru#191](https://github.com/samanyudas/paneru/pull/191), merged into `miri/v0.5.2` as `e78b0596`, writes the window back to its column.
 An app that keeps moving the window gets at most 3 answers within a quiet second, and a window in a hidden Space or parked offscreen keeps the old rule.
 Branch `fix/engine-pin-489-390` pins the engine to `64525dc7`, which also carries #390's fix, [paneru#200](https://github.com/samanyudas/paneru/pull/200).
-A failed write-back that overlaps a native Space switch is a follow-up.
+A failed write-back that overlaps a native Space switch is follow-up task [#521](https://github.com/samanyudas/miri/issues/521).
 Next: the pin PR merges, an agent checks both #489 criteria on `main`, and #489 closes.
 After that, #388's 20 of 20 check can run again.
 
