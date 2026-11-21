@@ -245,7 +245,8 @@ Sam chose this on 12 November 2026 in [#438](https://github.com/samanyudas/miri/
 V1 includes keyboard navigation, column resizing, window stacking, floating windows, and trackpad scrolling.
 V1 uses clicking and macOS window switching to access floating windows instead of a dedicated floating-to-tiled focus shortcut.
 Fixed-size windows and Miri's settings float automatically.
-Picture-in-Picture windows float automatically, stay above ordinary windows, and take keyboard focus once when they open.
+Picture-in-Picture windows float automatically, stay above ordinary windows, and take keyboard focus once when they open from the app in front.
+A window that a background app opens above ordinary windows floats but leaves keyboard focus with the app in front, as Sam decided on 22 November 2026 ([#515](https://github.com/samanyudas/miri/issues/515)).
 Miri treats any window that its app keeps above the normal window level as such a window, so it also floats an app's own always-on-top window.
 A Picture-in-Picture window stays on the display where it opened and does not follow focus to another display, as Sam decided on 26 October 2026.
 When a player window that entered Picture-in-Picture returns, it takes back its old size and place, or a visible place on the current display if its old workspace is not shown.
