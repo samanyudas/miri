@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-22 on branch `chore/agents-may-merge`, based on `main` at `742ce84f`
+Updated: 2026-11-22 on branch `fix/386-taller-release`, based on `main` at `44c1c3aa`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -102,14 +102,14 @@ A Lua `window_destroyed` handler still runs once per closed window, which an eng
 
 **Next:** nothing for #210.
 
-## A snapped window that waits beside its column
+## A snapped window that comes back late to its column
 
 [#386](https://github.com/samanyudas/miri/issues/386) reported that after a drop, a window that a snapping app tiled into a third got its column's size back at once but could stop beside its column for about 1 s.
 The engine writes the column's slot and then holds it for 1 s.
 T3 Code applies the restore's first size, sent while the window sat at the third's place, after the engine's later writes, and macOS then keeps the wide window beside its slot.
 During the hold the engine wrote nothing for that still frame, so the window waited for the hold to end, about 1.5 s after the release.
 [paneru#188](https://github.com/samanyudas/paneru/pull/188) writes the slot again once a frame beside it has held still for 100 ms, once per such frame, and also while the restore's size check is pending.
-It merged into `miri/v0.5.2` as `6fb9bcd`, which this branch pins.
+It merged into `miri/v0.5.2` as `6fb9bcd`, and [#492](https://github.com/samanyudas/miri/pull/492) pinned it.
 On its builds, in `verify-miri` runs with Control-Option-G and both Magnet and Rectangle running, 0 of 30 drops reached their column later than 1 s after the release (run `20261114-224648`), against 16 of 30 on `main` at `477c51f8` (run `20261114-225003`).
 With only Rectangle running, 18 of 20 drops returned within 1 s, against 13 of 20 on `main`.
 Magnet alone and Loop alone did not show the wait on either build.
@@ -117,7 +117,14 @@ In 20 Loop drops on the fix (run `20261115-041423`), none went by the built-in d
 On `main`, in drops 4 and 5 of run `20261115-042030`, Loop put its third on the built-in display, and the window stayed there after drop 5, so that comes from Loop's placement, not from the fix.
 `make verify-engine-lifecycle` passes but cannot catch this bug, because its model has no window frames, so the engine tests in `src/tests/drag/part_c.rs` stand in for it.
 
-**Next:** Sam merges this pin, then 30 drops with Rectangle on a `main` build, and #386 closes.
+On 22 November, with the built-in display below the 27-inch display, `main` at `44c1c3aa` still failed: 0 of 30 drops reached the column's full frame within 1 s of the release (run `20261122-051838`).
+The third reaches 8 pt past the display's bottom edge, and macOS ignores the small shrink back to the column's height.
+The window kept the third's 1410 pt height for 0.56 to 0.67 s, because the size check waited `LATE_RESIZE_GRACE` (500 ms) before it released the height.
+This is the taller height that #386 first reported, which did not reproduce on 14 November with the built-in display to the right.
+[paneru#199](https://github.com/samanyudas/paneru/pull/199) releases the height at once when a tile restore missed only the height, and merged as `ad0d32c`, which this branch pins.
+On its build, 30 of 30 drops were home within 1 s (run `20261122-053334`), and an AXFixture window showed the same before and after (runs `20261122-053846` and `20261122-054139`).
+
+**Next:** after this pin merges, 30 drops on a `main` build, and #386 closes.
 
 ## A dropped window that ends on the other display
 
