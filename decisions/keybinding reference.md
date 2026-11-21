@@ -127,7 +127,8 @@ Within one run of width changes, Miri remembers where the column started, so ret
 That memory ends when focus or the strip moves.
 Sam accepted this behavior on 19 October 2026.
 
-Maximize or restore window is the same toggle as a double-click on the window's title bar.
+Maximize or restore window is the same toggle as a double-click on a tiled window's title bar.
+On a floating window, the double-click is macOS's own zoom.
 A maximized window is a column as wide as the display, and focus moves scroll past it.
 It never creates a native full-screen Space.
 [Maximizing a window](release-scope.md#maximizing-a-window) records the rules.

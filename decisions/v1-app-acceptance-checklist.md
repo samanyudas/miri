@@ -131,7 +131,8 @@ Never leave windows stranded off-screen.
 15. Maximize a tiled window with ⌃⌥F, then move focus to the left and right past it, and swipe the strip past it.
     The window stays maximized and fills the usable area whenever it is in view, and no neighbor shows on top of it.
     A title-bar double-click restores it, the column returns to its earlier width, and the neighbors keep their sizes.
-    ⌃⌥F and the double-click do the same on a floating window, and no action creates a native full-screen Space.
+    On a floating window, ⌃⌥F fills the usable area, and a title-bar double-click zooms the window with the macOS animation, without a jump.
+    No action creates a native full-screen Space.
 16. Set **Maximized stacked window opens** to **Left of its stack**, then to **Right of its stack**, and maximize a stacked window each time.
     The window leaves its stack for a column of its own on the chosen side.
     On restore it returns to its old position in the stack when the stack still exists and has room.

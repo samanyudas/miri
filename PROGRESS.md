@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-22 on branch `fix/386-taller-release`, based on `main` at `44c1c3aa`
+Updated: 2026-11-22 on branch `fix/native-zoom-floating`, based on `main` at `c25a2e3e`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -23,13 +23,13 @@ A second short run passed its recording check.
 Sam plugged in the external display during that run, so its `end` reported moved windows, and Sam accepted the new layout.
 Next: Sam merges #514, and the first agent PR with a visible change uses the new table.
 
-## Settings that shrinks smaller than its layout
+## A floating window's title-bar zoom that jumps
 
-[#506](https://github.com/samanyudas/miri/issues/506): Settings had no working size limit, because the SwiftUI hosting controller replaced the limits that `WindowPresenter` set.
-The fix on branch `fix/settings-min-design-size` sets the minimum through the hosting controller and resizes Settings and Copy Diagnostics back to it after an Accessibility resize.
-Live on 17 November, Settings kept 880 by 640 points at least.
-A maximum width of 1100 points stopped the title bar double-click's Fill animation, so Settings has no maximum.
-Next: Sam merges, an agent rechecks on `main`, and Sam drags a Settings edge by hand, because synthetic drags do not resize windows.
+[#513](https://github.com/samanyudas/miri/issues/513): a title-bar double-click on a floating window sometimes jumped to its full size, because the engine wrote the filled frame over macOS's own zoom animation.
+[paneru#198](https://github.com/samanyudas/paneru/pull/198), merged as `ccb55c8`, leaves that double-click to macOS and keeps the frame macOS gives.
+Branch `fix/native-zoom-floating` pins the engine to `ccb55c8` and records the behavior in the decision docs.
+Next: the pin PR merges, an agent checks every #513 criterion on `main`, and #513 closes.
+[#506](https://github.com/samanyudas/miri/issues/506), the Settings minimum size, merged and closed on 17 November.
 
 ## An incoming window that covers the window it pushes
 
