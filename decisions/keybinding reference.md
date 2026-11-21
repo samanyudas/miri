@@ -128,8 +128,9 @@ That memory ends when focus or the strip moves.
 Sam accepted this behavior on 19 October 2026.
 
 Maximize or restore window is the same toggle as a double-click on a tiled window's title bar.
-On a floating window, the double-click is macOS's own zoom.
-A maximized window is a column as wide as the display, and focus moves scroll past it.
+On a floating window, the double-click runs the macOS action chosen in the **Double-click a window's title bar** setting in System Settings, such as Zoom with macOS's own animation.
+A double-click on a floating window that Maximize or restore window filled restores it instead.
+A maximized tiled window is a column as wide as the display, and focus moves scroll past it.
 It never creates a native full-screen Space.
 [Maximizing a window](release-scope.md#maximizing-a-window) records the rules.
 The width and height adjustment increment follows [Default shortcuts and layout](release-scope.md#default-shortcuts-and-layout).
