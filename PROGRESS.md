@@ -35,11 +35,11 @@ Next: the pin PR merges, an agent checks every #513 criterion on `main`, and #51
 
 [#489](https://github.com/samanyudas/miri/issues/489): when a window-snapping app such as Rectangle moved a tiled window without resizing it, the engine kept the window where the app put it, off its column.
 [paneru#191](https://github.com/samanyudas/paneru/pull/191), merged into `miri/v0.5.2` as `e78b0596`, writes the window back to its column.
-An app that keeps moving the window gets at most 3 answers within a quiet second, and a window in a hidden Space or parked offscreen keeps the old rule.
+The engine answers up to 3 moves at the same slot, and answers again after a second with no move or after a slot change.
+A window in a hidden Space or parked offscreen keeps the old rule.
 Branch `fix/engine-pin-489-390` pins the engine to `64525dc7`, which also carries #390's fix, [paneru#200](https://github.com/samanyudas/paneru/pull/200).
 A failed write-back that overlaps a native Space switch is follow-up task [#521](https://github.com/samanyudas/miri/issues/521).
 Next: the pin PR merges, an agent checks both #489 criteria on `main`, and #489 closes.
-After that, #388's 20 of 20 check can run again.
 
 ## An incoming window that covers the window it pushes
 
@@ -157,7 +157,7 @@ In 11 hand drags by Sam on that build, macOS never carried T3 Code on its own (r
 
 [paneru#200](https://github.com/samanyudas/paneru/pull/200) merged into `miri/v0.5.2` as `64525dc7`, which branch `fix/engine-pin-489-390` pins together with #489's fix.
 
-**Next:** the pin PR merges, then 20 forced drops on the `main` build, and #390 closes.
+**Next:** the pin PR merges, an agent checks every #390 criterion on `main`, including its engine test and 20 of 20 forced drops, and #390 closes.
 
 ## A dropped window that comes back wider than its column
 
@@ -578,7 +578,7 @@ In `verify-miri` run `20261108-xdisplay` (load average 4 to 8), 20 of 20 drops r
 It merged into `miri/v0.5.2` as `24fef41`, which branch `fix/388-pin-engine` pins.
 In `verify-miri` runs `20261110-034914`, `-035139`, `-035535`, and `-040113` on that pin, 17 of 20 valid quarter drops returned T3 Code to its full 1676 by 1394 frame, and none came back narrower.
 The other 3 ended on the built-in display, which is [#390](https://github.com/samanyudas/miri/issues/390), so #388's 20 of 20 criterion stays unticked.
-Next: the 20 of 20 check runs again after the #390 pin is on `main`.
+Next: the 20 of 20 check runs again after the #390 and #489 fixes are verified on `main`.
 #277 closed on 6 November 2026 after `verify-miri` run `20261106-131827` on `main` at `5eb9366f`: the row named Rectangle and Magnet, management still started, and the row passed after both quit.
 
 ## Picture-in-Picture resizing
