@@ -10,6 +10,17 @@ Use `Part of #123` for decisions, docs, or partial work.
 Keep issues open for agent verification after merge under CONTRIBUTING.md#issue-lifecycle.
 Use references rather than closing keywords such as Closes, Fixes, or Resolves, which bypass that verification. -->
 
+## Before and after
+
+<!-- UI changes need before/after images. Motion or timing needs a short video.
+Capture only disposable windows with verify-miri `capture` and `record`, and upload them with its `upload` command.
+Never commit the files. See docs/AI-CONTRIBUTIONS.md#capture-evidence.
+Write "No visible change" when nobody can see or feel the change. -->
+
+| Before | After |
+| --- | --- |
+|  |  |
+
 ## Verification
 
 <!-- List the commands you ran and their results. Paste the failing output from before the change when it exists.

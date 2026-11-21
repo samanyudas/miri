@@ -116,11 +116,12 @@ Closing keywords close the issue on merge before an agent verifies the landed ch
 
 ## Review and merge
 
-Sam reads the diff and the verification evidence of every pull request.
-Hardware-dependent behavior needs Sam's hardware result.
+Sam can read the diff and the verification evidence of any pull request.
+Hardware-dependent behavior needs Sam's hardware result before merge.
 
-Agents never merge.
-The command guard blocks `gh pr merge`, and Sam decides every merge.
+An agent may merge a pull request once its CI checks pass and it meets the [definition of done](AGENTS.md#definition-of-done).
+A change that people can see or feel needs its Before and After images or video in the description first.
+If Sam asks to review a pull request first, wait for that review.
 CodeRabbit posts a summary on each pull request.
 Treat its findings as input, not as a review verdict.
 
@@ -151,7 +152,7 @@ GitHub Actions does not manage issue completion, and silence is never evidence o
 Close a verified issue without waiting for a release or reporter silence.
 Release distribution acceptance, including installation and updates, remains separate from individual issue completion.
 If an issue explicitly requires release distribution evidence, that criterion still needs verification before closure.
-Sam continues to own merges and releases.
+Sam continues to own releases.
 
 The legacy labels `fixed (pending release)` and `please confirm close` record historical automation state, not completion proof.
 During agent re-evaluation, remove either obsolete label if present, whether the issue stays open or closes.

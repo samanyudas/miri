@@ -88,7 +88,7 @@ Before any step that changes the real desktop, including `make e2e`, take the [l
   End with the model and harness that did the work.
 - UI changes need before/after images.
   Motion or timing needs a short video.
-- Upload PR evidence to GitHub after Sam approves it, as [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#capture-evidence) describes.
+- Upload PR evidence to GitHub, with only disposable windows in the picture, as [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#capture-evidence) describes.
   Never commit PR-only screenshots or assets such as .github/pr-assets/.
 - One request is one PR.
   Split it only when the maintainer asks.
@@ -115,7 +115,7 @@ Never report one as another.
 `.claude/hooks/guard-command.py` blocks these commands for agents:
 
 - Pushing to `main`, force pushing, pushing with `--no-verify`, pushing tags, and deleting remote branches.
-- `gh pr merge`, release changes, and repository setting changes. Sam merges and releases.
+- Release changes and repository setting changes. Sam releases.
 - `git reset --hard`, `git clean -f`, and `git branch -D`.
 - `tccutil reset` and `defaults write`. Miri never changes privacy permissions or macOS settings.
 

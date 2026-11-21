@@ -28,9 +28,9 @@ Every command below runs from the repository root of the checkout you test.
 - Run `V doctor` right before `begin`.
   If its idle line says Sam used the Mac in the last minute and Sam did not ask for this run, ask before you drive.
   Check running T3 threads for a recent "testing live" message too. The lock covers agents, not Sam.
-- Evidence stays in `~/.cache/miri/verify-miri/runs/<run id>/`.
-  Never commit it, attach it, or upload it.
-  [Capture evidence](../../../docs/AI-CONTRIBUTIONS.md#capture-evidence) says how Sam approves media for a PR.
+- Evidence stays in `~/.cache/miri/verify-miri/runs/<run id>/`. Never commit it.
+  Only `capture` and `record` files go to GitHub, through `upload`, as [Capture evidence](../../../docs/AI-CONTRIBUTIONS.md#capture-evidence) describes.
+  `snapshot` PNGs come from `screencapture` and are not checked for other windows, so never upload them.
 - Prove behavior through the user's path: a key press, an AX press on a visible control, or an app that opens a window.
   `V send-cmd` sends engine commands directly. Use it only to set up a starting state, never as the proof.
 
@@ -83,6 +83,9 @@ Each drive command logs to `<run>/log.txt` with a timestamp.
 | `V key "ctrl+alt-leftarrow"` | Presses a chord, written as in `config.toml`, at the HID event tap. |
 | `V focused [--wait-for fixture-1]` | Prints the engine's focused window and macOS's frontmost app, named as fixtures. With `--wait-for`, exits 1 unless both views show that fixture within `--timeout` seconds (3 by default). |
 | `V snapshot <label>` | Writes `<label>.json` (the focus record and every fixture's frame, focus, visibility, and floating state) and one PNG per fixture window. |
+| `V capture <label>` | Writes `media/<label>.png`: the fixtures' display with only the run's fixture windows drawn, over plain grey. `--settings` adds the test build's Settings window, and `--display <id>` picks another display. |
+| `V record start <label>` | Starts an MP4 recording of the same view. Run the action, then `V record stop`, which writes `media/<label>.mp4`. It stops on its own after `--max-seconds` (60 by default), and `end` stops a recording that still runs. |
+| `V upload --pr <number> <files>` | Uploads `capture` and `record` files to the PR's GitHub attachments through Ardia, without posting a comment, and prints the Markdown for each. Needs no run. |
 | `V settings` | Reopens the test app, which shows Settings, as a user does from Finder or Spotlight. |
 | `V relaunch [--language de]` | Quits the test build with SIGTERM and opens it again, to check what it keeps across launches, such as a saved Stop. A build that starts no engine is a result, not a failure. `--language` starts it in that language through `-AppleLanguages`, without changing the Mac's language. |
 | `V ax test press "General"` | Presses Settings pages and buttons by title, accessibility description, or help text, in order. It looks for each one again after the previous press, so a page and a button on it work in one call. `dump` lists every element with its help text, `status` prints the status text of the page that shows, and `windows` lists window numbers. |
@@ -190,8 +193,10 @@ The layout check in step 6 is the proof.
 | [scripts/verify-miri](scripts/verify-miri) | The command above. `V --help` and `V <command> --help` list every option. |
 | [scripts/tools/axdo.swift](scripts/tools/axdo.swift) | Reads and presses Accessibility elements, lists window numbers, finds the built-in display, and hides and shows apps. |
 | [scripts/tools/key.swift](scripts/tools/key.swift) | Posts one key press with given flags at the HID event tap. |
+| [scripts/tools/fixturecap.swift](scripts/tools/fixturecap.swift) | Captures a still or a recording of one display with only the listed windows drawn, through ScreenCaptureKit. |
 | [scripts/tools/standin.c](scripts/tools/standin.c) | The sleeping stand-in process. |
 
-`V tools` compiles the three tools into `~/.cache/miri/verify-miri/tools/`. Other commands compile them when their source changes.
+`V tools` compiles the four tools into `~/.cache/miri/verify-miri/tools/`. Other commands compile them when their source changes.
 [scripts/tests/test_verify_miri.py](../../../scripts/tests/test_verify_miri.py) runs in `make lint`. It checks that every key in the default shortcuts has a key code here.
-The shell that runs `V` needs the macOS Accessibility permission, which T3 Code already has on this Mac.
+The shell that runs `V` needs the macOS Accessibility and Screen Recording permissions, which T3 Code already has on this Mac.
+`upload` needs Ardia running and signed in to GitHub, and `record` needs `ffmpeg`.

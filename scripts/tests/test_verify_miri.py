@@ -33,6 +33,30 @@ class VerifyMiriTest(unittest.TestCase):
         # Control and Option group masks, left-side bits 0x1 and 0x20, numeric-pad and Fn flags.
         self.assertEqual(flags, 0x40000 | 0x1 | 0x80000 | 0x20 | 0x200000 | 0x800000)
 
+    def test_upload_takes_only_unchanged_captures(self):
+        with tempfile.TemporaryDirectory() as home:
+            runs = Path(home, "runs").resolve()
+            media = runs / "run-1" / "media"
+            media.mkdir(parents=True)
+            image = media / "after.png"
+            image.write_bytes(b"fixture pixels")
+            self.vm.add_to_manifest(media, image, ["42"])
+            stray = media / "desktop.png"
+            stray.write_bytes(b"whole screen")
+            elsewhere = Path(home, "after.png")
+            elsewhere.write_bytes(b"fixture pixels")
+            saved, self.vm.RUNS = self.vm.RUNS, runs
+            try:
+                self.assertEqual(self.vm.check_uploadable(image), image)
+                for path, reason in ((stray, "not a capture"), (elsewhere, "not a capture")):
+                    with self.subTest(path=path.name), self.assertRaisesRegex(self.vm.Failure, reason):
+                        self.vm.check_uploadable(path)
+                image.write_bytes(b"edited pixels")
+                with self.assertRaisesRegex(self.vm.Failure, "changed after its capture"):
+                    self.vm.check_uploadable(image)
+            finally:
+                self.vm.RUNS = saved
+
     def test_letter_chords_have_no_arrow_flags(self):
         self.assertEqual(self.vm.parse_chord("ctrl+alt+shift-h"), (4, 0x40000 | 0x1 | 0x80000 | 0x20 | 0x20000 | 0x2))
 
