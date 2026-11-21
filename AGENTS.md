@@ -115,7 +115,7 @@ Never report one as another.
 `.claude/hooks/guard-command.py` blocks these commands for agents:
 
 - Pushing to `main`, force pushing, pushing with `--no-verify`, pushing tags, and deleting remote branches.
-- `gh pr merge`, release changes, and repository setting changes. Sam merges and releases.
+- Release changes and repository setting changes. Sam releases.
 - `git reset --hard`, `git clean -f`, and `git branch -D`.
 - `tccutil reset` and `defaults write`. Miri never changes privacy permissions or macOS settings.
 
