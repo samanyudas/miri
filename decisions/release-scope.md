@@ -372,7 +372,7 @@ Focus moves to the left or right and strip swipes scroll past it as usual.
 The maximized window slides away and back and stays maximized, and no neighbor shows on top of it.
 This matches niri's `maximize-column`.
 
-Control-Option-F and a double-click on a window's title bar, toolbar, or navigation bar are one toggle.
+Control-Option-F and a double-click on a tiled window's title bar, toolbar, or navigation bar are one toggle.
 Each maximizes the window, or restores it when it is maximized.
 Control-Option-F acts on the focused window, and the double-click acts on the clicked window.
 There is no timer.
@@ -382,8 +382,12 @@ A configuration that binds `window_fullwidth` keeps working, because the engine 
 
 Restore returns the column to its width just before maximizing, and the window to its earlier height.
 The neighbors keep their sizes.
-On a floating window, both triggers fill the usable area over the layout.
+On a floating window, Control-Option-F fills the usable area over the layout.
 A floating window returns to its earlier size, at the same offset from the top-left corner of the usable area, moved and shrunk as needed to stay on the display.
+A double-click on a floating window's title bar stays with macOS, which runs the action chosen in the **Double-click a window's title bar** setting in System Settings, such as Zoom with macOS's own animation.
+Miri keeps the frame macOS gives the window.
+A double-click still restores a floating window that Control-Option-F filled.
+Sam chose this on 20 November 2026, because Miri's own fill cut the macOS animation short and the window jumped ([#513](https://github.com/samanyudas/miri/issues/513)).
 
 Maximizing a stacked window moves it out of its stack into a column of its own.
 The **Maximized stacked window opens** setting chooses the side, **Left of its stack** or **Right of its stack**.
@@ -418,12 +422,13 @@ A window that comes back on another display fills that display.
 
 macOS also runs its own double-click action, such as Zoom.
 For one second after each toggle, Miri puts the window back at the frame the toggle gave it, so that action does not change the result.
+A title-bar double-click on a floating window that Miri has just restored ends that second early, so macOS's action stays.
 
 Known limitations:
 
 - A window with a maximum size grows only to that size, at the top-left corner of the usable area.
 - Chromium-based browsers can hide their tabs from Accessibility.
-  In such a browser, a double-click on a tab also maximizes the window.
+  In such a browser, a double-click on a tab also maximizes a tiled window, or restores a floating window that Control-Option-F filled.
 
 ## V2
 
