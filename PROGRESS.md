@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-22 on branch `docs/515-closeout`, based on `main` at `339345fb`
+Updated: 2026-11-22 on branch `docs/515-closeout`, based on `main` at `b8fd5af7`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -46,6 +46,36 @@ Next: the pin PR merges, an agent checks both #489 criteria on `main`, and #489 
 [#515](https://github.com/samanyudas/miri/issues/515) closed on 22 November, verified on `main` `339345fb` with engine `8d2a7935`.
 A floating window or Chrome Picture-in-Picture window from a background app now leaves keyboard focus with the app in front, in 5 of 5 runs each, and Picture-in-Picture from Chrome in front still takes focus.
 Nothing is in flight for #515.
+
+## A window that leaves across a shared edge late
+
+[#502](https://github.com/samanyudas/miri/issues/502): a window that left across an edge shared with another display waited half out under the incoming window, and in some presses its photo slid out over the incoming window 0.5 s or more after the press.
+Every two seconds the edge-photo refresh asked for every shown slice and every kept photo at once, 13 photos on Sam's Mac, and `ScreenCaptureKit` answers one capture at a time, so the leaving window's photo waited behind them.
+[paneru#203](https://github.com/samanyudas/paneru/pull/203), merged into `miri/v0.5.2` as `8af3e229`, queues the refresh photos, the visible panels before the kept photos.
+It starts the next one when the one before answers, or after one second if that one never does.
+A leaving window's photo does not join the queue, so it normally waits behind at most one refresh photo.
+A refresh also leaves alone a kept photo that a swipe asked for and that is still on its way.
+Branch `fix/502-refresh-queue-pin` pins the engine to `8af3e229`.
+Live on 22 November, with fixtures and a 4 ms sampler, the leaving window or its photo overlapped the incoming window by more than 100 pt later than 500 ms after the key in 4 of 10 presses on each display on `main` `e19cf9e0`, until 735 ms at the latest.
+With engine `6b9a2f7` on that `main`, it did in 0 of 30 presses on each display, and `6b9a2f7` differs from `8af3e229` only in the swipe case.
+The first criterion of #502 counts any overlap, and it does not hold as written on either build.
+At rest the leaving window keeps 1 pt and its edge photo 5 pt over the incoming window's outer edge after every press.
+Beyond that, with the fix, the last frames of the slide overlapped by at most 16 pt after 500 ms in 15 of 30 presses on the 27-inch display, ending by 672 ms, and in 7 of 30 on the built-in display, ending by 527 ms.
+Whether the criterion counts these is a question for Sam.
+Next: Sam answers the criterion question, the pin PR merges, an agent checks every #502 criterion on `main`, and #502 closes if they hold.
+[#503](https://github.com/samanyudas/miri/issues/503), a stack that splits as it leaves across a shared edge, stays open.
+
+## A stack that splits as it leaves across a shared edge
+
+[#503](https://github.com/samanyudas/miri/issues/503): the two windows of a stack that leaves across a shared display edge slid out apart.
+Each window waits half out for its own photo, and each photo slid on as soon as it arrived, so the stack split while the later photo was on its way.
+[paneru#202](https://github.com/samanyudas/paneru/pull/202), merged into `miri/v0.5.2` as `a46882d5`, moves the windows of one column as one: a sliding photo holds where a window of its column still waits, and a waiting window holds beside a photo that takes over from its mate.
+`a46882d5` also contains `8af3e229`, the #502 fix that `main` pins.
+Branch `fix/503-stack-leaves-together` pins the engine to `a46882d5`.
+Live on 22 November with three fixtures on the 27-inch display, 9 of 10 presses on `main` `339345fb` kept the stack more than 20 pt apart for over 50 ms, and 2 of 30 on the fix build `dfef1df`, for 64 and 51 ms.
+In both of those presses the engine asked both windows for the same horizontal position in every frame, and one fixture app showed its move about a frame after the other window or photo.
+The issue's first criterion is therefore not met, and Sam decides whether that lag counts.
+Next: the pin PR merges, an agent rechecks the #503 criteria on `main`, and #503 stays open until Sam answers the app-lag question.
 
 ## An incoming window that covers the window it pushes
 
