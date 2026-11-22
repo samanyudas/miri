@@ -34,9 +34,12 @@ Live checks on Sam's Mac on 23 November 2026, display 2 at 2560 by 1440 points:
 - A click on a picture 226 ms into a slide was held and posted on that window at the same point 13 ms after the cover lifted.
 - The engine's memory stayed at 45 MB with every picture kept.
 
-Not yet checked: covered swipes and flick swings on the real trackpad, the built-in display, and the cover's CPU cost over a working session.
+Sam tried the trackpad on 23 November 2026 and said it feels good.
+The cover then went through 5 sol-loop rounds with GPT-6.2 Sol and a review by Gemini 4 Neon, and every finding is fixed (engine `b6b03b0`) except Sol's S16: a press within a fraction of a point of a picture's edge, during a slide, can miss its replay, which awaits Sam's call.
+After the fixes, Sam's own use showed two covered swipes landing and lifting about 46 ms later.
+Not yet checked: the built-in display, a 60 fps recording against #509's criteria, and the cover's CPU cost over a working session.
 `make lint` reports one expected problem: the experiment's engine pin is not on the fork's `miri/v0.5.2` branch.
-Sam runs `~/.cache/miri/builds/spring-94ca830f` with `slide_window_pictures = true`, and `spring-ba1f10dc` is the build without the cover.
+Sam runs `~/.cache/miri/builds/spring-493cdb3c` with `slide_window_pictures = true` and cover debug logging, and `spring-ba1f10dc` is the build without the cover.
 
 ## Agent merges and PR evidence
 
