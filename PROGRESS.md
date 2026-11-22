@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-22 on branch `fix/502-refresh-queue-pin`, based on `main` at `339345fb`
+Updated: 2026-11-22 on branch `fix/503-stack-leaves-together`, based on `main` at `5ec244e1`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -70,6 +70,18 @@ Beyond that, with the fix, the last frames of the slide overlapped by at most 16
 Whether the criterion counts these is a question for Sam.
 Next: Sam answers the criterion question, the pin PR merges, an agent checks every #502 criterion on `main`, and #502 closes if they hold.
 [#503](https://github.com/samanyudas/miri/issues/503), a stack that splits as it leaves across a shared edge, stays open.
+
+## A stack that splits as it leaves across a shared edge
+
+[#503](https://github.com/samanyudas/miri/issues/503): the two windows of a stack that leaves across a shared display edge slid out apart.
+Each window waits half out for its own photo, and each photo slid on as soon as it arrived, so the stack split while the later photo was on its way.
+[paneru#202](https://github.com/samanyudas/paneru/pull/202), merged into `miri/v0.5.2` as `a46882d5`, moves the windows of one column as one: a sliding photo holds where a window of its column still waits, and a waiting window holds beside a photo that takes over from its mate.
+`a46882d5` also contains `8af3e229`, the #502 fix that `main` pins.
+Branch `fix/503-stack-leaves-together` pins the engine to `a46882d5`.
+Live on 22 November with three fixtures on the 27-inch display, 9 of 10 presses on `main` `339345fb` kept the stack more than 20 pt apart for over 50 ms, and 2 of 30 on the fix build `dfef1df`, for 64 and 51 ms.
+In both of those presses the engine moved the two windows together, and one fixture app showed its move about a frame after the other window or photo.
+The issue's first criterion is therefore not met, and Sam decides whether that lag counts.
+Next: the pin PR merges, an agent rechecks the #503 criteria on `main`, and #503 stays open until Sam answers the app-lag question.
 
 ## An incoming window that covers the window it pushes
 
@@ -2216,7 +2228,6 @@ The evidence and decision trail remain in `.audit/acceptance-pickup/` in the rep
   The previous commit kept a stale capacity of 6 after a simulated display notification, while the merged view immediately showed 3 and preserved the configured count of 5.
   This did not change physical displays or run the engine.
   This branch merges that result and keeps engine `db5bba3`, which contains both stack limit and stack overflow.
-
 
 - `feat/drag-insert-integration` starts from `main` at `49661a5` and pins engine merge `ffff464` from [samanyudas/paneru#29](https://github.com/samanyudas/paneru/pull/29), merged into `miri/v0.5.2` on 23 October 2026.
   This brings in the landed drag insertion and feedback changes from engine PRs #22, #23, and #28, together with part C from #29.
