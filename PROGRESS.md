@@ -35,7 +35,7 @@ Live checks on Sam's Mac on 23 November 2026, display 2 at 2560 by 1440 points:
 - The engine's memory stayed at 45 MB with every picture kept.
 
 Sam tried the trackpad on 23 November 2026 and said it feels good.
-The cover then went through 5 sol-loop rounds with GPT-6.2 Sol and a review by Gemini 4 Neon, and every finding is fixed (engine `b6b03b0`) except Sol's S16: a press within a fraction of a point of a picture's edge, during a slide, can miss its replay, which awaits Sam's call.
+The cover then went through 5 sol-loop rounds with GPT-6.2 Sol and a review by Gemini 4 Neon, and every finding is fixed (engine `b6b03b0`) except Sol's S16: a press within a fraction of a point of a picture's edge, during a slide, can miss its replay, which Sam chose to leave on 23 November 2026.
 After the fixes, Sam's own use showed two covered swipes landing and lifting about 46 ms later.
 Not yet checked: the built-in display, a 60 fps recording against #509's criteria, and the cover's CPU cost over a working session.
 `make lint` reports one expected problem: the experiment's engine pin is not on the fork's `miri/v0.5.2` branch.
