@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-22 on branch `fix/native-zoom-floating`, based on `main` at `c25a2e3e`
+Updated: 2026-11-22 on branch `fix/engine-pin-489-390`, based on `main` at `b53d8596`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -30,6 +30,16 @@ Next: Sam merges #514, and the first agent PR with a visible change uses the new
 Branch `fix/native-zoom-floating` pins the engine to `ccb55c8` and records the behavior in the decision docs.
 Next: the pin PR merges, an agent checks every #513 criterion on `main`, and #513 closes.
 [#506](https://github.com/samanyudas/miri/issues/506), the Settings minimum size, merged and closed on 17 November.
+
+## A tiled window that a snapping app moves off its column
+
+[#489](https://github.com/samanyudas/miri/issues/489): when a window-snapping app such as Rectangle moved a tiled window without resizing it, the engine kept the window where the app put it, off its column.
+[paneru#191](https://github.com/samanyudas/paneru/pull/191), merged into `miri/v0.5.2` as `e78b0596`, writes the window back to its column.
+The engine answers up to 3 moves at the same slot, and answers again after a second with no move or after a slot change.
+A window in a hidden Space or parked offscreen keeps the old rule.
+Branch `fix/engine-pin-489-390` pins the engine to `64525dc7`, which also carries #390's fix, [paneru#200](https://github.com/samanyudas/paneru/pull/200).
+A failed write-back that overlaps a native Space switch is follow-up task [#521](https://github.com/samanyudas/miri/issues/521).
+Next: the pin PR merges, an agent checks both #489 criteria on `main`, and #489 closes.
 
 ## An incoming window that covers the window it pushes
 
@@ -145,8 +155,9 @@ It merged into `miri/v0.5.2` as `4016c1c`, which branch `fix/390-quiet-pin` pins
 On its fix commit `0e676cf`, 25 of 25 forced drops and 10 of 10 plain drops came home (verify-miri run `20261115-034201`).
 In 11 hand drags by Sam on that build, macOS never carried T3 Code on its own (run `20261115-123921`).
 
-**Next:** Sam merges the pin PR, then 20 forced drops on the `main` build, and #390 closes.
-After that, #388's 20 of 20 check can run again.
+[paneru#200](https://github.com/samanyudas/paneru/pull/200) merged into `miri/v0.5.2` as `64525dc7`, which branch `fix/engine-pin-489-390` pins together with #489's fix.
+
+**Next:** the pin PR merges, an agent checks every #390 criterion on `main`, including its engine test and 20 of 20 forced drops, and #390 closes.
 
 ## A dropped window that comes back wider than its column
 
@@ -567,7 +578,7 @@ In `verify-miri` run `20261108-xdisplay` (load average 4 to 8), 20 of 20 drops r
 It merged into `miri/v0.5.2` as `24fef41`, which branch `fix/388-pin-engine` pins.
 In `verify-miri` runs `20261110-034914`, `-035139`, `-035535`, and `-040113` on that pin, 17 of 20 valid quarter drops returned T3 Code to its full 1676 by 1394 frame, and none came back narrower.
 The other 3 ended on the built-in display, which is [#390](https://github.com/samanyudas/miri/issues/390), so #388's 20 of 20 criterion stays unticked.
-Next: the 20 of 20 check runs again after the #390 pin is on `main`.
+Next: the 20 of 20 check runs again after the #390 and #489 fixes are verified on `main`.
 #277 closed on 6 November 2026 after `verify-miri` run `20261106-131827` on `main` at `5eb9366f`: the row named Rectangle and Magnet, management still started, and the row passed after both quit.
 
 ## Picture-in-Picture resizing
