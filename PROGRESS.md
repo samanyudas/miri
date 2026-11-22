@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-22 on branch `fix/503-stack-leaves-together`, based on `main` at `5ec244e1`
+Updated: 2026-11-22 on branch `docs/515-closeout`, based on `main` at `b8fd5af7`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -43,15 +43,9 @@ Next: the pin PR merges, an agent checks both #489 criteria on `main`, and #489 
 
 ## A background app's floating window that takes focus
 
-[#515](https://github.com/samanyudas/miri/issues/515): a floating panel or Chrome Picture-in-Picture window that a background app opened took keyboard focus and pulled that app in front.
-When Miri focused a new window kept above ordinary windows, the #77 change skipped the frontmost-app check that other new windows pass.
-Sam chose on 22 November to restore that check, so such a window takes focus only when its app is in front.
-[paneru#201](https://github.com/samanyudas/paneru/pull/201), merged into `miri/v0.5.2` as `8d2a7935`, restores it.
-Branch `fix/515-background-focus` pins the engine to `8d2a7935` and records the rule in the decision docs.
-Live on 22 November, the floating window took focus 6 of 6 times on `main` `b53d8596` and 0 of 6 on the fix build, and background Chrome Picture-in-Picture 3 of 3 and 0 of 3.
-With Chrome in front, its Document Picture-in-Picture window received keyboard focus 3 of 3 times on both builds.
-The background trials used video Picture-in-Picture.
-Next: the pin PR merges, an agent checks every #515 criterion on `main`, and #515 closes.
+[#515](https://github.com/samanyudas/miri/issues/515) closed on 22 November, verified on `main` `339345fb` with engine `8d2a7935`.
+A floating window or Chrome Picture-in-Picture window from a background app now leaves keyboard focus with the app in front, in 5 of 5 runs each, and Picture-in-Picture from Chrome in front still takes focus.
+Nothing is in flight for #515.
 
 ## A window that leaves across a shared edge late
 
