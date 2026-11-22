@@ -62,11 +62,11 @@ It starts the next one when the one before answers, or after one second if that 
 A leaving window's photo does not join the queue, so it normally waits behind at most one refresh photo.
 A refresh also leaves alone a kept photo that a swipe asked for and that is still on its way.
 Branch `fix/502-refresh-queue-pin` pins the engine to `8af3e229`.
-Live on 22 November, with fixtures and a 4 ms sampler, the leaving window or its photo overlapped the incoming window by more than 100 pt later than 500 ms after the key in 4 of 10 presses on each display on `main` `e19cf9e0`, until 722 ms at the latest.
+Live on 22 November, with fixtures and a 4 ms sampler, the leaving window or its photo overlapped the incoming window by more than 100 pt later than 500 ms after the key in 4 of 10 presses on each display on `main` `e19cf9e0`, until 735 ms at the latest.
 With engine `6b9a2f7` on that `main`, it did in 0 of 30 presses on each display, and `6b9a2f7` differs from `8af3e229` only in the swipe case.
 The first criterion of #502 counts any overlap, and it does not hold as written on either build.
 At rest the leaving window keeps 1 pt and its edge photo 5 pt over the incoming window's outer edge after every press.
-Beyond that, with the fix, the last frames of the slide overlapped by at most 16 pt after 500 ms in 15 of 30 presses on the 27-inch display and 7 of 30 on the built-in display, ending by 574 ms.
+Beyond that, with the fix, the last frames of the slide overlapped by at most 16 pt after 500 ms in 15 of 30 presses on the 27-inch display, ending by 672 ms, and in 7 of 30 on the built-in display, ending by 527 ms.
 Whether the criterion counts these is a question for Sam.
 Next: Sam answers the criterion question, the pin PR merges, an agent checks every #502 criterion on `main`, and #502 closes if they hold.
 [#503](https://github.com/samanyudas/miri/issues/503), a stack that splits as it leaves across a shared edge, stays open.
