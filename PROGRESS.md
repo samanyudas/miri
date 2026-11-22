@@ -57,9 +57,11 @@ Next: the pin PR merges, an agent checks every #515 criterion on `main`, and #51
 
 [#502](https://github.com/samanyudas/miri/issues/502): a window that left across an edge shared with another display waited half out under the incoming window, and in some presses its photo slid out over the incoming window 0.5 s or more after the press.
 Every two seconds the edge-photo refresh asked for every shown slice and every kept photo at once, 13 photos on Sam's Mac, and `ScreenCaptureKit` answers one capture at a time, so the leaving window's photo waited behind them.
-[paneru#203](https://github.com/samanyudas/paneru/pull/203), merged into `miri/v0.5.2` as `8af3e229`, starts refresh photos one at a time, so a leaving window's photo waits behind one at most.
+[paneru#203](https://github.com/samanyudas/paneru/pull/203), merged into `miri/v0.5.2` as `8af3e229`, queues the refresh photos and starts them one at a time, the visible panels before the kept photos, so a leaving window's photo waits behind at most one refresh photo.
+A refresh also leaves alone a kept photo that a swipe asked for and that is still on its way.
 Branch `fix/502-refresh-queue-pin` pins the engine to `8af3e229`.
-Live on 22 November, with fixtures and a 4 ms sampler, the photo showed over the incoming window later than 500 ms in 4 of 10 presses on each display on `main` `e19cf9e0`, and in 0 of 30 on each display on the fix build.
+Live on 22 November, with fixtures and a 4 ms sampler, the leaving window or its photo overlapped the incoming window by more than 100 pt later than 500 ms after the key in 4 of 10 presses on each display on `main` `e19cf9e0`.
+With engine `6b9a2f7` on that `main`, it did in 0 of 30 presses on each display, and `6b9a2f7` differs from `8af3e229` only in the swipe case.
 Next: the pin PR merges, an agent checks every #502 criterion on `main`, and #502 closes.
 [#503](https://github.com/samanyudas/miri/issues/503), a stack that splits as it leaves across a shared edge, stays open.
 
