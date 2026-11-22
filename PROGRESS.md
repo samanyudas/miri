@@ -25,6 +25,10 @@ On top of `main` at `1542cd60` it adds, in order:
   This changes Sam's 12 November no-overshoot settle at Sam's request, as `decisions/release-scope.md` records.
 - The picture cover of [#509](https://github.com/samanyudas/miri/issues/509) for keyboard strip moves, with the **Slide pictures of windows** switch and the ADR 0002 amendment (engine `e07b9bd`).
 - Click replay on cover pictures and covered swipes (engine `0de348c`).
+- Keyboard moves that only touch the strip stay under the cover, through a layout fingerprint (engine `8a85b29`).
+- Column resizes under the cover (engine `72f3a2d` to `72a2cf8`): the real windows take their final frames once under the cover, each picture moves from its old frame to its new one on the spring with the gaps held, and the cover fades out over the real windows once they show their new frames.
+  Sam chose this on 23 November 2026 over leaving the overlap, trading it for desktop gaps, or covering only the neighbors.
+  Gemini 4 Neon planned it, it went through 5 sol-loop rounds with GPT-6.2 Sol and a review by Neon, and every finding is fixed except four declined as rare: a parked window's edge sliver hides under the cover, a press during the morph goes to the final frames, the landing reads the window server on the engine thread, and two strips' covers on one display in one pass.
 
 Live checks on Sam's Mac on 23 November 2026, display 2 at 2560 by 1440 points:
 
@@ -37,9 +41,11 @@ Live checks on Sam's Mac on 23 November 2026, display 2 at 2560 by 1440 points:
 Sam tried the trackpad on 23 November 2026 and said it feels good.
 The cover then went through 5 sol-loop rounds with GPT-6.2 Sol and a review by Gemini 4 Neon, and every finding is fixed (engine `b6b03b0`) except Sol's S16: a press within a fraction of a point of a picture's edge, during a slide, can miss its replay, which Sam chose to leave on 23 November 2026.
 After the fixes, Sam's own use showed two covered swipes landing and lifting about 46 ms later, and Sam said keyboard moves on `spring-493cdb3c` are good.
-Not yet checked: a 60 fps recording against #509's criteria, and the cover's CPU cost over a working session.
+Covered resizes on three fixture windows on 23 November 2026 landed 250 to 280 ms after the key, faded 20 to 40 ms later, and the cover came off about 430 ms after the key; screenshots every 50 ms showed the gaps held.
+After a relaunch, macOS showed its prompt that Miri Developer asks to bypass the private window picker, which awaits Sam.
+Not yet checked: Sam's own resizes and whether the stretched picture is acceptable, a 60 fps recording against #509's criteria, and the cover's CPU cost over a working session.
 `make lint` reports one expected problem: the experiment's engine pin is not on the fork's `miri/v0.5.2` branch.
-Sam runs `~/.cache/miri/builds/spring-493cdb3c` with `slide_window_pictures = true` and cover debug logging, and `spring-ba1f10dc` is the build without the cover.
+Sam runs `~/.cache/miri/builds/spring-4c6957cf` with `slide_window_pictures = true` and cover debug logging, and `spring-ba1f10dc` is the build without the cover.
 
 ## Agent merges and PR evidence
 
