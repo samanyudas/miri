@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-22 on branch `docs/515-closeout`, based on `main` at `b8fd5af7`
+Updated: 2026-11-23 on branch `exp/spring-on-main`, based on `main` at `1542cd60`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,30 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Apple motion experiment on `exp/spring-on-main`, 23 November 2026
+
+This branch is a local experiment and is not for `main` until Sam feels it.
+It lives in the worktree `../miri-spring-main`, with the engine on its own `exp/spring-on-main` branch, and nothing is pushed.
+On top of `main` at `1542cd60` it adds, in order:
+
+- The critically damped spring ease from 17 November, rebased (engine `96a4328`, `4db9c58`).
+- A slight swing past the landing after a trackpad flick, and Apple's rubber band past both strip ends (engine `6c53864`), reviewed in 4 sol-loop rounds and by Gemini 4 Neon.
+  This changes Sam's 12 November no-overshoot settle at Sam's request, as `decisions/release-scope.md` records.
+- The picture cover of [#509](https://github.com/samanyudas/miri/issues/509) for keyboard strip moves, with the **Slide pictures of windows** switch and the ADR 0002 amendment (engine `e07b9bd`).
+- Click replay on cover pictures and covered swipes (engine `0de348c`).
+
+Live checks on Sam's Mac on 23 November 2026, display 2 at 2560 by 1440 points:
+
+- Focus moves of 1684 points went under the cover with 4 pictures, the slide lasted 237 to 262 ms, each real window moved once under it, and the cover came off 14 ms after the last window landed.
+  The two Helium windows took their positions about 160 ms apart, hidden under the cover.
+- A screenshot partway through a slide showed the pictures in place, and the menu bar stayed live.
+- A click on a picture 226 ms into a slide was held and posted on that window at the same point 13 ms after the cover lifted.
+- The engine's memory stayed at 45 MB with every picture kept.
+
+Not yet checked: covered swipes and flick swings on the real trackpad, the built-in display, and the cover's CPU cost over a working session.
+`make lint` reports one expected problem: the experiment's engine pin is not on the fork's `miri/v0.5.2` branch.
+Sam runs `~/.cache/miri/builds/spring-94ca830f` with `slide_window_pictures = true`, and `spring-ba1f10dc` is the build without the cover.
 
 ## Agent merges and PR evidence
 
