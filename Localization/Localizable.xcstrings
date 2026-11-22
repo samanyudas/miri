@@ -4490,132 +4490,132 @@
         }
       }
     },
-    "A keyboard move slides pictures of the windows, then moves the windows once, so a slow app cannot make the motion stutter. Needs Screen Recording permission.": {
+    "A keyboard move or a swipe slides pictures of the windows, then moves the windows once, so a slow app cannot make the motion stutter. Needs Screen Recording permission.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "تحرّك حركة لوحة المفاتيح صور النوافذ، ثم تنقل النوافذ مرة واحدة، فلا يستطيع تطبيق بطيء أن يجعل الحركة متقطعة. يتطلب ذلك إذن تسجيل الشاشة وصوت النظام."
+            "value": "تحرّك حركة لوحة المفاتيح أو السحب صور النوافذ، ثم تنقل النوافذ مرة واحدة، فلا يستطيع تطبيق بطيء أن يجعل الحركة متقطعة. يتطلب ذلك إذن تسجيل الشاشة وصوت النظام."
           }
         },
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Eine Bewegung per Tastatur lässt Bilder der Fenster gleiten und bewegt die Fenster dann einmal, sodass eine langsame App die Bewegung nicht stocken lassen kann. Erfordert die Berechtigung „Aufnahme von Bildschirm & Systemaudio“."
+            "value": "Eine Bewegung per Tastatur oder Wischen lässt Bilder der Fenster gleiten und bewegt die Fenster dann einmal, sodass eine langsame App die Bewegung nicht stocken lassen kann. Erfordert die Berechtigung „Aufnahme von Bildschirm & Systemaudio“."
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Un movimiento con el teclado desliza imágenes de las ventanas y luego mueve las ventanas una sola vez, para que una app lenta no pueda entrecortar el movimiento. Requiere el permiso “Grabación de pantalla y del audio del sistema”."
+            "value": "Un movimiento con el teclado o un deslizamiento desliza imágenes de las ventanas y luego mueve las ventanas una sola vez, para que una app lenta no pueda entrecortar el movimiento. Requiere el permiso “Grabación de pantalla y del audio del sistema”."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Un déplacement au clavier fait glisser des images des fenêtres, puis déplace les fenêtres une seule fois, pour qu’une app lente ne puisse pas saccader le mouvement. Nécessite l’autorisation « Enregistrement de l’écran et des sons du système »."
+            "value": "Un déplacement au clavier ou un balayage fait glisser des images des fenêtres, puis déplace les fenêtres une seule fois, pour qu’une app lente ne puisse pas saccader le mouvement. Nécessite l’autorisation « Enregistrement de l’écran et des sons du système »."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "कीबोर्ड से किया गया मूव विंडो की तस्वीरें खिसकाता है, फिर विंडो को एक बार में ले जाता है, ताकि कोई धीमा ऐप गति को अटका न सके। इसके लिए स्क्रीन और सिस्टम ऑडियो रिकॉर्डिंग की अनुमति ज़रूरी है।"
+            "value": "कीबोर्ड से किया गया मूव या स्वाइप विंडो की तस्वीरें खिसकाता है, फिर विंडो को एक बार में ले जाता है, ताकि कोई धीमा ऐप गति को अटका न सके। इसके लिए स्क्रीन और सिस्टम ऑडियो रिकॉर्डिंग की अनुमति ज़रूरी है।"
           }
         },
         "id": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Gerakan dengan papan ketik menggeser gambar jendela, lalu memindahkan jendela sekali, sehingga app yang lambat tidak dapat membuat gerakan tersendat. Memerlukan izin Rekaman Layar & Audio Sistem."
+            "value": "Gerakan dengan papan ketik atau usapan menggeser gambar jendela, lalu memindahkan jendela sekali, sehingga app yang lambat tidak dapat membuat gerakan tersendat. Memerlukan izin Rekaman Layar & Audio Sistem."
           }
         },
         "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Uno spostamento da tastiera fa scorrere immagini delle finestre, poi sposta le finestre una sola volta, così un’app lenta non può rendere scattoso il movimento. Richiede il permesso “Registrazione schermo e audio di sistema”."
+            "value": "Uno spostamento da tastiera o uno scorrimento fa scorrere immagini delle finestre, poi sposta le finestre una sola volta, così un’app lenta non può rendere scattoso il movimento. Richiede il permesso “Registrazione schermo e audio di sistema”."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "キーボードでの移動ではウインドウの画像をスライドしてから、ウインドウを一度だけ移動するため、遅いアプリでも動きがカクつきません。「画面収録とシステムオーディオ録音」の許可が必要です。"
+            "value": "キーボードでの移動やスワイプではウインドウの画像をスライドしてから、ウインドウを一度だけ移動するため、遅いアプリでも動きがカクつきません。「画面収録とシステムオーディオ録音」の許可が必要です。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "키보드로 이동하면 윈도우 이미지를 밀어 보낸 다음 윈도우를 한 번에 옮기므로, 느린 앱 때문에 움직임이 끊기지 않습니다. 화면 및 시스템 오디오 녹음 권한이 필요합니다."
+            "value": "키보드로 이동하거나 쓸어 넘기면 윈도우 이미지를 밀어 보낸 다음 윈도우를 한 번에 옮기므로, 느린 앱 때문에 움직임이 끊기지 않습니다. 화면 및 시스템 오디오 녹음 권한이 필요합니다."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Een verplaatsing met het toetsenbord laat afbeeldingen van de vensters schuiven en verplaatst de vensters daarna in één keer, zodat een trage app de beweging niet kan laten haperen. Vereist toestemming voor ‘Scherm- en systeemaudio-opname’."
+            "value": "Een verplaatsing met het toetsenbord of een veegbeweging laat afbeeldingen van de vensters schuiven en verplaatst de vensters daarna in één keer, zodat een trage app de beweging niet kan laten haperen. Vereist toestemming voor ‘Scherm- en systeemaudio-opname’."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Ruch z klawiatury przesuwa obrazy okien, a potem jednorazowo przenosi okna, więc wolna aplikacja nie może sprawić, że ruch się zacina. Wymaga uprawnienia „Nagrywanie ekranu i dźwięku systemowego”."
+            "value": "Ruch z klawiatury lub przesunięcie palcami przesuwa obrazy okien, a potem jednorazowo przenosi okna, więc wolna aplikacja nie może sprawić, że ruch się zacina. Wymaga uprawnienia „Nagrywanie ekranu i dźwięku systemowego”."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Um movimento pelo teclado desliza imagens das janelas e depois move as janelas uma só vez, para que um app lento não deixe o movimento travado. Requer a permissão Gravação do Áudio do Sistema e da Tela."
+            "value": "Um movimento pelo teclado ou um gesto de deslizar desliza imagens das janelas e depois move as janelas uma só vez, para que um app lento não deixe o movimento travado. Requer a permissão Gravação do Áudio do Sistema e da Tela."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Um movimento pelo teclado desliza imagens das janelas e depois move as janelas uma só vez, para que uma app lenta não torne o movimento irregular. Requer a permissão Gravação do ecrã e de áudio do sistema."
+            "value": "Um movimento pelo teclado ou um gesto de deslizar desliza imagens das janelas e depois move as janelas uma só vez, para que uma app lenta não torne o movimento irregular. Requer a permissão Gravação do ecrã e de áudio do sistema."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Перемещение с клавиатуры сдвигает изображения окон, а затем перемещает окна за один раз, поэтому медленное приложение не сделает движение рывками. Требуется разрешение «Запись экрана и системного звука»."
+            "value": "Перемещение с клавиатуры или смахивание сдвигает изображения окон, а затем перемещает окна за один раз, поэтому медленное приложение не сделает движение рывками. Требуется разрешение «Запись экрана и системного звука»."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "En förflyttning med tangentbordet låter bilder av fönstren glida och flyttar sedan fönstren en gång, så att en långsam app inte kan få rörelsen att hacka. Kräver behörighet för Skärm- och systemljudsinspelning."
+            "value": "En förflyttning med tangentbordet eller ett svep låter bilder av fönstren glida och flyttar sedan fönstren en gång, så att en långsam app inte kan få rörelsen att hacka. Kräver behörighet för Skärm- och systemljudsinspelning."
           }
         },
         "th": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "การย้ายด้วยแป้นพิมพ์จะเลื่อนภาพของหน้าต่าง แล้วจึงย้ายหน้าต่างครั้งเดียว แอปที่ช้าจึงทำให้การเคลื่อนไหวกระตุกไม่ได้ ต้องมีสิทธิ์การบันทึกหน้าจอและเสียงระบบ"
+            "value": "การย้ายด้วยแป้นพิมพ์หรือการปัดจะเลื่อนภาพของหน้าต่าง แล้วจึงย้ายหน้าต่างครั้งเดียว แอปที่ช้าจึงทำให้การเคลื่อนไหวกระตุกไม่ได้ ต้องมีสิทธิ์การบันทึกหน้าจอและเสียงระบบ"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Klavyeyle yapılan bir taşıma pencerelerin görüntülerini kaydırır, ardından pencereleri tek seferde taşır; böylece yavaş bir uygulama hareketi takıldıramaz. Ekran ve Sistem Sesi Kaydı izni gerekir."
+            "value": "Klavyeyle yapılan bir taşıma ya da kaydırma hareketi pencerelerin görüntülerini kaydırır, ardından pencereleri tek seferde taşır; böylece yavaş bir uygulama hareketi takıldıramaz. Ekran ve Sistem Sesi Kaydı izni gerekir."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Переміщення з клавіатури зсуває зображення вікон, а потім переміщує вікна за один раз, тож повільна програма не зробить рух ривками. Потрібен дозвіл «Записування системного звуку й екрана»."
+            "value": "Переміщення з клавіатури або змах зсуває зображення вікон, а потім переміщує вікна за один раз, тож повільна програма не зробить рух ривками. Потрібен дозвіл «Записування системного звуку й екрана»."
           }
         },
         "vi": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Một lần di chuyển bằng bàn phím sẽ trượt hình ảnh của các cửa sổ, rồi di chuyển cửa sổ một lần, để ứng dụng chậm không thể làm chuyển động bị giật. Cần quyền Bản ghi âm thanh hệ thống & màn hình."
+            "value": "Một lần di chuyển bằng bàn phím hoặc một lần vuốt sẽ trượt hình ảnh của các cửa sổ, rồi di chuyển cửa sổ một lần, để ứng dụng chậm không thể làm chuyển động bị giật. Cần quyền Bản ghi âm thanh hệ thống & màn hình."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "键盘移动时会先滑动窗口的图像，再一次性移动窗口，这样慢速的应用不会让动画卡顿。需要“录屏与系统录音”权限。"
+            "value": "键盘移动或轻扫时会先滑动窗口的图像，再一次性移动窗口，这样慢速的应用不会让动画卡顿。需要“录屏与系统录音”权限。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "鍵盤移動時會先滑動視窗的影像，再一次移動視窗，這樣緩慢的 App 不會讓動畫卡頓。需要「螢幕與系統錄音」權限。"
+            "value": "鍵盤移動或滑動時會先滑動視窗的影像，再一次移動視窗，這樣緩慢的 App 不會讓動畫卡頓。需要「螢幕與系統錄音」權限。"
           }
         }
       }

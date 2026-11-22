@@ -32,7 +32,8 @@ Whether macOS attributes the engine's captures to the permission of `Miri.app` m
 
 Sam allowed a second opt-in Screen Recording use in [#509](https://github.com/samanyudas/miri/issues/509) on 23 November 2026, on the `exp/spring-on-main` experiment.
 Apps take the positions the engine writes on their own time, so the windows of one strip move out of step and a strip move looks choppy.
-With this use, a keyboard strip move instead slides pictures of the strip's windows on a cover over the display, and moves the real windows once, under the cover, when the pictures land.
+With this use, a keyboard strip move or a strip swipe instead slides pictures of the strip's windows on a cover over the display, and moves the real windows once, under the cover, when the pictures land.
+A press on a picture reaches its window once the window is in place.
 
 The **Slide pictures of windows** switch in Settings > Layout controls this use.
 It is off by default, and it writes `[options].slide_window_pictures`.

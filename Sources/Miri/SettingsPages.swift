@@ -277,7 +277,7 @@ struct LayoutSettings: View {
                     detail:
                         String(
                             localized:
-                                "A keyboard move slides pictures of the windows, then moves the windows once, so a slow app cannot make the motion stutter. Needs Screen Recording permission."
+                                "A keyboard move or a swipe slides pictures of the windows, then moves the windows once, so a slow app cannot make the motion stutter. Needs Screen Recording permission."
                         )
                 ) {
                     RowSwitch(
