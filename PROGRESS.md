@@ -49,7 +49,8 @@ Sam chose on 22 November to restore that check, so such a window takes focus onl
 [paneru#201](https://github.com/samanyudas/paneru/pull/201), merged into `miri/v0.5.2` as `8d2a7935`, restores it.
 Branch `fix/515-background-focus` pins the engine to `8d2a7935` and records the rule in the decision docs.
 Live on 22 November, the floating window took focus 6 of 6 times on `main` `b53d8596` and 0 of 6 on the fix build, and background Chrome Picture-in-Picture 3 of 3 and 0 of 3.
-With Chrome in front, its Document Picture-in-Picture window received keyboard focus 3 of 3 times on both builds. The background trials used video Picture-in-Picture.
+With Chrome in front, its Document Picture-in-Picture window received keyboard focus 3 of 3 times on both builds.
+The background trials used video Picture-in-Picture.
 Next: the pin PR merges, an agent checks every #515 criterion on `main`, and #515 closes.
 
 ## An incoming window that covers the window it pushes
