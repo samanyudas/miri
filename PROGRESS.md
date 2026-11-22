@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-22 on branch `fix/515-background-focus`, based on `main` at `dcd6ff82`
+Updated: 2026-11-22 on branch `fix/502-refresh-queue-pin`, based on `main` at `339345fb`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -52,6 +52,16 @@ Live on 22 November, the floating window took focus 6 of 6 times on `main` `b53d
 With Chrome in front, its Document Picture-in-Picture window received keyboard focus 3 of 3 times on both builds.
 The background trials used video Picture-in-Picture.
 Next: the pin PR merges, an agent checks every #515 criterion on `main`, and #515 closes.
+
+## A window that leaves across a shared edge late
+
+[#502](https://github.com/samanyudas/miri/issues/502): a window that left across an edge shared with another display waited half out under the incoming window, and in some presses its photo slid out over the incoming window 0.5 s or more after the press.
+Every two seconds the edge-photo refresh asked for every shown slice and every kept photo at once, 13 photos on Sam's Mac, and `ScreenCaptureKit` answers one capture at a time, so the leaving window's photo waited behind them.
+[paneru#203](https://github.com/samanyudas/paneru/pull/203), merged into `miri/v0.5.2` as `8af3e229`, starts refresh photos one at a time, so a leaving window's photo waits behind one at most.
+Branch `fix/502-refresh-queue-pin` pins the engine to `8af3e229`.
+Live on 22 November, with fixtures and a 4 ms sampler, the photo showed over the incoming window later than 500 ms in 4 of 10 presses on each display on `main` `e19cf9e0`, and in 0 of 30 on each display on the fix build.
+Next: the pin PR merges, an agent checks every #502 criterion on `main`, and #502 closes.
+[#503](https://github.com/samanyudas/miri/issues/503), a stack that splits as it leaves across a shared edge, stays open.
 
 ## An incoming window that covers the window it pushes
 
