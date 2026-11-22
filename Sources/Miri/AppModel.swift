@@ -42,6 +42,7 @@ import ServiceManagement
     private(set) var gestureTestFingers: GestureFingers?
     /// Miri turned the shared-edge switch off, or kept it off, because Screen Recording permission was missing.
     private var screenRecordingRefused = false
+    private var slidePicturesRefused = false
 
     @ObservationIgnored private let store: ConfigurationStore
     @ObservationIgnored private var supervisor: EngineSupervisor!
@@ -211,15 +212,28 @@ import ServiceManagement
     var sharedEdgeSlicesNeedPermission: Bool { screenRecordingRefused && !settings.sharedEdgeSlices }
 
     func setSharedEdgeSlices(_ wanted: Bool) {
-        let on = screenRecording.sharedEdgeSlices(wanting: wanted)
+        let on = screenRecording.switchValue(wanting: wanted)
         screenRecordingRefused = wanted && !on
         update { $0.sharedEdgeSlices = on }
     }
 
+    /// Whether Layout explains that the picture slide switch is off for lack of Screen Recording permission.
+    var slideWindowPicturesNeedPermission: Bool { slidePicturesRefused && !settings.slideWindowPictures }
+
+    func setSlideWindowPictures(_ wanted: Bool) {
+        let on = screenRecording.switchValue(wanting: wanted)
+        slidePicturesRefused = wanted && !on
+        update { $0.slideWindowPictures = on }
+    }
+
     func refreshSetup() {
-        if screenRecording.revokes(sharedEdgeSlices: settings.sharedEdgeSlices) {
+        if screenRecording.revokes(settings.sharedEdgeSlices) {
             screenRecordingRefused = true
             update { $0.sharedEdgeSlices = false }
+        }
+        if screenRecording.revokes(settings.slideWindowPictures) {
+            slidePicturesRefused = true
+            update { $0.slideWindowPictures = false }
         }
         let observation = SetupProbe.observe()
         let checks = SetupChecker.evaluate(observation)
