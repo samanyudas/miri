@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-22 on branch `fix/engine-pin-489-390`, based on `main` at `b53d8596`
+Updated: 2026-11-22 on branch `fix/515-background-focus`, based on `main` at `e19cf9e0`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -40,6 +40,17 @@ A window in a hidden Space or parked offscreen keeps the old rule.
 Branch `fix/engine-pin-489-390` pins the engine to `64525dc7`, which also carries #390's fix, [paneru#200](https://github.com/samanyudas/paneru/pull/200).
 A failed write-back that overlaps a native Space switch is follow-up task [#521](https://github.com/samanyudas/miri/issues/521).
 Next: the pin PR merges, an agent checks both #489 criteria on `main`, and #489 closes.
+
+## A background app's floating window that takes focus
+
+[#515](https://github.com/samanyudas/miri/issues/515): a floating panel or Chrome Picture-in-Picture window that a background app opened took keyboard focus and pulled that app in front.
+The #77 change focused every new window kept above ordinary windows, without the frontmost-app check that other new windows pass.
+Sam chose on 22 November to restore that check, so such a window takes focus only when its app is in front.
+[paneru#201](https://github.com/samanyudas/paneru/pull/201), merged into `miri/v0.5.2` as `8d2a7935`, restores it.
+Branch `fix/515-background-focus` pins the engine to `8d2a7935` and records the rule in the decision docs.
+Live on 22 November, the floating window took focus 6 of 6 times on `main` `b53d8596` and 0 of 6 on the fix build, and background Chrome Picture-in-Picture 3 of 3 and 0 of 3.
+Picture-in-Picture opened from Chrome in front kept keyboard focus 3 of 3 times on both builds.
+Next: the pin PR merges, an agent checks every #515 criterion on `main`, and #515 closes.
 
 ## An incoming window that covers the window it pushes
 
