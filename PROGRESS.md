@@ -47,7 +47,10 @@ On three fixture windows each press showed about 50 ms after the key and landed 
 A neighbor that a growing window pushes waited up to about 100 ms to move aside, so the two overlapped by up to 94 pt for that time.
 Not yet checked: Sam's own resizes, Helium in particular, a 60 fps recording against #509's criteria, and the cover's CPU cost over a working session.
 `make lint` reports one expected problem: the experiment's engine pin is not on the fork's `miri/v0.5.2` branch.
-Sam runs `~/.cache/miri/builds/spring-a78d19a8` with `slide_window_pictures = true`, and `spring-ba1f10dc` is the build without the cover.
+Sam then found the instant resize free of overlap but asked for a slight, smooth motion.
+On Gemini 4 Neon's advice, engine `acf9efa` (pin `f0fd5fc0`) eases a resize on a 120 ms quartic ease-out whose first frame covers about 44% of the way, with pacing on the same curve.
+On fixtures, growing overlapped a neighbor by up to 86 to 228 pt for 60 to 100 ms, and the shrink from 1906 to 630 pt let the left neighbor slide under the resized window by up to 617 pt for about 170 ms, against 311 pt for about 30 ms when instant.
+Sam runs `~/.cache/miri/builds/spring-f0fd5fc0` with `slide_window_pictures = true`; `spring-a78d19a8` is the instant resize and `spring-ba1f10dc` the build without the cover.
 
 ## Agent merges and PR evidence
 
