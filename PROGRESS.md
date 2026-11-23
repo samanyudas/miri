@@ -51,6 +51,10 @@ Sam then found the instant resize free of overlap but asked for a slight, smooth
 On Gemini 4 Neon's advice, engine `acf9efa` (pin `f0fd5fc0`) eases a resize on a 120 ms quartic ease-out whose first frame covers about 44% of the way, with pacing on the same curve.
 On fixtures, growing overlapped a neighbor by up to 86 to 228 pt for 60 to 100 ms, and the shrink from 1906 to 630 pt let the left neighbor slide under the resized window by up to 617 pt for about 170 ms, against 311 pt for about 30 ms when instant.
 Sam runs `~/.cache/miri/builds/spring-f0fd5fc0` with `slide_window_pictures = true`; `spring-a78d19a8` is the instant resize and `spring-ba1f10dc` the build without the cover.
+After reviewing a screen recording of `spring-f0fd5fc0` on Helium YouTube (30 to 140 ms reflow stalls and backwards right-edge jumps when `set_position` ran before `set_size`) and comparing options in an interactive HTML demo, Sam chose Option 1: a non-stretching crop/reveal spring cover.
+Claude Opus 5.5 implemented it (`13429ce`), followed by 5 sol-loop review rounds with GPT-6.2 Sol (`1e3282e`, `220ce58`, `8dcba9a`, `fab18ce`, `a474ffe`) and a final review by Gemini 4 Neon (`83af2ce`), with every finding fixed.
+Neighbors glide on the 120 Hz critically damped spring as rigid 1:1 pictures, the resized window stays 1:1 inside a clipping container (cropping cleanly on shrink, revealing a matched right-edge fill and swapping in a fresh 1:1 capture on grow), and the 150 ms ghost fade is removed.
+All 1541 + 56 engine tests, clippy, and fmt pass on engine `83af2ce`; not yet built into Miri or verified on live windows.
 
 ## Agent merges and PR evidence
 
