@@ -67,7 +67,11 @@ Sam confirmed `Ctrl+Opt+F` is smooth on `spring-c7c1e6a2`, and reported title-ba
 Root cause: on a real double-click, the second `MouseDown` (`clicks == 2`) arrives frames before `MouseUp`; `drag_events` (`UpdateSet::Focus`) treated it as a new `DragState::Pressed`, so `cover_resizes` skipped the cover as `"drag"` and `position_layout_windows` held the double-clicked window back while moving its neighbors, and `mouse_down_trigger` spawned a `MouseHeldMarker` that fired a second `reshuffle_around` on `MouseUp`.
 Engine `56a44fc` (pin `bec140f2`) ends any pending drag press on `clicks > 1` without entering `DragState::Pressed` and skips spawning `MouseHeldMarker` on `clicks > 1`, so title-bar double-click runs the exact same `CoverMorph` path as `Ctrl+Opt+F`.
 All 1546 + 56 engine tests (including a separated-frame double-click cover test), clippy, and fmt pass on `56a44fc`.
-Sam now runs `~/.cache/miri/builds/spring-bec140f2/Miri Developer.app` with `slide_window_pictures = true` (switched in verify-miri run `20261123-173335`, `matched=13, strips=2, missing=0`); awaiting Sam's visual check of title-bar double-click.
+Sam now runs `~/.cache/miri/builds/spring-bec140f2/Miri Developer.app` with `slide_window_pictures = true` (switched in verify-miri run `20261123-173335`, `matched=13, strips=2, missing=0`).
+Sam tested title-bar double-click on `spring-bec140f2` and sent a recording showing a 1-frame desktop flash ~450 ms after double-click restore (at `f0123` and `f0337` to `f0338`) that never happened with `Ctrl+Opt+F`.
+Root cause: `CGEventTap` passed the double-click through to Helium, so Helium ran macOS's native `performZoom:` ~450 ms later (after `CoverMorph` lifted), jumping to its pre-zoom box before `hold_frames` snapped it back.
+Engine `48eaa71` (pin `f1520b25`) adds `platform/double_click_tap.rs`: the tap holds `LeftMouseDown { clicks: 2 }` inside a published tiled/maximized top-bar rect (zero IPC in the tap), and `double_click_toggle` either calls `consume()` (swallowing down/drag/up so the app never runs native zoom) or `replay()` (re-posting `clicks == 2` with `DOUBLE_CLICK_TAG` within ~3 ms for URL bars, tabs, buttons, or content).
+All 1549 + 56 engine tests, clippy, and fmt pass on `48eaa71`, and `~/.cache/miri/builds/spring-f1520b25/Miri Developer.app` is built and signed; awaiting Sam's go-ahead to swap it in.
 
 ## Agent merges and PR evidence
 
