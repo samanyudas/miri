@@ -62,7 +62,11 @@ Two root causes were found: `cover_resizes` skipped maximize and restore (no `Re
 Engine `0618e74` (pin `c7c1e6a2`) routes tiled maximize, restore, stacked maximize/restore, and resize-out-of-maximize through `CoverMorph` via a one-frame `MaximizeMorph` marker, pins `Framed.picture` at top-left anchor `(0, 1)` with height-tracked `position.y`, extends 2D `fill_crossing_time` / `outgrown` / `replace_picture` and off-screen sliver refresh checks, and skips `hold_frames` on the toggle frame (`hold.is_changed()`).
 All 1545 + 56 engine tests (4 new maximize/restore morph tests), clippy, and fmt pass on `0618e74`.
 Live on 3 fixture windows on `spring-c7c1e6a2` (verify-miri run `20261123-165559`, 4 ms sampler): all 4 `Ctrl+Opt+F` presses (maximize `948x1034 -> 1920x1050`, restore `1920x1050 -> 948x1034`, second maximize, and immediate restore 36 ms after lift) went under the cover, lasted 279 to 326 ms, hid all real window snaps and macOS's `EDGE_RELEASE` bounce completely under the cover with 0 pt visible overlap, and returned `before == after` frames.
-Sam now runs `~/.cache/miri/builds/spring-c7c1e6a2/Miri Developer.app` with `slide_window_pictures = true` (`spring-fd9dff04` is the Option 1 resize build before maximize cover morph); awaiting Sam's visual check on real windows.
+Sam now runs `~/.cache/miri/builds/spring-c7c1e6a2/Miri Developer.app` with `slide_window_pictures = true` (`spring-fd9dff04` is the Option 1 resize build before maximize cover morph).
+Sam confirmed `Ctrl+Opt+F` is smooth on `spring-c7c1e6a2`, and reported title-bar double-click was still choppy.
+Root cause: on a real double-click, the second `MouseDown` (`clicks == 2`) arrives frames before `MouseUp`; `drag_events` (`UpdateSet::Focus`) treated it as a new `DragState::Pressed`, so `cover_resizes` skipped the cover as `"drag"` and `position_layout_windows` held the double-clicked window back while moving its neighbors, and `mouse_down_trigger` spawned a `MouseHeldMarker` that fired a second `reshuffle_around` on `MouseUp`.
+Engine `56a44fc` (pin `bec140f2`) ends any pending drag press on `clicks > 1` without entering `DragState::Pressed` and skips spawning `MouseHeldMarker` on `clicks > 1`, so title-bar double-click runs the exact same `CoverMorph` path as `Ctrl+Opt+F`.
+All 1546 + 56 engine tests (including a separated-frame double-click cover test), clippy, and fmt pass on `56a44fc`, and `~/.cache/miri/builds/spring-bec140f2/Miri Developer.app` is built and signed; awaiting Sam's go-ahead to swap in `spring-bec140f2`.
 
 ## Agent merges and PR evidence
 
