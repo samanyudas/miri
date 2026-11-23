@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-23 on branch `exp/spring-on-main`, based on `main` at `1542cd60`
+Updated: 2026-11-24 on branch `exp/spring-on-main`, based on `main` at `1542cd60`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,8 +16,8 @@ The public release path and the complete acceptance runs follow.
 
 ## Apple motion experiment on `exp/spring-on-main`, 23 November 2026
 
-This branch is a local experiment and is not for `main` until Sam feels it.
-It lives in the worktree `../miri-spring-main`, with the engine on its own `exp/spring-on-main` branch, and nothing is pushed.
+This branch is an experiment built in worktree `../miri-spring-main`, with the engine on `exp/spring-on-main` now pushed as [paneru#204](https://github.com/samanyudas/paneru/pull/204) targeting `miri/v0.5.2`.
+The Miri branch stays unpushed locally until `paneru#204` merges into `miri/v0.5.2` so `make compat` can verify the published engine pin before opening a pull request against `main`.
 On top of `main` at `1542cd60` it adds, in order:
 
 - The critically damped spring ease from 17 November, rebased (engine `96a4328`, `4db9c58`).
@@ -121,9 +121,15 @@ The log showed every swipe's cover ending early, about 450 ms in, with no reason
 Engine `910d42c` (pin `86ae0576`) keeps the cover up when a strip move arrives during a covered swipe and slides the pictures on to where the strip heads, and logs the reason for each other early end.
 This is the likely cause, not a confirmed one: a synthetic swipe does not act as Sam's hand does, so only an engine test covers it, and it fails on the old code.
 All 1558 + 56 engine tests, clippy, and fmt pass.
-Sam now runs `~/.cache/miri/builds/spring-86ae0576` with the same debug logging; awaiting Sam's swipes on the built-in display.
-The engine commits from `e696df4` to `910d42c` have had no review by Sol or Neon yet.
-Not done: what System Settings itself does with the double-click and how the layout takes it, the first double-click on a window not yet known to refuse (still taken while the engine finds out), and the frame hold's repeated writes when an app answers a restore with another width.
+Sam tested `spring-86ae0576` and later swipe-cover handoff fixes, and GPT-6.2 Sol reviewed `34329e6` through `032eb6c` (pin `9b556523`) across 10 rounds, approving in Round 10.
+Gemini 4 Neon then reviewed `910d42c` through `032eb6c` and reported 4 findings: keeping lifted covered swipes waiting for `cover_swipes` across all scroll systems, stopping unsettled or differently targeted covered swipes on a same-position `RepositionMarker`, clearing pending `CoverMorph` captures on Screen Recording loss and gating `unveil_ready_pictures`, and pruning unwatched windows with a generation bump in `ShownFrames::stop` and `stop_morph`.
+Claude Opus 5.5 fixed all four on 24 November 2026 in `305becb`, `137d8ac`, `0d51778`, and `aeaacd6` (pin `31beb768`), aligning covered swipes with uncovered settles on same-position markers, and Neon approved in Round 2 with no remaining findings.
+On `31beb768` / `aeaacd6`, `make engine-lint` and `make engine-test` pass with 42 library and 1519 binary tests (`--locked --no-default-features`, plus 1 single-process test and 0 doc-tests), default-features `cargo clippy --locked --all-targets -- -D warnings` is clean, and default-features `cargo test --locked --all-targets` passes 56 library and 1617 binary tests.
+`make swift-lint`, `make strings`, `make swift-test` (248 tests in 34 suites), `make docs`, `make harness-tests` (78 tests), `make shell`, and `make actions` also pass on `31beb768`.
+In live `verify-miri` run `20261124-082044` on `/Users/sam/.cache/miri/builds/spring-31beb768/Miri Developer.app`, fixture maximize (`1020x1278` to `2040x1278`), restore, a 120 ms rapid double-toggle, and focus slides passed with matching engine and macOS focus and zero errors or panics in `engine.log`.
+Sam checked `~/.cache/miri/builds/spring-31beb768/Miri Developer.app` by hand on 24 November 2026, confirmed the build works well, and asked to push, update `PROGRESS.md`, and open a pull request.
+Engine branch `exp/spring-on-main` (`aeaacd6`) is pushed to `samanyudas/paneru` and open as [paneru#204](https://github.com/samanyudas/paneru/pull/204) targeting `miri/v0.5.2`, while `samanyudas/miri`'s `exp/spring-on-main` waits locally because `.githooks/pre-push` (`make compat`) requires the pinned engine commit to be published on `origin/miri/v0.5.2` first.
+Not done: merging [paneru#204](https://github.com/samanyudas/paneru/pull/204) into `miri/v0.5.2`, repinning `vendor/paneru` in `samanyudas/miri` to that published commit and opening the Miri pull request against `main`, 60 fps recording checks against [#509](https://github.com/samanyudas/miri/issues/509), what System Settings itself does with a passed-through double-click, the first double-click on a window not yet known to refuse, and the frame hold's repeated writes when an app answers a restore with another width.
 
 ## Agent merges and PR evidence
 
