@@ -84,6 +84,15 @@ Sam's nine double-clicks on T3 Code went to the app as below its top bar.
 Engine `c697b51` (pin `9d26b517`) logs app writes slower than 100 ms and why a double-click goes to the app.
 On fixtures, `spring-9d26b517` maximized straight to the target with no trip back, and every cover lifted on its own 300 to 340 ms after the toggle.
 Sam now runs `~/.cache/miri/builds/spring-9d26b517` with debug logging for the cover, maximize, and window writer; not yet checked on Sam's Helium windows.
+Sam's next recording showed, on double-click toggles only, the old picture and a fill for about half a second, then a shake after the cover lifted.
+Root cause, reproduced on a throwaway Helium: a real press reaches the HID tap before the window server names the window under it, so `double_click_tap` passed every real title-bar double-click to the app.
+Helium then ran its own animated zoom for about 350 ms against the engine's frame, which stalled the engine's reads and writes, made the cover wait to its time limit, and left the frame hold to put the window back in view.
+Engine `e696df4` matches a press without a window by its place, and keeps a held press until the engine answers and a taken one until its release, instead of 200 ms.
+On the throwaway Helium the tap then held and swallowed each double-click, Helium ran no zoom, and every cover lifted on its own 337 to 355 ms after the press.
+The same recording showed a maximize as the old layout with a blank fill, and a restore of a centered PDF as a black window, until the cover lifted, and a picture up to 1 s old after a new tab.
+Engine `02b25ae` (pin `ce731300`) keeps each window's last picture at its previous size and shows it from the first frame when the window returns to that size, drops it when the window's title changes, and retakes a retitled window's picture first.
+All 1554 + 56 engine tests, clippy, and fmt pass.
+The first maximize of a window still shows the old layout and a fill, as no picture of its maximized layout exists yet.
 
 ## Agent merges and PR evidence
 
