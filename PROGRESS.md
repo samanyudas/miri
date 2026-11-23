@@ -116,7 +116,13 @@ On the throwaway limited window the tap held the press, the engine logged it lef
 All 1557 + 56 engine tests, clippy, and fmt pass.
 Sam now runs `~/.cache/miri/builds/spring-d59b88e3` with debug logging for the cover, maximize, window writer, and double-click tap.
 Sam checked System Settings on that build on 23 November 2026 and said all good.
-The engine commits from `e696df4` to `78ce722` have had no review by Sol or Neon yet.
+Sam then sent a recording from the built-in display alone: each trackpad swipe ended with the old layout for a frame, then the desktop beside the windows, before the new layout.
+The log showed every swipe's cover ending early, about 450 ms in, with no reason logged.
+Engine `910d42c` (pin `86ae0576`) keeps the cover up when a strip move arrives during a covered swipe and slides the pictures on to where the strip heads, and logs the reason for each other early end.
+This is the likely cause, not a confirmed one: a synthetic swipe does not act as Sam's hand does, so only an engine test covers it, and it fails on the old code.
+All 1558 + 56 engine tests, clippy, and fmt pass.
+Sam now runs `~/.cache/miri/builds/spring-86ae0576` with the same debug logging; awaiting Sam's swipes on the built-in display.
+The engine commits from `e696df4` to `910d42c` have had no review by Sol or Neon yet.
 Not done: what System Settings itself does with the double-click and how the layout takes it, the first double-click on a window not yet known to refuse (still taken while the engine finds out), and the frame hold's repeated writes when an app answers a restore with another width.
 
 ## Agent merges and PR evidence
