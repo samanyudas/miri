@@ -103,7 +103,15 @@ Sam confirmed all of it good on `spring-efda869f` and asked for the first maximi
 Engine `a02c45b` (pin `8d8197c7`) marks each window a resize's cover snaps, and its frame write moves it before it sizes it, so its app lays it out once instead of two or three times.
 On a throwaway Helium a first maximize then opened 145 ms after the key, against 285 ms, with one move and one size and no staged retry; the restore and the second maximize ran as before.
 All 1556 + 56 engine tests, clippy, and fmt pass.
-Sam now runs `~/.cache/miri/builds/spring-8d8197c7` with debug logging for the cover, maximize, window writer, and double-click tap; awaiting Sam's check of the shorter wait.
+Sam confirmed the shorter wait good, and reported the desktop showing beside System Settings after a maximize, and again when a neighbor moved across it.
+Sam's log showed System Settings taking 732 points of a 2552-point maximized column, at the column's left edge, with the frame hold rewriting its frame about 50 times a second for a second.
+Engine `ae093ab` (pin `8694cfef`) undoes the maximize of a tiled window that answers two finished writes in a row with a narrower frame, holds the frame it returns to as a restore does, and does not maximize it again while its display's usable area has that size; a waiting cover rests on while the app has answered narrower.
+It applies to any app whose window refuses the maximized width, not to System Settings by name.
+On a throwaway window limited to 900 points the maximize was undone 144 ms after the key, the window returned to its exact frame, the cover came off 504 ms after the key, and a second maximize and a title-bar double-click did nothing.
+All 1557 + 56 engine tests, clippy, and fmt pass.
+Sam accepted System Settings at 748 points wide on 23 November 2026, the width it answers when asked for 732, as `verify-miri end --accept-layout` records in run `20261123-214716`.
+Sam now runs `~/.cache/miri/builds/spring-8694cfef` with debug logging for the cover, maximize, window writer, and double-click tap.
+Not done: Sam's own check on System Settings, the neighbor-move case on its own, what a title-bar double-click on such a window should do (now nothing), and the frame hold's repeated writes when an app answers a restore with another width.
 
 ## Agent merges and PR evidence
 
