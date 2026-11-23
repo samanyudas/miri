@@ -66,7 +66,8 @@ Sam now runs `~/.cache/miri/builds/spring-c7c1e6a2/Miri Developer.app` with `sli
 Sam confirmed `Ctrl+Opt+F` is smooth on `spring-c7c1e6a2`, and reported title-bar double-click was still choppy.
 Root cause: on a real double-click, the second `MouseDown` (`clicks == 2`) arrives frames before `MouseUp`; `drag_events` (`UpdateSet::Focus`) treated it as a new `DragState::Pressed`, so `cover_resizes` skipped the cover as `"drag"` and `position_layout_windows` held the double-clicked window back while moving its neighbors, and `mouse_down_trigger` spawned a `MouseHeldMarker` that fired a second `reshuffle_around` on `MouseUp`.
 Engine `56a44fc` (pin `bec140f2`) ends any pending drag press on `clicks > 1` without entering `DragState::Pressed` and skips spawning `MouseHeldMarker` on `clicks > 1`, so title-bar double-click runs the exact same `CoverMorph` path as `Ctrl+Opt+F`.
-All 1546 + 56 engine tests (including a separated-frame double-click cover test), clippy, and fmt pass on `56a44fc`, and `~/.cache/miri/builds/spring-bec140f2/Miri Developer.app` is built and signed; awaiting Sam's go-ahead to swap in `spring-bec140f2`.
+All 1546 + 56 engine tests (including a separated-frame double-click cover test), clippy, and fmt pass on `56a44fc`.
+Sam now runs `~/.cache/miri/builds/spring-bec140f2/Miri Developer.app` with `slide_window_pictures = true` (switched in verify-miri run `20261123-173335`, `matched=13, strips=2, missing=0`); awaiting Sam's visual check of title-bar double-click.
 
 ## Agent merges and PR evidence
 
