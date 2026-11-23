@@ -73,6 +73,17 @@ Root cause: `CGEventTap` passed the double-click through to Helium, so Helium ra
 Engine `48eaa71` (pin `f1520b25`) adds `platform/double_click_tap.rs`: the tap holds `LeftMouseDown { clicks: 2 }` inside a published tiled/maximized top-bar rect (zero IPC in the tap), and `double_click_toggle` either calls `consume()` (swallowing down/drag/up so the app never runs native zoom) or `replay()` (re-posting `clicks == 2` with `DOUBLE_CLICK_TAG` within ~3 ms for URL bars, tabs, buttons, or content).
 All 1549 + 56 engine tests, clippy, and fmt pass on `48eaa71`.
 Sam now runs `~/.cache/miri/builds/spring-f1520b25/Miri Developer.app` with `slide_window_pictures = true` (switched in verify-miri run `20261123-182542`, `matched=13, strips=2, missing=0`); awaiting Sam's visual check of double-click restore without the desktop flash and URL-bar double-click replay.
+Sam then reported that a title-bar double-click maximize takes longer than `Ctrl+Opt+F`.
+Sam's recording showed the same motion, then about 300 ms of the old narrow picture in a grey full-width box before the real Helium window appeared, against about 16 ms after `Ctrl+Opt+F`.
+Fixture double-clicks were as fast as the key: the cover went up 20 to 95 ms after the second press, with or without focus, and a 400 ms hold of the second click delayed nothing.
+A debug build on Sam's own Helium windows found two causes.
+In one double-click the writer spent 419 ms on two moves after a staged maximize: back to the window's old position, then to the target where the staging had already put it, each waiting for Helium to draw at the new width, while the cover waited on the write.
+Engine `732477b` (pin `4885fe6e`) ends a staged resize at its target and skips the move when the staging already put it there, with two writer tests that fail on the old code.
+In another, the first click focused a Helium window 12 pt off screen, the strip's live scroll was still settling at the second click, and the cover refused the strip as not at rest, so the maximize ran without the cover; this awaits Sam's choice.
+Sam's nine double-clicks on T3 Code went to the app as below its top bar.
+Engine `c697b51` (pin `9d26b517`) logs app writes slower than 100 ms and why a double-click goes to the app.
+On fixtures, `spring-9d26b517` maximized straight to the target with no trip back, and every cover lifted on its own 300 to 340 ms after the toggle.
+Sam now runs `~/.cache/miri/builds/spring-9d26b517` with debug logging for the cover, maximize, and window writer; not yet checked on Sam's Helium windows.
 
 ## Agent merges and PR evidence
 
