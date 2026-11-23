@@ -115,6 +115,8 @@ Engine `78ce722` (pin `d59b88e3`): `double_click_toggle` replays the double-clic
 On the throwaway limited window the tap held the press, the engine logged it left to the app, the release passed, and the window kept its frame; the app's own title-bar action had nothing to change there.
 All 1557 + 56 engine tests, clippy, and fmt pass.
 Sam now runs `~/.cache/miri/builds/spring-d59b88e3` with debug logging for the cover, maximize, window writer, and double-click tap.
+Sam checked System Settings on that build on 23 November 2026 and said all good.
+The engine commits from `e696df4` to `78ce722` have had no review by Sol or Neon yet.
 Not done: what System Settings itself does with the double-click and how the layout takes it, the first double-click on a window not yet known to refuse (still taken while the engine finds out), and the frame hold's repeated writes when an app answers a restore with another width.
 
 ## Agent merges and PR evidence
