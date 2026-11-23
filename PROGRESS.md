@@ -60,7 +60,9 @@ Sam now runs `~/.cache/miri/builds/spring-fd9dff04` with `slide_window_pictures 
 Sam tested `spring-fd9dff04`, confirmed focus slides and Option 1 column resizes feel good, and sent a recording showing tiled maximize and restore (`Ctrl+Opt+F`) jumping with wallpaper gaps and overlap.
 Two root causes were found: `cover_resizes` skipped maximize and restore (no `ResizeMarker` and vertical edge-padding/stack height changes), and `hold_frames` ran in `UpdateSet::Events` on the toggle frame itself before `UpdateSet::Layout`, pairing old `Position` with restored `Bounds` and writing an intermediate frame at `x = 0`.
 Engine `0618e74` (pin `c7c1e6a2`) routes tiled maximize, restore, stacked maximize/restore, and resize-out-of-maximize through `CoverMorph` via a one-frame `MaximizeMorph` marker, pins `Framed.picture` at top-left anchor `(0, 1)` with height-tracked `position.y`, extends 2D `fill_crossing_time` / `outgrown` / `replace_picture` and off-screen sliver refresh checks, and skips `hold_frames` on the toggle frame (`hold.is_changed()`).
-All 1545 + 56 engine tests (4 new maximize/restore morph tests), clippy, and fmt pass on `0618e74`, and `~/.cache/miri/builds/spring-c7c1e6a2/Miri Developer.app` is built and signed; live fixture check and switch to `spring-c7c1e6a2` await Sam's go-ahead while he is active at the Mac.
+All 1545 + 56 engine tests (4 new maximize/restore morph tests), clippy, and fmt pass on `0618e74`.
+Live on 3 fixture windows on `spring-c7c1e6a2` (verify-miri run `20261123-165559`, 4 ms sampler): all 4 `Ctrl+Opt+F` presses (maximize `948x1034 -> 1920x1050`, restore `1920x1050 -> 948x1034`, second maximize, and immediate restore 36 ms after lift) went under the cover, lasted 279 to 326 ms, hid all real window snaps and macOS's `EDGE_RELEASE` bounce completely under the cover with 0 pt visible overlap, and returned `before == after` frames.
+Sam now runs `~/.cache/miri/builds/spring-c7c1e6a2/Miri Developer.app` with `slide_window_pictures = true` (`spring-fd9dff04` is the Option 1 resize build before maximize cover morph); awaiting Sam's visual check on real windows.
 
 ## Agent merges and PR evidence
 
