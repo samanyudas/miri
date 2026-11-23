@@ -94,7 +94,13 @@ Engine `02b25ae` (pin `ce731300`) keeps each window's last picture at its previo
 All 1554 + 56 engine tests, clippy, and fmt pass.
 The first maximize of a window still shows the old layout and a fill, as no picture of its maximized layout exists yet.
 Live on a throwaway Helium on `ce731300`'s engine: a double-click whose second press lasted 400 ms stayed swallowed, a double-click on the address bar was replayed and selected one word, and both a restore and a second maximize showed the window's previous-size picture.
-Sam now runs `~/.cache/miri/builds/spring-ce731300` with debug logging for the cover, maximize, window writer, and double-click tap; awaiting Sam's check of the double-click and of how maximize and restore look.
+Sam then asked for the first maximize's fill to go too.
+Engine `5f7342a` (pin `efda869f`) rests the cover's pictures until the window server shows the window at its maximized frame, for 250 ms of animation steps at the longest, then moves them with the window's frame as a hole in the cover that shows the window itself.
+A screen video of a throwaway Helium with a centered test page showed the first maximize open onto the live window with its content in its final place and no fill, the restore close onto the kept small picture, and the second maximize open onto the kept maximized picture, each ending on the final layout with no change as the cover lifted.
+In that run the pictures started about 285 ms after the key, with the video recording running and Helium's resize taking 199 ms; a run where Helium took 349 ms passed the limit and fell back to the fill.
+All 1555 + 56 engine tests, clippy, and fmt pass.
+Sam now runs `~/.cache/miri/builds/spring-efda869f` with debug logging for the cover, maximize, window writer, and double-click tap; awaiting Sam's check of the double-click, of how maximize and restore look, and of whether the first maximize's wait is acceptable.
+Not done: the writer still sizes a maximized window twice (width, then height after the move), which is most of that wait.
 
 ## Agent merges and PR evidence
 
