@@ -99,8 +99,11 @@ Engine `5f7342a` (pin `efda869f`) rests the cover's pictures until the window se
 A screen video of a throwaway Helium with a centered test page showed the first maximize open onto the live window with its content in its final place and no fill, the restore close onto the kept small picture, and the second maximize open onto the kept maximized picture, each ending on the final layout with no change as the cover lifted.
 In that run the pictures started about 285 ms after the key, with the video recording running and Helium's resize taking 199 ms; a run where Helium took 349 ms passed the limit and fell back to the fill.
 All 1555 + 56 engine tests, clippy, and fmt pass.
-Sam now runs `~/.cache/miri/builds/spring-efda869f` with debug logging for the cover, maximize, window writer, and double-click tap; awaiting Sam's check of the double-click, of how maximize and restore look, and of whether the first maximize's wait is acceptable.
-Not done: the writer still sizes a maximized window twice (width, then height after the move), which is most of that wait.
+Sam confirmed all of it good on `spring-efda869f` and asked for the first maximize's wait to be shorter.
+Engine `a02c45b` (pin `8d8197c7`) marks each window a resize's cover snaps, and its frame write moves it before it sizes it, so its app lays it out once instead of two or three times.
+On a throwaway Helium a first maximize then opened 145 ms after the key, against 285 ms, with one move and one size and no staged retry; the restore and the second maximize ran as before.
+All 1556 + 56 engine tests, clippy, and fmt pass.
+Sam now runs `~/.cache/miri/builds/spring-8d8197c7` with debug logging for the cover, maximize, window writer, and double-click tap; awaiting Sam's check of the shorter wait.
 
 ## Agent merges and PR evidence
 
