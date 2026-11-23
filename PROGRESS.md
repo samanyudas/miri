@@ -41,11 +41,13 @@ Live checks on Sam's Mac on 23 November 2026, display 2 at 2560 by 1440 points:
 Sam tried the trackpad on 23 November 2026 and said it feels good.
 The cover then went through 5 sol-loop rounds with GPT-6.2 Sol and a review by Gemini 4 Neon, and every finding is fixed (engine `b6b03b0`) except Sol's S16: a press within a fraction of a point of a picture's edge, during a slide, can miss its replay, which Sam chose to leave on 23 November 2026.
 After the fixes, Sam's own use showed two covered swipes landing and lifting about 46 ms later, and Sam said keyboard moves on `spring-493cdb3c` are good.
-Covered resizes on three fixture windows on 23 November 2026 landed 250 to 280 ms after the key, faded 20 to 40 ms later, and the cover came off about 430 ms after the key; screenshots every 50 ms showed the gaps held.
-After a relaunch, macOS showed its prompt that Miri Developer asks to bypass the private window picker, which awaits Sam.
-Not yet checked: Sam's own resizes and whether the stretched picture is acceptable, a 60 fps recording against #509's criteria, and the cover's CPU cost over a working session.
+On 23 November 2026 Sam disliked the covered resize: the stretched picture smeared and the fade showed a double image.
+Engine `201cb7a` (pin `a78d19a8`) reverts the covered resize, and a width command now moves its strip and windows to the new layout in one step, with pacing still holding a window beside a slower app.
+On three fixture windows each press showed about 50 ms after the key and landed in one or two jumps.
+A neighbor that a growing window pushes waited up to about 100 ms to move aside, so the two overlapped by up to 94 pt for that time.
+Not yet checked: Sam's own resizes, Helium in particular, a 60 fps recording against #509's criteria, and the cover's CPU cost over a working session.
 `make lint` reports one expected problem: the experiment's engine pin is not on the fork's `miri/v0.5.2` branch.
-Sam runs `~/.cache/miri/builds/spring-4c6957cf` with `slide_window_pictures = true` and cover debug logging, and `spring-ba1f10dc` is the build without the cover.
+Sam runs `~/.cache/miri/builds/spring-a78d19a8` with `slide_window_pictures = true`, and `spring-ba1f10dc` is the build without the cover.
 
 ## Agent merges and PR evidence
 
