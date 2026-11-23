@@ -93,6 +93,8 @@ The same recording showed a maximize as the old layout with a blank fill, and a 
 Engine `02b25ae` (pin `ce731300`) keeps each window's last picture at its previous size and shows it from the first frame when the window returns to that size, drops it when the window's title changes, and retakes a retitled window's picture first.
 All 1554 + 56 engine tests, clippy, and fmt pass.
 The first maximize of a window still shows the old layout and a fill, as no picture of its maximized layout exists yet.
+Live on a throwaway Helium on `ce731300`'s engine: a double-click whose second press lasted 400 ms stayed swallowed, a double-click on the address bar was replayed and selected one word, and both a restore and a second maximize showed the window's previous-size picture.
+Sam now runs `~/.cache/miri/builds/spring-ce731300` with debug logging for the cover, maximize, window writer, and double-click tap; awaiting Sam's check of the double-click and of how maximize and restore look.
 
 ## Agent merges and PR evidence
 
