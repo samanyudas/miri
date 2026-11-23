@@ -110,8 +110,12 @@ It applies to any app whose window refuses the maximized width, not to System Se
 On a throwaway window limited to 900 points the maximize was undone 144 ms after the key, the window returned to its exact frame, the cover came off 504 ms after the key, and a second maximize and a title-bar double-click did nothing.
 All 1557 + 56 engine tests, clippy, and fmt pass.
 Sam accepted System Settings at 748 points wide on 23 November 2026, the width it answers when asked for 732, as `verify-miri end --accept-layout` records in run `20261123-214716`.
-Sam now runs `~/.cache/miri/builds/spring-8694cfef` with debug logging for the cover, maximize, window writer, and double-click tap.
-Not done: Sam's own check on System Settings, the neighbor-move case on its own, what a title-bar double-click on such a window should do (now nothing), and the frame hold's repeated writes when an app answers a restore with another width.
+Sam confirmed it good and chose to pass a title-bar double-click on such a window to its app.
+Engine `78ce722` (pin `d59b88e3`): `double_click_toggle` replays the double-click of a tiled window marked `MaximizeRefused` for the current usable area, instead of taking it.
+On the throwaway limited window the tap held the press, the engine logged it left to the app, the release passed, and the window kept its frame; the app's own title-bar action had nothing to change there.
+All 1557 + 56 engine tests, clippy, and fmt pass.
+Sam now runs `~/.cache/miri/builds/spring-d59b88e3` with debug logging for the cover, maximize, window writer, and double-click tap.
+Not done: what System Settings itself does with the double-click and how the layout takes it, the first double-click on a window not yet known to refuse (still taken while the engine finds out), and the frame hold's repeated writes when an app answers a restore with another width.
 
 ## Agent merges and PR evidence
 
