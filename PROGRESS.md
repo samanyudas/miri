@@ -54,7 +54,9 @@ Sam runs `~/.cache/miri/builds/spring-f0fd5fc0` with `slide_window_pictures = tr
 After reviewing a screen recording of `spring-f0fd5fc0` on Helium YouTube (30 to 140 ms reflow stalls and backwards right-edge jumps when `set_position` ran before `set_size`) and comparing options in an interactive HTML demo, Sam chose Option 1: a non-stretching crop/reveal spring cover.
 Claude Opus 5.5 implemented it (`13429ce`), followed by 5 sol-loop review rounds with GPT-6.2 Sol (`1e3282e`, `220ce58`, `8dcba9a`, `fab18ce`, `a474ffe`) and a final review by Gemini 4 Neon (`83af2ce`), with every finding fixed.
 Neighbors glide on the 120 Hz critically damped spring as rigid 1:1 pictures, the resized window stays 1:1 inside a clipping container (cropping cleanly on shrink, revealing a matched right-edge fill and swapping in a fresh 1:1 capture on grow), and the 150 ms ghost fade is removed.
-All 1541 + 56 engine tests, clippy, and fmt pass on engine `83af2ce`; not yet built into Miri or verified on live windows.
+All 1541 + 56 engine tests, clippy, and fmt pass on engine `83af2ce` (pin `fd9dff04`).
+Live on 3 fixture windows on `spring-fd9dff04` (verify-miri run `20261123-141134`, 4 ms sampler): all 5 resizes (grow `1012 -> 1338`, grow `1338 -> 1522`, big shrink `1522 -> 502`, grow `502 -> 665`, and a back-to-back grow `665 -> 1012` 16 ms after lift) went under the cover, lasted 252 to 304 ms (vs ~430 to 462 ms with the old 150 ms fade), snapped each real window once underneath with 0 pt visible overlap, and the mid-flight fresh capture warmed the cache immediately for the follow-up press.
+Sam now runs `~/.cache/miri/builds/spring-fd9dff04` with `slide_window_pictures = true` (`spring-f0fd5fc0` is the 120 ms live ease-out, `spring-a78d19a8` the instant resize, and `spring-ba1f10dc` the build without the cover); awaiting Sam's visual check on real Chromium and Figma windows.
 
 ## Agent merges and PR evidence
 
