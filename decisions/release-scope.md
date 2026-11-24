@@ -235,12 +235,13 @@ The column takes focus once the strip has landed, so an app slow to take focus c
 It never glides past that column on momentum.
 The trackpad clicks each time the column it would land on changes, so a swipe that stays on its column, or a strip end, gives no click.
 Each modifier-scroll wheel input moves focus one column, with the same focus rules as keyboard focus.
-In both scrolling modes, the slide to the column after the fingers lift takes 0.5 s at Miri's animation speed.
-The slide carries on the speed the strip had toward that column when the fingers lifted, then slows to a stop on it without overshooting.
-On the `exp/spring-on-main` experiment, Sam asked on 23 November 2026 for Apple's flick behavior instead: a trackpad flick toward the landing column swings the strip about 2% past it and back, and a slow lift, a spring-back, or the wheel still stops without overshooting.
-On the same experiment, swiping past either end of a strip that overflows the display stretches it with resistance, as a strip that fits already does.
+In both scrolling modes, the slide to the column after the fingers lift follows the same critically damped spring as other window motions, which lands a slide from rest in about 237 ms at Miri's animation speed.
+The slide carries on the speed the strip had toward that column when the fingers lifted, then slows to a stop on it.
 A strip that is still, or moving away from its column, starts the slide gently from rest.
-Sam chose this on 12 November 2026 in [#438](https://github.com/samanyudas/miri/issues/438), after trying an exponential ease-out and an exponential ease-in-out.
+Sam chose a slide that carries on the fingers' speed on 12 November 2026 in [#438](https://github.com/samanyudas/miri/issues/438), after trying an exponential ease-out and an exponential ease-in-out.
+Sam asked on 23 November 2026 for Apple's flick behavior: a trackpad flick toward the landing column swings the strip about 2% past it and back, and a slow lift, a spring-back, or the wheel stops without overshooting.
+Swiping past either end of a strip that overflows the display stretches it with resistance, as a strip that fits already does.
+The spring, the flick, and the stretch reached `main` with [#527](https://github.com/samanyudas/miri/pull/527) on 24 November 2026.
 
 ## V1 interactions
 
