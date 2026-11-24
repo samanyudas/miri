@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-24 on branch `exp/spring-on-main`, based on `main` at `1542cd60`
+Updated: 2026-11-24 on branch `ci/upload-dmg-hidden-files`, based on `origin/main`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,24 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## CI speed audit and free-runner improvements on 24 November 2026
+
+Audited the last 150 CI runs (12 to 24 November 2026) via the GitHub Actions API.
+Native pull requests took a median of 263 s (4.4 m) and p95 of 415 s (6.9 m), while docs-only pull requests took 18 s median.
+Each native run claimed all four macOS runners at once, pushing p95 queue wait from 4 s to 116 to 135 s when runs overlapped.
+
+Merged [#528](https://github.com/samanyudas/miri/pull/528) with three changes:
+
+- `scripts/ci-needs-native.py` and `.github/workflows/ci.yml` now output `swift`, `engine`, and `app` on pull requests while `push` to `main` and `workflow_dispatch` still run all macOS jobs.
+- `.github/workflows/ci.yml` restores tracked Swift file mtimes from Git and caches `.build` from `main` in the `swift` and `app` jobs.
+  Locally, restoring commit mtimes dropped a post-checkout `swift build --product Miri` from 48.6 s cold (24.2 s with reset mtimes) to 5.8 s.
+- `scripts/build-app.sh` now runs `swift build` and `cargo build` concurrently instead of sequentially.
+  On [#528](https://github.com/samanyudas/miri/pull/528), `Build, selftest, and package` dropped from 203 s median to 155 s before the Swift cache warmed.
+
+Profiled all 1,546 `paneru` binary tests locally with `--test-threads=3` (116.2 s total) and merged [paneru#206](https://github.com/samanyudas/paneru/pull/206) (`046c274`) to pace idle settle windows in `TestHarness::advance` using `FrameActivity::mid_frame()`, cutting the 1,546 binary tests to 27.9 s at `--test-threads=3` (16.8 s default threads) with zero skipped tests and zero production changes.
+Merged [#529](https://github.com/samanyudas/miri/pull/529) to pin `vendor/paneru` to `046c274`.
+This branch sets `include-hidden-files: true` and `if-no-files-found: error` on the `miri-developer-dmg` upload step in `.github/workflows/ci.yml` so `actions/upload-artifact` v7 uploads `.build/Miri-Developer-*.dmg` instead of skipping the hidden `.build` directory.
 
 ## Apple motion experiment on `exp/spring-on-main`, 23 November 2026
 
