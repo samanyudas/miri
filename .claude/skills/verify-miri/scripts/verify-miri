@@ -1094,9 +1094,14 @@ def cmd_settings(_args) -> int:
     run = load_run()
     pid = test_pid(run)
     subprocess.run(["open", run["test_app"]], check=True)
-    shown = wait(lambda: tool("axdo", str(pid), "status", check=False).strip(), 5, 0.2)
-    log(run, f"opened Settings: status {shown or 'not shown'}")
-    return 0 if shown else 1
+    # Settings reopens on its last page. Setup and Shortcuts have no status text, so the window is the proof it opened.
+    shown = wait(lambda: tool("axdo", str(pid), "frame", check=False).strip()[:1].isdigit(), 5, 0.2)
+    if not shown:
+        log(run, "Settings did not open within 5 s")
+        return 1
+    status = tool("axdo", str(pid), "status", check=False).strip()
+    log(run, f"opened Settings: status {status or 'not shown on this page'}")
+    return 0
 
 
 def cmd_relaunch(args) -> int:
