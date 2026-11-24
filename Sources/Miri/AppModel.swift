@@ -200,7 +200,9 @@ import ServiceManagement
         let wasActive = NSApp.isActive
         NSApp.setActivationPolicy(policy)
         // Hiding the icon from Settings must keep Settings in front. A file edit made in another app must not take focus.
-        if wasActive { NSApp.activate() }
+        // The policy change can hand the front to another app, and the plain activate() did not take it back after an
+        // Accessibility press, as VoiceOver sends.
+        if wasActive { NSApp.activate(ignoringOtherApps: true) }
     }
 
     func setLaunchAtLogin(_ enabled: Bool) {

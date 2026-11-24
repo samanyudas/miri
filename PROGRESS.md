@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-24 on branch `fix/526-activate`, based on `main` at `c74fe793`
+Updated: 2026-11-24 on branch `fix/menu-activate`, based on `main` at `51960db3`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -29,7 +29,13 @@ The plain call is cooperative: macOS refused it after a choice in Miri's menu ba
 On `main` (`c74fe793` sources, `verify-miri` run `20261124-184109`), HID pointer clicks on the menu bar icon and **Settings…** left the other app frontmost in all four checks: Settings open off-screen, open fully visible, and closed, and once with T3 Code in front.
 On the fix build at `8acb87c5` (`verify-miri` runs `20261124-184921` and `20261124-185034`), the same clicks made Miri frontmost with Settings focused in all three cases.
 An Accessibility press on **Settings…**, as VoiceOver sends, also made Miri frontmost by Accessibility and System Events. NSWorkspace reported it within 6 s.
-Next: Sam clicks **Settings…** by hand while another app is in front, then an agent closes #526.
+Sam's hand check passed on `main` `51960db3`, and #526 is closed.
+
+The **Show in Dock** switch had the same cooperative-activation gap: on `main` `51960db3`, an Accessibility press that turned it off, as VoiceOver sends, dropped Settings behind the app that was in front before (run `20261124-190707`).
+Branch `fix/menu-activate` makes `AppModel.showDockIcon` call `NSApp.activate(ignoringOtherApps: true)`.
+On that build (run `20261124-194442`), Miri stayed frontmost with Settings focused in 10 of 10 toggles, 6 by Accessibility press and 4 by pointer click.
+The menu bar **Show Logs in Finder** item, shown only after the engine fails, still opens Finder behind the app in front: [#534](https://github.com/samanyudas/miri/issues/534).
+The engine lifecycle model's line comments and `sync-commit` lag `main` since `2931c939`, and a separate PR resyncs them.
 
 ## CI speed audit and free-runner improvements on 24 November 2026
 
