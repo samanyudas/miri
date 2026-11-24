@@ -36,7 +36,10 @@ final class WindowPresenter {
                 window.setFrame(fitted, display: window.isVisible)
             }
         }
-        NSApp.activate()
+        // The plain activate() asks the frontmost app to yield. After a choice in Miri's menu bar menu, macOS did not
+        // activate Miri: the window showed, but the app in front kept the keyboard. This call activates Miri even
+        // while another app is active.
+        NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
     }
 
