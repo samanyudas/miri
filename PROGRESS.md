@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-24 on branch `fix/526-settings-offscreen`, based on `origin/main`
+Updated: 2026-11-24 on branch `fix/526-activate`, based on `main` at `c74fe793`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -22,6 +22,14 @@ Added `WindowPlacement.fitted(_:in:)` in `Sources/MiriCore/WindowPlacement.swift
 Reproduced on `main` (`50b72246`, engine `c9ea7070`, `verify-miri` run `20261124-175909`): Settings stayed at `(2520, 300, 880, 640)` after selecting **Settings…** while open.
 Verified on the fix build (`verify-miri` runs `20261124-180212` and `20261124-180539`): Settings moved from `(2520, 300, 880, 640)` to `(1680, 300, 880, 640)` inside the main display's visible area `(0, 30, 2560, 1410)` with Settings focused, and stayed at `(840, 415, 880, 640)` when already fully visible.
 Reviewed with `sol-loop` (1 round with GPT-6.2 Sol on `high`, verdict `APPROVE`, 2 nits declined).
+
+[#532](https://github.com/samanyudas/miri/pull/532) merged as `c74fe793`, but Miri still did not become the frontmost app.
+Branch `fix/526-activate` replaces `NSApp.activate()` in `WindowPresenter.show` with `NSApp.activate(ignoringOtherApps: true)`.
+The plain call is cooperative: macOS refused it after a choice in Miri's menu bar menu, so Settings showed while the app in front kept the keyboard.
+On `main` (`c74fe793` sources, `verify-miri` run `20261124-184109`), HID pointer clicks on the menu bar icon and **Settings…** left the other app frontmost in all four checks: Settings open off-screen, open fully visible, and closed, and once with T3 Code in front.
+On the fix build at `8acb87c5` (`verify-miri` runs `20261124-184921` and `20261124-185034`), the same clicks made Miri frontmost with Settings focused in all three cases.
+An Accessibility press on **Settings…**, as VoiceOver sends, also made Miri frontmost by Accessibility and System Events. NSWorkspace reported it within 6 s.
+Next: Sam clicks **Settings…** by hand while another app is in front, then an agent closes #526.
 
 ## CI speed audit and free-runner improvements on 24 November 2026
 
