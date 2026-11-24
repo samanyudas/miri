@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-24 on branch `ci/pin-fast-engine-tests`, based on `origin/main`
+Updated: 2026-11-24 on branch `ci/upload-dmg-hidden-files`, based on `origin/main`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -29,7 +29,8 @@ Merged [#528](https://github.com/samanyudas/miri/pull/528) with three changes:
   On [#528](https://github.com/samanyudas/miri/pull/528), `Build, selftest, and package` dropped from 203 s median to 155 s before the Swift cache warmed.
 
 Profiled all 1,546 `paneru` binary tests locally with `--test-threads=3` (116.2 s total) and merged [paneru#206](https://github.com/samanyudas/paneru/pull/206) (`046c274`) to pace idle settle windows in `TestHarness::advance` using `FrameActivity::mid_frame()`, cutting the 1,546 binary tests to 27.9 s at `--test-threads=3` (16.8 s default threads) with zero skipped tests and zero production changes.
-This branch pins `vendor/paneru` to `046c274`.
+Merged [#529](https://github.com/samanyudas/miri/pull/529) to pin `vendor/paneru` to `046c274`.
+This branch sets `include-hidden-files: true` and `if-no-files-found: error` on the `miri-developer-dmg` upload step in `.github/workflows/ci.yml` so `actions/upload-artifact` v7 uploads `.build/Miri-Developer-*.dmg` instead of skipping the hidden `.build` directory.
 
 ## Apple motion experiment on `exp/spring-on-main`, 23 November 2026
 
