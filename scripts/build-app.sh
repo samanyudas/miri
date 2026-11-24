@@ -22,10 +22,25 @@ if [[ -n "$(git -C vendor/paneru status --porcelain)" ]]; then
 fi
 # The linker reads the SDK version only from -isysroot or SDKROOT, and swift build passes neither to it.
 # Without -isysroot it records the minimum macOS version as the SDK, and newer macOS then runs Miri in a compatibility mode.
+# Build the Swift app and Rust engine concurrently; they are independent until bundling below.
 sdk=$(xcrun --sdk macosx --show-sdk-path)
-swift build -Xswiftc -Xclang-linker -Xswiftc -isysroot -Xswiftc -Xclang-linker -Xswiftc "$sdk"
+swift_log=$(mktemp)
+cargo_log=$(mktemp)
+trap 'rm -f "$swift_log" "$cargo_log"' EXIT
+
+swift build -Xswiftc -Xclang-linker -Xswiftc -isysroot -Xswiftc -Xclang-linker -Xswiftc "$sdk" >"$swift_log" 2>&1 &
+swift_pid=$!
 env -u CARGO_BUILD_TARGET cargo build --manifest-path vendor/paneru/Cargo.toml \
-    --target-dir "$PWD/vendor/paneru/target" --locked --bin paneru --no-default-features --features miri-developer
+    --target-dir "$PWD/vendor/paneru/target" --locked --bin paneru --no-default-features --features miri-developer >"$cargo_log" 2>&1 &
+cargo_pid=$!
+
+swift_status=0
+wait "$swift_pid" || swift_status=$?
+cargo_status=0
+wait "$cargo_pid" || cargo_status=$?
+cat "$swift_log"
+cat "$cargo_log"
+(( swift_status == 0 && cargo_status == 0 )) || exit 1
 bin=$(swift build --show-bin-path)
 bundle="$PWD/.build/app/Miri Developer.app"
 rm -rf "$bundle"

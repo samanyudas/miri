@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-24 on branch `exp/spring-on-main`, based on `main` at `1542cd60`
+Updated: 2026-11-24 on branch `ci/pr-job-selection`, based on `origin/main`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,27 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## CI speed audit and free-runner improvements on 24 November 2026
+
+Audited the last 150 CI runs (12 to 24 November 2026) via the GitHub Actions API.
+Native pull requests took a median of 263 s (4.4 m) and p95 of 415 s (6.9 m), while docs-only pull requests took 18 s median.
+Each native run claimed all four macOS runners at once, pushing p95 queue wait from 4 s to 116 to 135 s when runs overlapped.
+
+Implemented three changes on `ci/pr-job-selection`:
+
+- `scripts/ci-needs-native.py` and `.github/workflows/ci.yml` now output `swift`, `engine`, and `app` on pull requests while `push` to `main` and `workflow_dispatch` still run all macOS jobs.
+- `.github/workflows/ci.yml` restores tracked Swift file mtimes from Git and caches `.build` from `main` in the `swift` and `app` jobs.
+  Locally, restoring commit mtimes dropped a post-checkout `swift build --product Miri` from 48.6 s cold (24.2 s with reset mtimes) to 5.8 s.
+- `scripts/build-app.sh` now runs `swift build` and `cargo build` concurrently instead of sequentially.
+  Locally, `make build` finished in 62.8 s (19.9 s Swift overlapped with 55.7 s Cargo).
+
+Profiled all 1,546 `paneru` binary tests locally with `--test-threads=3` (116.2 s total).
+The top modules are `tests::drag` (23.7 s, 248 tests), `tests::slice_photos` (15.9 s, 77 tests), `tests::strip_cover` (11.6 s, 109 tests), and `tests::next_display` (8.1 s for 6 tests, 1,353 ms/test because it loops over display permutations with 2 s settle windows of 100 Bevy frames each).
+Engine test speedups belong in a follow-up `samanyudas/paneru` PR on `miri/v0.5.2`.
+
+Verified locally with `make pre-push`, `make build`, and `make swift-test` (248 tests in 34 suites passed).
+Live CI before/after numbers await pushing this branch and opening a PR.
 
 ## Apple motion experiment on `exp/spring-on-main`, 23 November 2026
 
