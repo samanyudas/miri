@@ -357,6 +357,41 @@ struct SharedEdgeSlicesConfigurationTests {
     }
 }
 
+struct SlideWindowPicturesConfigurationTests {
+    private let directory = FileManager.default.temporaryDirectory.appending(
+        path: "miri-slide-pictures-\(UUID().uuidString)")
+    private var url: URL { directory.appending(path: "config.toml") }
+
+    private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
+
+    private func store(_ text: String) throws -> ConfigurationStore {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try text.write(to: url, atomically: true, encoding: .utf8)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
+        store.load(reduceMotion: false)
+        return store
+    }
+
+    @Test func isOffWhenTheKeyIsAbsent() throws {
+        let store = try store("")
+        #expect(store.settings.slideWindowPictures == false)
+        #expect(try TOMLDocument(contents()).value(at: ["options", "slide_window_pictures"]) == .boolean(false))
+    }
+
+    @Test func readsTheEngineKey() throws {
+        #expect(try store("[options]\nslide_window_pictures = true\n").settings.slideWindowPictures)
+        #expect(try store("[options]\nslide_window_pictures = false\n").settings.slideWindowPictures == false)
+    }
+
+    @Test func writesTheSwitchAsTheEngineKey() throws {
+        let store = try store("")
+        try store.update(reduceMotion: false) { $0.slideWindowPictures = true }
+        #expect(try TOMLDocument(contents()).value(at: ["options", "slide_window_pictures"]) == .boolean(true))
+        try store.update(reduceMotion: false) { $0.slideWindowPictures = false }
+        #expect(try TOMLDocument(contents()).value(at: ["options", "slide_window_pictures"]) == .boolean(false))
+    }
+}
+
 struct ShowInDockConfigurationTests {
     private let directory = FileManager.default.temporaryDirectory.appending(path: "miri-dock-\(UUID().uuidString)")
     private var url: URL { directory.appending(path: "config.toml") }

@@ -24,34 +24,34 @@ private final class FakeScreenRecording: ScreenRecordingAccess {
 struct ScreenRecordingTests {
     @Test func turningOnWithoutPermissionPromptsAndStaysOff() {
         let access = FakeScreenRecording(granted: false)
-        #expect(access.sharedEdgeSlices(wanting: true) == false)
+        #expect(access.switchValue(wanting: true) == false)
         #expect(access.prompts == 1)
     }
 
     @Test func turningOnSavesOnWhenThePromptGrantsPermission() {
         let access = FakeScreenRecording(granted: false, grantsOnRequest: true)
-        #expect(access.sharedEdgeSlices(wanting: true))
+        #expect(access.switchValue(wanting: true))
         #expect(access.prompts == 1)
     }
 
     @Test func turningOnWithPermissionSavesOnWithoutAPrompt() {
         let access = FakeScreenRecording(granted: true)
-        #expect(access.sharedEdgeSlices(wanting: true))
+        #expect(access.switchValue(wanting: true))
         #expect(access.prompts == 0)
     }
 
     @Test func turningOffNeverPrompts() {
         let access = FakeScreenRecording(granted: false)
-        #expect(access.sharedEdgeSlices(wanting: false) == false)
+        #expect(access.switchValue(wanting: false) == false)
         #expect(access.prompts == 0)
     }
 
     @Test func aRevokedGrantTurnsASavedSwitchOffWithoutAPrompt() {
         let access = FakeScreenRecording(granted: true)
-        #expect(access.revokes(sharedEdgeSlices: true) == false)
+        #expect(access.revokes(true) == false)
         access.isGranted = false
-        #expect(access.revokes(sharedEdgeSlices: true))
-        #expect(access.revokes(sharedEdgeSlices: false) == false)
+        #expect(access.revokes(true))
+        #expect(access.revokes(false) == false)
         #expect(access.prompts == 0)
     }
 }

@@ -272,6 +272,34 @@ struct LayoutSettings: View {
                             get: { model.settings.animations },
                             set: { value in model.update { $0.animations = value } }))
                 }
+                SettingsRow(
+                    title: String(localized: "Slide pictures of windows"),
+                    detail:
+                        String(
+                            localized:
+                                "A keyboard move or a swipe slides pictures of the windows, then moves the windows once, so a slow app cannot make the motion stutter. Needs Screen Recording permission."
+                        )
+                ) {
+                    RowSwitch(
+                        label: String(localized: "Slide pictures of windows"),
+                        isOn: Binding(
+                            get: { model.settings.slideWindowPictures },
+                            set: { model.setSlideWindowPictures($0) }))
+                }
+                if model.slideWindowPicturesNeedPermission {
+                    NoticeRow(
+                        kind: .warning,
+                        text:
+                            String(
+                                localized:
+                                    "Off because Miri does not have Screen Recording permission. Turn on Miri there, then switch this on again."
+                            )
+                    ) {
+                        if let url = SystemScreenRecording.settingsURL {
+                            Button("Open Screen Recording Settings") { NSWorkspace.shared.open(url) }
+                        }
+                    }
+                }
             }
             SettingsSection(String(localized: "Stacks")) {
                 SettingsRow(

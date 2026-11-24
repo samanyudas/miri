@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-22 on branch `docs/515-closeout`, based on `main` at `b8fd5af7`
+Updated: 2026-11-24 on branch `exp/spring-on-main`, based on `main` at `1542cd60`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,133 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Apple motion experiment on `exp/spring-on-main`, 23 November 2026
+
+This branch is an experiment built in worktree `../miri-spring-main`, with the engine PR [paneru#204](https://github.com/samanyudas/paneru/pull/204) now merged into `miri/v0.5.2` as `c53bb6d` and pinned here for the Miri pull request against `main`.
+On top of `main` at `1542cd60` it adds, in order:
+
+- The critically damped spring ease from 17 November, rebased (engine `96a4328`, `4db9c58`).
+- A slight swing past the landing after a trackpad flick, and Apple's rubber band past both strip ends (engine `6c53864`), reviewed in 4 sol-loop rounds and by Gemini 4 Neon.
+  This changes Sam's 12 November no-overshoot settle at Sam's request, as `decisions/release-scope.md` records.
+- The picture cover of [#509](https://github.com/samanyudas/miri/issues/509) for keyboard strip moves, with the **Slide pictures of windows** switch and the ADR 0002 amendment (engine `e07b9bd`).
+- Click replay on cover pictures and covered swipes (engine `0de348c`).
+- Keyboard moves that only touch the strip stay under the cover, through a layout fingerprint (engine `8a85b29`).
+- Column resizes under the cover (engine `72f3a2d` to `72a2cf8`): the real windows take their final frames once under the cover, each picture moves from its old frame to its new one on the spring with the gaps held, and the cover fades out over the real windows once they show their new frames.
+  Sam chose this on 23 November 2026 over leaving the overlap, trading it for desktop gaps, or covering only the neighbors.
+  Gemini 4 Neon planned it, it went through 5 sol-loop rounds with GPT-6.2 Sol and a review by Neon, and every finding is fixed except four declined as rare: a parked window's edge sliver hides under the cover, a press during the morph goes to the final frames, the landing reads the window server on the engine thread, and two strips' covers on one display in one pass.
+
+Live checks on Sam's Mac on 23 November 2026, display 2 at 2560 by 1440 points:
+
+- Focus moves of 1684 points went under the cover with 4 pictures, the slide lasted 237 to 262 ms, each real window moved once under it, and the cover came off 14 ms after the last window landed.
+  The two Helium windows took their positions about 160 ms apart, hidden under the cover.
+- A screenshot partway through a slide showed the pictures in place, and the menu bar stayed live.
+- A click on a picture 226 ms into a slide was held and posted on that window at the same point 13 ms after the cover lifted.
+- The engine's memory stayed at 45 MB with every picture kept.
+
+Sam tried the trackpad on 23 November 2026 and said it feels good.
+The cover then went through 5 sol-loop rounds with GPT-6.2 Sol and a review by Gemini 4 Neon, and every finding is fixed (engine `b6b03b0`) except Sol's S16: a press within a fraction of a point of a picture's edge, during a slide, can miss its replay, which Sam chose to leave on 23 November 2026.
+After the fixes, Sam's own use showed two covered swipes landing and lifting about 46 ms later, and Sam said keyboard moves on `spring-493cdb3c` are good.
+On 23 November 2026 Sam disliked the covered resize: the stretched picture smeared and the fade showed a double image.
+Engine `201cb7a` (pin `a78d19a8`) reverts the covered resize, and a width command now moves its strip and windows to the new layout in one step, with pacing still holding a window beside a slower app.
+On three fixture windows each press showed about 50 ms after the key and landed in one or two jumps.
+A neighbor that a growing window pushes waited up to about 100 ms to move aside, so the two overlapped by up to 94 pt for that time.
+Not yet checked: Sam's own resizes, Helium in particular, a 60 fps recording against #509's criteria, and the cover's CPU cost over a working session.
+`make lint` reports one expected problem: the experiment's engine pin is not on the fork's `miri/v0.5.2` branch.
+Sam then found the instant resize free of overlap but asked for a slight, smooth motion.
+On Gemini 4 Neon's advice, engine `acf9efa` (pin `f0fd5fc0`) eases a resize on a 120 ms quartic ease-out whose first frame covers about 44% of the way, with pacing on the same curve.
+On fixtures, growing overlapped a neighbor by up to 86 to 228 pt for 60 to 100 ms, and the shrink from 1906 to 630 pt let the left neighbor slide under the resized window by up to 617 pt for about 170 ms, against 311 pt for about 30 ms when instant.
+Sam runs `~/.cache/miri/builds/spring-f0fd5fc0` with `slide_window_pictures = true`; `spring-a78d19a8` is the instant resize and `spring-ba1f10dc` the build without the cover.
+After reviewing a screen recording of `spring-f0fd5fc0` on Helium YouTube (30 to 140 ms reflow stalls and backwards right-edge jumps when `set_position` ran before `set_size`) and comparing options in an interactive HTML demo, Sam chose Option 1: a non-stretching crop/reveal spring cover.
+Claude Opus 5.5 implemented it (`13429ce`), followed by 5 sol-loop review rounds with GPT-6.2 Sol (`1e3282e`, `220ce58`, `8dcba9a`, `fab18ce`, `a474ffe`) and a final review by Gemini 4 Neon (`83af2ce`), with every finding fixed.
+Neighbors glide on the 120 Hz critically damped spring as rigid 1:1 pictures, the resized window stays 1:1 inside a clipping container (cropping cleanly on shrink, revealing a matched right-edge fill and swapping in a fresh 1:1 capture on grow), and the 150 ms ghost fade is removed.
+All 1541 + 56 engine tests, clippy, and fmt pass on engine `83af2ce` (pin `fd9dff04`).
+Live on 3 fixture windows on `spring-fd9dff04` (verify-miri run `20261123-141134`, 4 ms sampler): all 5 resizes (grow `1012 -> 1338`, grow `1338 -> 1522`, big shrink `1522 -> 502`, grow `502 -> 665`, and a back-to-back grow `665 -> 1012` 16 ms after lift) went under the cover, lasted 252 to 304 ms (vs ~430 to 462 ms with the old 150 ms fade), snapped each real window once underneath with 0 pt visible overlap, and the mid-flight fresh capture warmed the cache immediately for the follow-up press.
+Sam now runs `~/.cache/miri/builds/spring-fd9dff04` with `slide_window_pictures = true` (`spring-f0fd5fc0` is the 120 ms live ease-out, `spring-a78d19a8` the instant resize, and `spring-ba1f10dc` the build without the cover).
+Sam tested `spring-fd9dff04`, confirmed focus slides and Option 1 column resizes feel good, and sent a recording showing tiled maximize and restore (`Ctrl+Opt+F`) jumping with wallpaper gaps and overlap.
+Two root causes were found: `cover_resizes` skipped maximize and restore (no `ResizeMarker` and vertical edge-padding/stack height changes), and `hold_frames` ran in `UpdateSet::Events` on the toggle frame itself before `UpdateSet::Layout`, pairing old `Position` with restored `Bounds` and writing an intermediate frame at `x = 0`.
+Engine `0618e74` (pin `c7c1e6a2`) routes tiled maximize, restore, stacked maximize/restore, and resize-out-of-maximize through `CoverMorph` via a one-frame `MaximizeMorph` marker, pins `Framed.picture` at top-left anchor `(0, 1)` with height-tracked `position.y`, extends 2D `fill_crossing_time` / `outgrown` / `replace_picture` and off-screen sliver refresh checks, and skips `hold_frames` on the toggle frame (`hold.is_changed()`).
+All 1545 + 56 engine tests (4 new maximize/restore morph tests), clippy, and fmt pass on `0618e74`.
+Live on 3 fixture windows on `spring-c7c1e6a2` (verify-miri run `20261123-165559`, 4 ms sampler): all 4 `Ctrl+Opt+F` presses (maximize `948x1034 -> 1920x1050`, restore `1920x1050 -> 948x1034`, second maximize, and immediate restore 36 ms after lift) went under the cover, lasted 279 to 326 ms, hid all real window snaps and macOS's `EDGE_RELEASE` bounce completely under the cover with 0 pt visible overlap, and returned `before == after` frames.
+Sam now runs `~/.cache/miri/builds/spring-c7c1e6a2/Miri Developer.app` with `slide_window_pictures = true` (`spring-fd9dff04` is the Option 1 resize build before maximize cover morph).
+Sam confirmed `Ctrl+Opt+F` is smooth on `spring-c7c1e6a2`, and reported title-bar double-click was still choppy.
+Root cause: on a real double-click, the second `MouseDown` (`clicks == 2`) arrives frames before `MouseUp`; `drag_events` (`UpdateSet::Focus`) treated it as a new `DragState::Pressed`, so `cover_resizes` skipped the cover as `"drag"` and `position_layout_windows` held the double-clicked window back while moving its neighbors, and `mouse_down_trigger` spawned a `MouseHeldMarker` that fired a second `reshuffle_around` on `MouseUp`.
+Engine `56a44fc` (pin `bec140f2`) ends any pending drag press on `clicks > 1` without entering `DragState::Pressed` and skips spawning `MouseHeldMarker` on `clicks > 1`, so title-bar double-click runs the exact same `CoverMorph` path as `Ctrl+Opt+F`.
+All 1546 + 56 engine tests (including a separated-frame double-click cover test), clippy, and fmt pass on `56a44fc`.
+Sam now runs `~/.cache/miri/builds/spring-bec140f2/Miri Developer.app` with `slide_window_pictures = true` (switched in verify-miri run `20261123-173335`, `matched=13, strips=2, missing=0`).
+Sam tested title-bar double-click on `spring-bec140f2` and sent a recording showing a 1-frame desktop flash ~450 ms after double-click restore (at `f0123` and `f0337` to `f0338`) that never happened with `Ctrl+Opt+F`.
+Root cause: `CGEventTap` passed the double-click through to Helium, so Helium ran macOS's native `performZoom:` ~450 ms later (after `CoverMorph` lifted), jumping to its pre-zoom box before `hold_frames` snapped it back.
+Engine `48eaa71` (pin `f1520b25`) adds `platform/double_click_tap.rs`: the tap holds `LeftMouseDown { clicks: 2 }` inside a published tiled/maximized top-bar rect (zero IPC in the tap), and `double_click_toggle` either calls `consume()` (swallowing down/drag/up so the app never runs native zoom) or `replay()` (re-posting `clicks == 2` with `DOUBLE_CLICK_TAG` within ~3 ms for URL bars, tabs, buttons, or content).
+All 1549 + 56 engine tests, clippy, and fmt pass on `48eaa71`.
+Sam now runs `~/.cache/miri/builds/spring-f1520b25/Miri Developer.app` with `slide_window_pictures = true` (switched in verify-miri run `20261123-182542`, `matched=13, strips=2, missing=0`); awaiting Sam's visual check of double-click restore without the desktop flash and URL-bar double-click replay.
+Sam then reported that a title-bar double-click maximize takes longer than `Ctrl+Opt+F`.
+Sam's recording showed the same motion, then about 300 ms of the old narrow picture in a grey full-width box before the real Helium window appeared, against about 16 ms after `Ctrl+Opt+F`.
+Fixture double-clicks were as fast as the key: the cover went up 20 to 95 ms after the second press, with or without focus, and a 400 ms hold of the second click delayed nothing.
+A debug build on Sam's own Helium windows found two causes.
+In one double-click the writer spent 419 ms on two moves after a staged maximize: back to the window's old position, then to the target where the staging had already put it, each waiting for Helium to draw at the new width, while the cover waited on the write.
+Engine `732477b` (pin `4885fe6e`) ends a staged resize at its target and skips the move when the staging already put it there, with two writer tests that fail on the old code.
+In another, the first click focused a Helium window 12 pt off screen, the strip's live scroll was still settling at the second click, and the cover refused the strip as not at rest, so the maximize ran without the cover; this awaits Sam's choice.
+Sam's nine double-clicks on T3 Code went to the app as below its top bar.
+Engine `c697b51` (pin `9d26b517`) logs app writes slower than 100 ms and why a double-click goes to the app.
+On fixtures, `spring-9d26b517` maximized straight to the target with no trip back, and every cover lifted on its own 300 to 340 ms after the toggle.
+Sam now runs `~/.cache/miri/builds/spring-9d26b517` with debug logging for the cover, maximize, and window writer; not yet checked on Sam's Helium windows.
+Sam's next recording showed, on double-click toggles only, the old picture and a fill for about half a second, then a shake after the cover lifted.
+Root cause, reproduced on a throwaway Helium: a real press reaches the HID tap before the window server names the window under it, so `double_click_tap` passed every real title-bar double-click to the app.
+Helium then ran its own animated zoom for about 350 ms against the engine's frame, which stalled the engine's reads and writes, made the cover wait to its time limit, and left the frame hold to put the window back in view.
+Engine `e696df4` matches a press without a window by its place, and keeps a held press until the engine answers and a taken one until its release, instead of 200 ms.
+On the throwaway Helium the tap then held and swallowed each double-click, Helium ran no zoom, and every cover lifted on its own 337 to 355 ms after the press.
+The same recording showed a maximize as the old layout with a blank fill, and a restore of a centered PDF as a black window, until the cover lifted, and a picture up to 1 s old after a new tab.
+Engine `02b25ae` (pin `ce731300`) keeps each window's last picture at its previous size and shows it from the first frame when the window returns to that size, drops it when the window's title changes, and retakes a retitled window's picture first.
+All 1554 + 56 engine tests, clippy, and fmt pass.
+The first maximize of a window still shows the old layout and a fill, as no picture of its maximized layout exists yet.
+Live on a throwaway Helium on `ce731300`'s engine: a double-click whose second press lasted 400 ms stayed swallowed, a double-click on the address bar was replayed and selected one word, and both a restore and a second maximize showed the window's previous-size picture.
+Sam then asked for the first maximize's fill to go too.
+Engine `5f7342a` (pin `efda869f`) rests the cover's pictures until the window server shows the window at its maximized frame, for 250 ms of animation steps at the longest, then moves them with the window's frame as a hole in the cover that shows the window itself.
+A screen video of a throwaway Helium with a centered test page showed the first maximize open onto the live window with its content in its final place and no fill, the restore close onto the kept small picture, and the second maximize open onto the kept maximized picture, each ending on the final layout with no change as the cover lifted.
+In that run the pictures started about 285 ms after the key, with the video recording running and Helium's resize taking 199 ms; a run where Helium took 349 ms passed the limit and fell back to the fill.
+All 1555 + 56 engine tests, clippy, and fmt pass.
+Sam confirmed all of it good on `spring-efda869f` and asked for the first maximize's wait to be shorter.
+Engine `a02c45b` (pin `8d8197c7`) marks each window a resize's cover snaps, and its frame write moves it before it sizes it, so its app lays it out once instead of two or three times.
+On a throwaway Helium a first maximize then opened 145 ms after the key, against 285 ms, with one move and one size and no staged retry; the restore and the second maximize ran as before.
+All 1556 + 56 engine tests, clippy, and fmt pass.
+Sam confirmed the shorter wait good, and reported the desktop showing beside System Settings after a maximize, and again when a neighbor moved across it.
+Sam's log showed System Settings taking 732 points of a 2552-point maximized column, at the column's left edge, with the frame hold rewriting its frame about 50 times a second for a second.
+Engine `ae093ab` (pin `8694cfef`) undoes the maximize of a tiled window that answers two finished writes in a row with a narrower frame, holds the frame it returns to as a restore does, and does not maximize it again while its display's usable area has that size; a waiting cover rests on while the app has answered narrower.
+It applies to any app whose window refuses the maximized width, not to System Settings by name.
+On a throwaway window limited to 900 points the maximize was undone 144 ms after the key, the window returned to its exact frame, the cover came off 504 ms after the key, and a second maximize and a title-bar double-click did nothing.
+All 1557 + 56 engine tests, clippy, and fmt pass.
+Sam accepted System Settings at 748 points wide on 23 November 2026, the width it answers when asked for 732, as `verify-miri end --accept-layout` records in run `20261123-214716`.
+Sam confirmed it good and chose to pass a title-bar double-click on such a window to its app.
+Engine `78ce722` (pin `d59b88e3`): `double_click_toggle` replays the double-click of a tiled window marked `MaximizeRefused` for the current usable area, instead of taking it.
+On the throwaway limited window the tap held the press, the engine logged it left to the app, the release passed, and the window kept its frame; the app's own title-bar action had nothing to change there.
+All 1557 + 56 engine tests, clippy, and fmt pass.
+Sam now runs `~/.cache/miri/builds/spring-d59b88e3` with debug logging for the cover, maximize, window writer, and double-click tap.
+Sam checked System Settings on that build on 23 November 2026 and said all good.
+Sam then sent a recording from the built-in display alone: each trackpad swipe ended with the old layout for a frame, then the desktop beside the windows, before the new layout.
+The log showed every swipe's cover ending early, about 450 ms in, with no reason logged.
+Engine `910d42c` (pin `86ae0576`) keeps the cover up when a strip move arrives during a covered swipe and slides the pictures on to where the strip heads, and logs the reason for each other early end.
+This is the likely cause, not a confirmed one: a synthetic swipe does not act as Sam's hand does, so only an engine test covers it, and it fails on the old code.
+All 1558 + 56 engine tests, clippy, and fmt pass.
+Sam tested `spring-86ae0576` and later swipe-cover handoff fixes, and GPT-6.2 Sol reviewed `34329e6` through `032eb6c` (pin `9b556523`) across 10 rounds, approving in Round 10.
+Gemini 4 Neon then reviewed `910d42c` through `032eb6c` and reported 4 findings: keeping lifted covered swipes waiting for `cover_swipes` across all scroll systems, stopping unsettled or differently targeted covered swipes on a same-position `RepositionMarker`, clearing pending `CoverMorph` captures on Screen Recording loss and gating `unveil_ready_pictures`, and pruning unwatched windows with a generation bump in `ShownFrames::stop` and `stop_morph`.
+Claude Opus 5.5 fixed all four on 24 November 2026 in `305becb`, `137d8ac`, `0d51778`, and `aeaacd6` (pin `31beb768`), aligning covered swipes with uncovered settles on same-position markers, and Neon approved in Round 2 with no remaining findings.
+On `31beb768` / `aeaacd6`, `make engine-lint` and `make engine-test` pass with 42 library and 1519 binary tests (`--locked --no-default-features`, plus 1 single-process test and 0 doc-tests), default-features `cargo clippy --locked --all-targets -- -D warnings` is clean, and default-features `cargo test --locked --all-targets` passes 56 library and 1617 binary tests.
+`make swift-lint`, `make strings`, `make swift-test` (248 tests in 34 suites), `make docs`, `make harness-tests` (78 tests), `make shell`, and `make actions` also pass on `31beb768`.
+In live `verify-miri` run `20261124-082044` on `/Users/sam/.cache/miri/builds/spring-31beb768/Miri Developer.app`, fixture maximize (`1020x1278` to `2040x1278`), restore, a 120 ms rapid double-toggle, and focus slides passed with matching engine and macOS focus and zero errors or panics in `engine.log`.
+Sam checked `~/.cache/miri/builds/spring-31beb768/Miri Developer.app` by hand on 24 November 2026, confirmed the build works well, and asked to push, update `PROGRESS.md`, and open a pull request.
+Engine branch `exp/spring-on-main` was updated on 24 November 2026 with `7740b66` on [paneru#204](https://github.com/samanyudas/paneru/pull/204) (parked sliver and OS bottom-tuck landing tolerances with mismatch debug logging, `follow_viewport` `CoverSlide` translation, `FAILED_RETRY` 6 s and timeout backoff, and immediate cover abort on Screen Recording access loss).
+On `7740b66`, local `cargo fmt --check`, `make engine-lint` (`0` warnings), `make engine-test` (`42` lib, `1` single-process, `1524` bin), default-features `clippy` (`0` warnings) and `test` (`56` lib, `1` single-process, `1622` bin), all 4 GitHub Actions CI checks (`Format and Clippy`, `Tests as Miri builds the engine`, `Tests with the default features`, `CodeRabbit` skipped), and all 3 CodeRabbit review threads are green and resolved.
+In `/Users/sam/.t3/projects/miri-spring-main`, `exp/spring-on-main` now pins the merged `origin/miri/v0.5.2` commit `c53bb6d` ([paneru#204](https://github.com/samanyudas/paneru/pull/204), tree-identical to `50b6307`), ready to push and open the Miri pull request against `main`.
+In live 60 fps `#509` run `20261124-112129` on `/Users/sam/.cache/miri/builds/spring-7740b66/Miri Developer.app`, Test A (`fullwidth-right` / `fullwidth-left`: `active_fps` `41.3` / `55.7`, `0.000%` interior handoff diff, `0` pt `handoff_dx_pt`), Test B (`stack-enter`, `stack-slide`, `stack-exit`, `stack-return`: `0.000%-0.213%` interior diff, `0` pt `handoff_dx_pt`, `0` pt `stack_max_dx_spread_pt` on `stack-enter`/`stack-slide`/`stack-exit` and `50` pt on initial sliver entry in `stack-return` with `0-2` pt across the remaining 10 frames), Test C (`animations = false` -> `cover_seen = false`, `switched off`), and Test D (`disable-mid-morph` -> `ended early: switched off` at `204.6 ms` with `0.000%` interior diff; `reenable-restore` -> `active_fps = 55.0`, `0.213%` interior diff, `0` pt `handoff_dx_pt` via `post_stream`) all passed with `0` errors or panics in `579` delta log lines (`14` user windows restored).
+Across 7 uncontended non-`rec60` slide cycles in that run, `shown -> landed` took `249.6-280.7 ms`, `landed -> lifted` took `36.9-147.7 ms`, and `lifted -> hidden` took `0.6-51.6 ms`, with `0` time-limit lifts, `0` landing mismatches, and `0` slow writes.
+Engine branch `exp/spring-on-main` was updated again on 24 November 2026 with `2ee2e8f` on [paneru#204](https://github.com/samanyudas/paneru/pull/204), addressing all `24` remaining CodeRabbit Minor and Nitpick findings and intentionally skipping `1` item (`src/ecs/strip_cover.rs:333`, keeping `CoverPhotos::window` usable across retitles as asserted by `5` existing strip-cover tests).
+On `2ee2e8f`, local `cargo fmt --check`, `make engine-lint` (`0` warnings), `make engine-test` (`42` lib, `1` single-process, `1541` bin), default-features `clippy` (`0` warnings), and default-features `test` (`56` lib, `1` single-process, `1639` bin) all pass.
+Engine branch `exp/spring-on-main` was updated again on 24 November 2026 with `0e20019` and `50b6307` on [paneru#204](https://github.com/samanyudas/paneru/pull/204), addressing all `7` findings from CodeRabbit's second review (`5` inline review threads confirmed addressed and resolved, plus `2` outside-diff findings in `src/ecs/slice_photos.rs` and `src/manager/window_writer.rs`, and tightening `failed_and_timed_out_captures_back_off_to_let_desktop_capture`).
+On `50b6307`, local `cargo fmt --check`, `make engine-lint` (`0` warnings), `make engine-test` (`42` lib, `1` single-process, `1546` bin), default-features `clippy` (`0` warnings), default-features `test` (`56` lib, `1` single-process, `1644` bin), `make swift-test` (`248` tests in `34` suites), `make build`, and `make e2e` (`test-permission-prototype.sh` and `test-window-recovery.sh`) all pass.
+In live 60 fps `#509` run `20261124-154614` on `/Users/sam/.t3/projects/miri-spring-main/.build/app/Miri Developer.app` (`50b6307`, `565` delta log lines, `0` errors or panics, `9` user windows restored with `layout check passed`), Test A (`fullwidth-right` / `fullwidth-left`: `active_fps` `55.4` / `55.7`, `0.000%` interior diff), Test B (`stack-enter` / `stack-slide` / `stack-exit` / `stack-return`: `active_fps` `52.5-56.0`, `0.000%-0.213%` interior diff, `0` pt `handoff_dx_pt`, `stack_max_dx_spread_pt` `0-16`, `1` time-limit lift during `stack-slide` under `SCStream` capture), Test C (`animations = false` -> `cover_seen = false`, `switched off`), and Test D (`disable-mid-morph` -> `ended early: switched off` at `108.3 ms`; `reenable-restore` -> `active_fps = 55.4`, `0.000%` interior diff, `0` pt `handoff_dx_pt`) all completed cleanly, with `0` time-limit lifts and `0` landing mismatches across the `7` uncontended non-`rec60` slide cycles (`shown -> landed` `249.5-290.2 ms`, `landed -> lifted` `34.5-112.6 ms`, `lifted -> hidden` `0.4-10.6 ms`).
+On 24 November 2026 Sam also completed manual hardware and TCC checks on `/Users/sam/.cache/miri/builds/spring-50b6307/Miri Developer.app` (`50b6307`, `310` debug log lines, `0` errors or panics, `0` time-limit lifts, `0` landing mismatches): physical trackpad rubber-band and mid-coast handoff passed (`36` covered swipes, `9` `carries on under a swipe` handoffs), and live macOS Screen Recording TCC revoke and re-grant passed (`cover pictures refused by macOS`, `capture access lost`, and live recovery back to covered swipes without restarting the engine).
+`make docs`, `make harness-tests`, `make shell`, `make actions`, `make swift-lint`, `make strings`, `make engine-format`, and `scripts/check-pushed-media.py` also pass for the updated submodule pin.
+Not done: merging the Miri pull request against `main` and verifying [#509](https://github.com/samanyudas/miri/issues/509) on `main`, what System Settings itself does with a passed-through double-click, the first double-click on a window not yet known to refuse, and the frame hold's repeated writes when an app answers a restore with another width.
 
 ## Agent merges and PR evidence
 
