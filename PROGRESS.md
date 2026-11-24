@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-24 on branch `chore/lifecycle-model-sync`, based on `main` at `e50e6e5c`
+Updated: 2026-11-24 on branch `docs/limitations-audit`, based on `main` at `cfce4860`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -37,6 +37,13 @@ On that build (run `20261124-194442`), Miri stayed frontmost with Settings focus
 The menu bar **Show Logs in Finder** item, shown only after the engine fails, still opens Finder behind the app in front: [#534](https://github.com/samanyudas/miri/issues/534).
 Verified on `main` `e50e6e5c` (run `20261124-200314`): Miri stayed frontmost in 10 of 10 toggles. A rare race remains when a pointer click turns the switch off after Settings was reopened, about 1 in 8 tries on `main` before and after the fix. Sam chose to ignore it.
 Branch `chore/lifecycle-model-sync` moves the engine lifecycle model's line comments and `sync-commit` to `e50e6e5c`, and `make verify-engine-lifecycle` exits 0 again.
+
+## Limitations page audit on 24 November 2026
+
+Branch `docs/limitations-audit` rechecks every entry of [docs/limitations.md](docs/limitations.md) against the source on `main` at `cfce4860` (engine `c9ea707`) and each entry's issue history.
+It drops 3 entries: the Mission Control drag fixed in [#143](https://github.com/samanyudas/miri/issues/143), the swipe lag that [#66](https://github.com/samanyudas/miri/issues/66) closed as not reproduced, and the maximized column after a restart.
+`verify-miri` run `20261124-201810` kept a maximized column where it was after **Restart Engine** and after a relaunch, both fully in view and half in view.
+It corrects 10 entries and adds [#500](https://github.com/samanyudas/miri/issues/500), [#517](https://github.com/samanyudas/miri/issues/517), [#534](https://github.com/samanyudas/miri/issues/534), and the remaining snapping-app limits from [#386](https://github.com/samanyudas/miri/issues/386) and [#390](https://github.com/samanyudas/miri/issues/390).
 
 ## CI speed audit and free-runner improvements on 24 November 2026
 
