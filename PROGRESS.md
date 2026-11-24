@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-25 on branch `docs/verify-miri-maintenance`, based on `main` at `3dc8943a`
+Updated: 2026-11-25 on branch `chore/pin-thumb-swipe-rejection`, based on `main` at `954e70df`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,15 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Trackpad resting thumb and palm rejection on 25 November 2026
+
+Merged [engine PR #208](https://github.com/samanyudas/paneru/pull/208) into `miri/v0.5.2` as `465817d1` (head `7d57b5e8`), which this branch pins.
+Previously, `Touch::sample` counted every touch in `allTouches()` and `SwipeAccumulator` committed on a single moving finger past 0.0005 normalized, so a thumb resting near Command during a two-finger scroll triggered the three-finger strip swipe and blocked scrolling for 1.2 s.
+`SwipeAccumulator` now filters resting touches, requires coordinated multi-finger physical motion across `configured_fingers` to commit (while ignoring stationary resting palms during three- or four-finger swipes), scopes post-swipe scroll wheel suppression, and lowers the trackpad haptic detent in `src/platform/haptics.rs` from actuation 4 to 3.
+Reviewed with `sol-loop` (7 rounds with `gpt-6.2-sol` on `high`, verdict `APPROVE`) and CodeRabbit (5 of 6 findings fixed in `7d57b5e8`, 1 declined to preserve `#494` fast retouch).
+Sam verified the feel of engine `fc7e0bc4` on a real MacBook trackpad, and all three engine CI jobs passed on `7d57b5e8`.
+Four-finger swipes with a resting palm and vertical workspace swipes (`vertical = true`) were checked by unit tests only.
 
 ## verify-miri feature map recheck on 25 November 2026
 
