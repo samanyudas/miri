@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-24 on branch `ci/upload-dmg-hidden-files`, based on `origin/main`
+Updated: 2026-11-24 on branch `fix/526-settings-offscreen`, based on `origin/main`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,15 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Settings window off-screen recovery on 24 November 2026
+
+Fixed [#526](https://github.com/samanyudas/miri/issues/526) on branch `fix/526-settings-offscreen`.
+`WindowPresenter.show` previously adjusted window position only for invisible windows on another display, so selecting **Settings…** while Settings was already open and partly off-screen left it clipped.
+Added `WindowPlacement.fitted(_:in:)` in `Sources/MiriCore/WindowPlacement.swift` with 5 unit tests in `Tests/MiriCoreTests/WindowPlacementTests.swift`, and updated `WindowPresenter.show` to fit the window into its display's visible frame before focusing it.
+Reproduced on `main` (`50b72246`, engine `c9ea7070`, `verify-miri` run `20261124-175909`): Settings stayed at `(2520, 300, 880, 640)` after selecting **Settings…** while open.
+Verified on the fix build (`verify-miri` runs `20261124-180212` and `20261124-180539`): Settings moved from `(2520, 300, 880, 640)` to `(1680, 300, 880, 640)` inside the main display's visible area `(0, 30, 2560, 1410)` with Settings focused, and stayed at `(840, 415, 880, 640)` when already fully visible.
+Reviewed with `sol-loop` (1 round with GPT-6.2 Sol on `high`, verdict `APPROVE`, 2 nits declined).
 
 ## CI speed audit and free-runner improvements on 24 November 2026
 

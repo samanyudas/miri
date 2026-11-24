@@ -29,6 +29,13 @@ final class WindowPresenter {
             window.setFrameOrigin(
                 NSPoint(x: area.midX - window.frame.width / 2, y: area.midY - window.frame.height / 2))
         }
+        // An already-open window can sit partly off-screen, and makeKeyAndOrderFront alone leaves it clipped.
+        if let screen = window.screen ?? NSScreen.main {
+            let fitted = WindowPlacement.fitted(window.frame, in: screen.visibleFrame)
+            if fitted != window.frame {
+                window.setFrame(fitted, display: window.isVisible)
+            }
+        }
         NSApp.activate()
         window.makeKeyAndOrderFront(nil)
     }
