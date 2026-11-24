@@ -86,8 +86,9 @@ Each drive command logs to `<run>/log.txt` with a timestamp.
 | `V capture <label>` | Writes `media/<label>.png`: the fixtures' display with only the run's fixture windows drawn, over plain grey. `--settings` adds the test build's Settings window, and `--display <id>` picks another display. |
 | `V record start <label>` | Starts an MP4 recording of the same view. Run the action, then `V record stop`, which writes `media/<label>.mp4`. It stops on its own after `--max-seconds` (60 by default), and `end` stops a recording that still runs. |
 | `V upload --pr <number> <files>` | Uploads `capture` and `record` files to the PR's GitHub attachments through Ardia, without posting a comment, and prints the Markdown for each. Needs no run. |
-| `V settings` | Reopens the test app, which shows Settings, as a user does from Finder or Spotlight. |
-| `V relaunch [--language de]` | Quits the test build with SIGTERM and opens it again, to check what it keeps across launches, such as a saved Stop. A build that starts no engine is a result, not a failure. `--language` starts it in that language through `-AppleLanguages`, without changing the Mac's language. |
+| `V settings` | Reopens the test app, which shows Settings, as a user does from Finder or Spotlight. It exits 1 only when no Settings window shows within 5 s, and logs the status text when the page has one. |
+| `V relaunch [--language de]` | Quits the test build with SIGTERM and opens it again, to check what it keeps across launches, such as a saved Stop. A build that starts no engine is a result, not a failure. `--language` starts it in that language through `-AppleLanguages`, without changing the Mac's language. `--initial-setup` shows the Set Up Miri window, as on the first launch. `--double-length` shows every interface text twice. |
+| `V cutoff` | Sets Settings to its default 880 by 640 size, shows each page, and logs every text that is cut off. It exits 1 when one is. It then puts the window size back. Run it after `relaunch --double-length` or `--language` to check that long text wraps. |
 | `V ax test press "General"` | Presses Settings pages and buttons by title, accessibility description, or help text, in order. It looks for each one again after the previous press, so a page and a button on it work in one call. `dump` lists every element with its help text, `status` prints the status text of the page that shows, and `windows` lists window numbers. |
 | `V empty-display` | Hides each app with a managed window on the built-in display, so the display has none. `end` shows the apps again. [Empty a display](#empty-a-display) has the steps. |
 | `V standin yabai` | Runs a harmless compiled process named `yabai`, so the Setup page reports a competing window manager. |
@@ -121,6 +122,10 @@ Hide the apps that have windows there instead:
 3. Run the test.
 4. Run `V end`. Its first step shows the hidden apps again, before it puts back the session and Sam's build.
    The layout check then proves that every window is back in the strip, display, and position it had at `begin`, and within 2 points of its width then.
+
+An app can show itself again after `empty-display` hid it.
+On 2026-11-25, Preview came back once and Notion twice, with nobody at the Mac, and Notion took the first column.
+Run `V query state` right before each step that needs the empty strip, and run `empty-display` again when a window is back.
 
 A hidden app hides its windows on every display, so the other display can lose windows too.
 The engine takes hidden windows out of their strips and returns each one to its old slot when the app shows again.
@@ -191,7 +196,7 @@ The layout check in step 6 is the proof.
 | File | Role |
 | --- | --- |
 | [scripts/verify-miri](scripts/verify-miri) | The command above. `V --help` and `V <command> --help` list every option. |
-| [scripts/tools/axdo.swift](scripts/tools/axdo.swift) | Reads and presses Accessibility elements, lists window numbers, finds the built-in display, and hides and shows apps. |
+| [scripts/tools/axdo.swift](scripts/tools/axdo.swift) | Reads and presses Accessibility elements, lists window numbers, reads and sets the Settings window frame, lists cut-off text, finds the built-in display, and hides and shows apps. |
 | [scripts/tools/key.swift](scripts/tools/key.swift) | Posts one key press with given flags at the HID event tap. |
 | [scripts/tools/fixturecap.swift](scripts/tools/fixturecap.swift) | Captures a still or a recording of one display with only the listed windows drawn, through ScreenCaptureKit. |
 | [scripts/tools/standin.c](scripts/tools/standin.c) | The sleeping stand-in process. |

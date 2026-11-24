@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-24 on branch `fix/engine-ax-stalls`, based on `main` at `607729e0`
+Updated: 2026-11-25 on branch `docs/verify-miri-maintenance`, based on `main` at `3dc8943a`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,14 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## verify-miri feature map recheck on 25 November 2026
+
+Rechecked all five feature files of the `verify-miri` skill against the source on `main` at `3dc8943a`, then drove each feature live in run `20261125-021942` on the built-in display only.
+The branch fixes `V settings`, which failed on the Shortcuts and Setup pages because they show no status text, and corrects the recipes that the run showed out of date.
+Monitor focus and the other-display width steps need two displays and were not driven.
+After `V empty-display` hid them, Preview showed itself again once and Notion twice, with nobody at the Mac.
+A retry worked, and a column jump did not show a hidden app, so the cause is unknown and no issue is filed.
 
 ## Busy-app engine-thread Accessibility reads on 24 November 2026
 
