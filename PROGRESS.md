@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-24 on branch `fix/menu-activate`, based on `main` at `51960db3`
+Updated: 2026-11-24 on branch `chore/lifecycle-model-sync`, based on `main` at `e50e6e5c`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -32,10 +32,11 @@ An Accessibility press on **Settings…**, as VoiceOver sends, also made Miri fr
 Sam's hand check passed on `main` `51960db3`, and #526 is closed.
 
 The **Show in Dock** switch had the same cooperative-activation gap: on `main` `51960db3`, an Accessibility press that turned it off, as VoiceOver sends, dropped Settings behind the app that was in front before (run `20261124-190707`).
-Branch `fix/menu-activate` makes `AppModel.showDockIcon` call `NSApp.activate(ignoringOtherApps: true)`.
+[#535](https://github.com/samanyudas/miri/pull/535), merged as `e50e6e5c`, makes `AppModel.showDockIcon` call `NSApp.activate(ignoringOtherApps: true)`.
 On that build (run `20261124-194442`), Miri stayed frontmost with Settings focused in 10 of 10 toggles, 6 by Accessibility press and 4 by pointer click.
 The menu bar **Show Logs in Finder** item, shown only after the engine fails, still opens Finder behind the app in front: [#534](https://github.com/samanyudas/miri/issues/534).
-The engine lifecycle model's line comments and `sync-commit` lag `main` since `2931c939`, and a separate PR resyncs them.
+Verified on `main` `e50e6e5c` (run `20261124-200314`): Miri stayed frontmost in 10 of 10 toggles. A rare race remains when a pointer click turns the switch off after Settings was reopened, about 1 in 8 tries on `main` before and after the fix. Sam chose to ignore it.
+Branch `chore/lifecycle-model-sync` moves the engine lifecycle model's line comments and `sync-commit` to `e50e6e5c`, and `make verify-engine-lifecycle` exits 0 again.
 
 ## CI speed audit and free-runner improvements on 24 November 2026
 
