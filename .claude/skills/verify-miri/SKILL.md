@@ -123,6 +123,10 @@ Hide the apps that have windows there instead:
 4. Run `V end`. Its first step shows the hidden apps again, before it puts back the session and Sam's build.
    The layout check then proves that every window is back in the strip, display, and position it had at `begin`, and within 2 points of its width then.
 
+An app can show itself again after `empty-display` hid it.
+On 2026-11-25, Preview came back once and Notion twice, with nobody at the Mac, and Notion took the first column.
+Run `V query state` right before each step that needs the empty strip, and run `empty-display` again when a window is back.
+
 A hidden app hides its windows on every display, so the other display can lose windows too.
 The engine takes hidden windows out of their strips and returns each one to its old slot when the app shows again.
 Engines before `4b640f7` tile the windows of an app that was hidden before the engine started, when the app still lists them over Accessibility, as Beeper does ([#374](https://github.com/samanyudas/miri/issues/374)).
@@ -192,7 +196,7 @@ The layout check in step 6 is the proof.
 | File | Role |
 | --- | --- |
 | [scripts/verify-miri](scripts/verify-miri) | The command above. `V --help` and `V <command> --help` list every option. |
-| [scripts/tools/axdo.swift](scripts/tools/axdo.swift) | Reads and presses Accessibility elements, lists window numbers, finds the built-in display, and hides and shows apps. |
+| [scripts/tools/axdo.swift](scripts/tools/axdo.swift) | Reads and presses Accessibility elements, lists window numbers, reads and sets the Settings window frame, lists cut-off text, finds the built-in display, and hides and shows apps. |
 | [scripts/tools/key.swift](scripts/tools/key.swift) | Posts one key press with given flags at the HID event tap. |
 | [scripts/tools/fixturecap.swift](scripts/tools/fixturecap.swift) | Captures a still or a recording of one display with only the listed windows drawn, through ScreenCaptureKit. |
 | [scripts/tools/standin.c](scripts/tools/standin.c) | The sleeping stand-in process. |

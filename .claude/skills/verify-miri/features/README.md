@@ -32,11 +32,11 @@ Read the index, then use the matching feature file as the recipe.
 
 | Feature | Proven by this skill |
 | --- | --- |
-| [Focus a window with a shortcut](focus-window-shortcut.md) | Yes, on 2026-11-05 at `main` c4ba432e, run `20261105-160539`: column, letter, number, stack, and monitor above and below. Monitor left and right were proved in run `20261104-225455`. |
-| [Start, stop, and restart window management](window-management-controls.md) | Yes, on 2026-11-05 at `main` c4ba432e, run `20261105-160539`: every sub-feature, the menu bar menu excepted. |
-| [Setup checks](setup-checks.md) | Yes, on 2026-11-05 at `main` c4ba432e, run `20261105-160539`: the `yabai` stand-in, Waiting, and auto-start. |
-| [Customize shortcuts](shortcut-customization.md) | Yes, on 2026-11-05 at `main` c4ba432e, run `20261105-160539`: remove, add, both conflicts, and reset. Not the filter. |
-| [New window width](new-window-width.md) | Yes, on 2026-11-10 at `main` 547f9777, run `20261110-180854`: background open and focused open. The overflow reproduced on `main` 04ae4c7a in run `20261110-171803`. |
+| [Focus a window with a shortcut](focus-window-shortcut.md) | Yes, on 2026-11-25 at `main` 3dc8943a, run `20261125-021942`: column, letter, number, stack, and the Settings rows without a chord. Monitor focus needs two displays, so it was last proved on 2026-11-05 at `main` c4ba432e, run `20261105-160539` (above and below), and in run `20261104-225455` (left and right). |
+| [Start, stop, and restart window management](window-management-controls.md) | Yes, on 2026-11-25 at `main` 3dc8943a, run `20261125-021942`: every sub-feature, Show Logs from Settings, but not the menu bar menu. |
+| [Setup checks](setup-checks.md) | Yes, on 2026-11-25 at `main` 3dc8943a, run `20261125-021942`: the `yabai` stand-in, `Check Again` while managing, Waiting, and auto-start. |
+| [Customize shortcuts](shortcut-customization.md) | Yes, on 2026-11-25 at `main` 3dc8943a, run `20261125-021942`: remove, add, both conflicts, Escape and app-switch cancel, and reset. Not the filter. |
+| [New window width](new-window-width.md) | Yes, on 2026-11-25 at `main` 3dc8943a, run `20261125-021942`, on one display: half width, a wide opener, a background opener, and the tiling-area limit. The other-display steps need two displays and were last proved on 2026-11-10 at `main` 547f9777, run `20261110-180854`. |
 
 ## Surfaces without a map entry
 
@@ -46,9 +46,11 @@ These user-facing surfaces have no recipe yet.
 - Configuration error: the menu line and the Settings banner with `Show Configuration File in Finder` ([Views.swift](../../../../Sources/Miri/Views.swift), [Settings.swift](../../../../Sources/MiriCore/Settings.swift)). Drivable with a broken `config.toml`.
 - Diagnostics page and `Copy Diagnostics…` window ([SettingsPages.swift](../../../../Sources/Miri/SettingsPages.swift), [Views.swift](../../../../Sources/Miri/Views.swift)). Drivable with `ax press`.
 - Window recovery: windows that management stops leave on screen ([WindowRestorer.swift](../../../../Sources/Miri/WindowRestorer.swift)). Drivable with fixtures and Stop.
-- Layout page: gaps, width presets, `Animate window movement`, windows per stack, maximized window side, and the shared-edge switch ([SettingsPages.swift](../../../../Sources/Miri/SettingsPages.swift)). Config. The shared-edge switch also needs Screen Recording permission and two displays.
-- General page: `Launch at login` and `Show in Dock` ([SettingsPages.swift](../../../../Sources/Miri/SettingsPages.swift)). Never drive `Launch at login`, which changes Sam's login items.
+- Layout page: gaps, width presets, `Animate window movement`, `Slide pictures of windows`, windows per stack, maximized window side, and the shared-edge switch ([SettingsPages.swift](../../../../Sources/Miri/SettingsPages.swift)). Config. The shared-edge switch also needs Screen Recording permission and two displays.
+- General page: `Launch at login`, `Move the pointer to windows that Miri focuses`, and `Show in Dock` ([SettingsPages.swift](../../../../Sources/Miri/SettingsPages.swift)). Never drive `Launch at login`, which changes Sam's login items.
   `Show in Dock` is drivable with `ax press "Show in Dock"`, and each press writes `show_in_dock` to `config.toml`.
 - Gestures page and `Test Gesture…` ([GestureSettings.swift](../../../../Sources/Miri/GestureSettings.swift)). The test needs Sam's trackpad.
-- Initial setup, the Set Up Miri window on first launch ([InitialSetup.swift](../../../../Sources/Miri/InitialSetup.swift)). Showing it again needs the launch argument `-initialSetupDone NO`, which `V begin` does not pass.
+- Initial setup, the Set Up Miri window on first launch ([InitialSetup.swift](../../../../Sources/Miri/InitialSetup.swift)). `V relaunch --initial-setup` shows it, and `V relaunch` closes it again.
+- `Send Feedback…` on the Diagnostics page and in the menu bar menu ([SettingsPages.swift](../../../../Sources/Miri/SettingsPages.swift), [Views.swift](../../../../Sources/Miri/Views.swift)). It opens GitHub in Sam's browser, so press it only when that is the test.
+- Translated interface text ([Localizable.xcstrings](../../../../Localization/Localizable.xcstrings)). `V relaunch --language <code>` and `V cutoff` check that the text of one language fits.
 - The menu bar menu ([Views.swift](../../../../Sources/Miri/Views.swift)). `axdo` cannot open it. [Start, stop, and restart](window-management-controls.md) has the System Events route.

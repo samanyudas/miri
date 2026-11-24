@@ -35,14 +35,16 @@ Preconditions:
 - **Stop shortcut.** Run `V key ctrl+alt-q`. The status reads `Stopped by you`, the watch log shows the engine's `exit`, and `defaults read io.github.samanyudas.miri.dev managementStopped` prints `1`. Only `Start Window Management` shows. Press ⌃⌥Q again: nothing changes, and no engine starts.
 - **Start.** Run `V ax test press "Start Window Management"`. The status returns to `Managing windows`, the watch log shows a new engine, and `managementStopped` prints `0`.
 - **Stop.** Run `V ax test press "Stop Window Management"`. Within 4 s, `V ax test status` prints `Stopped by you`, and `managementStopped` prints `1`.
-- **Saved Stop.** While stopped, run `V relaunch`. It logs `relaunched test build pid <n> with no engine`, and `V doctor` shows no engine. Run `V settings`, press `General`, and check that the status reads `Stopped`. Then press `Start Window Management`.
-- **Crash limit.** Kill only the test engine three times, about 3 s apart, with `kill -9 <engine pid>`. Take each process ID from `V doctor`, or from `ps -axo pid=,comm=` where the executable is `<test bundle>/Contents/Helpers/miri-engine`. The status reads `Stopped after engine failures`, the General banner shows the reason with `Restart Engine` and `Show Logs in Finder`, and the sidebar button reads `Restart Miri`.
-- **Show logs.** In the failed state, press `Show Logs in Finder` in Settings > General or the menu. Finder becomes the frontmost app, with a `Logs` window and `engine.log` selected. Close that Finder window afterwards.
+- **Saved Stop.** While stopped, run `V relaunch`. It logs `relaunched test build pid <n> with no engine`, and `V doctor` shows no engine. Run `V settings`, press `General`, and check that the status reads `Stopped by you`. Then press `Start Window Management`.
+- **Crash limit.** Kill only the test engine three times, about 3 s apart, with `kill -9 <engine pid>`. Take each process ID from `V doctor`, or from `ps -axo pid=,comm=` where the executable is `<test bundle>/Contents/Helpers/miri-engine`. The status reads `Stopped after engine failures`, the General banner shows the reason with `Restart Engine` and `Show Logs in Finder`, and the sidebar button reads `Restart Engine`.
+- **Show logs.** In the failed state, list the Finder window IDs, then press `Show Logs in Finder` in Settings > General. Finder becomes the frontmost app, with a new `Logs` window and `engine.log` selected. Close only the Finder window whose ID is new.
+  From the menu bar menu, Finder can open behind the app in front ([#534](https://github.com/samanyudas/miri/issues/534), open). Report that as #534, not as drift.
 - **Recover.** Press `Restart Engine`. The status reads `Managing windows`.
 
 ## Gotchas
 
 - For timed sequences, press several buttons in one call, such as `V ax test press "Stop Window Management" "Restart Engine"`. Separate calls add about 100 ms each. `axdo` looks for each title again after the previous press, so `V ax test press General "Stop Window Management"` works from another page.
+  A button that shows only after the engine exits, such as `Start Window Management` after Stop, needs its own call once the status reads `Stopped by you`.
 - `V settings` and `V ax test status` print the status text that Settings marks with the accessibility identifier `miri.status`, on the page that shows. Settings reopens on the last page, which can be Gestures, whose status reads `Off until tested: not tested yet`. Press `General` before you read the status.
 - Never find the engine by matching a whole command line. A shell whose command holds the engine path matches too, and a `kill` then stops that shell.
 - Quit the test build with `kill -TERM <test pid>` for a timed quit. `osascript quit` arrived 3.8 s late in the #234-#236 run.

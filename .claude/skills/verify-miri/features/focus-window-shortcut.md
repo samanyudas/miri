@@ -11,7 +11,8 @@ The engine scrolls the strip so the focused column shows, and macOS makes that w
 - `focus-display`: ⌃⌥⌘← and ⌃⌥⌘→ (also ⌃⌥⌘H and ⌃⌥⌘L, ⌃⌥⌘A and ⌃⌥⌘D) focus the monitor on that side from any column in the strip.
   ⌃⌥⌘↑ and ⌃⌥⌘↓ (also ⌃⌥⌘K and ⌃⌥⌘J, ⌃⌥⌘W and ⌃⌥⌘S) focus the monitor above or below.
   Each lands on the window last focused on that monitor.
-- `focus-edge`: Focus first column or monitor left and Focus last column or monitor right remain in Settings with no default shortcut.
+- `focus-edge`: Focus first column and Focus last column are in Settings with no default shortcut.
+  Since defaults version 6 (7bba4777), Settings no longer lists the old edge-focus actions, Focus first column or monitor left and Focus last column or monitor right.
 - `focus-number`: ⌃⌥1 to ⌃⌥9 (`Jump to column N`) focus a column by its position, on the window last focused in that column.
 
 ## How to get to it (user POV)
@@ -32,7 +33,8 @@ Preconditions:
 - **Record it.** Run `V snapshot 2-after-left`. The log shows `engine focus fixture-1, macOS frontmost fixture-1`. `2-after-left-fixture-1.png` shows colored window buttons, and `2-after-left-fixture-2.png` shows grey ones.
 - **Focus right.** Run `V key ctrl+alt-rightarrow`, `V focused --wait-for fixture-2`, and `V snapshot 3-after-right`. Focus is back on `fixture-2` in both views.
 - **Letter chords.** Run `V key ctrl+alt-h`, `V focused --wait-for fixture-1`, then `V key ctrl+alt-l`, `V focused --wait-for fixture-2`. Do the same with `ctrl+alt-a` and `ctrl+alt-d`. Each exits 0, as for the arrows.
-- **Column number.** Read `fixture-1`'s position in the active strip from `V query state`, where `virtual_workspaces[].windows` lists the strip in order. Press that number, such as `V key ctrl+alt-2`, then `V focused --wait-for fixture-1`.
+- **Column number.** Read `fixture-1`'s position in the active strip from `V query state`: take the workspace with `"active": true`, and count its `windows` that have `"floating": false`. The count matches ⌃⌥N only while no stack or tab group sits left of `fixture-1`, because each of their windows counts too. Press that number, such as `V key ctrl+alt-2`, then `V focused --wait-for fixture-1`. A column past 9 has no number chord, so use an [emptied display](../SKILL.md#empty-a-display), where the fixtures are columns 1 and 2.
+- **Settings rows without a chord.** Run `V settings`, `V ax test press Shortcuts`, and `V ax test dump | rg "Focus first column|Focus last column|or monitor"`. It lists `Focus first column` and `Focus last column`, each with only its `Add Shortcut for` button, and no `or monitor` row.
 - **Stack.** With `fixture-2` focused, run `V key ctrl+alt-leftbracket`. In the next snapshot both fixtures share `fixture-1`'s `x`, with half the height each.
 - **Focus within the stack.** Run `V key ctrl+alt-uparrow` and `V focused --wait-for fixture-1`, then `V key ctrl+alt-downarrow` and `V focused --wait-for fixture-2`. Do the same with `k` and `j`, and with `w` and `s`.
 - **Unstack.** Run `V key ctrl+alt+shift-rightbracket`. `fixture-2` returns to its own column on the right.
@@ -40,6 +42,9 @@ Preconditions:
 In the proof run on 2026-11-05, both views agreed about 0.2 s after each key press.
 
 ## Direct monitor focus
+
+Monitor focus needs two displays.
+With one display, report it as skipped with that precondition.
 
 Monitor focus lands on the window last focused on the destination display.
 That is one of Sam's windows unless a fixture held focus there last, so set that up first.
@@ -57,13 +62,11 @@ Record the fixture IDs and use engine commands only to set up the source's inter
 Confirm that the source fixture has a column on both sides before each shortcut.
 
 - Upgrade a version 4 configuration with the exact default edge-focus arrays.
-  Check that `window_focusdisplay_west` and `window_focusdisplay_east` now hold the Command-layer chords, and both edge-focus entries are empty.
+  Check that `window_focusdisplay_west` and `window_focusdisplay_east` now hold the Command-layer chords, both `window_focusedge_*` keys are gone, and `default_bindings_version` is 6.
 - Press ⌃⌥⌘→ from an interior column on the left display.
   Record a snapshot and confirm that both engine focus and macOS focus select the destination fixture on the right display.
 - Press ⌃⌥⌘← from an interior column on the right display.
   Confirm both focus observations on the left display.
-- Open Settings > Shortcuts.
-  Confirm that Focus first column or monitor left and Focus last column or monitor right remain visible with no shortcut chips.
 - In isolated configuration tests, cover customized, deleted, empty, and conflicting bindings, then load a fresh store to confirm that conflict notices persist.
   Do not overwrite Sam's custom bindings for a live check.
 

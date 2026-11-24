@@ -3,7 +3,8 @@
 Settings > Setup lists what Miri needs before it can manage windows.
 Three checks block start: Accessibility permission, Displays have separate Spaces, and Other window managers.
 Five checks only warn: Window-snapping apps, Stage Manager, macOS window tiling, and the four-finger and three-finger strip swipe conflicts.
-A check that blocks start keeps the engine stopped, and Miri starts it once the problem is gone.
+A check that blocks start keeps the engine stopped when Miri starts it, at launch or from a Start or Restart button, and Miri starts it once the problem is gone.
+A blocker that appears while the engine runs does not stop it.
 
 ## Sub-features
 
@@ -19,8 +20,9 @@ A check that blocks start keeps the engine stopped, and Miri starts it once the 
 ## How to get to it (user POV)
 
 - Settings > Setup.
-- The Set Up Miri window on first launch, which shows the status, the checks that block start, and the strip swipe choice.
-- The General page status, which reads `Waiting for setup: <title of the first blocking check>` while Miri waits for setup.
+- The Set Up Miri window on first launch, which shows the status, the checks that blocked a start, the strip swipe choice, and `Show in Dock`. `V relaunch --initial-setup` shows it.
+- The General page banner while Miri waits for setup. Its title reads `Waiting for setup`, and its detail names the check, such as `Waiting for the “Other window managers” check.`
+  `V ax test status` and the menu bar menu read `Waiting for setup: <title of the first blocking check>`.
 
 ## Driving it with verify-miri
 
@@ -31,8 +33,9 @@ Preconditions:
 
 - **Clean state.** Run `V ax test press Setup`, then `V ax test dump | rg -A2 "Other window managers"`. It shows `Passed`.
 - **Add a blocker.** Run `V standin yabai`, then `V ax test press "Check Again"`. The dump shows `Quit yabai before starting Miri. Miri leaves yabai's configuration untouched.` and `Blocks start`.
-- **Blocked start.** Run `V ax test press General`, then press `Stop Window Management` and `Start Window Management`. `V ax test status` prints `Waiting for setup: Other window managers`, the General page shows `Open Setup` and `Cancel Automatic Start` instead of Start, and `V doctor` shows no engine.
-- **Auto-start.** Stop the stand-in by its process ID, which `log.txt` records. Within 4 s a new engine runs, and the status reads `Managing windows`.
+- **Check Again leaves the engine running.** Run `V ax test press General`. `V ax test status` still prints `Managing windows`.
+- **Blocked start.** Run `V ax test press "Stop Window Management"`, wait until `V ax test status` prints `Stopped by you`, then run `V ax test press "Start Window Management"` in a separate call. `V ax test status` prints `Waiting for setup: Other window managers`, the General page shows `Open Setup` and `Cancel Automatic Start` instead of Start, and `V doctor` shows no engine.
+- **Auto-start.** Stop the stand-in by its process ID, which `log.txt` records. Within 4 s a new engine runs, and the status reads `Managing windows`. On 2026-11-25 it took about 1 s.
 
 ## Gotchas
 
@@ -40,3 +43,6 @@ Preconditions:
 - A stand-in started in a tool call's background job dies when that call ends. `V standin` detaches it and records it for `V end`.
 - A stand-in cannot trigger the Amethyst check, which matches only a bundle ID.
 - `V ax test status` prints nothing while the Setup page shows, because that page has no status text. Press `General` first.
+- `Start Window Management` shows only after the engine has exited, up to 3 s after Stop. A press of both titles in one call fails with `no element titled Start Window Management`.
+- `Check Again` reads `Checked` for 2 s after a press, so a second press within 2 s finds no `Check Again` button.
+- The dump text is in the app's language. Run these checks without `--language`.
