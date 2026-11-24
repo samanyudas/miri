@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-24 on branch `docs/limitations-audit`, based on `main` at `cfce4860`
+Updated: 2026-11-24 on branch `fix/engine-ax-stalls`, based on `main` at `607729e0`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,21 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Busy-app engine-thread Accessibility reads on 24 November 2026
+
+Filed [#539](https://github.com/samanyudas/miri/issues/539) and merged [engine PR #207](https://github.com/samanyudas/paneru/pull/207) into `miri/v0.5.2` as `c0dfd79` (identical tree to tested head `c9f62af`), which this branch pins.
+Previously, `window_frame_update`, `front_switched_trigger`, `window_focused_trigger`, and `detect_focus_rejection` called Accessibility reads synchronously on the engine's main thread, so a busy app could stall every window for up to the 250 ms Accessibility timeout.
+Those four reads now run on the target app's per-app `WindowWriters` thread via `WindowWriters::ask`, `Answer`, `WindowWriters::wait_briefly` (8 ms wait, 250 ms busy backoff), and `FrameWrites::poll_frame`.
+Abandoned or overtaken questions are skipped via a `Weak` reference, slow `WindowFocused` confirmations defer via `WindowFocusQuestion` instead of skipping stale-focus and native-tab redirection, newer focus commands or notifications cancel stale pending questions, `front_switched_trigger` keeps only the newest switch per frame, `detect_focus_rejection` resets `answer_waits` on retry and ends when focus leaves the app, and unanswered batch writes retry after the batch's other windows.
+
+Reviewed with `sol-loop`: 5 rounds with `gpt-6.2-sol` on `high`, verdict `APPROVE` (S1-S4, S6-S8 fixed; S5 and S9 declined as nits; S10 test strengthened).
+Verified locally on `c9f62af` / `c0dfd79`: `make lint` (including `make compat`), `make swift-lint`, `make engine-lint`, `make build`, `make swift-test` (253), `make engine-test` (1,608 `--no-default-features` and 1,720 default-feature tests), `make e2e` (`observed-granted` and `recovered`, run on identical tree `c9f62af`), and `make package`.
+On the paired throwaway-Helium live drive (36 slides on the built-in display, minimal timing probe), engine-thread Accessibility reads of 10 ms or more dropped from 26 (`run6-before`, 1,066 ms total including two 251 ms timeouts) and 16 (`run7-before`, 460 ms total, max 139 ms) on `main` (`607729e0`, engine `c9ea707`) to 0 on `c9f62af` (`run7-after`).
+Non-Accessibility mid-slide pauses (200 to 371 ms with no engine-thread Accessibility read) remain out of scope.
+Sam ran the hands-on check on `fix-ax-stalls-c9f62af` on 25 November 2026 and reported that it feels solid.
+
+Next: merge the Miri pin PR, then verify [#539](https://github.com/samanyudas/miri/issues/539) on landed `main` and close it.
 
 ## Settings window off-screen recovery on 24 November 2026
 
