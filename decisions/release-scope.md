@@ -367,7 +367,7 @@ Sam chose this on 6 November 2026 ([#123](https://github.com/samanyudas/miri/iss
 Sam accepted the first rules on 25 October 2026 ([#88](https://github.com/samanyudas/miri/issues/88)).
 On 26 October 2026, Sam replaced the model and the toggle ([#106](https://github.com/samanyudas/miri/issues/106)).
 
-A maximized tiled window is a column as wide as the display, and the window fills the usable area of its display.
+A maximized tiled window is a column as wide as the display's tiled area, keeping the configured screen-edge and inter-window gaps like any other tiled column.
 The usable area excludes the menu bar and the visible Dock.
 No action creates a native full-screen Space.
 The maximized column stays in its row, and its neighbors sit beside it off-screen, as with any wide column.
