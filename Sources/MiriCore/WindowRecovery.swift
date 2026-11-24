@@ -6,9 +6,9 @@ import CoreGraphics
 /// downward.
 public enum WindowRecovery {
     /// A window counts as reachable when at least this fraction of it is on a display.
-    public static let visibleFraction = 0.5
+    static let visibleFraction = 0.5
     /// Recovered windows are at most this fraction of the visible display area, like the engine's own exit cleanup.
-    public static let maximumFraction = 0.9
+    static let maximumFraction = 0.9
 
     /// Returns the frame a window should move to, or `nil` when it is already reachable.
     /// - Parameters:

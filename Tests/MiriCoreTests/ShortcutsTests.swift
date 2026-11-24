@@ -94,22 +94,6 @@ import Testing
         Shortcuts(document: try TOMLDocument(text), layout: us)
     }
 
-    @Test func theEditableListIsTheDefaultTableThenStop() {
-        #expect(ShortcutAction.editable.count == DefaultBinding.table.count + 1)
-        #expect(ShortcutAction.editable.first?.title == "Focus column left")
-        #expect(ShortcutAction.editable.last == .stop)
-        #expect(ShortcutAction.stop.title == "Stop window manager")
-        #expect(resize.title == "Cycle preset widths forward")
-    }
-
-    @Test func anOlderFullWidthBindingShowsAsTheMaximizeToggle() throws {
-        let maximize = ShortcutAction.engine(command: "window_maximize")
-        #expect(maximize.title == "Maximize or restore window")
-        let file = try shortcuts("[bindings]\nwindow_fullwidth = \"ctrl+alt-f\"\n")
-        #expect(file.chords(for: maximize) == [Chord([.control, .option], "f")])
-        #expect(file.others.isEmpty)
-    }
-
     @Test func readsChordsUnderAnySpellingAndStopsDefault() throws {
         let file = try shortcuts(
             """

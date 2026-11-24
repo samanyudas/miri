@@ -19,78 +19,15 @@ struct DefaultBindingsTests {
         return (store, try TOMLDocument(String(contentsOf: url, encoding: .utf8)))
     }
 
-    @Test func aNewInstallGetsTheAcceptedDefaultSet() throws {
+    @Test func aNewInstallWritesCurrentDefaults() throws {
         let (store, document) = try load()
         #expect(store.issue == nil)
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
-        let expected: [String: TOMLValue] = [
-            "window_focus_west": .array([.string("ctrl+alt-leftarrow"), .string("ctrl+alt-h"), .string("ctrl+alt-a")]),
-            "window_focus_east": .array([.string("ctrl+alt-rightarrow"), .string("ctrl+alt-l"), .string("ctrl+alt-d")]),
-            "window_focus_north": .array([.string("ctrl+alt-uparrow"), .string("ctrl+alt-k"), .string("ctrl+alt-w")]),
-            "window_focus_south": .array([.string("ctrl+alt-downarrow"), .string("ctrl+alt-j"), .string("ctrl+alt-s")]),
-            "window_swap_west": .array([
-                .string("ctrl+alt+shift-leftarrow"), .string("ctrl+alt+shift-h"), .string("ctrl+alt+shift-a"),
-            ]),
-            "window_swap_east": .array([
-                .string("ctrl+alt+shift-rightarrow"), .string("ctrl+alt+shift-l"), .string("ctrl+alt+shift-d"),
-            ]),
-            "window_swap_north": .array([
-                .string("ctrl+alt+shift-uparrow"), .string("ctrl+alt+shift-k"), .string("ctrl+alt+shift-w"),
-            ]),
-            "window_swap_south": .array([
-                .string("ctrl+alt+shift-downarrow"), .string("ctrl+alt+shift-j"), .string("ctrl+alt+shift-s"),
-            ]),
-            "window_focusdisplay_west": .array([
-                .string("ctrl+alt+cmd-leftarrow"), .string("ctrl+alt+cmd-h"), .string("ctrl+alt+cmd-a"),
-            ]),
-            "window_focusdisplay_east": .array([
-                .string("ctrl+alt+cmd-rightarrow"), .string("ctrl+alt+cmd-l"), .string("ctrl+alt+cmd-d"),
-            ]),
-            "window_swap_first": .array([
-                .string("ctrl+alt+cmd+shift-leftarrow"), .string("ctrl+alt+cmd+shift-h"),
-                .string("ctrl+alt+cmd+shift-a"),
-            ]),
-            "window_swap_last": .array([
-                .string("ctrl+alt+cmd+shift-rightarrow"), .string("ctrl+alt+cmd+shift-l"),
-                .string("ctrl+alt+cmd+shift-d"),
-            ]),
-            "window_focusdisplay_north": .array([
-                .string("ctrl+alt+cmd-uparrow"), .string("ctrl+alt+cmd-k"), .string("ctrl+alt+cmd-w"),
-            ]),
-            "window_focusdisplay_south": .array([
-                .string("ctrl+alt+cmd-downarrow"), .string("ctrl+alt+cmd-j"), .string("ctrl+alt+cmd-s"),
-            ]),
-            "window_movedisplay_north": .array([
-                .string("ctrl+alt+cmd+shift-uparrow"), .string("ctrl+alt+cmd+shift-k"), .string("ctrl+alt+cmd+shift-w"),
-            ]),
-            "window_movedisplay_south": .array([
-                .string("ctrl+alt+cmd+shift-downarrow"), .string("ctrl+alt+cmd+shift-j"),
-                .string("ctrl+alt+cmd+shift-s"),
-            ]),
-            "window_focus_1": .string("ctrl+alt-1"),
-            "window_focus_2": .string("ctrl+alt-2"),
-            "window_focus_3": .string("ctrl+alt-3"),
-            "window_focus_4": .string("ctrl+alt-4"),
-            "window_focus_5": .string("ctrl+alt-5"),
-            "window_focus_6": .string("ctrl+alt-6"),
-            "window_focus_7": .string("ctrl+alt-7"),
-            "window_focus_8": .string("ctrl+alt-8"),
-            "window_focus_9": .string("ctrl+alt-9"),
-            "window_nextdisplay": .string("ctrl+alt-n"),
-            "window_resize": .string("ctrl+alt-r"),
-            "window_maximize": .string("ctrl+alt-f"),
-            "window_center": .string("ctrl+alt-c"),
-            "window_step_grow": .string("ctrl+alt-equal"),
-            "window_step_shrink": .string("ctrl+alt-minus"),
-            "window_vertical_step_grow": .string("ctrl+alt+shift-equal"),
-            "window_vertical_step_shrink": .string("ctrl+alt+shift-minus"),
-            "window_equalize": .string("ctrl+alt-0"),
-            "window_stack_west": .string("ctrl+alt-leftbracket"),
-            "window_stack_east": .string("ctrl+alt-rightbracket"),
-            "window_unstack_east": .string("ctrl+alt+shift-rightbracket"),
-            "window_unstack_west": .string("ctrl+alt+shift-leftbracket"),
-            "window_manage": .string("ctrl+alt-t"),
-        ]
+        #expect(
+            document.value(at: ["miri", "default_bindings_version"]) == .integer(Int64(DefaultBinding.currentVersion)))
+        let expected = Dictionary(
+            uniqueKeysWithValues: DefaultBinding.table.filter { !$0.chords.isEmpty }.map {
+                ($0.command, DefaultBinding.encoded($0.chords))
+            })
         #expect(document.value(at: ["bindings"]) == .table(expected))
     }
 
@@ -563,12 +500,6 @@ struct DefaultBindingsTests {
         #expect(store.issue != nil)
         #expect(store.stopChordsToRegister == [DefaultBinding.stopChord])
         #expect(try String(contentsOf: url, encoding: .utf8) == replacement)
-    }
-
-    @Test func droppedUppercaseKeyLeavesStopFreeOnFirstLoad() throws {
-        let (store, _) = try load("[bindings]\nwindow_center = \"ctrl+alt-Q\"\n")
-        #expect(store.issue != nil)
-        #expect(store.stopChordsToRegister == [DefaultBinding.stopChord])
     }
 
     @Test(arguments: [

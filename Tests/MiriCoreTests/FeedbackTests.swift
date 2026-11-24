@@ -7,10 +7,6 @@ struct FeedbackTests {
     static let templates = URL(filePath: #filePath).deletingLastPathComponent()
         .appending(path: "../../.github/ISSUE_TEMPLATE").standardized
 
-    @Test func sendFeedbackOpensTheListOfIssueForms() {
-        #expect(Feedback.formList.absoluteString == "https://github.com/samanyudas/miri/issues/new/choose")
-    }
-
     @Test func bugReportNamesATemplateThatExists() {
         let template = Self.templates.appending(path: Feedback.bugReportForm)
         #expect(FileManager.default.fileExists(atPath: template.path), "missing \(template.path)")

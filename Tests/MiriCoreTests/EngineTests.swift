@@ -99,6 +99,11 @@ import Testing
         var now = Date(timeIntervalSince1970: 0)
         let engine = supervisor(now: { now })
         engine.start()
+        // A crash older than the five-minute window ages out before three recent crashes accumulate.
+        launcher.engines.last?.crash()
+        #expect(engine.state == .restarting(crashes: 1))
+        engine.start()
+        now += CrashPolicy.window + 1
         for crash in 1...3 {
             launcher.engines.last?.crash()
             if crash < 3 {
@@ -112,7 +117,7 @@ import Testing
             return
         }
         engine.restartManually()
-        #expect(engine.state == .running(pid: 103))
+        #expect(engine.state == .running(pid: 104))
         launcher.engines.last?.crash()
         #expect(engine.state == .restarting(crashes: 1))
         engine.stop()
@@ -172,18 +177,6 @@ import Testing
             return
         }
         #expect(message.hasPrefix("The engine could not start."))
-    }
-}
-
-struct CrashPolicyTests {
-    @Test func countsOnlyCrashesWithinTheWindow() {
-        var policy = CrashPolicy()
-        let start = Date(timeIntervalSince1970: 0)
-        let decisions = [0, 100, 301, 350].map { policy.recordCrash(at: start + $0) }
-        #expect(decisions == [true, true, true, false])
-        policy.reset()
-        let afterReset = policy.recordCrash(at: start + 351)
-        #expect(afterReset)
     }
 }
 

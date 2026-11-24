@@ -1,21 +1,19 @@
 import Foundation
 
 /// Counts engine crashes and decides whether Miri restarts the engine or stops retrying.
-public struct CrashPolicy: Sendable {
-    public static let limit = 3
-    public static let window: TimeInterval = 5 * 60
+struct CrashPolicy: Sendable {
+    static let limit = 3
+    static let window: TimeInterval = 5 * 60
 
     private(set) var crashes: [Date] = []
 
-    public init() {}
-
     /// Records a crash and returns `true` when Miri should restart the engine.
-    public mutating func recordCrash(at time: Date) -> Bool {
+    mutating func recordCrash(at time: Date) -> Bool {
         crashes = crashes.filter { time.timeIntervalSince($0) < Self.window } + [time]
         return crashes.count < Self.limit
     }
 
-    public mutating func reset() { crashes.removeAll() }
+    mutating func reset() { crashes.removeAll() }
 }
 
 /// What the app shows about the engine.
@@ -33,7 +31,7 @@ public enum EngineState: Equatable, Sendable {
 }
 
 /// A running engine process.
-@MainActor public protocol EngineProcess: AnyObject {
+@MainActor protocol EngineProcess: AnyObject {
     var pid: Int32 { get }
     /// Asks the engine to exit so its cleanup runs.
     func interrupt()
@@ -41,7 +39,7 @@ public enum EngineState: Equatable, Sendable {
     func kill()
 }
 
-@MainActor public protocol EngineLauncher {
+@MainActor protocol EngineLauncher {
     /// Starts the engine. `onExit` runs on the main actor with the termination status when the process ends.
     func launch(onExit: @escaping @MainActor (Int32) -> Void) throws -> any EngineProcess
 }
@@ -49,7 +47,7 @@ public enum EngineState: Equatable, Sendable {
 /// Starts, stops, and restarts the engine, and recovers windows whenever it stops.
 @MainActor public final class EngineSupervisor {
     public static let stopTimeout: Duration = .seconds(3)
-    public static let restartDelay: Duration = .seconds(1)
+    static let restartDelay: Duration = .seconds(1)
 
     public private(set) var state: EngineState = .stopped {
         didSet { if state != oldValue { onChange(state) } }
@@ -67,7 +65,11 @@ public enum EngineState: Equatable, Sendable {
     private var pendingRestart: Task<Void, Never>?
     private let now: () -> Date
 
-    public init(
+    public convenience init(launcher: ProcessEngineLauncher, recoverWindows: @escaping () -> Void) {
+        self.init(launcher: launcher as any EngineLauncher, recoverWindows: recoverWindows)
+    }
+
+    init(
         launcher: any EngineLauncher, recoverWindows: @escaping () -> Void, now: @escaping () -> Date = Date.init
     ) {
         self.launcher = launcher

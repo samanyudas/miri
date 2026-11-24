@@ -20,7 +20,7 @@ public struct KeyLayout: Equatable, Sendable {
     }
 
     /// Names keys only by their US position and fixed names, as the engine does when it cannot read the layout.
-    public static let positional = KeyLayout(keys: [])
+    static let positional = KeyLayout(keys: [])
 
     /// The current ASCII-capable layout. Without one, the engine falls back to US-position names, and so does this.
     /// HIToolbox aborts when two threads call the input source API at once, so every caller is on the main actor.
@@ -32,7 +32,7 @@ public struct KeyLayout: Equatable, Sendable {
     }
 
     /// An installed layout, such as `com.apple.keylayout.French`, whether or not the user enabled it.
-    @MainActor public init?(inputSourceID: String) {
+    @MainActor init?(inputSourceID: String) {
         let filter = [kTISPropertyInputSourceID as String: inputSourceID] as CFDictionary
         guard let list = TISCreateInputSourceList(filter, true)?.takeRetainedValue() as? [TISInputSource],
             let source = list.first

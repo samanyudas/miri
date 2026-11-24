@@ -7,7 +7,7 @@ public enum Feedback {
     public static let formList = issuesPage("new/choose")
 
     /// The file of the bug report form in `.github/ISSUE_TEMPLATE/`.
-    public static let bugReportForm = "bug_report.yml"
+    static let bugReportForm = "bug_report.yml"
 
     /// The new-issue page with the bug report form selected.
     public static let bugReport = issuesPage("new", template: bugReportForm)

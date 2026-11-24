@@ -2,15 +2,15 @@
 public struct MiriSettings: Equatable, Sendable {
     /// Provisional range in points. The engine clamps per-window padding to 50, so larger inner gaps would be lost.
     public static let gapRange = 0...32
-    public static let presetRange = 0.05...1.0
-    public static let presetCountRange = 1...10
+    static let presetRange = 0.05...1.0
+    static let presetCountRange = 1...10
     /// The engine's exponential ease-out rate when animation is on. Unset in the engine means instant movement.
-    public static let animationSpeed = 14.0
+    static let animationSpeed = 14.0
     /// The share of the display width a window that opens while the engine runs starts at. Windows open when the
     /// engine starts keep their widths.
-    public static let newWindowWidth = 0.5
-    public static let gapRuleName = "miri-gaps"
-    public static let floatingRuleName = "miri-settings"
+    static let newWindowWidth = 0.5
+    static let gapRuleName = "miri-gaps"
+    static let floatingRuleName = "miri-settings"
 
     public var innerGap = 8
     public var outerGap = 8
@@ -39,7 +39,7 @@ public struct MiriSettings: Equatable, Sendable {
     public init() {}
 
     /// Reads settings from a document. Missing keys keep their defaults.
-    public init(document: TOMLDocument) throws(ConfigurationIssue) {
+    init(document: TOMLDocument) throws(ConfigurationIssue) {
         if let value = document.value(at: ["miri", "inner_gap"]) { innerGap = try Self.gap(value, key: "inner_gap") }
         if let value = document.value(at: ["miri", "outer_gap"]) { outerGap = try Self.gap(value, key: "outer_gap") }
         if let value = document.value(at: ["miri", "animations"]) {
@@ -127,7 +127,7 @@ public struct MiriSettings: Equatable, Sendable {
     }
 
     /// Per-window padding. Adjacent windows each contribute it, so two of them make the inner gap.
-    public var windowPadding: Int { innerGap / 2 }
+    var windowPadding: Int { innerGap / 2 }
 
     /// Display-edge padding. The edge window's own padding adds to it, so together they make the outer gap.
     public var edgePadding: Int { max(0, outerGap - windowPadding) }

@@ -5,7 +5,7 @@ import Foundation
 /// After any failure the store keeps the last valid settings. It never writes to a file it could not read correctly.
 public final class ConfigurationStore {
     // Not interface text: the file header stays English, like the TOML keys it describes.
-    public static let header = """
+    static let header = """
         # Miri configuration.
         # Miri Settings writes this file, and you can also edit it by hand. Valid edits apply immediately.
         # Paneru keys keep their Paneru names. Miri-only settings are in [miri].
@@ -38,10 +38,14 @@ public final class ConfigurationStore {
     /// The current file, when it was read correctly. Writes require it.
     private var document: TOMLDocument?
 
-    public init(url: URL, appBundleIdentifier: String, layout: KeyLayout = .positional) {
+    public init(url: URL, appBundleIdentifier: String, layout: KeyLayout) {
         self.url = url
         self.appBundleIdentifier = appBundleIdentifier
         self.layout = layout
+    }
+
+    convenience init(url: URL, appBundleIdentifier: String) {
+        self.init(url: url, appBundleIdentifier: appBundleIdentifier, layout: .positional)
     }
 
     /// The shortcuts in the file, when it was read correctly.

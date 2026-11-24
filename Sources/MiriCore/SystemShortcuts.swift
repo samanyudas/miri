@@ -20,7 +20,7 @@ public struct SystemShortcuts: Sendable {
 
     /// Merges `AppleSymbolicHotKeys` entries over the built-in defaults. Each entry has `enabled` and
     /// `value.parameters`, which is `[character, keyCode, modifierMask]`.
-    public static func parse(symbolicHotKeys: [String: Any], layout: KeyLayout) -> SystemShortcuts {
+    static func parse(symbolicHotKeys: [String: Any], layout: KeyLayout) -> SystemShortcuts {
         var result: [SystemShortcut] = []
         var seen = Set<Int>()
         for hotKey in defaults {

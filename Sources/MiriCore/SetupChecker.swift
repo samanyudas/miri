@@ -75,7 +75,7 @@ public struct SetupCheck: Equatable, Sendable, Identifiable {
 public enum SetupChecker {
     /// Known window managers that fight Miri for window positions, by bundle identifier and by process name.
     // Not interface text: app names stay as the apps spell them.
-    public static let competingManagers: [(name: String, bundleIdentifiers: Set<String>, processNames: Set<String>)] = [
+    static let competingManagers: [(name: String, bundleIdentifiers: Set<String>, processNames: Set<String>)] = [
         ("Paneru", ["com.github.karinushka.paneru", "com.github.karinushka.paneru.launcher"], ["paneru"]),
         ("AeroSpace", ["bobko.aerospace"], ["AeroSpace"]),
         ("Amethyst", ["com.amethyst.Amethyst"], []),
@@ -85,7 +85,7 @@ public enum SetupChecker {
     /// Apps that move a window when you use one of their window actions, by bundle identifier. Each identifier comes
     /// from the app's signed bundle.
     // Not interface text: app names stay as the apps spell them.
-    public static let snappingApps: [(name: String, bundleIdentifiers: Set<String>)] = [
+    static let snappingApps: [(name: String, bundleIdentifiers: Set<String>)] = [
         ("Rectangle", ["com.knollsoft.Rectangle"]),
         ("Loop", ["com.MrKai77.Loop"]),
         ("Magnet", ["com.crowdcafe.windowmagnet"]),
@@ -144,7 +144,7 @@ public enum SetupChecker {
     }
 
     /// The names of running competing window managers.
-    public static func runningCompetitors(_ observation: SetupObservation) -> [String] {
+    static func runningCompetitors(_ observation: SetupObservation) -> [String] {
         competingManagers.filter {
             !$0.bundleIdentifiers.isDisjoint(with: observation.runningBundleIdentifiers)
                 || !$0.processNames.isDisjoint(with: observation.runningProcessNames)
