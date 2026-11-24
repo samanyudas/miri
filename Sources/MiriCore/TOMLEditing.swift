@@ -1,11 +1,11 @@
 /// Why Miri refused to change a TOML document.
-public enum TOMLEditError: Error, Equatable, Sendable, CustomStringConvertible {
+enum TOMLEditError: Error, Equatable, Sendable, CustomStringConvertible {
     /// The key exists, but in a form Miri does not rewrite, such as an inline table or a dotted key in a parent table.
     case notEditable(path: String)
     /// The edited text did not read back with the requested value. Miri keeps the original file.
     case verificationFailed(path: String)
 
-    public var description: String {
+    var description: String {
         switch self {
         case .notEditable(let path):
             String(
@@ -20,7 +20,7 @@ public enum TOMLEditError: Error, Equatable, Sendable, CustomStringConvertible {
 
 extension TOMLDocument {
     /// Returns a copy with one value set, keeping every other byte of the file, including comments and ordering.
-    public func setting(_ value: TOMLValue, table: [String], key: String) throws -> TOMLDocument {
+    func setting(_ value: TOMLValue, table: [String], key: String) throws -> TOMLDocument {
         let path = (table + [key]).map(TOMLValue.encodeKey).joined(separator: ".")
         let edited: String
         if let assignment = editableAssignment(table: table, key: key) {
@@ -45,7 +45,7 @@ extension TOMLDocument {
     }
 
     /// Returns a copy without the key's statement line. A missing key leaves the document unchanged.
-    public func removing(table: [String], key: String) throws -> TOMLDocument {
+    func removing(table: [String], key: String) throws -> TOMLDocument {
         guard let assignment = editableAssignment(table: table, key: key) else {
             guard value(at: table + [key]) == nil else {
                 throw TOMLEditError.notEditable(path: (table + [key]).map(TOMLValue.encodeKey).joined(separator: "."))

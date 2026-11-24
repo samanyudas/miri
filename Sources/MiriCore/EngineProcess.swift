@@ -35,14 +35,18 @@ public struct EnginePaths: Sendable {
 
 /// An append-only log that keeps at most two files of `limit` bytes each, so engine logs stay bounded.
 public final class RotatingLog: @unchecked Sendable {
-    public static let defaultLimit = 1 << 20
+    static let defaultLimit = 1 << 20
 
     public let url: URL
-    public var previousURL: URL { url.deletingPathExtension().appendingPathExtension("1.log") }
+    var previousURL: URL { url.deletingPathExtension().appendingPathExtension("1.log") }
     private let limit: Int
     private let lock = NSLock()
 
-    public init(url: URL, limit: Int = RotatingLog.defaultLimit) {
+    public convenience init(url: URL) {
+        self.init(url: url, limit: RotatingLog.defaultLimit)
+    }
+
+    init(url: URL, limit: Int) {
         self.url = url
         self.limit = limit
     }
@@ -86,7 +90,7 @@ public struct ProcessEngineLauncher: EngineLauncher {
         self.log = log
     }
 
-    public func launch(onExit: @escaping @MainActor (Int32) -> Void) throws -> any EngineProcess {
+    func launch(onExit: @escaping @MainActor (Int32) -> Void) throws -> any EngineProcess {
         guard FileManager.default.fileExists(atPath: paths.configuration.path) else {
             throw CocoaError(.fileNoSuchFile, userInfo: [NSFilePathErrorKey: paths.configuration.path])
         }

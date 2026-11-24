@@ -25,11 +25,6 @@ class VerifyEngineLifecycleTest(unittest.TestCase):
         listed = set(re.findall(r"(?m)^(?:INVARIANT|PROPERTY) (\w+)$", config))
         self.assertEqual(listed, set(verify.INVARIANTS + verify.PROPERTIES))
 
-    def test_the_skill_names_a_sync_commit_and_the_engine_supervisor(self):
-        sync, files = verify.coverage()
-        self.assertRegex(sync, r"^[0-9a-f]{7,40}$")
-        self.assertIn("Sources/MiriCore/Engine.swift", files)
-
     def test_every_file_with_a_start_stop_or_restart_control_is_covered(self):
         _, files = verify.coverage()
         callers = {

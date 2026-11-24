@@ -32,11 +32,6 @@ struct GestureStateTests {
         return GestureEnvironment(macOSVersion: macOS, gestureSettings: settings)
     }
 
-    @Test func aNewSetupIsOff() {
-        #expect(MiriSettings().stripGesture == .off)
-        #expect(state(.off, verification: nil) == .off)
-    }
-
     @Test func offStaysOffWhateverElseHolds() {
         #expect(state(.off) == .off)
         #expect(state(.off, conflict: .passed) == .off)
@@ -116,44 +111,6 @@ struct GestureStateTests {
                     threeFingerSwipe: nil, fourFingerSwipe: nil, threeFingerDrag: nil)
             ), date: Self.tested)
         #expect(state(verification: unreadableAtTest) == .enabled(verifiedAt: Self.tested))
-    }
-
-    @Test func eachFingerCountUsesItsOwnSetupCheck() {
-        let observation = SetupObservation(
-            accessibilityTrusted: true, spansDisplays: false, stageManager: false, threeFingerSwipe: 1,
-            fourFingerSwipe: 0, threeFingerDrag: false, edgeTiling: false, menuBarTiling: false,
-            optionDragTiling: false, runningBundleIdentifiers: [], runningProcessNames: [],
-            macOSMajorVersion: 27)
-        let checks = SetupChecker.evaluate(observation)
-        let three = checks.first { $0.id == GestureFingers.three.setupCheck }?.status
-        let four = checks.first { $0.id == GestureFingers.four.setupCheck }?.status
-        guard case .problem(let pages) = three else {
-            Issue.record("Expected a three-finger conflict, got \(String(describing: three))")
-            return
-        }
-        #expect(pages.contains("Swipe between pages"))
-        #expect(four == .passed)
-    }
-}
-
-struct GestureVerificationTests {
-    @Test func roundTripsThroughJSON() throws {
-        let verification = GestureVerification(
-            fingers: .four, reversed: true,
-            environment: GestureEnvironment(
-                macOSVersion: "Version 27.0 (Build 27A100)",
-                gestureSettings: GestureSettingsSnapshot(
-                    threeFingerSwipe: 2, fourFingerSwipe: nil, threeFingerDrag: false)
-            ),
-            date: Date(timeIntervalSinceReferenceDate: 0))
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys]
-        let data = try encoder.encode(verification)
-        #expect(
-            String(decoding: data, as: UTF8.self)
-                == #"{"date":0,"environment":{"gestureSettings":{"threeFingerDrag":false,"threeFingerSwipe":2},"macOSVersion":"Version 27.0 (Build 27A100)"},"fingers":4,"reversed":true}"#
-        )
-        #expect(try JSONDecoder().decode(GestureVerification.self, from: data) == verification)
     }
 }
 

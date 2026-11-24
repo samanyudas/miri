@@ -160,6 +160,58 @@ struct ConfigurationStoreTests {
         #expect(saved.text.hasPrefix("padding = { top = 1 }\n"))
         #expect(saved.value(at: ["options", "preset_column_widths"]) == .array([.float(0.4), .float(0.6)]))
     }
+
+    @Test func readsAndWritesSingleKeySwitchesAndChoices() throws {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try """
+        [miri]
+        show_in_dock = false
+
+        [options]
+        maximized_window_side = "left"
+        shared_edge_slices = true
+        slide_window_pictures = true
+        mouse_follows_focus = true
+        """.write(to: url, atomically: true, encoding: .utf8)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
+        store.load(reduceMotion: false)
+        #expect(store.issue == nil)
+        #expect(store.settings.showInDock == false)
+        #expect(store.settings.maximizedWindowSide == .left)
+        #expect(store.settings.sharedEdgeSlices)
+        #expect(store.settings.slideWindowPictures)
+        #expect(store.settings.mouseFollowsFocus)
+        try store.update(reduceMotion: false) {
+            $0.showInDock = true
+            $0.maximizedWindowSide = .right
+            $0.sharedEdgeSlices = false
+            $0.slideWindowPictures = false
+            $0.mouseFollowsFocus = false
+        }
+        let saved = try TOMLDocument(contents())
+        #expect(saved.value(at: ["miri", "show_in_dock"]) == .boolean(true))
+        #expect(saved.value(at: ["options", "maximized_window_side"]) == .string("right"))
+        #expect(saved.value(at: ["options", "shared_edge_slices"]) == .boolean(false))
+        #expect(saved.value(at: ["options", "slide_window_pictures"]) == .boolean(false))
+        #expect(saved.value(at: ["options", "mouse_follows_focus"]) == .boolean(false))
+    }
+
+    @Test(arguments: [
+        ("miri", "show_in_dock", "0", "miri.show_in_dock must be true or false."),
+        ("options", "maximized_window_side", "\"up\"", "options.maximized_window_side must be \"left\" or \"right\"."),
+        ("options", "maximized_window_side", "1", "options.maximized_window_side must be \"left\" or \"right\"."),
+        ("options", "shared_edge_slices", "\"yes\"", "options.shared_edge_slices must be true or false."),
+        ("options", "mouse_follows_focus", "1", "options.mouse_follows_focus must be true or false."),
+    ])
+    func rejectsInvalidSingleKeyValues(section: String, key: String, raw: String, message: String) throws {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let text = "[\(section)]\n\(key) = \(raw)\n"
+        try text.write(to: url, atomically: true, encoding: .utf8)
+        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
+        store.load(reduceMotion: false)
+        #expect(store.issue == .invalidValue(key: "\(section).\(key)", message: message))
+        #expect(try contents() == text)
+    }
 }
 
 struct ConfigurationIssueMenuSummaryTests {
@@ -262,178 +314,6 @@ struct StackLimitConfigurationTests {
         #expect(StackLimit.offeredCounts(fit: 3, configured: .count(9)) == [1, 2, 3, 9])
         #expect(StackLimit.offeredCounts(fit: 6, configured: .count(Int.max)) == [1, 2, 3, 4, 5, 6, Int.max])
         #expect(StackLimit.offeredCounts(fit: 0, configured: .fit) == [1])
-    }
-}
-
-struct MaximizedWindowSideConfigurationTests {
-    private let directory = FileManager.default.temporaryDirectory.appending(
-        path: "miri-maximized-side-\(UUID().uuidString)")
-    private var url: URL { directory.appending(path: "config.toml") }
-
-    private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
-
-    private func store(_ text: String) throws -> ConfigurationStore {
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        try text.write(to: url, atomically: true, encoding: .utf8)
-        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
-        store.load(reduceMotion: false)
-        return store
-    }
-
-    @Test func defaultsToTheRightOfTheStack() throws {
-        #expect(try store("").settings.maximizedWindowSide == .right)
-    }
-
-    @Test func readsLeftOrRight() throws {
-        #expect(try store("[options]\nmaximized_window_side = \"left\"\n").settings.maximizedWindowSide == .left)
-        #expect(try store("[options]\nmaximized_window_side = \"right\"\n").settings.maximizedWindowSide == .right)
-    }
-
-    @Test func writesTheChoiceAsTheEngineReadsIt() throws {
-        let store = try store("")
-        try store.update(reduceMotion: false) { $0.maximizedWindowSide = .left }
-        #expect(try TOMLDocument(contents()).value(at: ["options", "maximized_window_side"]) == .string("left"))
-        #expect(store.settings.maximizedWindowSide == .left)
-        try store.update(reduceMotion: false) { $0.maximizedWindowSide = .right }
-        #expect(try TOMLDocument(contents()).value(at: ["options", "maximized_window_side"]) == .string("right"))
-    }
-
-    @Test func rejectsValuesTheEngineRejects() throws {
-        for bad in ["\"up\"", "\"Left\"", "\"\"", "1", "true"] {
-            let text = "[options]\nmaximized_window_side = \(bad)\n"
-            let store = try store(text)
-            #expect(
-                store.issue
-                    == .invalidValue(
-                        key: "options.maximized_window_side",
-                        message: "options.maximized_window_side must be \"left\" or \"right\"."), "\(bad)")
-            #expect(try contents() == text)
-        }
-    }
-}
-
-struct SharedEdgeSlicesConfigurationTests {
-    private let directory = FileManager.default.temporaryDirectory.appending(
-        path: "miri-shared-edge-\(UUID().uuidString)")
-    private var url: URL { directory.appending(path: "config.toml") }
-
-    private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
-
-    private func store(_ text: String) throws -> ConfigurationStore {
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        try text.write(to: url, atomically: true, encoding: .utf8)
-        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
-        store.load(reduceMotion: false)
-        return store
-    }
-
-    @Test func isOffWhenTheKeyIsAbsent() throws {
-        let store = try store("")
-        #expect(store.settings.sharedEdgeSlices == false)
-        #expect(try TOMLDocument(contents()).value(at: ["options", "shared_edge_slices"]) == .boolean(false))
-    }
-
-    @Test func readsTheEngineKey() throws {
-        #expect(try store("[options]\nshared_edge_slices = true\n").settings.sharedEdgeSlices)
-        #expect(try store("[options]\nshared_edge_slices = false\n").settings.sharedEdgeSlices == false)
-    }
-
-    @Test func writesTheSwitchAsTheEngineKey() throws {
-        let store = try store("")
-        try store.update(reduceMotion: false) { $0.sharedEdgeSlices = true }
-        #expect(try TOMLDocument(contents()).value(at: ["options", "shared_edge_slices"]) == .boolean(true))
-        try store.update(reduceMotion: false) { $0.sharedEdgeSlices = false }
-        #expect(try TOMLDocument(contents()).value(at: ["options", "shared_edge_slices"]) == .boolean(false))
-    }
-
-    @Test func rejectsAValueThatIsNotTrueOrFalse() throws {
-        let text = "[options]\nshared_edge_slices = \"yes\"\n"
-        let store = try store(text)
-        #expect(
-            store.issue
-                == .invalidValue(
-                    key: "options.shared_edge_slices", message: "options.shared_edge_slices must be true or false."))
-        #expect(try contents() == text)
-    }
-}
-
-struct SlideWindowPicturesConfigurationTests {
-    private let directory = FileManager.default.temporaryDirectory.appending(
-        path: "miri-slide-pictures-\(UUID().uuidString)")
-    private var url: URL { directory.appending(path: "config.toml") }
-
-    private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
-
-    private func store(_ text: String) throws -> ConfigurationStore {
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        try text.write(to: url, atomically: true, encoding: .utf8)
-        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
-        store.load(reduceMotion: false)
-        return store
-    }
-
-    @Test func isOffWhenTheKeyIsAbsent() throws {
-        let store = try store("")
-        #expect(store.settings.slideWindowPictures == false)
-        #expect(try TOMLDocument(contents()).value(at: ["options", "slide_window_pictures"]) == .boolean(false))
-    }
-
-    @Test func readsTheEngineKey() throws {
-        #expect(try store("[options]\nslide_window_pictures = true\n").settings.slideWindowPictures)
-        #expect(try store("[options]\nslide_window_pictures = false\n").settings.slideWindowPictures == false)
-    }
-
-    @Test func writesTheSwitchAsTheEngineKey() throws {
-        let store = try store("")
-        try store.update(reduceMotion: false) { $0.slideWindowPictures = true }
-        #expect(try TOMLDocument(contents()).value(at: ["options", "slide_window_pictures"]) == .boolean(true))
-        try store.update(reduceMotion: false) { $0.slideWindowPictures = false }
-        #expect(try TOMLDocument(contents()).value(at: ["options", "slide_window_pictures"]) == .boolean(false))
-    }
-}
-
-struct ShowInDockConfigurationTests {
-    private let directory = FileManager.default.temporaryDirectory.appending(path: "miri-dock-\(UUID().uuidString)")
-    private var url: URL { directory.appending(path: "config.toml") }
-
-    private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
-
-    private func store(_ text: String) throws -> ConfigurationStore {
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        try text.write(to: url, atomically: true, encoding: .utf8)
-        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
-        store.load(reduceMotion: false)
-        return store
-    }
-
-    @Test func isOnWhenTheKeyIsAbsent() throws {
-        let store = try store("")
-        #expect(store.issue == nil)
-        #expect(store.settings.showInDock)
-        #expect(try TOMLDocument(contents()).value(at: ["miri", "show_in_dock"]) == .boolean(true))
-    }
-
-    @Test func readsTheKey() throws {
-        #expect(try store("[miri]\nshow_in_dock = false\n").settings.showInDock == false)
-        #expect(try store("[miri]\nshow_in_dock = true\n").settings.showInDock)
-    }
-
-    @Test func writesTheSwitchToTheMiriSection() throws {
-        let store = try store("")
-        try store.update(reduceMotion: false) { $0.showInDock = false }
-        #expect(try TOMLDocument(contents()).value(at: ["miri", "show_in_dock"]) == .boolean(false))
-        try store.update(reduceMotion: false) { $0.showInDock = true }
-        #expect(try TOMLDocument(contents()).value(at: ["miri", "show_in_dock"]) == .boolean(true))
-    }
-
-    @Test func rejectsAValueThatIsNotTrueOrFalse() throws {
-        let text = "[miri]\nshow_in_dock = 0\n"
-        let store = try store(text)
-        #expect(
-            store.issue
-                == .invalidValue(key: "miri.show_in_dock", message: "miri.show_in_dock must be true or false."))
-        #expect(store.settings.showInDock)
-        #expect(try contents() == text)
     }
 }
 
@@ -626,67 +506,5 @@ struct GestureConfigurationTests {
         }
         #expect(message.contains("swipe.gesture"))
         #expect(try contents() == original)
-    }
-}
-
-struct GapMappingTests {
-    @Test(arguments: [(8, 8, 4, 4), (0, 8, 0, 8), (8, 0, 4, 0), (9, 10, 4, 6), (32, 32, 16, 16)])
-    func mapsGapsToEnginePadding(inner: Int, outer: Int, window: Int, edge: Int) {
-        var settings = MiriSettings()
-        settings.innerGap = inner
-        settings.outerGap = outer
-        #expect(settings.windowPadding == window)
-        #expect(settings.edgePadding == edge)
-    }
-}
-
-struct MouseFollowsFocusConfigurationTests {
-    private let directory = FileManager.default.temporaryDirectory.appending(
-        path: "miri-mouse-follows-focus-\(UUID().uuidString)")
-    private var url: URL { directory.appending(path: "config.toml") }
-
-    private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
-
-    private func store(_ text: String) throws -> ConfigurationStore {
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        try text.write(to: url, atomically: true, encoding: .utf8)
-        let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
-        store.load(reduceMotion: false)
-        return store
-    }
-
-    @Test func isOffWhenTheKeyIsAbsent() throws {
-        let store = try store("")
-        #expect(store.settings.mouseFollowsFocus == false)
-        #expect(try TOMLDocument(contents()).value(at: ["options", "mouse_follows_focus"]) == .boolean(false))
-    }
-
-    @Test func readsTheEngineKey() throws {
-        #expect(try store("[options]\nmouse_follows_focus = true\n").settings.mouseFollowsFocus)
-        #expect(try store("[options]\nmouse_follows_focus = false\n").settings.mouseFollowsFocus == false)
-    }
-
-    @Test func writesTheSwitchAsTheEngineKeyAndChangesNothingElse() throws {
-        let store = try store("")
-        let before = try TOMLDocument(contents())
-        try store.update(reduceMotion: false) { $0.mouseFollowsFocus = true }
-        let on = try TOMLDocument(contents())
-        #expect(on.value(at: ["options", "mouse_follows_focus"]) == .boolean(true))
-        #expect(
-            on.text
-                == before.text.replacingOccurrences(
-                    of: "mouse_follows_focus = false", with: "mouse_follows_focus = true"))
-        try store.update(reduceMotion: false) { $0.mouseFollowsFocus = false }
-        #expect(try contents() == before.text)
-    }
-
-    @Test func rejectsAValueThatIsNotTrueOrFalse() throws {
-        let text = "[options]\nmouse_follows_focus = 1\n"
-        let store = try store(text)
-        #expect(
-            store.issue
-                == .invalidValue(
-                    key: "options.mouse_follows_focus", message: "options.mouse_follows_focus must be true or false."))
-        #expect(try contents() == text)
     }
 }

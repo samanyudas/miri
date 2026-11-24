@@ -42,7 +42,7 @@ public struct Chord: Hashable, Sendable, CustomStringConvertible {
     /// the engine rejects the modifier (`vendor/paneru/src/config.rs` line 1736) and finds no key named `H`
     /// (line 1718). A near miss therefore still counts as taking its chord, and Miri adds no second binding for it.
     /// Returns `nil` for text that names no single chord, such as an empty key or an unknown modifier.
-    public init?(engineText: String) {
+    init?(engineText: String) {
         guard let exact = Chord(exactEngineText: engineText) else { return nil }
         self.init(exact.modifiers, Self.keyAliases[exact.key] ?? exact.key)
     }
@@ -93,15 +93,15 @@ enum BindingInspection {
 }
 
 /// One action in Miri's default shortcut set and the engine command that performs it.
-public struct DefaultBinding: Sendable {
+struct DefaultBinding: Sendable {
     /// The action's name in the keybinding reference.
-    public let action: String
+    let action: String
     /// The engine's `[bindings]` key, which the engine splits on `_` into its command words.
-    public let command: String
-    public let chords: [Chord]
+    let command: String
+    let chords: [Chord]
     /// The `miri.default_bindings_version` that first offered this default. Later versions add only newer rows.
     /// A row with no chords lists an action that Settings offers without a default shortcut.
-    public let version: Int
+    let version: Int
 
     init(_ action: String, _ command: String, _ chords: Chord..., version: Int = 1) {
         self.action = action
@@ -114,7 +114,7 @@ public struct DefaultBinding: Sendable {
     ///
     /// The reference also lists actions this table leaves unbound, because the engine has no command for them or
     /// the action is app-owned or deferred to v2. `decisions/keybinding reference.md` names each one and the reason.
-    public static let table: [DefaultBinding] =
+    static let table: [DefaultBinding] =
         [
             DefaultBinding(
                 String(localized: "Focus column left"), "window_focus_west", ctrlAlt("leftarrow"), ctrlAlt("h"),
@@ -212,7 +212,7 @@ public struct DefaultBinding: Sendable {
         ]
 
     /// The newest version in the table or in `changed`. Miri records it after offering the defaults.
-    public static let currentVersion = (table.map(\.version) + changed.map(\.version)).max() ?? 0
+    static let currentVersion = (table.map(\.version) + changed.map(\.version)).max() ?? 0
 
     /// Defaults that `version` removed, with the command whose current default replaces each one. `offered` is the
     /// version that first wrote the retired default, so Miri can tell a binding the user deleted from one it never
@@ -277,7 +277,7 @@ public struct DefaultBinding: Sendable {
 
     /// The default Stop window manager shortcut, used when `[miri].stop_shortcut` is absent. Miri owns Stop instead of
     /// the engine, because the engine's `quit` makes Miri restart the engine (miri#25).
-    public static let stopChord = ctrlAlt("q")
+    static let stopChord = ctrlAlt("q")
 
     private static func ctrlAlt(_ key: String, _ extra: ChordModifier...) -> Chord {
         Chord(Set([.control, .option] + extra), key)

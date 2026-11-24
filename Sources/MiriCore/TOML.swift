@@ -1,7 +1,7 @@
 import Foundation
 
 /// A parsed TOML value. Date and time values keep their source text, because Miri never interprets them.
-public enum TOMLValue: Equatable, Sendable {
+enum TOMLValue: Equatable, Sendable {
     case string(String)
     case integer(Int64)
     case float(Double)
@@ -10,12 +10,12 @@ public enum TOMLValue: Equatable, Sendable {
     case array([TOMLValue])
     case table([String: TOMLValue])
 
-    public subscript(key: String) -> TOMLValue? {
+    subscript(key: String) -> TOMLValue? {
         if case .table(let entries) = self { entries[key] } else { nil }
     }
 
     /// Encodes the value as TOML source text. Tables encode as inline tables.
-    public var encoded: String {
+    var encoded: String {
         switch self {
         case .string(let value): TOMLValue.quote(value)
         case .integer(let value): String(value)
@@ -73,7 +73,7 @@ public struct TOMLError: Error, Equatable, Sendable, CustomStringConvertible {
 }
 
 /// A TOML document that remembers where each statement is, so Miri can change one value without touching the rest.
-public struct TOMLDocument: Sendable {
+struct TOMLDocument: Sendable {
     /// One `key = value` statement and its position, as offsets into the document's Unicode scalars.
     struct Assignment: Sendable {
         let table: [String]
@@ -92,12 +92,12 @@ public struct TOMLDocument: Sendable {
         let lineEnd: Int
     }
 
-    public let text: String
-    public let root: TOMLValue
+    let text: String
+    let root: TOMLValue
     let assignments: [Assignment]
     let headers: [Header]
 
-    public init(_ text: String) throws(TOMLError) {
+    init(_ text: String) throws(TOMLError) {
         var parser = TOMLParser(text)
         try parser.parse()
         self.text = text
@@ -106,7 +106,7 @@ public struct TOMLDocument: Sendable {
         headers = parser.headers
     }
 
-    public func value(at path: [String]) -> TOMLValue? {
+    func value(at path: [String]) -> TOMLValue? {
         path.reduce(Optional(root)) { $0?[$1] }
     }
 }

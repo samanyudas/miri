@@ -3,8 +3,13 @@ import Darwin
 /// Engines that outlived the app that started them. An engine whose parent is launchd has no app to stop it, but
 /// it still manages windows and holds the Mach service, so a new engine cannot start.
 public enum OrphanedEngines {
+    /// The process IDs of running `miri-engine` processes whose parent is launchd.
+    public static func find() -> [pid_t] {
+        find(executableName: "miri-engine")
+    }
+
     /// The process IDs of running processes named `executableName` whose parent is launchd.
-    public static func find(executableName: String = "miri-engine") -> [pid_t] {
+    static func find(executableName: String) -> [pid_t] {
         let capacity = proc_listallpids(nil, 0)
         guard capacity > 0 else { return [] }
         var pids = [pid_t](repeating: 0, count: Int(capacity) * 2)

@@ -13,7 +13,7 @@ public struct Redactor: Sendable {
         self.sensitiveStrings = sensitiveStrings.filter { $0.count >= 3 }.sorted { $0.count > $1.count }
     }
 
-    public func redact(_ text: String) -> String {
+    func redact(_ text: String) -> String {
         var result = text.replacing(/\x1B\[[0-9;]*[A-Za-z]/, with: "")
         for secret in sensitiveStrings { result = result.replacing(secret, with: "<title>") }
         if homeDirectory.count > 1 { result = result.replacing(homeDirectory, with: "~") }

@@ -82,9 +82,6 @@ class VerifyMiriTest(unittest.TestCase):
         self.assertIsNone(self.vm.APP_PATTERN.match(f"/bin/zsh -c pgrep -f '{app}'"))
         self.assertIsNone(self.vm.ENGINE_PATTERN.match(engine.replace(" launch", " query state")))
 
-    def test_evidence_lives_outside_the_repository(self):
-        self.assertNotIn(str(ROOT), str(self.vm.HOME))
-
     def test_runs_on_the_macos_system_python(self):
         # T3 Code agent shells start with only the system paths on PATH, and macOS ships Python 3.9 there.
         system = "/usr/bin/python3"

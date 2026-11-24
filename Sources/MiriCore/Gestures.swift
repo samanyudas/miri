@@ -163,32 +163,32 @@ public enum StripMovement: Sendable {
 
 /// The parts of `miri-engine query state --json` that the gesture test reads.
 public struct EngineStateSnapshot: Decodable, Equatable, Sendable {
-    public struct Active: Decodable, Equatable, Sendable {
-        public var nativeWorkspaceId: UInt64?
-        public var virtualWorkspaceNumber: UInt32?
+    struct Active: Decodable, Equatable, Sendable {
+        var nativeWorkspaceId: UInt64?
+        var virtualWorkspaceNumber: UInt32?
     }
 
-    public struct Row: Decodable, Equatable, Sendable {
-        public var number: UInt32
-        public var nativeWorkspaceId: UInt64
-        public var active: Bool
-        public var windows: [Window]
+    struct Row: Decodable, Equatable, Sendable {
+        var number: UInt32
+        var nativeWorkspaceId: UInt64
+        var active: Bool
+        var windows: [Window]
     }
 
-    public struct Window: Decodable, Equatable, Sendable {
-        public var windowId: Int32
-        public var frame: Frame?
+    struct Window: Decodable, Equatable, Sendable {
+        var windowId: Int32
+        var frame: Frame?
     }
 
-    public struct Frame: Decodable, Equatable, Sendable {
-        public var x: Int
-        public var y: Int
-        public var width: Int
-        public var height: Int
+    struct Frame: Decodable, Equatable, Sendable {
+        var x: Int
+        var y: Int
+        var width: Int
+        var height: Int
     }
 
-    public var active: Active
-    public var virtualWorkspaces: [Row]
+    var active: Active
+    var virtualWorkspaces: [Row]
 
     public init(json: Data) throws {
         let decoder = JSONDecoder()

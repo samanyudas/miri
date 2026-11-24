@@ -57,13 +57,13 @@ public struct Shortcuts: Sendable {
         public let chords: [Chord]
     }
 
-    public let document: TOMLDocument
+    let document: TOMLDocument
     private let layout: KeyLayout
     /// The file's `[bindings]` keys for each listed command, sorted, so edits go to the spelling the user wrote.
     private let keysByCommand: [String: [String]]
     public let others: [OtherBinding]
 
-    public init(document: TOMLDocument, layout: KeyLayout = .positional) {
+    init(document: TOMLDocument, layout: KeyLayout = .positional) {
         self.layout = layout
         self.document = document
         var keysByCommand: [String: [String]] = [:]
@@ -107,7 +107,7 @@ public struct Shortcuts: Sendable {
         return nil
     }
 
-    public func adding(_ chord: Chord, to action: ShortcutAction, layout: KeyLayout) throws -> TOMLDocument {
+    func adding(_ chord: Chord, to action: ShortcutAction, layout: KeyLayout) throws -> TOMLDocument {
         if let rejection = rejection(adding: chord, to: action, layout: layout) { throw rejection }
         switch action {
         case .engine(let command):
@@ -125,7 +125,7 @@ public struct Shortcuts: Sendable {
 
     /// Removes `chord` from `action`. The last engine chord removes the key, and the last Stop chord leaves
     /// `stop_shortcut = []`, because an absent key means the default.
-    public func removing(_ chord: Chord, from action: ShortcutAction) throws -> TOMLDocument {
+    func removing(_ chord: Chord, from action: ShortcutAction) throws -> TOMLDocument {
         switch action {
         case .engine(let command):
             var result = document
@@ -148,7 +148,7 @@ public struct Shortcuts: Sendable {
 
     /// Replaces `[bindings]` with exactly Miri's default set, restores the default Stop shortcut, and records the
     /// current defaults version, so a later upgrade offers only newer defaults.
-    public func resettingToDefaults() throws -> TOMLDocument {
+    func resettingToDefaults() throws -> TOMLDocument {
         var result = document
         if case .table(let entries) = document.value(at: ["bindings"]) {
             for key in entries.keys.sorted() {
@@ -167,7 +167,7 @@ public struct Shortcuts: Sendable {
 
     /// The Stop chords Miri registers. A `[bindings]` entry on the same keys wins, because the engine takes the key
     /// press first.
-    public func stopChordsToRegister(layout: KeyLayout) -> [Chord] {
+    func stopChordsToRegister(layout: KeyLayout) -> [Chord] {
         let engineChords =
             keysByCommand.values.joined().flatMap {
                 Self.chords(in: document.value(at: ["bindings", $0]), layout: layout) ?? []

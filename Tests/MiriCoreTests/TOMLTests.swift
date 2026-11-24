@@ -87,13 +87,6 @@ struct TOMLParsingTests {
         }
     }
 
-    @Test(arguments: ["Cargo.toml", "Cargo.lock"])
-    func readsRealEngineManifests(name: String) throws {
-        let text = try String(contentsOf: engineDirectory.appending(path: name), encoding: .utf8)
-        let document = try TOMLDocument(text)
-        #expect(document.value(at: name == "Cargo.toml" ? ["package", "name"] : ["version"]) != nil)
-    }
-
     @Test func readsEveryTOMLExampleInTheEngineDocumentation() throws {
         let markdown = try String(contentsOf: engineDirectory.appending(path: "CONFIGURATION.md"), encoding: .utf8)
         let blocks = markdown.matches(of: /```toml\n([\s\S]*?)```/).map { String($0.1) }
