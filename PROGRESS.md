@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-25 on branch `fix/534-show-logs-in-finder`, based on `main` at `abb4fcd1`
+Updated: 2026-11-25 on branch `fix/517-stack-width-relaunch`, based on `main` at `b7b89fa1`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,16 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Stacked column width on relaunch on 25 November 2026
+
+Fixed [#517](https://github.com/samanyudas/miri/issues/517) in [engine PR #209](https://github.com/samanyudas/paneru/pull/209), merged into `miri/v0.5.2` as `98765941` (head `b070b5f1`), which this branch pins.
+Previously, when a stacked window (such as Helium) refused a too-short height during session restore and returned a wider frame (+19 pt), `adopt_refused_size` adopted the wider width and `widen_column_siblings` widened all siblings, persisting across restarts.
+`window_resize_verifier` now retries the asked width once at the accepted height (recording `MinimumHeight` and returning any refused height step) before treating the width as refused.
+Added `a_restart_keeps_a_five_window_stack_width_when_height_refusal_widens` (failed at 519 vs 500 pt before fix, passes after) and `a_window_that_refuses_both_width_and_height_still_widens_its_stack` in `vendor/paneru/src/tests/session_restore.rs`.
+Reviewed with `sol-loop` (1 round with `gpt-6.2-sol`, verdict `APPROVE`, 1 nit declined).
+Reproduced live on unmodified `main` (`b7b89fa1`, engine `465817d1`) in `verify-miri` run `20261125-175322` (`1039 -> 1058 -> 1077 pt` across 2 relaunches).
+The 5-cycle live `verify-miri` after-fix check and `make e2e` remain pending screen unlock on the host Mac.
 
 ## Menu bar Show Logs in Finder activation on 25 November 2026
 
