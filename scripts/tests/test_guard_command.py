@@ -42,6 +42,8 @@ class GuardCommandTest(unittest.TestCase):
             "cd /tmp && git -C repo reset --hard HEAD~1": "reset --hard",
             "git clean -xfd": "git clean",
             "git branch -D old": "branch -D",
+            "gh pr merge 12 --admin": "branch protection",
+            "gh pr merge 12 --squash --admin=true": "branch protection",
             "gh release create v1.0.0": "release",
             "gh repo edit --visibility public": "repository settings",
             "sudo tccutil reset Accessibility": "privacy permissions",

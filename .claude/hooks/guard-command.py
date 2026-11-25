@@ -170,6 +170,11 @@ def check(argv: list[str], cwd: str, command: str) -> str | None:
     if program == "gh" and len(args) >= 2:
         if args[0] == "issue" and args[1] in {"create", "new"}:
             return check_issue_create(args[2:], cwd, command)
+        if args[:2] == ["pr", "merge"] and any(
+            a == "--admin" or (a.startswith("--admin=") and a.split("=", 1)[1].lower() != "false")
+            for a in args[2:]
+        ):
+            return "gh pr merge --admin bypasses branch protection and required checks"
         if args[0] == "release" and args[1] in {"create", "delete", "edit", "upload"}:
             return "publishing or changing a release needs Sam"
         if args[0] == "repo" and args[1] in {"delete", "edit", "archive", "rename"}:
