@@ -7,6 +7,7 @@ body:
       value: |
         Write the title as one plain sentence about what changes for the person using Miri, such as "Miri reports which permission is missing at launch".
         Do not file an issue without a real need and evidence for it.
+        Do not file an unreproduced bug hypothesis from code reading or review as a task. Reproduce it first and use Bug report, or report it directly to Sam.
   - type: textarea
     id: outcome
     attributes:
