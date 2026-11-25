@@ -1,3 +1,5 @@
+import Foundation
+
 /// An action whose shortcuts the Shortcuts settings page edits.
 public enum ShortcutAction: Hashable, Sendable {
     /// An engine command in the engine's own spelling, from `EngineCommand.canonical`.
@@ -12,10 +14,19 @@ public enum ShortcutAction: Hashable, Sendable {
     /// Cycle preset widths forward, which the Layout settings page names below the width presets.
     public static let cyclePresetWidths = ShortcutAction.engine(command: EngineCommand.canonical("window_resize")!)
 
+    private static let stopTitleResource = LocalizedStringResource("Stop window manager")
+
     public var title: String {
         switch self {
         case .engine(let command): DefaultBinding.row(for: command)?.action ?? command
-        case .stop: String(localized: "Stop window manager")
+        case .stop: String(localized: Self.stopTitleResource)
+        }
+    }
+
+    var titleResource: LocalizedStringResource? {
+        switch self {
+        case .engine(let command): DefaultBinding.row(for: command)?.titleResource
+        case .stop: Self.stopTitleResource
         }
     }
 }
