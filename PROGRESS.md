@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-25 on branch `chore/pin-thumb-swipe-rejection`, based on `main` at `954e70df`
+Updated: 2026-11-25 on branch `fix/534-show-logs-in-finder`, based on `main` at `abb4fcd1`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,14 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Menu bar Show Logs in Finder activation on 25 November 2026
+
+Fixed [#534](https://github.com/samanyudas/miri/issues/534) in `Sources/Miri/Views.swift` and removed its entry from [known limitations](docs/limitations.md).
+Previously, `showLogsInFinder()` called the cooperative `NSApp.activate()` and immediately called `NSWorkspace.shared.activateFileViewerSelecting([log.url])`, so clicking **Show Logs in Finder** from the menu bar while another app was frontmost opened Finder's Logs window behind that app.
+`NSApp.activate(ignoringOtherApps: true)` is asynchronous (its `didBecomeActiveNotification` fires 33 to 80 ms later), so `showLogsInFinder()` now waits for `NSApplication.didBecomeActiveNotification` (with a 500 ms fallback) before yielding activation to Finder, revealing the log, and activating Finder from `.current`.
+Verified live with `verify-miri` on macOS 27.0.1 in runs `20261125-165400` (Show in Dock on: Settings closed, Settings open, Settings > General, and Settings > Diagnostics) and `20261125-165609` (Show in Dock off, Settings closed).
+`make check` passed, and `sol-loop` approved in 1 round with `gpt-6.2-sol` on `high` (1 nit declined).
 
 ## Trackpad resting thumb and palm rejection on 25 November 2026
 
