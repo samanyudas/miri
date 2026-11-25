@@ -28,8 +28,35 @@ extension AppModel {
     }
 
     func showLogsInFinder() {
-        NSApp.activate()
-        NSWorkspace.shared.activateFileViewerSelecting([log.url])
+        let url = log.url
+        let reveal: @MainActor () -> Void = {
+            NSApp.yieldActivation(toApplicationWithBundleIdentifier: "com.apple.finder")
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+            NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.finder")
+                .first?.activate(from: .current, options: [])
+        }
+        if NSApp.isActive {
+            reveal()
+            return
+        }
+        // Clicking a menu bar item while another app is frontmost leaves Miri inactive, so Finder cannot take focus
+        // under cooperative activation. Activate Miri first, then hand activation to Finder once Miri is active.
+        var revealed = false
+        nonisolated(unsafe) var observer: NSObjectProtocol?
+        let finish: @MainActor () -> Void = {
+            guard !revealed else { return }
+            revealed = true
+            if let observer { NotificationCenter.default.removeObserver(observer) }
+            observer = nil
+            reveal()
+        }
+        observer = NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification, object: NSApp, queue: .main
+        ) { _ in
+            MainActor.assumeIsolated { finish() }
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { finish() }
     }
 }
 
