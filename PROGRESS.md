@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-25 on branch `fix/517-stack-width-relaunch`, based on `main` at `b7b89fa1`
+Updated: 2026-11-25 on branch `fix/517-stack-width-relaunch`, based on `main` at `8d5dba9c`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -22,7 +22,15 @@ Previously, when a stacked window (such as Helium) refused a too-short height du
 Added `a_restart_keeps_a_five_window_stack_width_when_height_refusal_widens` (failed at 519 vs 500 pt before fix, passes after) and `a_window_that_refuses_both_width_and_height_still_widens_its_stack` in `vendor/paneru/src/tests/session_restore.rs`.
 Reviewed with `sol-loop` (1 round with `gpt-6.2-sol`, verdict `APPROVE`, 1 nit declined).
 Reproduced live on unmodified `main` (`b7b89fa1`, engine `465817d1`) in `verify-miri` run `20261125-175322` (`1039 -> 1058 -> 1077 pt` across 2 relaunches).
-The 5-cycle live `verify-miri` after-fix check and `make e2e` remain pending screen unlock on the host Mac.
+Verified live after the fix in `verify-miri` run `20261125-230250` on engine `b070b5f1` (tree identical to `98765941`): the 5-window stack stayed at `1276 pt` (0 pt drift) across all 5 quit-and-relaunch cycles, read 10 s after each relaunch.
+
+## Multilingual and fuzzy shortcut search on 25 November 2026
+
+Added cross-language and fuzzy matching to **Search actions or shortcuts** in Settings > Shortcuts (`Sources/MiriCore/ShortcutSearch.swift`, `Sources/Miri/ShortcutsSettings.swift`).
+`DefaultBinding` and `ShortcutAction` now keep a `LocalizedStringResource`, and `ShortcutSearch` indexes every editable action's title across all 22 shipped `.lproj` localizations in the app bundle so queries in any supported language find matching actions regardless of the active UI language.
+Queries support case, diacritic, width, and Turkish dotless-`ı` folding, multi-word out-of-order matching, word-boundary acronyms, compact subsequences, bounded Damerau-Levenshtein typo tolerance (including sliding windows for unspaced CJK, Japanese, and Thai scripts), and shortcut chord matching without typo false positives.
+Verified with 227 Swift unit tests (including a compiled `Localizable.xcstrings` catalog check across all 22 languages), `make strings`, `make pre-push`, `make build`, `make package`, and live verification in `Miri Developer.app` (`verify-miri` run `20261125-175919`) covering English UI with Chinese, Japanese, typo, acronym, and non-matching queries plus Chinese UI with an English query.
+Reviewed with `sol-loop` (3 rounds with `gpt-6.2-sol` on `high`; all 5 findings S1 to S5 fixed).
 
 ## Menu bar Show Logs in Finder activation on 25 November 2026
 

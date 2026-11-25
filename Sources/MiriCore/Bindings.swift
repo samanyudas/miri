@@ -94,8 +94,10 @@ enum BindingInspection {
 
 /// One action in Miri's default shortcut set and the engine command that performs it.
 struct DefaultBinding: Sendable {
-    /// The action's name in the keybinding reference.
+    /// The action's name in the keybinding reference, in the current locale.
     let action: String
+    /// The localization resource for `action`, so search can resolve its title in every shipped language.
+    let titleResource: LocalizedStringResource
     /// The engine's `[bindings]` key, which the engine splits on `_` into its command words.
     let command: String
     let chords: [Chord]
@@ -103,8 +105,9 @@ struct DefaultBinding: Sendable {
     /// A row with no chords lists an action that Settings offers without a default shortcut.
     let version: Int
 
-    init(_ action: String, _ command: String, _ chords: Chord..., version: Int = 1) {
-        self.action = action
+    init(_ titleResource: LocalizedStringResource, _ command: String, _ chords: Chord..., version: Int = 1) {
+        self.action = String(localized: titleResource)
+        self.titleResource = titleResource
         self.command = command
         self.chords = chords
         self.version = version
@@ -117,98 +120,111 @@ struct DefaultBinding: Sendable {
     static let table: [DefaultBinding] =
         [
             DefaultBinding(
-                String(localized: "Focus column left"), "window_focus_west", ctrlAlt("leftarrow"), ctrlAlt("h"),
+                LocalizedStringResource("Focus column left"), "window_focus_west", ctrlAlt("leftarrow"), ctrlAlt("h"),
                 ctrlAlt("a")),
             DefaultBinding(
-                String(localized: "Focus column right"), "window_focus_east", ctrlAlt("rightarrow"), ctrlAlt("l"),
+                LocalizedStringResource("Focus column right"), "window_focus_east", ctrlAlt("rightarrow"),
+                ctrlAlt("l"),
                 ctrlAlt("d")),
             DefaultBinding(
-                String(localized: "Focus window above within column"), "window_focus_north", ctrlAlt("uparrow"),
+                LocalizedStringResource("Focus window above within column"), "window_focus_north", ctrlAlt("uparrow"),
                 ctrlAlt("k"),
                 ctrlAlt("w")),
             DefaultBinding(
-                String(localized: "Focus window below within column"), "window_focus_south", ctrlAlt("downarrow"),
+                LocalizedStringResource("Focus window below within column"), "window_focus_south", ctrlAlt("downarrow"),
                 ctrlAlt("j"),
                 ctrlAlt("s")),
             DefaultBinding(
-                String(localized: "Focus display left"), "window_focusdisplay_west", ctrlAlt("leftarrow", .command),
+                LocalizedStringResource("Focus display left"), "window_focusdisplay_west",
+                ctrlAlt("leftarrow", .command),
                 ctrlAlt("h", .command), ctrlAlt("a", .command), version: 5),
             DefaultBinding(
-                String(localized: "Focus display right"), "window_focusdisplay_east", ctrlAlt("rightarrow", .command),
+                LocalizedStringResource("Focus display right"), "window_focusdisplay_east",
+                ctrlAlt("rightarrow", .command),
                 ctrlAlt("l", .command), ctrlAlt("d", .command), version: 5),
             DefaultBinding(
-                String(localized: "Focus display above"), "window_focusdisplay_north", ctrlAlt("uparrow", .command),
+                LocalizedStringResource("Focus display above"), "window_focusdisplay_north",
+                ctrlAlt("uparrow", .command),
                 ctrlAlt("k", .command), ctrlAlt("w", .command), version: 2),
             DefaultBinding(
-                String(localized: "Focus display below"), "window_focusdisplay_south", ctrlAlt("downarrow", .command),
+                LocalizedStringResource("Focus display below"), "window_focusdisplay_south",
+                ctrlAlt("downarrow", .command),
                 ctrlAlt("j", .command), ctrlAlt("s", .command), version: 2),
         ]
         + (1...9).map {
-            DefaultBinding(String(localized: "Jump to column \($0)"), "window_focus_\($0)", ctrlAlt("\($0)"))
+            DefaultBinding(LocalizedStringResource("Jump to column \($0)"), "window_focus_\($0)", ctrlAlt("\($0)"))
         }
         + [
             DefaultBinding(
-                String(localized: "Move column left"), "window_swap_west", ctrlAlt("leftarrow", .shift),
+                LocalizedStringResource("Move column left"), "window_swap_west", ctrlAlt("leftarrow", .shift),
                 ctrlAlt("h", .shift),
                 ctrlAlt("a", .shift)),
             DefaultBinding(
-                String(localized: "Move column right"), "window_swap_east", ctrlAlt("rightarrow", .shift),
+                LocalizedStringResource("Move column right"), "window_swap_east", ctrlAlt("rightarrow", .shift),
                 ctrlAlt("l", .shift),
                 ctrlAlt("d", .shift)),
             DefaultBinding(
-                String(localized: "Move window up within column"), "window_swap_north", ctrlAlt("uparrow", .shift),
+                LocalizedStringResource("Move window up within column"), "window_swap_north",
+                ctrlAlt("uparrow", .shift),
                 ctrlAlt("k", .shift),
                 ctrlAlt("w", .shift)),
             DefaultBinding(
-                String(localized: "Move window down within column"), "window_swap_south", ctrlAlt("downarrow", .shift),
+                LocalizedStringResource("Move window down within column"), "window_swap_south",
+                ctrlAlt("downarrow", .shift),
                 ctrlAlt("j", .shift), ctrlAlt("s", .shift)),
             DefaultBinding(
-                String(localized: "Move column to first position"), "window_swap_first",
+                LocalizedStringResource("Move column to first position"), "window_swap_first",
                 ctrlAlt("leftarrow", .command, .shift),
                 ctrlAlt("h", .command, .shift), ctrlAlt("a", .command, .shift), version: 6),
             DefaultBinding(
-                String(localized: "Move column to last position"), "window_swap_last",
+                LocalizedStringResource("Move column to last position"), "window_swap_last",
                 ctrlAlt("rightarrow", .command, .shift),
                 ctrlAlt("l", .command, .shift), ctrlAlt("d", .command, .shift), version: 6),
             DefaultBinding(
-                String(localized: "Move column to display above"), "window_movedisplay_north",
+                LocalizedStringResource("Move column to display above"), "window_movedisplay_north",
                 ctrlAlt("uparrow", .command, .shift),
                 ctrlAlt("k", .command, .shift), ctrlAlt("w", .command, .shift), version: 2),
             DefaultBinding(
-                String(localized: "Move column to display below"), "window_movedisplay_south",
+                LocalizedStringResource("Move column to display below"), "window_movedisplay_south",
                 ctrlAlt("downarrow", .command, .shift),
                 ctrlAlt("j", .command, .shift), ctrlAlt("s", .command, .shift), version: 2),
-            DefaultBinding(String(localized: "Send column to next display"), "window_nextdisplay", ctrlAlt("n")),
-            DefaultBinding(String(localized: "Cycle preset widths forward"), "window_resize", ctrlAlt("r")),
+            DefaultBinding(
+                LocalizedStringResource("Send column to next display"), "window_nextdisplay", ctrlAlt("n")),
+            DefaultBinding(LocalizedStringResource("Cycle preset widths forward"), "window_resize", ctrlAlt("r")),
             // Version 1 offered this as `window_fullwidth`, which the engine still reads as `window_maximize`.
-            DefaultBinding(String(localized: "Maximize or restore window"), "window_maximize", ctrlAlt("f")),
-            DefaultBinding(String(localized: "Centre column"), "window_center", ctrlAlt("c")),
-            DefaultBinding(String(localized: "Make column wider"), "window_step_grow", ctrlAlt("equal"), version: 2),
+            DefaultBinding(LocalizedStringResource("Maximize or restore window"), "window_maximize", ctrlAlt("f")),
+            DefaultBinding(LocalizedStringResource("Centre column"), "window_center", ctrlAlt("c")),
             DefaultBinding(
-                String(localized: "Make column narrower"), "window_step_shrink", ctrlAlt("minus"), version: 2),
+                LocalizedStringResource("Make column wider"), "window_step_grow", ctrlAlt("equal"), version: 2),
             DefaultBinding(
-                String(localized: "Make window taller"), "window_vertical_step_grow", ctrlAlt("equal", .shift),
+                LocalizedStringResource("Make column narrower"), "window_step_shrink", ctrlAlt("minus"), version: 2),
+            DefaultBinding(
+                LocalizedStringResource("Make window taller"), "window_vertical_step_grow", ctrlAlt("equal", .shift),
                 version: 2),
             DefaultBinding(
-                String(localized: "Make window shorter"), "window_vertical_step_shrink", ctrlAlt("minus", .shift),
+                LocalizedStringResource("Make window shorter"), "window_vertical_step_shrink", ctrlAlt("minus", .shift),
                 version: 2),
-            DefaultBinding(String(localized: "Equalize window heights within column"), "window_equalize", ctrlAlt("0")),
             DefaultBinding(
-                String(localized: "Stack focused window into left column"), "window_stack_west", ctrlAlt("leftbracket")),
+                LocalizedStringResource("Equalize window heights within column"), "window_equalize", ctrlAlt("0")),
             DefaultBinding(
-                String(localized: "Stack focused window into right column"), "window_stack_east",
+                LocalizedStringResource("Stack focused window into left column"), "window_stack_west",
+                ctrlAlt("leftbracket")),
+            DefaultBinding(
+                LocalizedStringResource("Stack focused window into right column"), "window_stack_east",
                 ctrlAlt("rightbracket")),
             DefaultBinding(
-                String(localized: "Pop focused window out to right"), "window_unstack_east",
+                LocalizedStringResource("Pop focused window out to right"), "window_unstack_east",
                 ctrlAlt("rightbracket", .shift)),
             DefaultBinding(
-                String(localized: "Pop focused window out to left"), "window_unstack_west",
+                LocalizedStringResource("Pop focused window out to left"), "window_unstack_west",
                 ctrlAlt("leftbracket", .shift)),
-            DefaultBinding(String(localized: "Float or unfloat focused window"), "window_manage", ctrlAlt("t")),
-            DefaultBinding(String(localized: "Focus first column"), "window_focus_first"),
-            DefaultBinding(String(localized: "Focus last column"), "window_focus_last"),
-            DefaultBinding(String(localized: "Move column to display left"), "window_movedisplay_west", version: 2),
-            DefaultBinding(String(localized: "Move column to display right"), "window_movedisplay_east", version: 2),
+            DefaultBinding(LocalizedStringResource("Float or unfloat focused window"), "window_manage", ctrlAlt("t")),
+            DefaultBinding(LocalizedStringResource("Focus first column"), "window_focus_first"),
+            DefaultBinding(LocalizedStringResource("Focus last column"), "window_focus_last"),
+            DefaultBinding(
+                LocalizedStringResource("Move column to display left"), "window_movedisplay_west", version: 2),
+            DefaultBinding(
+                LocalizedStringResource("Move column to display right"), "window_movedisplay_east", version: 2),
         ]
 
     /// The newest version in the table or in `changed`. Miri records it after offering the defaults.

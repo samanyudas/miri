@@ -51,8 +51,10 @@ struct ShortcutsSettings: View {
                         ForEach(model.keptDefaults, id: \.self) { kept in keptDefaultRow(kept) }
                     }
                 }
-                let actions = ShortcutAction.editable.filter { matches($0, shortcuts) }
-                let others = shortcuts.others.filter { matches($0) }
+                let actions = ShortcutSearch.shared.filter(
+                    ShortcutAction.editable, query: filter, shortcuts: shortcuts, layout: model.keyLayout)
+                let others = ShortcutSearch.shared.filter(
+                    shortcuts.others, query: filter, layout: model.keyLayout)
                 if actions.isEmpty, others.isEmpty {
                     VStack(spacing: 10) {
                         Text(String(localized: "No shortcuts match \u{201C}\(filter)\u{201D}."))
@@ -279,18 +281,6 @@ struct ShortcutsSettings: View {
             ? String(localized: "\(kept.action.title) has no shortcut now.") : String(localized: "Miri kept \(labels).")
         return movable
             ? String(localized: "\(keptSentence) Using \(wanted) removes it from \(kept.owner).") : keptSentence
-    }
-
-    private func matches(_ action: ShortcutAction, _ shortcuts: Shortcuts) -> Bool {
-        filter.isEmpty || action.title.localizedCaseInsensitiveContains(filter)
-            || shortcuts.chords(for: action).contains {
-                model.keyLayout.label(for: $0).localizedCaseInsensitiveContains(filter)
-            }
-    }
-
-    private func matches(_ other: Shortcuts.OtherBinding) -> Bool {
-        filter.isEmpty || other.key.localizedCaseInsensitiveContains(filter)
-            || other.chords.contains { model.keyLayout.label(for: $0).localizedCaseInsensitiveContains(filter) }
     }
 
     private func startRecording(_ action: ShortcutAction) {
