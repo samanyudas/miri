@@ -85,7 +85,7 @@ class GuardCommandTest(unittest.TestCase):
 
     def test_issue_create_names_each_missing_section(self):
         blocked = {
-            "gh issue create -t Gap -l bug -b 'Windows overlap.'": "Missing: Steps to reproduce, Expected result, "
+            "gh issue create -t Gap -l bug -b 'Windows overlap.'": "Missing: Steps to reproduce, Reproduction evidence, Expected result, "
             "Actual result, Acceptance criteria, Miri version or commit, macOS version and Mac model.",
             f"gh issue create -t Gap -l bug -b '{BUG.replace('Actual result', 'Result')}'": "Missing: Actual result.",
             f"gh issue create -t Strip -l enhancement -b '{FEATURE_WITHOUT_SOURCE}'": "Missing: Requested by, Release.",
@@ -146,6 +146,7 @@ def sections(*pairs: str) -> str:
 
 BUG = sections(
     "Steps to reproduce", "1. Connect a second display.\n2. Press Control-Option-Command-D.",
+    "Reproduction evidence", "verify-miri run 20261125-120000 on main fabf16d4: window moved to x=-1200.",
     "Expected result", "Every window stays on screen.",
     "Actual result", "One window moves off-screen.",
     "Acceptance criteria", "- Following the steps, every window stays reachable.",

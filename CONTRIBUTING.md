@@ -23,8 +23,10 @@ Each acceptance criterion states an observable result and how to check it.
 Name the automated test, the `make` target, or the manual or hardware check from the [v1 acceptance checklist](decisions/v1-acceptance-checklist.md).
 If you cannot write acceptance criteria yet, file a `decision` issue for the open question, or ask Sam.
 
-An agent files a bug only after it reproduces the bug on the surface a user sees.
-If the agent cannot reproduce the bug, it reports to Sam what it saw and what it tried, and it does not file the issue.
+An agent files a bug-related issue only after it reproduces the problem on the surface a user sees.
+The issue must include the exact runnable steps to reproduce, the build commit, and the observed failing output.
+Do not file an unreproduced bug hypothesis from code reading or review as a `bug` or a `task`.
+If the agent cannot reproduce the bug, it reports to Sam (or in the PR review) what it saw and what it tried, and it does not file the issue.
 A feature names who asked for it, or the decision or issue it comes from.
 
 In Claude Code sessions, `.claude/hooks/guard-command.py` reads the templates and blocks `gh issue create` without exactly one type label and every required section.

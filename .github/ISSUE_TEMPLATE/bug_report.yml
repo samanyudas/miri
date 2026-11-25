@@ -13,11 +13,20 @@ body:
     id: steps
     attributes:
       label: Steps to reproduce
-      description: The steps you ran that show the problem, and the build or commit you ran them on.
+      description: Exact numbered steps or commands another person or agent can run to reproduce the problem, and the build or commit you ran them on.
       placeholder: |
         1. Connect a second display to the right of the built-in display.
         2. Press Control-Option-Command-D.
         3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Reproduction evidence
+      description: The exact command or verify-miri run ID and the observed failing output from reproducing the bug before filing.
+      placeholder: |
+        verify-miri run 20261125-120000 on main abb4fcd1 (engine 465817d1): window moved to x=-1200.
     validations:
       required: true
   - type: textarea
