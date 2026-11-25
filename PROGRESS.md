@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-25 on branch `fix/534-show-logs-in-finder`, based on `main` at `abb4fcd1`
+Updated: 2026-11-25 on branch `feat/multilingual-fuzzy-shortcut-search`, based on `main` at `b7b89fa1`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,14 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Multilingual and fuzzy shortcut search on 25 November 2026
+
+Added cross-language and fuzzy matching to **Search actions or shortcuts** in Settings > Shortcuts (`Sources/MiriCore/ShortcutSearch.swift`, `Sources/Miri/ShortcutsSettings.swift`).
+`DefaultBinding` and `ShortcutAction` now keep a `LocalizedStringResource`, and `ShortcutSearch` indexes every editable action's title across all 22 shipped `.lproj` localizations in the app bundle so queries in any supported language find matching actions regardless of the active UI language.
+Queries support case, diacritic, width, and Turkish dotless-`ı` folding, multi-word out-of-order matching, word-boundary acronyms, compact subsequences, bounded Damerau-Levenshtein typo tolerance (including sliding windows for unspaced CJK, Japanese, and Thai scripts), and shortcut chord matching without typo false positives.
+Verified with 227 Swift unit tests (including a compiled `Localizable.xcstrings` catalog check across all 22 languages), `make strings`, `make pre-push`, `make build`, `make package`, and live verification in `Miri Developer.app` (`verify-miri` run `20261125-175919`) covering English UI with Chinese, Japanese, typo, acronym, and non-matching queries plus Chinese UI with an English query.
+Reviewed with `sol-loop` (3 rounds with `gpt-6.2-sol` on `high`; all 5 findings S1 to S5 fixed).
 
 ## Menu bar Show Logs in Finder activation on 25 November 2026
 
