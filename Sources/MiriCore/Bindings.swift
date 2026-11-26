@@ -81,7 +81,7 @@ public struct Chord: Hashable, Sendable, CustomStringConvertible {
 }
 
 enum BindingInspection {
-    case usable(droppedKeyIssue: ConfigurationIssue?)
+    case usable(droppedBindingIssue: ConfigurationIssue?)
     case rejected(ConfigurationIssue)
 
     var issue: ConfigurationIssue? {
@@ -436,12 +436,12 @@ struct DefaultBinding: Sendable {
     }
 
     static func inspect(in document: TOMLDocument, layout: KeyLayout = .positional) -> BindingInspection {
-        guard let bindings = document.value(at: ["bindings"]) else { return .usable(droppedKeyIssue: nil) }
+        guard let bindings = document.value(at: ["bindings"]) else { return .usable(droppedBindingIssue: nil) }
         guard case .table(let entries) = bindings else {
             return .rejected(
                 .invalidValue(key: "bindings", message: String(localized: "bindings must be a table of shortcuts.")))
         }
-        var droppedKeyIssue: ConfigurationIssue?
+        var droppedBindingIssue: ConfigurationIssue?
         for (command, value) in entries.sorted(by: { $0.key < $1.key }) {
             let path = "bindings.\(command)"
             let values: [TOMLValue]
@@ -460,21 +460,22 @@ struct DefaultBinding: Sendable {
                 }
                 texts.append(text)
             }
-            guard texts.isEmpty || EngineCommand.canonical(command) != nil else {
-                return .rejected(
-                    .invalidValue(
-                        key: path, message: String(localized: "\(path) names a command the engine does not know.")))
+            if !texts.isEmpty && EngineCommand.canonical(command) == nil {
+                droppedBindingIssue =
+                    droppedBindingIssue
+                    ?? .invalidValue(
+                        key: path, message: String(localized: "\(path) names a command the engine does not know."))
             }
             for text in texts {
                 guard let problem = EngineKey.problem(in: text, layout: layout) else { continue }
                 let issue = ConfigurationIssue.invalidValue(key: path, message: "\(path): \(problem.message)")
                 switch problem {
-                case .unknownKey: droppedKeyIssue = droppedKeyIssue ?? issue
+                case .unknownKey: droppedBindingIssue = droppedBindingIssue ?? issue
                 case .extraDash, .invalidModifier: return .rejected(issue)
                 }
             }
         }
-        return .usable(droppedKeyIssue: droppedKeyIssue)
+        return .usable(droppedBindingIssue: droppedBindingIssue)
     }
 
     /// A printed character such as `]` names whichever key types it in `layout`, so it keeps its spelling there.

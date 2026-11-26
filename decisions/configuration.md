@@ -195,8 +195,8 @@ Actions not covered there have no default shortcut, because Paneru's default con
 
 Miri writes the default set to `[bindings]`, with the engine's command names as keys and its chord syntax as values.
 The engine reads each key as command words split on `_`, so `window_focus_3` means `window focus 3`.
-An unknown command name makes the engine reject the whole file, so Miri writes only names the pinned engine parses.
-A binding whose key name the engine does not know does nothing, and a bad modifier or an extra dash makes the engine reject the whole file.
+An unknown command name or unknown key name is skipped by the engine, while a bad modifier or an extra dash makes the engine reject the whole file.
+Miri writes only command names the pinned engine parses.
 Miri reports each of these as a configuration error in Settings and the menu bar, and changes nothing in the file until the user fixes it.
 A short excerpt of the written table follows.
 

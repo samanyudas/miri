@@ -82,7 +82,7 @@ public struct Shortcuts: Sendable {
         let entries: [String: TOMLValue] =
             if case .table(let entries) = document.value(at: ["bindings"]) { entries } else { [:] }
         for key in entries.keys.sorted() {
-            let command = EngineCommand.canonical(key) ?? key
+            guard let command = EngineCommand.canonical(key) else { continue }
             if DefaultBinding.row(for: command) != nil {
                 keysByCommand[command, default: []].append(key)
             } else if let chords = Self.chords(in: entries[key], layout: layout), !chords.isEmpty {

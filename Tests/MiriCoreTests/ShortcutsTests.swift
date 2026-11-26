@@ -270,6 +270,12 @@ import Testing
         )
         #expect(file.stopChordsToRegister(layout: us) == [Chord([.control, .command], "s")])
     }
+
+    @Test func unknownCommandsAreIgnoredByOthersAndStopOwnership() throws {
+        let file = try shortcuts("[bindings]\nwindow_missing = \"ctrl+alt-q\"\n")
+        #expect(file.others.isEmpty)
+        #expect(file.stopChordsToRegister(layout: us) == [DefaultBinding.stopChord])
+    }
 }
 
 @MainActor struct ShortcutStoreTests {
