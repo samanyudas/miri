@@ -610,8 +610,7 @@ struct DefaultBindingsTests {
 
     @Test(
         arguments: [
-            "window_missing = \"ctrl+alt-h\"",
-            "window_missing = \"ctrl+alt-lefarrow\"",
+            "window_missing = \"hyper-h\"",
             "window_focus_west = 1",
             "window_focus_west = true",
             "window_focus_west = { key = \"ctrl+alt-h\" }",
@@ -635,6 +634,35 @@ struct DefaultBindingsTests {
         }
         #expect(key == "bindings.\(row.components(separatedBy: " = ")[0])")
         #expect((store.stopChordsToRegister == [DefaultBinding.stopChord]) == wasFree)
+        #expect(store.settings == previousSettings)
+        #expect(try String(contentsOf: url, encoding: .utf8) == replacement)
+        #expect(throws: ConfigurationIssue.self) { try store.update(reduceMotion: false) { $0.innerGap = 12 } }
+        #expect(try String(contentsOf: url, encoding: .utf8) == replacement)
+    }
+
+    @Test(
+        arguments: [
+            "window_missing = \"ctrl+alt-h\"",
+            "window_missing = \"ctrl+alt-q\"",
+            "window_missing = \"ctrl+alt-lefarrow\"",
+        ], [true, false])
+    func skipsUnknownCommandsWhileReportingIssueAndUpdatingStopOwnership(row: String, wasFree: Bool) throws {
+        let initialChord = wasFree ? "ctrl+alt-c" : "ctrl+alt-q"
+        let (store, _) = try load("[bindings]\nwindow_center = \"\(initialChord)\"\n")
+        try #require(store.issue == nil)
+        let previousSettings = store.settings
+        let replacementChord = wasFree ? "ctrl+alt-q" : "ctrl+alt-c"
+        let replacement = "[bindings]\nwindow_center = \"\(replacementChord)\"\n\(row)\n"
+        try replacement.write(to: url, atomically: true, encoding: .utf8)
+
+        store.load(reduceMotion: false)
+
+        guard case .invalidValue(let key, _) = store.issue else {
+            Issue.record("expected a dropped-command issue, got \(String(describing: store.issue))")
+            return
+        }
+        #expect(key == "bindings.window_missing")
+        #expect((store.stopChordsToRegister == [DefaultBinding.stopChord]) == !wasFree)
         #expect(store.settings == previousSettings)
         #expect(try String(contentsOf: url, encoding: .utf8) == replacement)
         #expect(throws: ConfigurationIssue.self) { try store.update(reduceMotion: false) { $0.innerGap = 12 } }

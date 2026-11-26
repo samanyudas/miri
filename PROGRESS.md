@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-26 on branch `docs/517-closeout`, based on `main` at `8b7b033f`
+Updated: 2026-11-27 on branch `fix/skip-unknown-binding-commands`, based on `main` at `07713c6e`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,16 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Unknown [bindings] commands skipped on startup on 27 November 2026
+
+Fixed [#555](https://github.com/samanyudas/miri/issues/555) in [engine PR #211](https://github.com/samanyudas/paneru/pull/211), merged into `miri/v0.5.2` as `8fbe890` (head `f236f5c`), which this branch pins.
+Previously, an unknown command name under `[bindings]` caused `InnerConfig::parse_config_with_virtual_keys` to return `Err(Error::InvalidConfig)`, crashing the engine three times on startup and leaving Miri in `Stopped after engine failures`.
+The engine now skips unknown `[bindings]` commands with a warning while loading all valid bindings in the same table, and `MiriCore` treats unknown commands with valid chord syntax as `.usable(droppedBindingIssue:)` so Settings and the menu bar still report the error without overwriting `config.toml`, while `Shortcuts` excludes dropped commands from `others` and `stopChordsToRegister`.
+Invalid chord syntax (bad modifiers or extra dashes) still rejects the file in both the engine and `MiriCore`.
+Reviewed with `sol-loop` (1 round with `gpt-6.2-sol`, verdict `APPROVE`; S1 extra-dash test case added).
+Verified live with `verify-miri` using `window_nonexistent_command = "ctrl+alt+shift-p"` under `[bindings]`: on `main` (`07713c6e`, engine `3b5a177c`, run `20261127-040624`) the engine exited three times and Settings showed `Stopped after engine failures`, while on the fix build (engine `21446a4`, code identical to `8fbe890` except the extra-dash test assertion, run `20261127-041326`) the engine started once, reached `Managing windows`, kept the configuration notice visible without modifying `config.toml`, and `ctrl+alt-leftarrow` moved focus from `fixture-2` to `fixture-1`.
+`make verify-engine-lifecycle` confirms all 7 lifecycle rules hold; this change touches no lifecycle-covered file.
 
 ## Mounted DMG installer windows float automatically on 26 November 2026
 
