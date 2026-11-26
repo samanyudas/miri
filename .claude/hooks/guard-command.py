@@ -18,8 +18,23 @@ SEPARATORS = {";", "&&", "||", "|", "&", "(", ")", "|&", ";;"}
 GIT_OPTIONS_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace"}
 ISSUE_TEMPLATES = Path(__file__).resolve().parents[2] / ".github/ISSUE_TEMPLATE"
 ISSUE_CREATE = re.compile(r"\bgh\s+issue\s+(create|new)\b")
+PR_CREATE = re.compile(r"\bgh\s+pr\s+create\b")
 LABEL_OPTION = re.compile(r"(?<!\S)(?:-l|--label)[ =]+(?:'([^']*)'|\"([^\"]*)\"|(\S+))")
+BASE_OPTION = re.compile(r"(?<!\S)(?:-B|--base)[ =]+(?:'([^']*)'|\"([^\"]*)\"|(\S+))")
 ISSUE_HELP = "See File an issue in CONTRIBUTING.md"
+PR_MEDIA_PREFIXES = ("Sources/", "vendor/paneru", "assets/")
+PR_MEDIA_LINK = re.compile(
+    r"(https://github\.com/user-attachments/assets/\S+|!\[[^\]]*\]\([^)]+\)|<(?:img|video)\b)",
+    re.I,
+)
+NO_VISIBLE_CHANGE = re.compile(r"\bno visible change\b", re.I)
+PR_MEDIA_HELP = (
+    "a PR touching Sources/, vendor/paneru, or assets/ needs before/after media "
+    "(screenshot, GIF, or video) under '## Before and after', captured with "
+    "verify-miri capture/record and uploaded with verify-miri upload "
+    "(or 'No visible change' if nobody can see or feel the change). "
+    "See docs/AI-CONTRIBUTIONS.md#capture-evidence"
+)
 
 
 def segments(command: str):
@@ -158,6 +173,81 @@ def check_issue_create(args: list[str], cwd: str, command: str) -> str | None:
     return check_issue(labels, body or "")
 
 
+def pr_changed_files(cwd: str, base: str | None) -> list[str]:
+    candidates = []
+    if base:
+        candidates += [f"origin/{base}", base]
+    candidates += ["origin/main", "main"]
+    for ref in candidates:
+        probe = subprocess.run(["git", "-C", cwd, "rev-parse", "--verify", "--quiet", ref],
+                               capture_output=True, text=True)
+        if probe.returncode != 0:
+            continue
+        diff = subprocess.run(["git", "-C", cwd, "diff", "--name-only", f"{ref}...HEAD"],
+                              capture_output=True, text=True)
+        if diff.returncode == 0:
+            return [line.strip() for line in diff.stdout.splitlines() if line.strip()]
+    return []
+
+
+def pr_needs_visual_evidence(cwd: str, base: str | None = None) -> bool:
+    return any(
+        path == "vendor/paneru" or path.startswith(PR_MEDIA_PREFIXES)
+        for path in pr_changed_files(cwd, base)
+    )
+
+
+def extract_section(body: str, heading: str) -> str | None:
+    normalized = body.replace("\\n", "\n")
+    match = re.search(rf"^[ \t]*(#{{1,6}})[ \t]*{re.escape(heading)}[ \t]*$", normalized, re.I | re.M)
+    if not match:
+        return None
+    level = len(match.group(1))
+    rest = normalized[match.end():]
+    next_heading = re.search(rf"^[ \t]*#{{1,{level}}}[ \t]+\S", rest, re.M)
+    return rest[:next_heading.start()] if next_heading else rest
+
+
+def check_pr_body(body: str) -> str | None:
+    section = extract_section(body, "Before and after")
+    if section is None:
+        return PR_MEDIA_HELP
+    # Ignore HTML comments copied from .github/PULL_REQUEST_TEMPLATE.md.
+    cleaned = re.sub(r"<!--.*?-->", "", section, flags=re.S)
+    if PR_MEDIA_LINK.search(cleaned) or NO_VISIBLE_CHANGE.search(cleaned):
+        return None
+    return PR_MEDIA_HELP
+
+
+def check_pr_create(args: list[str], cwd: str, command: str) -> str | None:
+    body, body_file, base = None, None, None
+    i = 0
+    while i < len(args):
+        name, has_value, value = args[i].partition("=")
+        if name in {"-b", "--body", "-F", "--body-file", "-B", "--base"} and not has_value:
+            if i + 1 >= len(args):
+                break
+            i += 1
+            value = args[i]
+        if name in {"-w", "--web"}:
+            return None
+        if name in {"-b", "--body"}:
+            body = value
+        elif name in {"-F", "--body-file"}:
+            body_file = value
+        elif name in {"-B", "--base"}:
+            base = value
+        i += 1
+    if not pr_needs_visual_evidence(cwd, base):
+        return None
+    if body is None and body_file:
+        try:
+            body = Path(cwd, body_file).read_text(encoding="utf-8") if body_file != "-" else command
+        except OSError:
+            body = command
+    return check_pr_body(body or "")
+
+
 def check(argv: list[str], cwd: str, command: str) -> str | None:
     argv = strip_wrappers(argv)
     if not argv:
@@ -170,6 +260,8 @@ def check(argv: list[str], cwd: str, command: str) -> str | None:
     if program == "gh" and len(args) >= 2:
         if args[0] == "issue" and args[1] in {"create", "new"}:
             return check_issue_create(args[2:], cwd, command)
+        if args[:2] == ["pr", "create"]:
+            return check_pr_create(args[2:], cwd, command)
         if args[:2] == ["pr", "merge"] and any(
             a == "--admin" or (a.startswith("--admin=") and a.split("=", 1)[1].lower() != "false")
             for a in args[2:]
@@ -190,11 +282,16 @@ def check_command(command: str, cwd: str) -> str | None:
     try:
         parsed = list(segments(command))
     except ValueError:
-        # An unquoted heredoc body with an apostrophe cannot be split, so check the issue text as written.
+        # An unquoted heredoc body with an apostrophe cannot be split, so check the text as written.
         if ISSUE_CREATE.search(command):
             labels = [label.strip() for match in LABEL_OPTION.finditer(command)
                       for label in "".join(match.groups(default="")).split(",")]
             return check_issue(labels, command)
+        if PR_CREATE.search(command):
+            base_match = BASE_OPTION.search(command)
+            base = "".join(base_match.groups(default="")) if base_match else None
+            if pr_needs_visual_evidence(cwd, base):
+                return check_pr_body(command)
         return None
     for argv in parsed:
         reason = check(argv, cwd, command)

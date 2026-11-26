@@ -1,0 +1,15 @@
+{
+  "miri-command-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command|mcp_t3-code_pull_request_create",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ./hooks/guard-command.py"
+          }
+        ]
+      }
+    ]
+  }
+}
