@@ -907,12 +907,39 @@ def capture_targets(run: dict, args) -> tuple[str, list[str]]:
     state = query("state", run["test_pid"])
     rows = [w for w in fixture_windows(run, state) if w.get("visible")]
     windows = [str(w["window_id"]) for w in rows]
+    display_ids = [w["display_id"] for w in rows if w.get("display_id") is not None]
+    disposable_ids = getattr(args, "disposable_window", None) or []
+    if disposable_ids:
+        recorded = Path(run["dir"]) / "backup" / "layout.json"
+        if not recorded.exists():
+            raise Failure("Cannot verify --disposable-window without backup/layout.json from `begin`.")
+        preexisting = {w["window_id"] for w in json.loads(recorded.read_text())}
+        visible_by_id = {
+            w["window_id"]: w
+            for ws in state.get("virtual_workspaces", [])
+            for w in ws.get("windows", [])
+            if w.get("visible")
+        }
+        for wid in disposable_ids:
+            if wid in preexisting:
+                raise Failure(
+                    f"Window {wid} existed before `begin`; --disposable-window only accepts windows opened during this run."
+                )
+            row = visible_by_id.get(wid)
+            if not row:
+                raise Failure(f"Window {wid} is not a visible managed window in `query state`.")
+            if str(wid) not in windows:
+                windows.append(str(wid))
+            if row.get("display_id") is not None:
+                display_ids.append(row["display_id"])
     if args.settings:
         listing = tool("axdo", str(run["test_pid"]), "windows")
         windows += [line.split()[0] for line in listing.splitlines() if " layer=0 " in line]
     if not windows:
-        raise Failure("No visible fixture window to capture. Open one with `fixture`, or pass --settings.")
-    display = args.display or (rows[0]["display_id"] if rows else 1)
+        raise Failure(
+            "No visible fixture window to capture. Open one with `fixture`, or pass --settings or --disposable-window."
+        )
+    display = args.display or (display_ids[0] if display_ids else 1)
     return str(display), windows
 
 
@@ -1323,6 +1350,8 @@ def main() -> int:
             p.add_argument("label")
         p.add_argument("--display", type=int, help="CoreGraphics display ID; the first fixture's display by default")
         p.add_argument("--settings", action="store_true", help="also show the test build's Settings window")
+        p.add_argument("--disposable-window", action="append", type=int, default=[], metavar="WINDOW_ID",
+                       help="also show a disposable window opened during this run (refuses windows that existed at begin)")
         p.set_defaults(func=cmd_capture if name == "capture" else cmd_record)
     p = sub.add_parser("upload", help="upload capture and record files to GitHub's attachment store through Ardia, "
                                       "and print the Markdown for the PR body. Needs no run")

@@ -298,6 +298,54 @@ class VerifyMiriTest(unittest.TestCase):
         self.assertEqual(calls, [])
         self.assertTrue(current)
 
+    def _run_capture_targets(self, state, preexisting, disposable_ids, fixtures=None):
+        vm = self.vm
+        saved_query = vm.query
+        with tempfile.TemporaryDirectory() as home:
+            if preexisting is not None:
+                backup = Path(home, "backup")
+                backup.mkdir()
+                (backup / "layout.json").write_text(json.dumps(preexisting))
+            run = {"dir": home, "test_pid": 99, "fixtures": fixtures or []}
+            args = type("Args", (), {"display": None, "settings": False, "disposable_window": disposable_ids})()
+            vm.query = lambda kind, pid=None: state
+            try:
+                return vm.capture_targets(run, args)
+            finally:
+                vm.query = saved_query
+
+    def test_capture_targets_accepts_disposable_window_opened_after_begin(self):
+        state = {"virtual_workspaces": [{"windows": [
+            {"window_id": 100, "visible": True, "display_id": 1},
+            {"window_id": 200, "visible": True, "display_id": 3},
+        ]}]}
+        display, windows = self._run_capture_targets(state, [{"window_id": 100}], [200])
+        self.assertEqual(display, "3")
+        self.assertEqual(windows, ["200"])
+
+    def test_capture_targets_rejects_preexisting_window_as_disposable(self):
+        state = {"virtual_workspaces": [{"windows": [
+            {"window_id": 100, "visible": True, "display_id": 1},
+        ]}]}
+        with self.assertRaisesRegex(self.vm.Failure, "existed before"):
+            self._run_capture_targets(state, [{"window_id": 100}], [100])
+
+    def test_capture_targets_rejects_disposable_window_without_layout_backup(self):
+        state = {"virtual_workspaces": [{"windows": [
+            {"window_id": 200, "visible": True, "display_id": 3},
+        ]}]}
+        with self.assertRaisesRegex(self.vm.Failure, "backup/layout.json"):
+            self._run_capture_targets(state, None, [200])
+
+    def test_capture_targets_rejects_missing_or_hidden_disposable_window(self):
+        state = {"virtual_workspaces": [{"windows": [
+            {"window_id": 200, "visible": False, "display_id": 3},
+        ]}]}
+        with self.assertRaisesRegex(self.vm.Failure, "not a visible managed window"):
+            self._run_capture_targets(state, [], [200])
+        with self.assertRaisesRegex(self.vm.Failure, "not a visible managed window"):
+            self._run_capture_targets(state, [], [999])
+
 
 if __name__ == "__main__":
     unittest.main()
