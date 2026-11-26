@@ -248,6 +248,7 @@ The spring, the flick, and the stretch reached `main` with [#527](https://github
 V1 includes keyboard navigation, column resizing, window stacking, floating windows, and trackpad scrolling.
 V1 uses clicking and macOS window switching to access floating windows instead of a dedicated floating-to-tiled focus shortcut.
 Fixed-size windows and Miri's settings float automatically.
+Mounted disk image (DMG) installer windows in Finder that open without a toolbar also float automatically so branded installers keep their intended dimensions ([#550](https://github.com/samanyudas/miri/issues/550)).
 Picture-in-Picture windows float automatically, stay above ordinary windows, and take keyboard focus once when they open, if their app is in front when Miri finds the window above ordinary windows.
 A window that a background app opens above ordinary windows floats but leaves keyboard focus with the app in front, as Sam decided on 22 November 2026 ([#515](https://github.com/samanyudas/miri/issues/515)).
 Miri treats any window that its app keeps above the normal window level as such a window, so it also floats an app's own always-on-top window.
