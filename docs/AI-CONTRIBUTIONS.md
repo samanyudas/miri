@@ -95,6 +95,7 @@ Never capture Sam's apps, the full screen, or a screen region.
 2. In each run, open fixtures with `V fixture`, and capture the same state:
    - `V capture <label>` saves a PNG of the display with only the run's fixture windows drawn.
      Add `--settings` to include the test build's Settings window.
+     Add `--disposable-window <window_id>` to include a disposable window opened during the run (such as a synthetic mounted DMG in Finder); `verify-miri` refuses any window that existed before `begin`.
    - `V record start <label>`, then the action, then `V record stop` saves an MP4 of the same view.
    ScreenCaptureKit draws only those windows over plain grey, with no wallpaper, menu bar, cursor, or other app.
    Each file goes to `<run>/media/`, and `manifest.json` there records its hash.
