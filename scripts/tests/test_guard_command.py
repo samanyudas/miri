@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -42,6 +43,8 @@ class GuardCommandTest(unittest.TestCase):
             "cd /tmp && git -C repo reset --hard HEAD~1": "reset --hard",
             "git clean -xfd": "git clean",
             "git branch -D old": "branch -D",
+            "gh pr merge 12 --admin": "branch protection",
+            "gh pr merge 12 --squash --admin=true": "branch protection",
             "gh release create v1.0.0": "release",
             "gh repo edit --visibility public": "repository settings",
             "sudo tccutil reset Accessibility": "privacy permissions",
@@ -131,6 +134,91 @@ class GuardCommandTest(unittest.TestCase):
                 without = body.replace(f"### {section}\n", "")
                 with self.subTest(type_label=type_label, section=section):
                     self.assertIn(f"Missing: {section}.", self.decide(f"gh issue create -t T -l {type_label} -b '{without}'"))
+
+    def make_branch_repo(self, changed_path: str) -> tempfile.TemporaryDirectory:
+        directory = tempfile.TemporaryDirectory()
+        root = Path(directory.name)
+        subprocess.run(["git", "init", "-q", "-b", "main", str(root)], check=True)
+        subprocess.run(["git", "-C", str(root), "config", "user.email", "test@example.com"], check=True)
+        subprocess.run(["git", "-C", str(root), "config", "user.name", "Test"], check=True)
+        (root / "README.md").write_text("base\n")
+        subprocess.run(["git", "-C", str(root), "add", "README.md"], check=True)
+        subprocess.run(["git", "-C", str(root), "commit", "-q", "-m", "base"], check=True)
+        subprocess.run(["git", "-C", str(root), "checkout", "-q", "-b", "feat/test"], check=True)
+        target = root / changed_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("changed\n")
+        subprocess.run(["git", "-C", str(root), "add", changed_path], check=True)
+        subprocess.run(["git", "-C", str(root), "commit", "-q", "-m", "change"], check=True)
+        return directory
+
+    def test_pr_create_requires_before_and_after_media_for_product_changes(self):
+        with self.make_branch_repo("Sources/Miri/App.swift") as repo:
+            for body in [
+                "## Summary\nFixed the bug.",
+                "## Before and after\n\n| Before | After |\n| --- | --- |\n| Broken | Fixed |",
+            ]:
+                with self.subTest(blocked_body=body):
+                    reason = self.decide(f"gh pr create -t 'fix: x' -b '{body}'", repo)
+                    self.assertIn("Before and after", reason)
+
+            for body in [
+                "## Before and after\n\nhttps://github.com/user-attachments/assets/12345678-abcd-ef01-2345-6789abcdef01",
+                "## Before and after\n\n![after](https://example.com/after.png)",
+                "## Before and after\n\nNo visible change: internal refactor.",
+                "### Before and After\\n\\nNo visible change",
+            ]:
+                with self.subTest(allowed_body=body):
+                    self.assertEqual(self.decide(f"gh pr create -t 'fix: x' -b '{body}'", repo), "allow")
+
+            self.assertEqual(self.decide("gh pr create --web", repo), "allow")
+
+        with self.make_branch_repo("docs/notes.md") as docs_repo:
+            self.assertEqual(self.decide("gh pr create -t 'docs: note' -b 'Updated docs.'", docs_repo), "allow")
+
+    def test_claude_code_t3_pr_create_tool_requires_media(self):
+        def decide_tool(tool_input: dict, cwd: str) -> str:
+            event = {"tool_name": "mcp__t3-code__pull_request_create", "tool_input": tool_input, "cwd": cwd}
+            result = subprocess.run([sys.executable, str(HOOK)], input=json.dumps(event),
+                                    capture_output=True, text=True)
+            self.assertIn(result.returncode, (0, 2), result.stderr)
+            return "allow" if result.returncode == 0 else result.stderr.strip()
+
+        settings = json.loads((HOOK.parents[1] / "settings.json").read_text())
+        matchers = [entry["matcher"] for entry in settings["hooks"]["PreToolUse"]]
+        self.assertTrue(any(re.fullmatch(m, "mcp__t3-code__pull_request_create") for m in matchers))
+
+        with self.make_branch_repo("Sources/Miri/App.swift") as repo:
+            self.assertIn("Before and after", decide_tool({"title": "fix: x", "body": "No media."}, repo))
+            self.assertEqual(decide_tool({"title": "fix: x", "body": "## Before and after\n\nNo visible change"}, repo),
+                             "allow")
+        with self.make_branch_repo("docs/notes.md") as docs_repo:
+            self.assertEqual(decide_tool({"title": "docs: x", "body": "Docs."}, docs_repo), "allow")
+
+    def test_antigravity_adapter_delegates_shell_and_mcp_pr_create(self):
+        adapter = Path(__file__).resolve().parents[2] / ".agents/hooks/guard-command.py"
+
+        def run_adapter(tool_name: str, args: dict, cwd: str) -> dict:
+            event = {"toolCall": {"name": tool_name, "args": args}, "cwd": cwd}
+            result = subprocess.run([sys.executable, str(adapter)], input=json.dumps(event),
+                                    capture_output=True, text=True, check=True)
+            return json.loads(result.stdout)
+
+        with self.make_branch_repo("Sources/Miri/App.swift") as repo:
+            denied_merge = run_adapter("run_command", {"CommandLine": "gh pr merge 12 --admin"}, repo)
+            self.assertEqual(denied_merge["decision"], "deny")
+            self.assertIn("branch protection", denied_merge["reason"])
+
+            denied_pr = run_adapter("mcp_t3-code_pull_request_create", {"title": "fix: x", "body": "No media."}, repo)
+            self.assertEqual(denied_pr["decision"], "deny")
+            self.assertIn("Before and after", denied_pr["reason"])
+
+            allowed_pr = run_adapter(
+                "mcp_t3-code_pull_request_create",
+                {"title": "fix: x", "body": "## Before and after\n\nhttps://github.com/user-attachments/assets/abc"},
+                repo,
+            )
+            self.assertEqual(allowed_pr["decision"], "allow")
 
 
 def template_sections() -> dict[str, list[str]]:
