@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-25 on branch `fix/517-stack-width-relaunch`, based on `main` at `8d5dba9c`
+Updated: 2026-11-26 on branch `feat/550-float-mounted-dmg-windows`, based on `main` at `e4c4ed51`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,13 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Mounted DMG installer windows float automatically on 26 November 2026
+
+Implemented [#550](https://github.com/samanyudas/miri/issues/550) in [engine PR #210](https://github.com/samanyudas/paneru/pull/210), merged into `miri/v0.5.2` as `3b5a177c` (head `ee3e9753`), which this branch pins.
+Finder (`com.apple.finder`) windows that open without an `AXToolbar` child and whose title matches a currently mounted disk image under `/Volumes/<title>` (verified via `statfs` and DiskArbitration `DADeviceModel == "Disk Image"` and `DADeviceProtocol == "Virtual Interface"`) now float automatically unless an explicit window rule overrides them, and remain tileable via `Control-Option-T`.
+Reviewed with `sol-loop` (3 rounds with `gpt-6.2-sol`, verdict `APPROVE`; S1 heuristic limitation documented, S2 rule-precedence shortcut applied).
+Verified live with `verify-miri` using the same `540 x 380` branded DMG (`MiriDMGBranded`) and a regular local folder (`MiriRegularFolder`): on `main` (`main-b7b89fa1`, engine `465817d1`, run `20261126-125407`) `MiriDMGBranded` tiled (`floating: false`) and resized to `1268 x 1394`, while on the fix build (engine `ee3e9753`, tree identical to `3b5a177c`, run `20261126-125341`) `MiriDMGBranded` floated (`floating: true`) at `540 x 380` and `MiriRegularFolder` stayed tiled (`floating: false`).
 
 ## Stacked column width on relaunch on 25 November 2026
 
