@@ -2,6 +2,8 @@
 """Claude Code PreToolUse hook that blocks irreversible or outward-facing shell commands.
 
 It also blocks `gh issue create` unless the issue has one type label and every section its template requires.
+It blocks a PR on a product change, from `gh pr create` or the T3 Code `pull_request_create` tool,
+unless its body has before and after media or says "No visible change".
 AGENTS.md explains the policy. Exit code 2 blocks the call and shows stderr to the agent.
 """
 import json
@@ -19,6 +21,8 @@ GIT_OPTIONS_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace"}
 ISSUE_TEMPLATES = Path(__file__).resolve().parents[2] / ".github/ISSUE_TEMPLATE"
 ISSUE_CREATE = re.compile(r"\bgh\s+issue\s+(create|new)\b")
 PR_CREATE = re.compile(r"\bgh\s+pr\s+create\b")
+# Claude Code names an MCP tool mcp__<server>__<tool>. .claude/settings.json matches the same name.
+PR_CREATE_TOOL = "mcp__t3-code__pull_request_create"
 LABEL_OPTION = re.compile(r"(?<!\S)(?:-l|--label)[ =]+(?:'([^']*)'|\"([^\"]*)\"|(\S+))")
 BASE_OPTION = re.compile(r"(?<!\S)(?:-B|--base)[ =]+(?:'([^']*)'|\"([^\"]*)\"|(\S+))")
 ISSUE_HELP = "See File an issue in CONTRIBUTING.md"
@@ -248,6 +252,13 @@ def check_pr_create(args: list[str], cwd: str, command: str) -> str | None:
     return check_pr_body(body or "")
 
 
+def check_pr_create_tool(tool_input: dict, cwd: str) -> str | None:
+    """Check a PR that a tool such as T3 Code `pull_request_create` opens without the gh CLI."""
+    if not pr_needs_visual_evidence(cwd, tool_input.get("base")):
+        return None
+    return check_pr_body(tool_input.get("body") or "")
+
+
 def check(argv: list[str], cwd: str, command: str) -> str | None:
     argv = strip_wrappers(argv)
     if not argv:
@@ -302,8 +313,12 @@ def check_command(command: str, cwd: str) -> str | None:
 
 def main() -> int:
     event = json.load(sys.stdin)
-    command = event.get("tool_input", {}).get("command", "")
-    reason = check_command(command, event.get("cwd") or os.getcwd())
+    tool_input = event.get("tool_input") or {}
+    cwd = event.get("cwd") or os.getcwd()
+    if event.get("tool_name") == PR_CREATE_TOOL:
+        reason = check_pr_create_tool(tool_input, cwd)
+    else:
+        reason = check_command(tool_input.get("command", ""), cwd)
     if reason:
         print(f"Blocked by .claude/hooks/guard-command.py: {reason}.", file=sys.stderr)
         return 2

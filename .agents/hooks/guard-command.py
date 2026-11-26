@@ -33,9 +33,7 @@ def main() -> int:
         command = args.get("CommandLine") or args.get("command") or ""
         reason = guard.check_command(command, cwd)
     elif name == "mcp_t3-code_pull_request_create":
-        base = args.get("base")
-        if guard.pr_needs_visual_evidence(cwd, base):
-            reason = guard.check_pr_body(args.get("body") or "")
+        reason = guard.check_pr_create_tool(args, cwd)
 
     if reason:
         json.dump(

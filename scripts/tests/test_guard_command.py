@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -174,6 +175,25 @@ class GuardCommandTest(unittest.TestCase):
 
         with self.make_branch_repo("docs/notes.md") as docs_repo:
             self.assertEqual(self.decide("gh pr create -t 'docs: note' -b 'Updated docs.'", docs_repo), "allow")
+
+    def test_claude_code_t3_pr_create_tool_requires_media(self):
+        def decide_tool(tool_input: dict, cwd: str) -> str:
+            event = {"tool_name": "mcp__t3-code__pull_request_create", "tool_input": tool_input, "cwd": cwd}
+            result = subprocess.run([sys.executable, str(HOOK)], input=json.dumps(event),
+                                    capture_output=True, text=True)
+            self.assertIn(result.returncode, (0, 2), result.stderr)
+            return "allow" if result.returncode == 0 else result.stderr.strip()
+
+        settings = json.loads((HOOK.parents[1] / "settings.json").read_text())
+        matchers = [entry["matcher"] for entry in settings["hooks"]["PreToolUse"]]
+        self.assertTrue(any(re.fullmatch(m, "mcp__t3-code__pull_request_create") for m in matchers))
+
+        with self.make_branch_repo("Sources/Miri/App.swift") as repo:
+            self.assertIn("Before and after", decide_tool({"title": "fix: x", "body": "No media."}, repo))
+            self.assertEqual(decide_tool({"title": "fix: x", "body": "## Before and after\n\nNo visible change"}, repo),
+                             "allow")
+        with self.make_branch_repo("docs/notes.md") as docs_repo:
+            self.assertEqual(decide_tool({"title": "docs: x", "body": "Docs."}, docs_repo), "allow")
 
     def test_antigravity_adapter_delegates_shell_and_mcp_pr_create(self):
         adapter = Path(__file__).resolve().parents[2] / ".agents/hooks/guard-command.py"
