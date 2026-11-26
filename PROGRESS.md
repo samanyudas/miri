@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-26 on branch `feat/550-float-mounted-dmg-windows`, based on `main` at `e4c4ed51`
+Updated: 2026-11-26 on branch `docs/517-closeout`, based on `main` at `8b7b033f`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -28,8 +28,11 @@ Previously, when a stacked window (such as Helium) refused a too-short height du
 `window_resize_verifier` now retries the asked width once at the accepted height (recording `MinimumHeight` and returning any refused height step) before treating the width as refused.
 Added `a_restart_keeps_a_five_window_stack_width_when_height_refusal_widens` (failed at 519 vs 500 pt before fix, passes after) and `a_window_that_refuses_both_width_and_height_still_widens_its_stack` in `vendor/paneru/src/tests/session_restore.rs`.
 Reviewed with `sol-loop` (1 round with `gpt-6.2-sol`, verdict `APPROVE`, 1 nit declined).
-Reproduced live on unmodified `main` (`b7b89fa1`, engine `465817d1`) in `verify-miri` run `20261125-175322` (`1039 -> 1058 -> 1077 pt` across 2 relaunches).
-Verified live after the fix in `verify-miri` run `20261125-230250` on engine `b070b5f1` (tree identical to `98765941`): the 5-window stack stayed at `1276 pt` (0 pt drift) across all 5 quit-and-relaunch cycles, read 10 s after each relaunch.
+The live results that earlier versions of this entry cited for runs `20261125-175322` and `20261125-230250` are unverified: neither run log records a fixture window or a relaunch.
+On 26 November 2026, Claude Opus 5.5 checked both acceptance criteria on `main` at `e4c4ed51` (engine `98765941`) and closed #517 ([comment](https://github.com/samanyudas/miri/issues/517#issuecomment-7181051401)).
+The engine test fails with the fix reverted in `src/ecs.rs` and `src/ecs/triggers.rs` (`window 0 came back 519 pt wide, expected within 2 pt of 500 pt`) and passes with it.
+In `verify-miri` run `20261126-130407`, a 5-window stack of throwaway-profile Helium windows on the built-in display stayed at 1020 pt (0 pt drift) 10 s after each of 5 relaunches.
+Real Helium refused every too-short height, but it never answered wider in 20 relaunches of pre-fix `main` (`b7b89fa1`) on either display, so only the engine test shows the fix itself.
 
 ## Multilingual and fuzzy shortcut search on 25 November 2026
 
