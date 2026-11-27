@@ -12,8 +12,8 @@ fi
 revision=$(git -C vendor/paneru rev-parse HEAD)
 pin=$(git ls-files --stage vendor/paneru | awk '{print $2}')
 [[ "$revision" == "$pin" ]] || { echo "Engine HEAD differs from the recorded submodule pin." >&2; exit 1; }
-git -C vendor/paneru merge-base --is-ancestor b1b6abbd3f1a4be138152b6f0389c9ff1b27a269 HEAD || {
-    echo "The engine must descend from the required v0.5.2 base (b1b6abbd3f1a4be138152b6f0389c9ff1b27a269)." >&2
+git -C vendor/paneru merge-base --is-ancestor 24edaa97c52b785d8d1ce88d1359a088c5a865c2 HEAD || {
+    echo "The engine must descend from the required v0.5.3 base (24edaa97c52b785d8d1ce88d1359a088c5a865c2)." >&2
     exit 1
 }
 if [[ -n "$(git -C vendor/paneru status --porcelain)" ]]; then

@@ -27,7 +27,7 @@ The developer's preferences should be able to override anything here.
 | Path | Role / gotcha |
 | --- | --- |
 | `Sources/AXFixture/` | Harmless window that selftests read and move. |
-| `vendor/paneru/` | Engine submodule pinned on `samanyudas/paneru` branch `miri/v0.5.2`. Start engine PRs from `miri/v0.5.2`, not from `testing` in `vendor/paneru/AGENTS.md`. |
+| `vendor/paneru/` | Engine submodule pinned on `samanyudas/paneru` branch `miri/v0.5.3`. Start engine PRs from `miri/v0.5.3`, not from `testing` in `vendor/paneru/AGENTS.md`. |
 | `verification/` | TLA+ models checked via `.claude/skills/verify-engine-lifecycle/`. |
 | `docs/acceptance-ledger.md` | Recorded result of every v1 acceptance check. |
 | `docs/limitations.md` | Confirmed limitations with evidence; add when confirmed, remove when verified fixed. |
