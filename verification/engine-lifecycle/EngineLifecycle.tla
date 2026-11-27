@@ -4,8 +4,7 @@
 (*                                                                          *)
 (* Each action is one job on the main actor, or one event of the operating  *)
 (* system, so nothing else runs inside an action. The comment above each     *)
-(* operator names the Swift code that it describes. The coverage record and *)
-(* sync commit live in .claude/skills/verify-engine-lifecycle/SKILL.md.      *)
+(* operator names the Swift code that it describes.                          *)
 (***************************************************************************)
 EXTENDS Naturals, Sequences, FiniteSets
 

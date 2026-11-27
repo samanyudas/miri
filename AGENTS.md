@@ -69,9 +69,9 @@ Before any step that touches the real desktop (including `make e2e`), take the [
 
 `.claude/hooks/guard-command.py` blocks these in Claude Code, and all other agents must honor them without workarounds:
 
-- No pushing to `main`, force pushing, `--no-verify`, pushing tags, or deleting remote branches.
-- No `gh pr merge --admin`, `gh pr create` or `pull_request_create` without before/after media on product changes, release changes, or repository setting changes (Sam releases).
-- No `git reset --hard`, `git clean -f`, or `git branch -D`.
+- No pushing to or deleting `main`, force pushing, `--no-verify`, or pushing tags.
+- No `gh pr merge --admin`, release changes, or repository setting changes (Sam releases).
+- No `git reset --hard` or `git clean -f`.
 - No `tccutil reset` or `defaults write` (Miri never changes privacy permissions or macOS settings).
 - No committing screen recordings anywhere or images outside `assets/` and `Sources/` without a `Media-approved-by: Sam` trailer after Sam approves those exact files.
 

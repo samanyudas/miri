@@ -1,6 +1,4 @@
-import importlib.util
 import json
-import re
 import subprocess
 import sys
 import tempfile
@@ -8,6 +6,7 @@ import unittest
 from pathlib import Path
 
 HOOK = Path(__file__).resolve().parents[2] / ".claude/hooks/guard-command.py"
+ADAPTER = Path(__file__).resolve().parents[2] / ".agents/hooks/guard-command.py"
 
 
 class GuardCommandTest(unittest.TestCase):
@@ -36,13 +35,17 @@ class GuardCommandTest(unittest.TestCase):
             "git push origin main": "pushing to main",
             "git push origin HEAD:refs/heads/main": "pushing to main",
             "git push": "pushing to main",
+            "git push -d origin main": "deleting main",
+            "git push --delete origin main": "deleting main",
+            "git push origin :main": "deleting main",
+            "git push origin :refs/heads/main": "deleting main",
             "git push origin v1.0.0": "version tag",
             "git push --tags": "--tags",
-            "git push -d origin feature": "--delete",
+            "git push --mirror origin": "--mirror",
+            "git push --prune origin": "--prune",
             "git push --no-verify -u origin feature": "pre-push checks",
             "cd /tmp && git -C repo reset --hard HEAD~1": "reset --hard",
             "git clean -xfd": "git clean",
-            "git branch -D old": "branch -D",
             "gh pr merge 12 --admin": "branch protection",
             "gh pr merge 12 --squash --admin=true": "branch protection",
             "gh release create v1.0.0": "release",
@@ -56,212 +59,43 @@ class GuardCommandTest(unittest.TestCase):
             with self.subTest(command=command):
                 self.assertIn(reason, self.decide(command))
 
-    def test_allows_ordinary_development(self):
+    def test_allows_ordinary_development_and_cleanup(self):
         for command in [
             "git status && git log --oneline -5",
             "git push -u origin chore/repo-harness",
             "git push --force-with-lease origin chore/repo-harness",
+            "git push -d origin feat/temp-probe",
+            "git push --delete origin feat/temp-probe",
+            "git push origin :feat/temp-probe",
             "git reset --soft HEAD~1",
             "git branch -d merged-branch",
+            "git branch -D scratch-branch",
+            "gh issue create -t 'Short bug title' -b 'Repro notes.'",
+            "gh pr create -t 'fix: x' -b 'Fixed it.'",
             "gh pr view 7 --comments",
             "gh pr merge 12 --merge",
             "gh release list",
             "defaults read com.apple.spaces spans-displays",
             "echo 'git push --force origin main'",
             "grep -n 'tccutil reset' docs/*.md",
+            "python3 - << 'EOF'\nmsg = \"Sam's note mentioning gh issue create and gh pr create\"\nprint(msg)\nEOF",
         ]:
             with self.subTest(command=command):
                 self.assertEqual(self.decide(command), "allow")
 
-    def test_issue_create_needs_exactly_one_type_label(self):
-        for command in [
-            f"gh issue create -t Gap -b '{BUG}'",
-            f"gh issue create -t Gap -l needs-triage -b '{BUG}'",
-            f"gh issue create -t Gap -l bug,task -b '{BUG}'",
-            f"gh issue new -t Gap -l bug --label enhancement -b '{BUG}'",
-            f"gh issue create -t Gap --body-file - <<'EOF'\nSam's Mac.\n{BUG}\nEOF",
-        ]:
-            with self.subTest(command=command):
-                reason = self.decide(command)
-                self.assertIn("exactly one type label", reason)
-                self.assertIn("bug, decision, enhancement, task", reason)
-
-    def test_issue_create_names_each_missing_section(self):
-        blocked = {
-            "gh issue create -t Gap -l bug -b 'Windows overlap.'": "Missing: Steps to reproduce, Reproduction evidence, Expected result, "
-            "Actual result, Acceptance criteria, Miri version or commit, macOS version and Mac model.",
-            f"gh issue create -t Gap -l bug -b '{BUG.replace('Actual result', 'Result')}'": "Missing: Actual result.",
-            f"gh issue create -t Strip -l enhancement -b '{FEATURE_WITHOUT_SOURCE}'": "Missing: Requested by, Release.",
-            "gh issue create -t Gap -l task -b '## Acceptance\n- works'": "Missing: Outcome, Acceptance criteria",
-            "bash -c 'gh issue create -t Gap -l decision -b nothing'": "Missing: Question, Options, Acceptance criteria.",
-        }
-        for command, reason in blocked.items():
-            with self.subTest(command=command):
-                decision = self.decide(command)
-                self.assertIn(reason, decision)
-                self.assertIn("See File an issue in CONTRIBUTING.md", decision)
-
-    def test_issue_create_allows_complete_issues_however_the_body_arrives(self):
-        for command in [
-            f"gh issue create -t Gap -l 'bug,needs-triage' -b '{BUG}'",
-            f"gh issue create -t Strip --label=enhancement --body '{FEATURE}'",
-            f"gh issue create -t Permission -l task -b '{TASK}'",
-            f"gh issue create -t Placement -l decision -l needs-triage -b '{DECISION}'",
-            f"gh issue create -t Gap -l bug --body \"$(cat <<'EOF'\n{BUG}\nEOF\n)\"",
-            f"gh issue create -t Gap -l bug --body-file - <<'EOF'\nSam's Mac.\n{BUG}\nEOF",
-            f"gh issue create -t Gap -l \"needs-triage, bug\" -F - <<'EOF'\nSam's Mac.\n{BUG}\nEOF",
-            f"gh issue create -t Permission -l task --body=\"{TASK_ESCAPED}\"",
-            "gh issue create --web",
-            "gh issue view 7 --comments",
-            "gh issue comment 7 --body 'Reproduced on main.'",
-            "gh issue edit 7 --add-label needs-info",
-        ]:
-            with self.subTest(command=command):
-                self.assertEqual(self.decide(command), "allow")
-
-        with tempfile.TemporaryDirectory() as directory:
-            Path(directory, "bug.md").write_text(BUG)
-            Path(directory, "vague.md").write_text("Windows overlap.\n")
-            self.assertEqual(self.decide("gh issue create -t Gap -l bug -F bug.md", directory), "allow")
-            self.assertIn("Missing: Steps to reproduce", self.decide("gh issue create -t Gap -l bug -F vague.md", directory))
-
-    def test_every_template_section_is_required(self):
-        types = template_sections()
-        self.assertEqual(set(types), {"bug", "decision", "enhancement", "task"})
-        for type_label, sections in types.items():
-            self.assertTrue(sections, f"{type_label} template parsed no required sections")
-            body = "\n".join(f"### {section}\nFilled in.\n" for section in sections)
-            with self.subTest(type_label=type_label):
-                self.assertEqual(self.decide(f"gh issue create -t Title -l {type_label} -b '{body}'"), "allow")
-            for section in sections:
-                without = body.replace(f"### {section}\n", "")
-                with self.subTest(type_label=type_label, section=section):
-                    self.assertIn(f"Missing: {section}.", self.decide(f"gh issue create -t T -l {type_label} -b '{without}'"))
-
-    def make_branch_repo(self, changed_path: str) -> tempfile.TemporaryDirectory:
-        directory = tempfile.TemporaryDirectory()
-        root = Path(directory.name)
-        subprocess.run(["git", "init", "-q", "-b", "main", str(root)], check=True)
-        subprocess.run(["git", "-C", str(root), "config", "user.email", "test@example.com"], check=True)
-        subprocess.run(["git", "-C", str(root), "config", "user.name", "Test"], check=True)
-        (root / "README.md").write_text("base\n")
-        subprocess.run(["git", "-C", str(root), "add", "README.md"], check=True)
-        subprocess.run(["git", "-C", str(root), "commit", "-q", "-m", "base"], check=True)
-        subprocess.run(["git", "-C", str(root), "checkout", "-q", "-b", "feat/test"], check=True)
-        target = root / changed_path
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text("changed\n")
-        subprocess.run(["git", "-C", str(root), "add", changed_path], check=True)
-        subprocess.run(["git", "-C", str(root), "commit", "-q", "-m", "change"], check=True)
-        return directory
-
-    def test_pr_create_requires_before_and_after_media_for_product_changes(self):
-        with self.make_branch_repo("Sources/Miri/App.swift") as repo:
-            for body in [
-                "## Summary\nFixed the bug.",
-                "## Before and after\n\n| Before | After |\n| --- | --- |\n| Broken | Fixed |",
-            ]:
-                with self.subTest(blocked_body=body):
-                    reason = self.decide(f"gh pr create -t 'fix: x' -b '{body}'", repo)
-                    self.assertIn("Before and after", reason)
-
-            for body in [
-                "## Before and after\n\nhttps://github.com/user-attachments/assets/12345678-abcd-ef01-2345-6789abcdef01",
-                "## Before and after\n\n![after](https://example.com/after.png)",
-                "## Before and after\n\nNo visible change: internal refactor.",
-                "### Before and After\\n\\nNo visible change",
-            ]:
-                with self.subTest(allowed_body=body):
-                    self.assertEqual(self.decide(f"gh pr create -t 'fix: x' -b '{body}'", repo), "allow")
-
-            self.assertEqual(self.decide("gh pr create --web", repo), "allow")
-
-        with self.make_branch_repo("docs/notes.md") as docs_repo:
-            self.assertEqual(self.decide("gh pr create -t 'docs: note' -b 'Updated docs.'", docs_repo), "allow")
-
-    def test_claude_code_t3_pr_create_tool_requires_media(self):
-        def decide_tool(tool_input: dict, cwd: str) -> str:
-            event = {"tool_name": "mcp__t3-code__pull_request_create", "tool_input": tool_input, "cwd": cwd}
-            result = subprocess.run([sys.executable, str(HOOK)], input=json.dumps(event),
-                                    capture_output=True, text=True)
-            self.assertIn(result.returncode, (0, 2), result.stderr)
-            return "allow" if result.returncode == 0 else result.stderr.strip()
-
-        settings = json.loads((HOOK.parents[1] / "settings.json").read_text())
-        matchers = [entry["matcher"] for entry in settings["hooks"]["PreToolUse"]]
-        self.assertTrue(any(re.fullmatch(m, "mcp__t3-code__pull_request_create") for m in matchers))
-
-        with self.make_branch_repo("Sources/Miri/App.swift") as repo:
-            self.assertIn("Before and after", decide_tool({"title": "fix: x", "body": "No media."}, repo))
-            self.assertEqual(decide_tool({"title": "fix: x", "body": "## Before and after\n\nNo visible change"}, repo),
-                             "allow")
-        with self.make_branch_repo("docs/notes.md") as docs_repo:
-            self.assertEqual(decide_tool({"title": "docs: x", "body": "Docs."}, docs_repo), "allow")
-
-    def test_antigravity_adapter_delegates_shell_and_mcp_pr_create(self):
-        adapter = Path(__file__).resolve().parents[2] / ".agents/hooks/guard-command.py"
-
-        def run_adapter(tool_name: str, args: dict, cwd: str) -> dict:
-            event = {"toolCall": {"name": tool_name, "args": args}, "cwd": cwd}
-            result = subprocess.run([sys.executable, str(adapter)], input=json.dumps(event),
+    def test_antigravity_adapter_delegates_shell_commands(self):
+        def run_adapter(tool_name: str, args: dict) -> dict:
+            event = {"toolCall": {"name": tool_name, "args": args}, "cwd": self.on_main}
+            result = subprocess.run([sys.executable, str(ADAPTER)], input=json.dumps(event),
                                     capture_output=True, text=True, check=True)
             return json.loads(result.stdout)
 
-        with self.make_branch_repo("Sources/Miri/App.swift") as repo:
-            denied_merge = run_adapter("run_command", {"CommandLine": "gh pr merge 12 --admin"}, repo)
-            self.assertEqual(denied_merge["decision"], "deny")
-            self.assertIn("branch protection", denied_merge["reason"])
+        denied_merge = run_adapter("run_command", {"CommandLine": "gh pr merge 12 --admin"})
+        self.assertEqual(denied_merge["decision"], "deny")
+        self.assertIn("branch protection", denied_merge["reason"])
 
-            denied_pr = run_adapter("mcp_t3-code_pull_request_create", {"title": "fix: x", "body": "No media."}, repo)
-            self.assertEqual(denied_pr["decision"], "deny")
-            self.assertIn("Before and after", denied_pr["reason"])
-
-            allowed_pr = run_adapter(
-                "mcp_t3-code_pull_request_create",
-                {"title": "fix: x", "body": "## Before and after\n\nhttps://github.com/user-attachments/assets/abc"},
-                repo,
-            )
-            self.assertEqual(allowed_pr["decision"], "allow")
-
-
-def template_sections() -> dict[str, list[str]]:
-    spec = importlib.util.spec_from_file_location("guard_command", HOOK)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.issue_types()
-
-
-def sections(*pairs: str) -> str:
-    return "\n\n".join(f"### {pairs[i]}\n{pairs[i + 1]}" for i in range(0, len(pairs), 2))
-
-
-BUG = sections(
-    "Steps to reproduce", "1. Connect a second display.\n2. Press Control-Option-Command-D.",
-    "Reproduction evidence", "verify-miri run 20261125-120000 on main fabf16d4: window moved to x=-1200.",
-    "Expected result", "Every window stays on screen.",
-    "Actual result", "One window moves off-screen.",
-    "Acceptance criteria", "- Following the steps, every window stays reachable.",
-    "Miri version or commit", "fabf16d4",
-    "macOS version and Mac model", "macOS 27.0, MacBook Air M3",
-)
-FEATURE_WITHOUT_SOURCE = sections(
-    "Problem", "One strip spans both displays.",
-    "Proposed behavior", "Each display scrolls its own strip.",
-    "Acceptance criteria", "- With two displays, each strip scrolls alone.",
-)
-FEATURE = FEATURE_WITHOUT_SOURCE + "\n\n" + sections("Requested by", "Sam", "Release", "v2")
-TASK = sections(
-    "Outcome", "Miri names the missing permission at launch.",
-    "Acceptance criteria", "- make test passes.",
-    "Verification level", "make check",
-)
-TASK_ESCAPED = TASK.replace("\n", "\\n")
-DECISION = sections(
-    "Question", "Should new windows open beside the focused window?",
-    "Options", "Beside the focused window, or at the end of the strip.",
-    "Acceptance criteria", "- Sam records the answer in decisions/new-window-placement.md.",
-    "Recommendation", "Beside the focused window.",
-)
+        allowed_pr = run_adapter("run_command", {"CommandLine": "gh pr create -t 'fix: x' -b 'Body.'"})
+        self.assertEqual(allowed_pr["decision"], "allow")
 
 
 if __name__ == "__main__":

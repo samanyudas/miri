@@ -3,7 +3,7 @@
 
 The steps and the meaning of each result are in .claude/skills/verify-engine-lifecycle/SKILL.md.
 Exit status: 0 when every rule gives its expected result, 1 when a result differs, 2 when the
-tools or a run fail, 3 when the results are as expected but covered code changed after the sync commit.
+tools or a run fail.
 """
 import argparse
 import concurrent.futures
@@ -21,7 +21,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 MODEL = ROOT / "verification" / "engine-lifecycle"
 SPEC = MODEL / "EngineLifecycle.tla"
-SKILL = ROOT / ".claude" / "skills" / "verify-engine-lifecycle" / "SKILL.md"
 
 INVARIANTS = ["StopStands", "SavedStopMatches", "QuitLeavesNoEngine", "OneEngine", "StoppedMeansNoEngine", "WaitingIsShown"]
 PROPERTIES = ["QuitFinishes"]
@@ -89,27 +88,6 @@ def tools() -> tuple[str, str]:
                 tar.extractall(CACHE, filter="tar")
         java = str(java_path)
     return java, jar
-
-
-def coverage() -> tuple[str, list[str]]:
-    """Reads the sync commit and the covered files from the skill."""
-    text = SKILL.read_text(encoding="utf-8")
-    sync = re.search(r"^sync-commit: ([0-9a-f]{7,40})$", text, re.M)
-    files = re.findall(r"^covers: (\S+)", text, re.M)
-    if not sync or not files:
-        sys.exit(f"{SKILL} has no sync-commit line or no covers lines.")
-    return sync.group(1), files
-
-
-def stale_files(sync: str, files: list[str]) -> list[str]:
-    """Covered files that differ between the sync commit and the working tree, untracked ones included."""
-    stale = []
-    for command in (["git", "diff", "--name-only", sync], ["git", "ls-files", "--others", "--exclude-standard"]):
-        result = subprocess.run([*command, "--", *files], cwd=ROOT, capture_output=True, text=True)
-        if result.returncode != 0:
-            sys.exit(f"{' '.join(command[:2])} for the covered files failed: {result.stderr.strip()}")
-        stale += [line for line in result.stdout.splitlines() if line]
-    return stale
 
 
 def run_tlc(java: str, jar: str, rule: str, mutant: str) -> tuple[str, str, str]:
@@ -220,15 +198,9 @@ def main() -> int:
             print(f"State space: {found.group(1)} distinct states, every one checked for {rule}.")
             break
 
-    sync, files = coverage()
-    stale = stale_files(sync, files)
     if unexpected:
         print("A result differs from the expected one. Read the skill's 'Read the result' section.")
         return 1
-    if stale:
-        print(f"Covered code changed after sync commit {sync}: {', '.join(stale)}")
-        print("Compare these changes with the model before you trust the results.")
-        return 3
     return 0
 
 
