@@ -27,6 +27,7 @@ final class ConfigurationStoreTests {
         #expect(document.value(at: ["options", "new_window_width"]) == .float(0.5))
         #expect(document.value(at: ["options", "stack_limit"]) == .integer(5))
         #expect(document.value(at: ["options", "maximized_window_side"]) == .string("right"))
+        #expect(document.value(at: ["options", "focus_on_close"]) == .string("left"))
         for side in ["top", "right", "bottom", "left"] {
             #expect(document.value(at: ["padding", side]) == .integer(4))
         }
@@ -183,6 +184,7 @@ final class ConfigurationStoreTests {
 
         [options]
         maximized_window_side = "left"
+        focus_on_close = "right"
         shared_edge_slices = true
         slide_window_pictures = true
         mouse_follows_focus = true
@@ -192,12 +194,14 @@ final class ConfigurationStoreTests {
         #expect(store.issue == nil)
         #expect(store.settings.showInDock == false)
         #expect(store.settings.maximizedWindowSide == .left)
+        #expect(store.settings.focusOnClose == .right)
         #expect(store.settings.sharedEdgeSlices)
         #expect(store.settings.slideWindowPictures)
         #expect(store.settings.mouseFollowsFocus)
         try store.update(reduceMotion: false) {
             $0.showInDock = true
             $0.maximizedWindowSide = .right
+            $0.focusOnClose = .left
             $0.sharedEdgeSlices = false
             $0.slideWindowPictures = false
             $0.mouseFollowsFocus = false
@@ -205,6 +209,7 @@ final class ConfigurationStoreTests {
         let saved = try TOMLDocument(contents())
         #expect(saved.value(at: ["miri", "show_in_dock"]) == .boolean(true))
         #expect(saved.value(at: ["options", "maximized_window_side"]) == .string("right"))
+        #expect(saved.value(at: ["options", "focus_on_close"]) == .string("left"))
         #expect(saved.value(at: ["options", "shared_edge_slices"]) == .boolean(false))
         #expect(saved.value(at: ["options", "slide_window_pictures"]) == .boolean(false))
         #expect(saved.value(at: ["options", "mouse_follows_focus"]) == .boolean(false))
@@ -214,6 +219,8 @@ final class ConfigurationStoreTests {
         ("miri", "show_in_dock", "0", "miri.show_in_dock must be true or false."),
         ("options", "maximized_window_side", "\"up\"", "options.maximized_window_side must be \"left\" or \"right\"."),
         ("options", "maximized_window_side", "1", "options.maximized_window_side must be \"left\" or \"right\"."),
+        ("options", "focus_on_close", "\"up\"", "options.focus_on_close must be \"left\" or \"right\"."),
+        ("options", "focus_on_close", "1", "options.focus_on_close must be \"left\" or \"right\"."),
         ("options", "shared_edge_slices", "\"yes\"", "options.shared_edge_slices must be true or false."),
         ("options", "mouse_follows_focus", "1", "options.mouse_follows_focus must be true or false."),
     ])

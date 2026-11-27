@@ -17,6 +17,7 @@ public struct MiriSettings: Equatable, Sendable {
     public var widthPresets = [0.25, 0.33, 0.5, 0.66, 0.75]
     public var stackLimit = StackLimit.count(5)
     public var maximizedWindowSide = MaximizedWindowSide.right
+    public var focusOnClose = FocusOnClose.left
     public var animations = true
     public var launchAtLogin = true
     /// Shows Miri's icon in the Dock and the Command-Tab switcher. Off leaves only the menu bar icon.
@@ -103,6 +104,14 @@ public struct MiriSettings: Equatable, Sendable {
             }
             maximizedWindowSide = side
         }
+        if let value = document.value(at: ["options", "focus_on_close"]) {
+            guard case .string(let name) = value, let side = FocusOnClose(rawValue: name) else {
+                throw .invalidValue(
+                    key: "options.focus_on_close",
+                    message: String(localized: "options.focus_on_close must be \"left\" or \"right\"."))
+            }
+            focusOnClose = side
+        }
         if let value = document.value(at: ["options", "shared_edge_slices"]) {
             sharedEdgeSlices = try Self.boolean(value, key: "options.shared_edge_slices")
         }
@@ -177,6 +186,7 @@ public struct MiriSettings: Equatable, Sendable {
         try set(.array(widthPresets.map(TOMLValue.float)), ["options"], "preset_column_widths")
         try set(stackLimit.tomlValue, ["options"], "stack_limit")
         try set(.string(maximizedWindowSide.rawValue), ["options"], "maximized_window_side")
+        try set(.string(focusOnClose.rawValue), ["options"], "focus_on_close")
         try set(.boolean(sharedEdgeSlices), ["options"], "shared_edge_slices")
         try set(.boolean(slideWindowPictures), ["options"], "slide_window_pictures")
         try set(.boolean(mouseFollowsFocus), ["options"], "mouse_follows_focus")
@@ -284,6 +294,12 @@ public enum SwipeTarget: String, Sendable {
 /// The side of its stack where a maximized stacked window opens as a column of its own. The raw value is the engine's
 /// `[options].maximized_window_side`.
 public enum MaximizedWindowSide: String, Sendable {
+    case left, right
+}
+
+/// The adjacent column that receives focus when the focused window closes or its app quits. The raw value is the
+/// engine's `[options].focus_on_close`.
+public enum FocusOnClose: String, Sendable {
     case left, right
 }
 
