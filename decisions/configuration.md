@@ -35,6 +35,7 @@ The initial default installation also backs up the file before adding its versio
 | Outer gap | `8` points | `[miri].outer_gap`. Miri writes it minus the per-window padding to each `[padding]` side. |
 | Stack limit | `5` windows | `[options].stack_limit`, a number from 1 or `"fit"`. The engine caps it at what fits on each display. |
 | Maximized stacked window opens | Right of its stack | `[options].maximized_window_side`, `"left"` or `"right"`. |
+| When a window closes, focus | Left | `[options].focus_on_close`, `"left"` or `"right"`. Falls back to the opposite side at the end of a strip. |
 | Show window contents on edges next to another display | Off | `[options].shared_edge_slices`, `true` or `false`. Absent means off. |
 | New window width | `0.5` of the display's tiling area | `[options].new_window_width`, a ratio above 0 and up to 1, of the width inside the display padding, as the width presets use. Miri writes it when the key is absent. A `[windows]` rule's `width` wins. |
 
@@ -61,6 +62,8 @@ The stack limit is an engine option, `[options].stack_limit`, which holds a numb
 Settings writes it, and the engine caps it at what fits on each display.
 The side where a maximized stacked window opens is an engine option, `[options].maximized_window_side`, which holds `"left"` or `"right"` and defaults to `"right"`.
 Settings writes it as **Maximized stacked window opens**, and [Maximizing a window](release-scope.md#maximizing-a-window) records the behavior.
+The adjacent column that receives focus when the focused window closes or its app quits is an engine option, `[options].focus_on_close`, which holds `"left"` or `"right"` and defaults to `"left"`.
+Settings writes it as **When a window closes, focus**, and it falls back to the opposite neighbor at the end of a strip ([#562](https://github.com/samanyudas/miri/issues/562)).
 The switch **Show window contents on edges next to another display** writes `[options].shared_edge_slices`, as Sam decided in [#150](https://github.com/samanyudas/miri/issues/150).
 Turning it on asks for Screen Recording permission, and the switch stays off without it.
 If Miri finds the permission gone when it rechecks its setup, it turns the switch off and says why.

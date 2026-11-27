@@ -252,6 +252,20 @@ struct LayoutSettings: View {
                     ScreenRecordingNoticeRow()
                 }
             }
+            SettingsSection(String(localized: "Focus")) {
+                SettingsRow(
+                    title: String(localized: "When a window closes, focus"),
+                    detail: String(localized: "Falls back to the other side at the end of a strip.")
+                ) {
+                    SegmentedChoice(
+                        label: String(localized: "When a window closes, focus"),
+                        selection: model.setting(\.focusOnClose),
+                        options: [
+                            (String(localized: "Left"), .left),
+                            (String(localized: "Right"), .right),
+                        ])
+                }
+            }
             SettingsSection(String(localized: "Stacks")) {
                 SettingsRow(
                     title: String(localized: "Windows per stack"),
