@@ -9,8 +9,10 @@ enum SetupProbe {
     static let screenRecordingSettingsURL = URL(
         string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")
 
+    /// Reads Screen Recording permission without prompting. Only turning a switch on prompts.
     static var screenRecordingGranted: Bool { CGPreflightScreenCaptureAccess() }
 
+    /// Prompts macOS for Screen Recording permission when the user turns on a switch that needs it.
     static func requestScreenRecording() -> Bool { CGRequestScreenCaptureAccess() }
 
     /// Converts an AppKit (bottom-left origin) rectangle to Accessibility (top-left of main display) coordinates.

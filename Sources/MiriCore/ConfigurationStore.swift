@@ -91,7 +91,7 @@ public final class ConfigurationStore {
     }
 
     /// Writes `[swipe.gesture].fingers_count` when `gestureFingers` now gives a different answer.
-    /// Returns `true` when the file was written.
+    /// Returns `true` when `gestureFingers` changed and a save was attempted.
     @discardableResult
     public func applyGestureFingers(reduceMotion: Bool) throws(ConfigurationIssue) -> Bool {
         guard document != nil, gestureFingers(settings) != writtenGestureFingers else { return false }
@@ -113,6 +113,7 @@ public final class ConfigurationStore {
             case .remove(let chord, let action): next = try shortcuts.removing(chord, from: action)
             case .move(let chord, let owner, let action):
                 var cleaned = current
+                // The owner can spell the same keys another way, such as `ctrl+alt-[` for `ctrl+alt-leftbracket`.
                 for existing in shortcuts.chords(for: owner) where layout.conflicts(existing, chord) {
                     cleaned = try Shortcuts(document: cleaned, layout: layout).removing(existing, from: owner)
                 }
