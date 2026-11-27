@@ -126,7 +126,10 @@ class GuardCommandTest(unittest.TestCase):
             self.assertIn("Missing: Steps to reproduce", self.decide("gh issue create -t Gap -l bug -F vague.md", directory))
 
     def test_every_template_section_is_required(self):
-        for type_label, sections in template_sections().items():
+        types = template_sections()
+        self.assertEqual(set(types), {"bug", "decision", "enhancement", "task"})
+        for type_label, sections in types.items():
+            self.assertTrue(sections, f"{type_label} template parsed no required sections")
             body = "\n".join(f"### {section}\nFilled in.\n" for section in sections)
             with self.subTest(type_label=type_label):
                 self.assertEqual(self.decide(f"gh issue create -t Title -l {type_label} -b '{body}'"), "allow")

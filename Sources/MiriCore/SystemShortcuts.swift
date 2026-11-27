@@ -3,14 +3,15 @@ import Foundation
 /// A macOS or standard app shortcut that a Miri shortcut on the same keys would take over.
 public struct SystemShortcut: Equatable, Sendable {
     public let name: String
-    public let modifiers: Set<ChordModifier>
-    public let keyCode: UInt16
+    let modifiers: Set<ChordModifier>
+    let keyCode: UInt16
 }
 
 /// The macOS shortcuts Miri warns about: the user's enabled shortcuts from System Settings > Keyboard > Keyboard
 /// Shortcuts, read over the defaults for the ones the user never changed, plus standard app shortcuts.
 public struct SystemShortcuts: Sendable {
-    public let shortcuts: [SystemShortcut]
+    let shortcuts: [SystemShortcut]
+    private let layout: KeyLayout
 
     /// Reads the live shortcuts. `com.apple.symbolichotkeys` holds only the entries the user or macOS changed.
     public static func load(layout: KeyLayout) -> SystemShortcuts {
@@ -46,10 +47,10 @@ public struct SystemShortcuts: Sendable {
             guard let keyCode = layout.keyCode(for: app.key) else { continue }
             result.append(SystemShortcut(name: app.name, modifiers: app.modifiers, keyCode: keyCode))
         }
-        return SystemShortcuts(shortcuts: result)
+        return SystemShortcuts(shortcuts: result, layout: layout)
     }
 
-    public func conflict(for chord: Chord, layout: KeyLayout) -> SystemShortcut? {
+    public func conflict(for chord: Chord) -> SystemShortcut? {
         guard let keyCode = layout.keyCode(for: chord.key) else { return nil }
         return shortcuts.first { $0.modifiers == chord.modifiers && $0.keyCode == keyCode }
     }
@@ -65,7 +66,6 @@ public struct SystemShortcuts: Sendable {
         return items.map(\.intValue)
     }
 
-    /// The entry's shortcut, or `nil` when it has no parameters or names no key.
     private static func shortcut(in entry: [String: Any], name: String) -> SystemShortcut? {
         guard let parameters = parameters(entry), parameters[1] != noKey, let keyCode = UInt16(exactly: parameters[1])
         else { return nil }
@@ -84,11 +84,10 @@ public struct SystemShortcuts: Sendable {
         (.shift, 0x2_0000), (.control, 0x4_0000), (.option, 0x8_0000), (.command, 0x10_0000), (.function, 0x80_0000),
     ]
 
-    /// Arrows, F1 to F20, Home, End, Page Up, Page Down, and Forward Delete.
     private static let functionKeyCodes: Set<UInt16> = Set(
         EngineKey.literalKeys.filter { key in
             key.name.hasSuffix("arrow") || ["home", "end", "pageup", "pagedown", "forwarddelete"].contains(key.name)
-                || (key.name.first == "f" && Int(key.name.dropFirst()) != nil)
+                || EngineKey.isFunctionKey(key.name)
         }.map(\.code))
 
     private struct HotKey {
@@ -98,11 +97,11 @@ public struct SystemShortcuts: Sendable {
         let keyCode: UInt16
         let enabledByDefault: Bool
 
-        init(_ id: Int, _ name: String, _ modifiers: Set<ChordModifier>, _ keyCode: UInt16, enabled: Bool = true) {
+        init(_ id: Int, _ name: String, _ modifiers: Set<ChordModifier>, _ keyName: String, enabled: Bool = true) {
             self.id = id
             self.name = name
             self.modifiers = modifiers
-            self.keyCode = keyCode
+            self.keyCode = EngineKey.code(for: keyName)!
             enabledByDefault = enabled
         }
     }
@@ -110,28 +109,29 @@ public struct SystemShortcuts: Sendable {
     /// The macOS 27 defaults for the symbolic hot keys a Miri shortcut is likely to meet.
     private static let defaults: [HotKey] =
         [
-            HotKey(7, String(localized: "Move focus to the menu bar"), [.control], 120),
-            HotKey(8, String(localized: "Move focus to the Dock"), [.control], 99),
-            HotKey(27, String(localized: "Move focus to next window"), [.command], 50),
-            HotKey(28, String(localized: "Save picture of screen as a file"), [.shift, .command], 20),
-            HotKey(29, String(localized: "Copy picture of screen"), [.control, .shift, .command], 20),
-            HotKey(30, String(localized: "Save picture of selected area"), [.shift, .command], 21),
-            HotKey(31, String(localized: "Copy picture of selected area"), [.control, .shift, .command], 21),
-            HotKey(32, String(localized: "Mission Control"), [.control], 126),
-            HotKey(33, String(localized: "Application windows"), [.control], 125),
-            HotKey(36, String(localized: "Show Desktop"), [], 103),
-            HotKey(52, String(localized: "Turn Dock hiding on or off"), [.option, .command], 2),
-            HotKey(60, String(localized: "Select the previous input source"), [.control], 49),
-            HotKey(61, String(localized: "Select next source in Input menu"), [.control, .option], 49),
-            HotKey(64, String(localized: "Show Spotlight search"), [.command], 49),
-            HotKey(65, String(localized: "Show Finder search window"), [.option, .command], 49),
-            HotKey(79, String(localized: "Move left a space"), [.control], 123),
-            HotKey(81, String(localized: "Move right a space"), [.control], 124),
+            HotKey(7, String(localized: "Move focus to the menu bar"), [.control], "f2"),
+            HotKey(8, String(localized: "Move focus to the Dock"), [.control], "f3"),
+            HotKey(27, String(localized: "Move focus to next window"), [.command], "grave"),
+            HotKey(28, String(localized: "Save picture of screen as a file"), [.shift, .command], "3"),
+            HotKey(29, String(localized: "Copy picture of screen"), [.control, .shift, .command], "3"),
+            HotKey(30, String(localized: "Save picture of selected area"), [.shift, .command], "4"),
+            HotKey(31, String(localized: "Copy picture of selected area"), [.control, .shift, .command], "4"),
+            HotKey(32, String(localized: "Mission Control"), [.control], "uparrow"),
+            HotKey(33, String(localized: "Application windows"), [.control], "downarrow"),
+            HotKey(36, String(localized: "Show Desktop"), [], "f11"),
+            HotKey(52, String(localized: "Turn Dock hiding on or off"), [.option, .command], "d"),
+            HotKey(60, String(localized: "Select the previous input source"), [.control], "space"),
+            HotKey(61, String(localized: "Select next source in Input menu"), [.control, .option], "space"),
+            HotKey(64, String(localized: "Show Spotlight search"), [.command], "space"),
+            HotKey(65, String(localized: "Show Finder search window"), [.option, .command], "space"),
+            HotKey(79, String(localized: "Move left a space"), [.control], "leftarrow"),
+            HotKey(81, String(localized: "Move right a space"), [.control], "rightarrow"),
         ]
-        + zip(1...9, [18, 19, 20, 21, 23, 22, 26, 28, 25] as [UInt16]).map { number, keyCode in
-            HotKey(117 + number, String(localized: "Switch to Desktop \(number)"), [.control], keyCode, enabled: false)
+        + (1...9).map { number in
+            HotKey(
+                117 + number, String(localized: "Switch to Desktop \(number)"), [.control], "\(number)", enabled: false)
         }
-        + [HotKey(184, String(localized: "Screenshot and recording options"), [.shift, .command], 23)]
+        + [HotKey(184, String(localized: "Screenshot and recording options"), [.shift, .command], "5")]
 
     /// Standard app shortcuts, with keys named as the engine names them so they follow the layout.
     private static let appShortcuts: [(name: String, modifiers: Set<ChordModifier>, key: String)] = [

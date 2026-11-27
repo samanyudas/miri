@@ -1,7 +1,7 @@
 import Foundation
 
 /// The strip swipe the user selected, stored in `[miri].strip_gesture`. Five fingers is not a v1 choice.
-public enum StripGesture: String, CaseIterable, Sendable {
+public enum StripGesture: String, Sendable {
     case off, three, four
 
     public var fingers: GestureFingers? {
@@ -171,7 +171,6 @@ public struct EngineStateSnapshot: Decodable, Equatable, Sendable {
     struct Row: Decodable, Equatable, Sendable {
         var number: UInt32
         var nativeWorkspaceId: UInt64
-        var active: Bool
         var windows: [Window]
     }
 
@@ -182,9 +181,7 @@ public struct EngineStateSnapshot: Decodable, Equatable, Sendable {
 
     struct Frame: Decodable, Equatable, Sendable {
         var x: Int
-        var y: Int
         var width: Int
-        var height: Int
     }
 
     var active: Active

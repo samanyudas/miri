@@ -35,8 +35,10 @@ LANGUAGES = ("en", "zh-Hans", "zh-Hant", "es", "fr", "de", "ja", "ko", "pt-BR", 
 TRANSLATED = ("translated", "needs_review")
 
 
-def literals(source: str):
-    """Yields (line, text) for each string literal outside comments, with each interpolation as PLACEHOLDER."""
+def scan(source: str) -> tuple[list[tuple[int, str]], dict[int, str]]:
+    """Returns string literals as (line, text) and non-string, non-comment code per line."""
+    found: list[tuple[int, str]] = []
+    code: dict[int, list[str]] = {}
     i, line, n = 0, 1, len(source)
     while i < n:
         c = source[i]
@@ -51,24 +53,37 @@ def literals(source: str):
             end = n if end < 0 else end + 2
             line += source.count("\n", i, end)
             i = end
-        elif c == "#" and i + 1 < n and source[i + 1] in "\"#":
+        elif c == "#" and i + 1 < n and source[i + 1] in '"#':
             # Raw strings such as #"..."# hold regular expressions and paths, not interface text.
-            hashes = len(source[i:]) - len(source[i:].lstrip("#"))
-            start = source.find('"', i)
-            close = '"' + "#" * hashes
-            end = source.find(close, start + 1)
-            end = n if end < 0 else end + len(close)
-            line += source.count("\n", i, end)
-            i = end
+            j = i
+            while j < n and source[j] == "#":
+                j += 1
+            if j < n and source[j] == '"':
+                close = '"' + "#" * (j - i)
+                end = source.find(close, j + 1)
+                end = n if end < 0 else end + len(close)
+                line += source.count("\n", i, end)
+                i = end
+            else:
+                code.setdefault(line, []).append(c)
+                i += 1
         elif c == "/" and is_regex_start(source, i):
             # A regex literal such as /["']x/ can hold quotes that do not open a string.
             i = regex_end(source, i)
         elif c == '"':
             start_line = line
-            text, i, line = read_string(source, i, line)
-            yield start_line, text
+            text, nested, i, line = read_string(source, i, line, code)
+            found.append((start_line, text))
+            found.extend(nested)
         else:
+            code.setdefault(line, []).append(c)
             i += 1
+    return found, {number: "".join(chars) for number, chars in code.items()}
+
+
+def literals(source: str):
+    """Yields (line, text) for each string literal outside comments, with each interpolation as PLACEHOLDER."""
+    yield from scan(source)[0]
 
 
 def is_regex_start(source: str, i: int) -> bool:
@@ -91,12 +106,14 @@ def regex_end(source: str, i: int) -> int:
     return j
 
 
-def read_string(source: str, i: int, line: int) -> tuple[str, int, int]:
-    """Reads the literal that opens at `i` and returns its text, the index after it, and the line it ends on."""
+def read_string(source: str, i: int, line: int,
+                code: dict[int, list[str]]) -> tuple[str, list[tuple[int, str]], int, int]:
+    """Reads the literal at `i`, returning its text, nested literals inside interpolations, next index, and end line."""
     multiline = source.startswith('"""', i)
     quote = '"""' if multiline else '"'
     i += len(quote)
     parts = []
+    nested: list[tuple[int, str]] = []
     n = len(source)
     while i < n and not source.startswith(quote, i):
         c = source[i]
@@ -108,10 +125,25 @@ def read_string(source: str, i: int, line: int) -> tuple[str, int, int]:
             depth, i = 1, i + 2
             while i < n and depth:
                 if source[i] == '"':
-                    _, i, line = read_string(source, i, line)
+                    nested_line = line
+                    nested_text, inner, i, line = read_string(source, i, line, code)
+                    nested.append((nested_line, nested_text))
+                    nested.extend(inner)
+                    continue
+                if source.startswith("//", i):
+                    while i < n and source[i] != "\n":
+                        i += 1
+                    continue
+                if source.startswith("/*", i):
+                    end = source.find("*/", i + 2)
+                    end = n if end < 0 else end + 2
+                    line += source.count("\n", i, end)
+                    i = end
                     continue
                 if source[i] == "\n":
                     line += 1
+                else:
+                    code.setdefault(line, []).append(source[i])
                 depth += {"(": 1, ")": -1}.get(source[i], 0)
                 i += 1
             parts.append(PLACEHOLDER)
@@ -121,7 +153,7 @@ def read_string(source: str, i: int, line: int) -> tuple[str, int, int]:
         else:
             parts.append(c)
             i += 1
-    return squeeze("".join(parts)), i + len(quote), line
+    return squeeze("".join(parts)), nested, i + len(quote), line
 
 
 def squeeze(text: str) -> str:
@@ -170,10 +202,11 @@ def candidates(root: Path):
         for path in sorted((root / folder).glob("**/*.swift")):
             relative = path.relative_to(root).as_posix()
             source = path.read_text(encoding="utf-8")
-            lines = source.splitlines()
-            skipped = marked_lines(lines)
-            for number, text in literals(source):
-                if is_interface_text(text) and not SKIPPED_LINE.search(lines[number - 1]) and number not in skipped:
+            skipped = marked_lines(source.splitlines())
+            found, code_lines = scan(source)
+            for number, text in found:
+                if (is_interface_text(text) and not SKIPPED_LINE.search(code_lines.get(number, ""))
+                        and number not in skipped):
                     yield relative, number, text
 
 

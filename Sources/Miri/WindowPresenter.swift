@@ -6,7 +6,7 @@ import SwiftUI
 final class WindowPresenter {
     enum Kind { case settings, diagnostics, permissionExperiment, initialSetup }
 
-    private let model: AppModel
+    let model: AppModel
     private let experiment: PermissionExperiment
     private var windows: [Kind: NSWindow] = [:]
     private var terminating = false
@@ -47,52 +47,64 @@ final class WindowPresenter {
         windows[kind]?.close()
     }
 
+    private struct Descriptor {
+        let title: String
+        let content: AnyView
+        let designSize: NSSize?
+        let resizable: Bool
+        let fullSizeContent: Bool
+    }
+
+    private func descriptor(for kind: Kind) -> Descriptor {
+        switch kind {
+        case .settings:
+            Descriptor(
+                title: String(localized: "Miri Settings"), content: AnyView(SettingsView(model: model)),
+                designSize: NSSize(width: 880, height: 640), resizable: true, fullSizeContent: true)
+        case .diagnostics:
+            Descriptor(
+                title: String(localized: "Copy Diagnostics"), content: AnyView(DiagnosticsView(model: model)),
+                designSize: NSSize(width: 640, height: 540), resizable: true, fullSizeContent: true)
+        case .permissionExperiment:
+            Descriptor(
+                title: String(localized: "Permission Experiment"),
+                content: AnyView(ExperimentView(experiment: experiment).frame(width: 560, height: 360)),
+                designSize: nil, resizable: false, fullSizeContent: false)
+        case .initialSetup:
+            Descriptor(
+                title: String(localized: "Set Up Miri"), content: AnyView(InitialSetupView(model: model)),
+                designSize: nil, resizable: false, fullSizeContent: true)
+        }
+    }
+
     private func makeWindow(_ kind: Kind) -> NSWindow {
-        let (title, content): (String, AnyView) =
-            switch kind {
-            case .settings: (String(localized: "Miri Settings"), AnyView(SettingsView(model: model)))
-            case .diagnostics: (String(localized: "Copy Diagnostics"), AnyView(DiagnosticsView(model: model)))
-            case .permissionExperiment:
-                (
-                    String(localized: "Permission Experiment"),
-                    AnyView(ExperimentView(experiment: experiment).frame(width: 560, height: 360))
-                )
-            case .initialSetup: (String(localized: "Set Up Miri"), AnyView(InitialSetupView(model: model)))
-            }
-        // Settings and Copy Diagnostics draw under their title bars at the design's size.
-        // Set Up Miri draws under its title bar too, and takes the height of its content.
-        let designSize: NSSize? =
-            switch kind {
-            case .settings: NSSize(width: 880, height: 640)
-            case .diagnostics: NSSize(width: 640, height: 540)
-            case .initialSetup, .permissionExperiment: nil
-            }
+        let spec = descriptor(for: kind)
         let host: NSHostingController<AnyView>
-        if let designSize {
+        if let designSize = spec.designSize {
             // The window never gets smaller than the design, which its pages are laid out for.
             // It has no maximum size: a maximum stops the animation when the title bar's double-click fills the display.
             // The hosting controller sets the window's minimum size from the view's, and replaces any minimum set on
             // the window itself. It adds the title bar's height to the view's, as the content runs under the title bar.
             let titleBar = NSWindow.frameRect(forContentRect: .zero, styleMask: .titled).height
-            let limited = content.frame(minWidth: designSize.width, minHeight: designSize.height - titleBar)
+            let limited = spec.content.frame(minWidth: designSize.width, minHeight: designSize.height - titleBar)
             host = NSHostingController(rootView: AnyView(limited.environment(\.presenter, self)))
             host.sizingOptions = [.minSize]
         } else {
-            host = NSHostingController(rootView: AnyView(content.environment(\.presenter, self)))
+            host = NSHostingController(rootView: AnyView(spec.content.environment(\.presenter, self)))
             host.sizingOptions = [.preferredContentSize]
         }
         let window = NSWindow(contentViewController: host)
-        window.title = title
+        window.title = spec.title
         window.styleMask = [.titled, .closable, .miniaturizable]
         // AppKit restores a saved size only on a resizable window, so these become resizable before the restore.
-        if kind == .settings || kind == .diagnostics { window.styleMask.insert(.resizable) }
+        if spec.resizable { window.styleMask.insert(.resizable) }
         window.isReleasedWhenClosed = false
         // macOS keeps a closed window on its last desktop, and showing it again would switch the display back there.
         window.collectionBehavior.insert(.moveToActiveSpace)
         // Miri's windows stay above other apps' windows, like Picture-in-Picture, so a window that scrolls into view
         // or takes focus never covers them. The engine floats them, which keeps them out of the strip but not on top.
         window.level = .floating
-        if designSize != nil || kind == .initialSetup {
+        if spec.fullSizeContent {
             // The content runs under the title bar, so the window buttons sit on it, as in the design.
             // This comes before the restore: added after it, AppKit keeps the content size, and the saved frame
             // lost the 32-point title bar at every launch.
@@ -104,7 +116,7 @@ final class WindowPresenter {
         window.setFrameAutosaveName(autosaveName)
         let restored = window.setFrameUsingName(autosaveName)
         if !restored { window.center() }
-        if let designSize {
+        if let designSize = spec.designSize {
             // A new window opens at the design's size, and a reopened one keeps the size the user chose, at least the
             // design's. Both keep their top-left corner.
             var frame = window.frame
@@ -112,7 +124,7 @@ final class WindowPresenter {
                 frame.origin.y += frame.height - designSize.height
                 frame.size = designSize
             }
-            window.setFrame(WindowSizeLimits.frame(frame, minimum: designSize), display: false)
+            window.setFrame(WindowPlacement.enforcingMinimum(frame, minimum: designSize), display: false)
             window.keepMinimumSize(designSize)
         }
         if kind == .initialSetup {
@@ -138,7 +150,7 @@ extension NSWindow {
             [weak self] _ in
             MainActor.assumeIsolated {
                 guard let window = self else { return }
-                let limited = WindowSizeLimits.frame(window.frame, minimum: minimum)
+                let limited = WindowPlacement.enforcingMinimum(window.frame, minimum: minimum)
                 if limited != window.frame { window.setFrame(limited, display: true) }
             }
         }

@@ -20,7 +20,7 @@ import Testing
     private func search(_ query: String, index: ShortcutSearch = ShortcutSearch(bundle: .main)) throws
         -> [ShortcutAction]
     {
-        index.filter(ShortcutAction.editable, query: query, shortcuts: try defaultShortcuts(), layout: us)
+        index.filter(ShortcutAction.editable, query: query, shortcuts: try defaultShortcuts())
     }
 
     /// Compiles `Localization/Localizable.xcstrings` into a temporary bundle so tests exercise the real catalog
@@ -85,10 +85,10 @@ import Testing
         let shortcuts = Shortcuts(
             document: try TOMLDocument("[bindings]\nwindow_virtual_2 = \"ctrl+alt+cmd-2\"\n"), layout: us)
         let index = ShortcutSearch(bundle: .main)
-        #expect(index.filter(shortcuts.others, query: "virtual", layout: us) == shortcuts.others)
-        #expect(index.filter(shortcuts.others, query: "vrtual", layout: us) == shortcuts.others)
-        #expect(index.filter(shortcuts.others, query: "⌃⌥⌘2", layout: us) == shortcuts.others)
-        #expect(index.filter(shortcuts.others, query: "nonexistent", layout: us).isEmpty)
+        #expect(index.filterOthers(query: "virtual", shortcuts: shortcuts) == shortcuts.others)
+        #expect(index.filterOthers(query: "vrtual", shortcuts: shortcuts) == shortcuts.others)
+        #expect(index.filterOthers(query: "⌃⌥⌘2", shortcuts: shortcuts) == shortcuts.others)
+        #expect(index.filterOthers(query: "nonexistent", shortcuts: shortcuts).isEmpty)
     }
 
     @Test func searchesAcrossAllShippedLanguagesFromCompiledCatalog() throws {

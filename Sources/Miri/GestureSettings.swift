@@ -2,8 +2,6 @@ import AppKit
 import MiriCore
 import SwiftUI
 
-/// Settings > Gestures: the strip swipe's state, its finger count and direction, and the test Miri offers when it
-/// cannot read the macOS gesture settings.
 struct GestureSettings: View {
     let model: AppModel
     @State private var testing = false
@@ -17,29 +15,13 @@ struct GestureSettings: View {
             ConfigurationIssueNotice(model: model)
             hero
             SettingsSection(String(localized: "Strip swipe")) {
-                SettingsRow(
-                    title: String(localized: "Fingers"),
-                    detail: String(localized: "Four is recommended. Three fingers can clash with Three Finger Drag.")
-                ) {
-                    SegmentedChoice(
-                        label: String(localized: "Fingers"), selection: setting(\.stripGesture),
-                        options: [
-                            (String(localized: "Three"), .three), (String(localized: "Four"), .four),
-                            (String(localized: "Off"), .off),
-                        ])
-                }
+                StripSwipeFingersRow(model: model)
                 SettingsRow(title: String(localized: "Direction")) {
                     SegmentedChoice(
-                        label: String(localized: "Direction"), selection: setting(\.reverseSwipe),
+                        label: String(localized: "Direction"), selection: model.setting(\.reverseSwipe),
                         options: [(String(localized: "Follow fingers"), false), (String(localized: "Reversed"), true)])
                 }
-                if case .conflict(let message) = model.gestureState {
-                    NoticeRow(kind: .warning, text: message) {
-                        if let url = conflictCheck?.settingsURL {
-                            Button("Open Trackpad Settings") { NSWorkspace.shared.open(url) }
-                        }
-                    }
-                }
+                StripSwipeConflictRow(model: model)
             }
             SettingsSection(String(localized: "Scrolling")) {
                 SettingsRow(
@@ -50,7 +32,7 @@ struct GestureSettings: View {
                     )
                 ) {
                     SegmentedChoice(
-                        label: String(localized: "Scroll by"), selection: setting(\.stripScrolling),
+                        label: String(localized: "Scroll by"), selection: model.setting(\.stripScrolling),
                         options: [
                             (String(localized: "Continuous"), .continuous),
                             (String(localized: "Window by window"), .window),
@@ -64,7 +46,7 @@ struct GestureSettings: View {
                     )
                 ) {
                     SegmentedChoice(
-                        label: String(localized: "Swipe moves"), selection: setting(\.swipeTarget),
+                        label: String(localized: "Swipe moves"), selection: model.setting(\.swipeTarget),
                         options: [
                             (String(localized: "Under pointer"), .pointer),
                             (String(localized: "Focused window"), .focused),
@@ -80,46 +62,19 @@ struct GestureSettings: View {
     }
 
     private var hero: some View {
-        HStack(spacing: 22) {
+        HeroCard(
+            eyebrow: eyebrow.text, eyebrowColor: eyebrow.color, title: heroTitle, detail: heroDetail,
+            statusValue: model.gestureSummary, tint: heroTint, spacing: 22
+        ) {
             TrackpadPicture(fingers: model.settings.stripGesture.fingers, reversed: model.settings.reverseSwipe)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(eyebrow.text)
-                    .font(.small.weight(.semibold))
-                    .tracking(0.66)
-                    .textCase(.uppercase)
-                    .foregroundStyle(eyebrow.color)
-                Text(heroTitle)
-                    .font(.heroTitle)
-                    .foregroundStyle(Palette.primaryText)
-                    .modifier(StatusValue(value: model.gestureSummary))
-                Text(heroDetail)
-                    .font(.detail)
-                    .foregroundStyle(Palette.secondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+        } trailing: {
             // The test is offered only when Miri cannot read the macOS gesture settings.
             if case .needsTest = model.gestureState {
-                // A disabled test is an ordinary button, so it does not look like the next step.
-                if model.gestureTestBlocker == nil {
-                    Button("Test Gesture…") { testing = true }
-                        .buttonStyle(.borderedProminent)
-                        .tint(Palette.accentFill)
-                        .fixedSize()
-                } else {
-                    // macOS shows no tooltip on a disabled button, so the help sits on a wrapper around it.
-                    Button("Test Gesture…") {}
-                        .disabled(true)
-                        .accessibilityHint(model.gestureTestBlocker ?? "")
-                        .padding(1)
-                        .contentShape(.rect)
-                        .help(model.gestureTestBlocker ?? "")
-                        .fixedSize()
+                GestureTestButton(blocker: model.gestureTestBlocker, prominentWhenEnabled: true) {
+                    testing = true
                 }
             }
         }
-        .padding(20)
-        .background(heroTint, in: .rect(cornerRadius: 10))
     }
 
     private var heroTint: Color {
@@ -147,7 +102,11 @@ struct GestureSettings: View {
         switch model.gestureState {
         case .off:
             String(localized: "Choose three or four fingers below to use the swipe.")
-        case .enabled(let date?): AppModel.confirmedSentence(date)
+        case .enabled(let date?):
+            String(
+                localized:
+                    "You confirmed on \(date.formatted(date: .abbreviated, time: .omitted)) that the strip follows your fingers."
+            )
         case .enabled(nil): String(localized: "Miri checked your macOS trackpad gestures and found no conflict.")
         case .needsTest(let reason):
             [
@@ -159,17 +118,68 @@ struct GestureSettings: View {
             String(localized: "Change the macOS setting below to turn the swipe on.")
         }
     }
+}
 
-    private var conflictCheck: SetupCheck? {
-        model.settings.stripGesture.fingers.flatMap(model.gestureCheck)
-    }
+struct StripSwipeFingersRow: View {
+    let model: AppModel
 
-    private func setting<Value>(_ key: WritableKeyPath<MiriSettings, Value>) -> Binding<Value> {
-        Binding(get: { model.settings[keyPath: key] }, set: { value in model.update { $0[keyPath: key] = value } })
+    var body: some View {
+        SettingsRow(
+            title: String(localized: "Fingers"),
+            detail: String(localized: "Four is recommended. Three fingers can clash with Three Finger Drag.")
+        ) {
+            SegmentedChoice(
+                label: String(localized: "Fingers"), selection: model.setting(\.stripGesture),
+                options: [
+                    (String(localized: "Three"), .three), (String(localized: "Four"), .four),
+                    (String(localized: "Off"), .off),
+                ])
+        }
     }
 }
 
-/// A sketch of a trackpad with one dot per finger and an arrow for the direction the strip moves.
+struct StripSwipeConflictRow: View {
+    let model: AppModel
+
+    var body: some View {
+        if case .conflict(let message) = model.gestureState {
+            NoticeRow(kind: .warning, text: message) {
+                if let url = model.settings.stripGesture.fingers.flatMap(model.gestureCheck)?.settingsURL {
+                    Button("Open Trackpad Settings") { NSWorkspace.shared.open(url) }
+                }
+            }
+        }
+    }
+}
+
+struct GestureTestButton: View {
+    let blocker: String?
+    var prominentWhenEnabled = false
+    let action: () -> Void
+
+    var body: some View {
+        if blocker == nil {
+            if prominentWhenEnabled {
+                Button("Test Gesture…", action: action)
+                    .prominentButton()
+                    .fixedSize()
+            } else {
+                Button("Test Gesture…", action: action)
+                    .fixedSize()
+            }
+        } else {
+            // macOS shows no tooltip on a disabled button, so the help sits on a wrapper around it.
+            Button("Test Gesture…") {}
+                .disabled(true)
+                .accessibilityHint(blocker ?? "")
+                .padding(1)
+                .contentShape(.rect)
+                .help(blocker ?? "")
+                .fixedSize()
+        }
+    }
+}
+
 private struct TrackpadPicture: View {
     let fingers: GestureFingers?
     let reversed: Bool
@@ -200,14 +210,6 @@ private struct TrackpadPicture: View {
 }
 
 extension AppModel {
-    /// Says when the user confirmed the swipe, in the same words on the Gestures page and in Set Up Miri.
-    static func confirmedSentence(_ date: Date) -> String {
-        String(
-            localized:
-                "You confirmed on \(date.formatted(date: .abbreviated, time: .omitted)) that the strip follows your fingers."
-        )
-    }
-
     /// One line about the strip swipe, which Settings and the test tools read as its status.
     var gestureSummary: String {
         switch gestureState {
@@ -244,10 +246,10 @@ extension MiriCore.GestureState.TestReason {
     }
 }
 
-/// Guides one gesture test, from swiping to the user's confirmation.
 struct GestureTestSheet: View {
     let model: AppModel
     @State private var test: GestureTest
+    @State private var sheetWindow = WeakWindowBox()
     @Environment(\.dismiss) private var dismiss
 
     init(model: AppModel) {
@@ -258,10 +260,7 @@ struct GestureTestSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Gesture test")
-                .font(.small.weight(.semibold))
-                .tracking(0.66)
-                .textCase(.uppercase)
-                .foregroundStyle(Palette.secondaryText)
+                .eyebrowStyle(color: Palette.secondaryText)
                 .padding(.bottom, 8)
             Text(title)
                 .font(.heroTitle)
@@ -291,12 +290,18 @@ struct GestureTestSheet: View {
         .padding(.bottom, 22)
         .frame(width: 480, alignment: .leading)
         .background(Palette.content)
+        .background(WindowReader(box: sheetWindow))
         .onAppear { test.start() }
         .onDisappear { test.cancel() }
         // VoiceOver users hear each step, because the focus stays on the buttons while the text changes.
         .onChange(of: test.phase) { AccessibilityNotification.Announcement(announcement).post() }
         // Closing Settings hides its window without removing this view, so onDisappear alone can miss it.
-        .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { _ in test.cancel() }
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { notification in
+            guard let closing = notification.object as? NSWindow,
+                closing === sheetWindow.window || closing === sheetWindow.window?.sheetParent
+            else { return }
+            test.cancel()
+        }
     }
 
     private var title: String {
@@ -372,14 +377,12 @@ struct GestureTestSheet: View {
                 test.confirm()
                 dismiss()
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Palette.accentFill)
+            .prominentButton()
             .keyboardShortcut(.defaultAction)
         case .failed, .inconclusive:
             Button("Done", role: .cancel) { dismiss() }
             Button("Try Again") { test.start() }
-                .buttonStyle(.borderedProminent)
-                .tint(Palette.accentFill)
+                .prominentButton()
                 .keyboardShortcut(.defaultAction)
         }
     }
@@ -389,6 +392,33 @@ struct GestureTestSheet: View {
         switch test.fingers ?? model.settings.stripGesture.fingers {
         case .three?: String(localized: "Swipe left and right with three fingers on the trackpad.")
         case .four?, nil: String(localized: "Swipe left and right with four fingers on the trackpad.")
+        }
+    }
+}
+
+private final class WeakWindowBox {
+    weak var window: NSWindow?
+}
+
+private struct WindowReader: NSViewRepresentable {
+    let box: WeakWindowBox
+
+    func makeNSView(context: Context) -> ObserverView {
+        let view = ObserverView()
+        view.box = box
+        return view
+    }
+
+    func updateNSView(_ nsView: ObserverView, context: Context) {
+        nsView.box = box
+    }
+
+    final class ObserverView: NSView {
+        weak var box: WeakWindowBox?
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            box?.window = window
         }
     }
 }

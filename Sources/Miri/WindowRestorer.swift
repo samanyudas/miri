@@ -12,10 +12,7 @@ enum WindowRestorer {
     /// Each display's visible frame in Accessibility coordinates, with the main display first.
     static func displayFrames() -> [CGRect] {
         guard let main = NSScreen.screens.first else { return [] }
-        return NSScreen.screens.map { screen in
-            let frame = screen.visibleFrame
-            return CGRect(x: frame.minX, y: main.frame.maxY - frame.maxY, width: frame.width, height: frame.height)
-        }
+        return NSScreen.screens.map { SetupProbe.axFrame(for: $0.visibleFrame, mainMaxY: main.frame.maxY) }
     }
 
     /// Recovers every stranded standard window of ordinary apps. `processes` limits recovery to those processes.
@@ -32,8 +29,7 @@ enum WindowRestorer {
                 guard let current = frame(of: window) else { continue }
                 summary.checked += 1
                 guard let target = WindowRecovery.target(for: current, displays: displays) else { continue }
-                setFrame(target, of: window)
-                summary.moved += 1
+                if setFrame(target, of: window) { summary.moved += 1 }
             }
         }
         return summary
@@ -74,15 +70,17 @@ enum WindowRestorer {
     }
 
     /// Sets size, then position, then size again, because an app may limit the size at the old position.
-    static func setFrame(_ frame: CGRect, of window: AXUIElement) {
+    @discardableResult
+    static func setFrame(_ frame: CGRect, of window: AXUIElement) -> Bool {
         var origin = frame.origin
         var size = frame.size
         guard let position = AXValueCreate(.cgPoint, &origin), let extent = AXValueCreate(.cgSize, &size) else {
-            return
+            return false
         }
-        AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, extent)
-        AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, position)
-        AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, extent)
+        let firstSize = AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, extent)
+        let move = AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, position)
+        let secondSize = AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, extent)
+        return move == .success || firstSize == .success || secondSize == .success
     }
 
     private static func attribute(_ name: String, of element: AXUIElement) -> CFTypeRef? {

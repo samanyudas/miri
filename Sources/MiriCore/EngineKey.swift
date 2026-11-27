@@ -37,23 +37,38 @@ enum EngineKey {
             + "\u{2000}\u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{200A}"
             + "\u{2028}\u{2029}\u{202F}\u{205F}\u{3000}")
 
-    static func problem(in text: String, layout: KeyLayout = .positional) -> Problem? {
+    static func split(_ text: String) -> (modifiers: [String], key: String)? {
         var parts = text.unicodeScalars.split(separator: "-", omittingEmptySubsequences: false).map {
             String($0).trimmingCharacters(in: whitespace)
         }
         let key = parts.removeLast()
-        guard parts.count <= 1 else {
+        guard parts.count <= 1 else { return nil }
+        let modifiers =
+            parts.first.map {
+                $0.unicodeScalars.split(separator: "+", omittingEmptySubsequences: false).map {
+                    String($0).trimmingCharacters(in: whitespace)
+                }
+            } ?? []
+        return (modifiers, key)
+    }
+
+    static func problem(in text: String, layout: KeyLayout = .positional) -> Problem? {
+        guard let (modifiers, key) = split(text) else {
             return .extraDash(text: text)
         }
-        if let modifiers = parts.first {
-            for name in modifiers.unicodeScalars.split(separator: "+", omittingEmptySubsequences: false).map({
-                String($0).trimmingCharacters(in: whitespace)
-            }) where !modifierNames.contains(name) {
-                return .invalidModifier(text: text, name: name)
-            }
+        for name in modifiers where !modifierNames.contains(name) {
+            return .invalidModifier(text: text, name: name)
         }
         guard layout.keyCode(for: key) == nil else { return nil }
         return .unknownKey(text: text, name: key)
+    }
+
+    static func code(for name: String) -> UInt16? {
+        layoutKeys.first { $0.name == name }?.code ?? literalKeys.first { $0.name == name }?.code
+    }
+
+    static func isFunctionKey(_ name: String) -> Bool {
+        name.count >= 2 && name.first == "f" && Int(name.dropFirst()).map { (1...20).contains($0) } == true
     }
 
     static let modifierNames: Set<String> = [

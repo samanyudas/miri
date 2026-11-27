@@ -31,11 +31,26 @@ public enum ShortcutAction: Hashable, Sendable {
     }
 }
 
+/// The binding that owns a shortcut: a listed action or an unlisted `[bindings]` key.
+public enum ShortcutOwner: Hashable, Sendable {
+    case action(ShortcutAction)
+    case other(String)
+
+    public var title: String {
+        switch self {
+        case .action(let action): action.title
+        case .other(let key): key
+        }
+    }
+
+    public var action: ShortcutAction? {
+        if case .action(let action) = self { action } else { nil }
+    }
+}
+
 /// Why Miri refused to add a shortcut. The file stays unchanged.
 public enum ShortcutRejection: Error, Equatable, Sendable {
-    /// Another binding presses the same keys. The value is its action's title, or its `[bindings]` key when Miri
-    /// does not list the command.
-    case usedBy(String)
+    case usedBy(ShortcutOwner)
     case alreadyAssigned
 }
 
@@ -45,14 +60,13 @@ public struct KeptDefault: Hashable, Sendable {
     /// The chords the action kept, which can be none.
     public let kept: [Chord]
     public let wanted: Chord
-    /// The title of the action that holds `wanted`, or its `[bindings]` key when Miri does not list the command.
-    public let owner: String
+    public let owner: ShortcutOwner
 }
 
-/// A change the Shortcuts settings page makes.
 public enum ShortcutEdit: Equatable, Sendable {
     case add(Chord, to: ShortcutAction)
     case remove(Chord, from: ShortcutAction)
+    case move(Chord, from: ShortcutAction, to: ShortcutAction)
     case resetToDefaults
 }
 
@@ -69,7 +83,7 @@ public struct Shortcuts: Sendable {
     }
 
     let document: TOMLDocument
-    private let layout: KeyLayout
+    let layout: KeyLayout
     /// The file's `[bindings]` keys for each listed command, sorted, so edits go to the spelling the user wrote.
     private let keysByCommand: [String: [String]]
     public let others: [OtherBinding]
@@ -106,31 +120,30 @@ public struct Shortcuts: Sendable {
         }
     }
 
-    /// Why `chord` cannot be added to `action`, or `nil` when it can.
-    public func rejection(adding chord: Chord, to action: ShortcutAction, layout: KeyLayout) -> ShortcutRejection? {
+    public func rejection(adding chord: Chord, to action: ShortcutAction) -> ShortcutRejection? {
         if chords(for: action).contains(where: { layout.conflicts($0, chord) }) { return .alreadyAssigned }
         for other in ShortcutAction.editable where other != action {
-            if chords(for: other).contains(where: { layout.conflicts($0, chord) }) { return .usedBy(other.title) }
+            if chords(for: other).contains(where: { layout.conflicts($0, chord) }) { return .usedBy(.action(other)) }
         }
         if let other = others.first(where: { $0.chords.contains { layout.conflicts($0, chord) } }) {
-            return .usedBy(other.key)
+            return .usedBy(.other(other.key))
         }
         return nil
     }
 
-    func adding(_ chord: Chord, to action: ShortcutAction, layout: KeyLayout) throws -> TOMLDocument {
-        if let rejection = rejection(adding: chord, to: action, layout: layout) { throw rejection }
+    func adding(_ chord: Chord, to action: ShortcutAction) throws -> TOMLDocument {
+        if let rejection = rejection(adding: chord, to: action) { throw rejection }
         switch action {
         case .engine(let command):
             guard let key = keysByCommand[command]?.first else {
                 return try document.setting(
                     .string(chord.description), table: ["bindings"], key: DefaultBinding.row(for: command)!.command)
             }
-            let texts = Self.texts(in: document.value(at: ["bindings", key])) + [chord.description]
-            return try document.setting(Self.value(texts), table: ["bindings"], key: key)
+            let texts = DefaultBinding.shortcutTexts(in: document.value(at: ["bindings", key])) + [chord.description]
+            return try document.setting(DefaultBinding.encodedTexts(texts), table: ["bindings"], key: key)
         case .stop:
             let texts = chords(for: .stop).map(\.description) + [chord.description]
-            return try document.setting(Self.value(texts), table: ["miri"], key: "stop_shortcut")
+            return try document.setting(DefaultBinding.encodedTexts(texts), table: ["miri"], key: "stop_shortcut")
         }
     }
 
@@ -141,19 +154,19 @@ public struct Shortcuts: Sendable {
         case .engine(let command):
             var result = document
             for key in keysByCommand[command] ?? [] {
-                let texts = Self.texts(in: document.value(at: ["bindings", key]))
+                let texts = DefaultBinding.shortcutTexts(in: document.value(at: ["bindings", key]))
                 let kept = texts.filter { Chord(exactEngineText: $0) != chord }
                 guard kept.count < texts.count else { continue }
                 result =
                     kept.isEmpty
                     ? try result.removing(table: ["bindings"], key: key)
-                    : try result.setting(Self.value(kept), table: ["bindings"], key: key)
+                    : try result.setting(DefaultBinding.encodedTexts(kept), table: ["bindings"], key: key)
             }
             return result
         case .stop:
             let kept = chords(for: .stop).filter { $0 != chord }.map(\.description)
             return try document.setting(
-                kept.isEmpty ? .array([]) : Self.value(kept), table: ["miri"], key: "stop_shortcut")
+                kept.isEmpty ? .array([]) : DefaultBinding.encodedTexts(kept), table: ["miri"], key: "stop_shortcut")
         }
     }
 
@@ -178,7 +191,7 @@ public struct Shortcuts: Sendable {
 
     /// The Stop chords Miri registers. A `[bindings]` entry on the same keys wins, because the engine takes the key
     /// press first.
-    func stopChordsToRegister(layout: KeyLayout) -> [Chord] {
+    func stopChordsToRegister() -> [Chord] {
         let engineChords =
             keysByCommand.values.joined().flatMap {
                 Self.chords(in: document.value(at: ["bindings", $0]), layout: layout) ?? []
@@ -191,15 +204,11 @@ public struct Shortcuts: Sendable {
     static func stopShortcutIssue(in document: TOMLDocument, layout: KeyLayout = .positional) -> ConfigurationIssue? {
         let key = "miri.stop_shortcut"
         guard let value = document.value(at: ["miri", "stop_shortcut"]) else { return nil }
-        let items: [TOMLValue] = if case .array(let items) = value { items } else { [value] }
-        var texts: [String] = []
-        for item in items {
-            guard case .string(let text) = item else {
-                return .invalidValue(
-                    key: key,
-                    message: String(localized: "\(key) must be a shortcut string or an array of shortcut strings."))
-            }
-            texts.append(text)
+        let texts: [String]
+        do {
+            texts = try DefaultBinding.validateShortcutTexts(in: value, path: key)
+        } catch {
+            return error
         }
         for text in texts {
             if let problem = EngineKey.problem(in: text, layout: layout) {
@@ -214,23 +223,11 @@ public struct Shortcuts: Sendable {
     private static func chords(in value: TOMLValue?, layout: KeyLayout) -> [Chord]? {
         switch value {
         case .string, .array:
-            texts(in: value).filter { EngineKey.problem(in: $0, layout: layout) == nil }.compactMap(
-                Chord.init(exactEngineText:))
+            DefaultBinding.shortcutTexts(in: value)
+                .filter { EngineKey.problem(in: $0, layout: layout) == nil }
+                .compactMap(Chord.init(exactEngineText:))
         default: nil
         }
-    }
-
-    private static func texts(in value: TOMLValue?) -> [String] {
-        switch value {
-        case .string(let text): [text]
-        case .array(let items): items.compactMap { if case .string(let text) = $0 { text } else { nil } }
-        default: []
-        }
-    }
-
-    /// One chord as a string and several as an array, as Miri writes its defaults.
-    private static func value(_ texts: [String]) -> TOMLValue {
-        texts.count == 1 ? .string(texts[0]) : .array(texts.map(TOMLValue.string))
     }
 }
 

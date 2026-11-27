@@ -22,24 +22,27 @@ extension TOMLDocument {
     /// Returns a copy with one value set, keeping every other byte of the file, including comments and ordering.
     func setting(_ value: TOMLValue, table: [String], key: String) throws -> TOMLDocument {
         let path = (table + [key]).map(TOMLValue.encodeKey).joined(separator: ".")
-        let edited: String
+        let result: TOMLDocument
         if let assignment = editableAssignment(table: table, key: key) {
-            edited = replacing(assignment.value, with: value.encoded)
+            result = try TOMLDocument(replacing(assignment.value, with: value.encoded))
         } else if self.value(at: table + [key]) != nil {
             throw TOMLEditError.notEditable(path: path)
         } else if let offset = insertionOffset(for: table) {
-            edited = inserting("\(TOMLValue.encodeKey(key)) = \(value.encoded)\n", at: offset)
+            result = try TOMLDocument(inserting("\(TOMLValue.encodeKey(key)) = \(value.encoded)\n", at: offset))
         } else if table.isEmpty || self.value(at: table) != nil {
             throw TOMLEditError.notEditable(path: path)
         } else {
             let header = table.map(TOMLValue.encodeKey).joined(separator: ".")
             var suffix = text.isEmpty || text.hasSuffix("\n") ? "" : "\n"
             if !text.isEmpty { suffix += "\n" }
-            edited = text + suffix + "[\(header)]\n\(TOMLValue.encodeKey(key)) = \(value.encoded)\n"
+            let edited = text + suffix + "[\(header)]\n\(TOMLValue.encodeKey(key)) = \(value.encoded)\n"
             // A parent defined inline, such as `swipe = { sensitivity = 0.5 }`, cannot gain a `[swipe.gesture]` header.
-            guard (try? TOMLDocument(edited)) != nil else { throw TOMLEditError.notEditable(path: path) }
+            do {
+                result = try TOMLDocument(edited)
+            } catch {
+                throw TOMLEditError.notEditable(path: path)
+            }
         }
-        let result = try TOMLDocument(edited)
         guard result.value(at: table + [key]) == value else { throw TOMLEditError.verificationFailed(path: path) }
         return result
     }

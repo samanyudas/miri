@@ -29,7 +29,7 @@ struct RedactorTests {
                 """)
     }
 
-    @Test func redactsAPathWithSpacesOutsideQuotes() {
+    @Test func redactsUnquotedUserPaths() {
         #expect(redactor.redact("saved /Users/sam/Desktop/a.txt") == "saved <path>")
         #expect(!redactor.redact("dir /Users/other/Secret/file").contains("Secret"))
     }

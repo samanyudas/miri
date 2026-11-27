@@ -14,11 +14,11 @@ struct ShortcutPreview: View {
         if let scene = action.scene {
             HStack(alignment: .center, spacing: 18) {
                 HStack(spacing: 6) {
-                    SketchView(sketch: scene.before, arrangement: scene.before)
+                    SketchView(sketch: scene.before, scene: scene)
                     Image(systemName: "arrow.right")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(Palette.secondaryText)
-                    SketchView(sketch: showsAfter ? scene.after : scene.before, arrangement: scene.before)
+                    SketchView(sketch: showsAfter ? scene.after : scene.before, scene: scene)
                 }
                 .frame(width: 330, height: 100)
                 // The sketches show the screen's real left and right, also in Arabic.
@@ -55,15 +55,13 @@ struct ShortcutPreview: View {
     }
 }
 
-/// One sketch of displays and windows. The focused window is in the accent color.
 private struct SketchView: View {
     let sketch: StripSketch
-    /// The sketch whose displays set the scale, so the before and after sketches match.
-    let arrangement: StripSketch
+    let scene: ShortcutScene
 
     var body: some View {
         GeometryReader { proxy in
-            let layout = sketch.layout(in: proxy.size, arrangement: arrangement)
+            let layout = scene.layout(sketch, in: proxy.size)
             ZStack(alignment: .topLeading) {
                 ForEach(layout.displays.indices, id: \.self) { index in
                     let box = layout.displays[index]

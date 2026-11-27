@@ -1,13 +1,14 @@
+import Darwin
 import Foundation
 
 /// Where Miri keeps the engine's files. Every path is inside Miri's own Application Support folder.
 public struct EnginePaths: Sendable {
     public let executable: URL
     public let configuration: URL
-    public let support: URL
+    let support: URL
     public let logs: URL
     /// The Mach service name. It differs from standalone Paneru's, so the two never talk to each other.
-    public let serviceName: String
+    let serviceName: String
 
     public init(executable: URL, support: URL, serviceName: String) {
         self.executable = executable
@@ -82,8 +83,8 @@ public final class RotatingLog: @unchecked Sendable {
 
 /// Runs the bundled engine binary with Miri's isolated environment and captures its output in a bounded log.
 public struct ProcessEngineLauncher: EngineLauncher {
-    public let paths: EnginePaths
-    public let log: RotatingLog
+    let paths: EnginePaths
+    let log: RotatingLog
 
     public init(paths: EnginePaths, log: RotatingLog) {
         self.paths = paths
@@ -132,5 +133,58 @@ public struct ProcessEngineLauncher: EngineLauncher {
     func kill() {
         guard process.isRunning else { return }
         Darwin.kill(process.processIdentifier, SIGKILL)
+    }
+}
+
+/// Engines that outlived the app that started them. An engine whose parent is launchd has no app to stop it, but
+/// it still manages windows and holds the Mach service, so a new engine cannot start.
+public enum OrphanedEngines {
+    public static func find() -> [pid_t] {
+        find(executableName: "miri-engine")
+    }
+
+    static func find(executableName: String) -> [pid_t] {
+        let capacity = proc_listallpids(nil, 0)
+        guard capacity > 0 else { return [] }
+        var pids = [pid_t](repeating: 0, count: Int(capacity) * 2)
+        let count = proc_listallpids(&pids, Int32(pids.count * MemoryLayout<pid_t>.size))
+        return pids.prefix(Int(max(count, 0))).filter { pid in
+            pid > 0 && parent(of: pid) == 1 && self.executableName(of: pid) == executableName
+        }
+    }
+
+    /// Interrupts each process so its cleanup runs, kills any that still run after `timeout`, and returns once they
+    /// are gone, so a new engine can take the Mach service.
+    public static func stop(_ pids: [pid_t], timeout: Duration) {
+        for pid in pids { kill(pid, SIGINT) }
+        let survivors = waitForExit(pids, timeout: timeout)
+        for pid in survivors { kill(pid, SIGKILL) }
+        _ = waitForExit(survivors, timeout: .seconds(1))
+    }
+
+    private static func waitForExit(_ pids: [pid_t], timeout: Duration) -> [pid_t] {
+        let clock = ContinuousClock()
+        let deadline = clock.now + timeout
+        var running = pids.filter { kill($0, 0) == 0 }
+        while !running.isEmpty, clock.now < deadline {
+            usleep(20_000)
+            running = running.filter { kill($0, 0) == 0 }
+        }
+        return running
+    }
+
+    private static func parent(of pid: pid_t) -> pid_t? {
+        var info = proc_bsdinfo()
+        let size = Int32(MemoryLayout<proc_bsdinfo>.size)
+        guard proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &info, size) == size else { return nil }
+        return pid_t(info.pbi_ppid)
+    }
+
+    private static func executableName(of pid: pid_t) -> String? {
+        // PROC_PIDPATHINFO_MAXSIZE (4 * MAXPATHLEN) is not imported as a Swift constant.
+        var buffer = [CChar](repeating: 0, count: 4 * Int(MAXPATHLEN))
+        guard proc_pidpath(pid, &buffer, UInt32(buffer.count)) > 0 else { return nil }
+        let path = buffer.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }
+        return String(decoding: path, as: UTF8.self).split(separator: "/").last.map(String.init)
     }
 }

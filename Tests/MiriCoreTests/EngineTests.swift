@@ -44,10 +44,11 @@ import Testing
 @MainActor struct EngineSupervisorTests {
     let launcher = FakeLauncher()
 
-    private func supervisor(recovered: @escaping () -> Void = {}, now: @escaping () -> Date = { .now })
-        -> EngineSupervisor
-    {
-        EngineSupervisor(launcher: launcher, recoverWindows: recovered, now: now)
+    private func supervisor(
+        recovered: @escaping () -> Void = {}, now: @escaping () -> Date = { .now },
+        sleep: @escaping @Sendable (Duration) async -> Void = { _ in await Task.yield() }
+    ) -> EngineSupervisor {
+        EngineSupervisor(launcher: launcher, recoverWindows: recovered, now: now, sleep: sleep)
     }
 
     @Test func startsAndStopsCleanlyAndRecoversWindows() async {
@@ -124,12 +125,12 @@ import Testing
     }
 
     @Test func stopCancelsAPendingRestart() async throws {
-        let engine = supervisor()
+        let engine = supervisor(sleep: { _ in try? await Task.sleep(for: .milliseconds(20)) })
         engine.start()
         launcher.engines[0].crash()
         engine.stop()
         #expect(engine.state == .stopped)
-        try await Task.sleep(for: EngineSupervisor.restartDelay + .milliseconds(300))
+        try await Task.sleep(for: .milliseconds(60))
         #expect(engine.state == .stopped)
         #expect(launcher.engines.count == 1)
     }
@@ -144,26 +145,15 @@ import Testing
         #expect(engine.state == .running(pid: 101))
     }
 
-    @Test func stopAfterAManualRestartKeepsTheEngineStopped() {
+    @Test func stopAfterAManualRestartCancelsRelaunchAndRunsCompletion() {
         let engine = supervisor()
         engine.start()
         launcher.engines[0].exitsOnInterrupt = false
         engine.restartManually()
-        engine.stop()
+        var launchesAtCompletion: Int?
+        engine.stop { launchesAtCompletion = launcher.engines.count }
         launcher.engines[0].onExit(0)
-        #expect(launcher.engines.count == 1)
-        #expect(engine.state == .stopped)
-    }
-
-    @Test func quitAfterAManualRestartLaunchesNoEngine() {
-        let engine = supervisor()
-        engine.start()
-        launcher.engines[0].exitsOnInterrupt = false
-        engine.restartManually()
-        var launchesWhenQuit: Int?
-        engine.stop { launchesWhenQuit = launcher.engines.count }
-        launcher.engines[0].onExit(0)
-        #expect(launchesWhenQuit == 1)
+        #expect(launchesAtCompletion == 1)
         #expect(launcher.engines.count == 1)
         #expect(engine.state == .stopped)
     }
@@ -203,6 +193,7 @@ struct EngineEnvironmentTests {
 struct RotatingLogTests {
     @Test func keepsAtMostTwoFilesOfTheLimit() throws {
         let directory = FileManager.default.temporaryDirectory.appending(path: "miri-log-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: directory) }
         let log = RotatingLog(url: directory.appending(path: "engine.log"), limit: 100)
         for line in 0..<50 { log.append(Data("line \(line)\n".utf8)) }
         let current = try Data(contentsOf: log.url)
@@ -217,8 +208,12 @@ struct RotatingLogTests {
 }
 
 /// Runs the real launcher against a shell script that stands in for the engine.
-@MainActor struct ProcessEngineLauncherTests {
+@MainActor final class ProcessEngineLauncherTests {
     private let support = FileManager.default.temporaryDirectory.appending(path: "miri-engine-\(UUID().uuidString)")
+
+    deinit {
+        try? FileManager.default.removeItem(at: support)
+    }
 
     private func launcher(script: String) throws -> ProcessEngineLauncher {
         try FileManager.default.createDirectory(at: support, withIntermediateDirectories: true)
@@ -284,15 +279,19 @@ struct RotatingLogTests {
 }
 
 /// Runs a sleeping process under a test name, the way an engine runs either as Miri's child or after Miri dies.
-struct OrphanedEnginesTests {
+final class OrphanedEnginesTests {
+    private let directory = FileManager.default.temporaryDirectory.appending(path: "miri-orphan-\(UUID().uuidString)")
     private let name = "fake-engine-\(UUID().uuidString.prefix(8))"
     /// Seconds the sleeper runs. A CI runner stalled one test run for over 30 seconds, so the sleeper must outlive
     /// such a stall, and still end by itself when a crashed run never kills it.
     private let lifetime = "600"
 
+    deinit {
+        try? FileManager.default.removeItem(at: directory)
+    }
+
     /// Compiles the sleeper, because macOS 15 kills a copy of `/bin/sleep` at launch even after it is signed again.
     private func executable() throws -> URL {
-        let directory = FileManager.default.temporaryDirectory.appending(path: "miri-orphan-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let source = directory.appending(path: "sleeper.c")
         try Data("#include <stdlib.h>\n#include <unistd.h>\nint main(int c, char **v) { sleep(atoi(v[1])); }\n".utf8)

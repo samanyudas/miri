@@ -3,9 +3,13 @@ import Testing
 
 @testable import MiriCore
 
-struct ConfigurationStoreTests {
+final class ConfigurationStoreTests {
     private let directory = FileManager.default.temporaryDirectory.appending(path: "miri-config-\(UUID().uuidString)")
     private var url: URL { directory.appending(path: "config.toml") }
+
+    deinit {
+        try? FileManager.default.removeItem(at: directory)
+    }
 
     private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
 
@@ -42,10 +46,20 @@ struct ConfigurationStoreTests {
         let store = ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri")
         store.load(reduceMotion: false)
         let first = try contents()
-        let modified = try FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date
+        let past = Date(timeIntervalSinceNow: -60)
+        try FileManager.default.setAttributes([.modificationDate: past], ofItemAtPath: url.path)
+        let before = try FileManager.default.attributesOfItem(atPath: url.path)
         store.load(reduceMotion: false)
+        let after = try FileManager.default.attributesOfItem(atPath: url.path)
         #expect(try contents() == first)
-        #expect(try FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date == modified)
+        #expect(after[.systemFileNumber] as? NSNumber == before[.systemFileNumber] as? NSNumber)
+        #expect(after[.modificationDate] as? Date == before[.modificationDate] as? Date)
+    }
+
+    @Test func parsesAndValidatesWidthPresetsText() throws {
+        #expect(try MiriSettings.parseWidthPresets("0.25, 0.5, 0.75") == [0.25, 0.5, 0.75])
+        #expect(throws: ConfigurationIssue.self) { _ = try MiriSettings.parseWidthPresets("0.25, abc") }
+        #expect(throws: ConfigurationIssue.self) { _ = try MiriSettings.parseWidthPresets("0.5, 0.25") }
     }
 
     @Test func keepsUserContentWhenSaving() throws {
@@ -134,7 +148,7 @@ struct ConfigurationStoreTests {
 
     @Test func writesTheNewWindowWidthOnlyWhenTheKeyIsAbsent() throws {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let width = { (text: String) throws -> TOMLValue? in
+        let width = { [self] (text: String) throws -> TOMLValue? in
             try text.write(to: url, atomically: true, encoding: .utf8)
             ConfigurationStore(url: url, appBundleIdentifier: "io.github.samanyudas.miri").load(reduceMotion: false)
             return try TOMLDocument(contents()).value(at: ["options", "new_window_width"])
@@ -214,10 +228,14 @@ struct ConfigurationStoreTests {
     }
 }
 
-struct ConfigurationIssueMenuSummaryTests {
+final class ConfigurationIssueMenuSummaryTests {
     private let directory = FileManager.default.temporaryDirectory.appending(
         path: "miri-menu-summary-\(UUID().uuidString)")
     private var url: URL { directory.appending(path: "config.toml") }
+
+    deinit {
+        try? FileManager.default.removeItem(at: directory)
+    }
 
     private func issue(_ text: String) throws -> ConfigurationIssue? {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -250,10 +268,14 @@ struct ConfigurationIssueMenuSummaryTests {
     }
 }
 
-struct StackLimitConfigurationTests {
+final class StackLimitConfigurationTests {
     private let directory = FileManager.default.temporaryDirectory.appending(
         path: "miri-stack-limit-\(UUID().uuidString)")
     private var url: URL { directory.appending(path: "config.toml") }
+
+    deinit {
+        try? FileManager.default.removeItem(at: directory)
+    }
 
     private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
 
@@ -317,9 +339,13 @@ struct StackLimitConfigurationTests {
     }
 }
 
-struct GestureConfigurationTests {
+final class GestureConfigurationTests {
     private let directory = FileManager.default.temporaryDirectory.appending(path: "miri-gesture-\(UUID().uuidString)")
     private var url: URL { directory.appending(path: "config.toml") }
+
+    deinit {
+        try? FileManager.default.removeItem(at: directory)
+    }
 
     private func contents() throws -> String { try String(contentsOf: url, encoding: .utf8) }
 

@@ -30,12 +30,10 @@ public enum EngineState: Equatable, Sendable {
     }
 }
 
-/// A running engine process.
 @MainActor protocol EngineProcess: AnyObject {
     var pid: Int32 { get }
     /// Asks the engine to exit so its cleanup runs.
     func interrupt()
-    /// Ends the engine immediately.
     func kill()
 }
 
@@ -49,7 +47,7 @@ public enum EngineState: Equatable, Sendable {
     public static let stopTimeout: Duration = .seconds(3)
     static let restartDelay: Duration = .seconds(1)
 
-    public private(set) var state: EngineState = .stopped {
+    private(set) var state: EngineState = .stopped {
         didSet { if state != oldValue { onChange(state) } }
     }
     public var onChange: (EngineState) -> Void = { _ in }
@@ -64,20 +62,23 @@ public enum EngineState: Equatable, Sendable {
     private var restartAfterStop = false
     private var pendingRestart: Task<Void, Never>?
     private let now: () -> Date
+    private let sleep: @Sendable (Duration) async -> Void
 
     public convenience init(launcher: ProcessEngineLauncher, recoverWindows: @escaping () -> Void) {
         self.init(launcher: launcher as any EngineLauncher, recoverWindows: recoverWindows)
     }
 
     init(
-        launcher: any EngineLauncher, recoverWindows: @escaping () -> Void, now: @escaping () -> Date = Date.init
+        launcher: any EngineLauncher, recoverWindows: @escaping () -> Void, now: @escaping () -> Date = Date.init,
+        sleep: @escaping @Sendable (Duration) async -> Void = { try? await Task.sleep(for: $0) }
     ) {
         self.launcher = launcher
         self.recoverWindows = recoverWindows
         self.now = now
+        self.sleep = sleep
     }
 
-    public func start() {
+    func start() {
         guard process == nil else { return }
         pendingRestart?.cancel()
         pendingRestart = nil
@@ -115,8 +116,9 @@ public enum EngineState: Equatable, Sendable {
         stopRequested = true
         stopCompletions.append(completion)
         running.interrupt()
+        let sleep = self.sleep
         Task { [weak self, weak running] in
-            try? await Task.sleep(for: Self.stopTimeout)
+            await sleep(Self.stopTimeout)
             guard let self, let running, self.process === running else { return }
             running.kill()
         }
@@ -146,8 +148,9 @@ public enum EngineState: Equatable, Sendable {
             return
         }
         state = .restarting(crashes: policy.crashes.count)
+        let sleep = self.sleep
         pendingRestart = Task { [weak self] in
-            try? await Task.sleep(for: Self.restartDelay)
+            await sleep(Self.restartDelay)
             guard !Task.isCancelled else { return }
             self?.start()
         }

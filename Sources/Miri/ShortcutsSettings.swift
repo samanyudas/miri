@@ -1,4 +1,3 @@
-import Carbon.HIToolbox
 import MiriCore
 import SwiftUI
 
@@ -10,6 +9,7 @@ struct ShortcutsSettings: View {
 
     private struct PendingConflict {
         let chord: Chord
+        let ownerToClear: ShortcutAction?
         let action: ShortcutAction
         let shortcut: SystemShortcut
     }
@@ -52,9 +52,8 @@ struct ShortcutsSettings: View {
                     }
                 }
                 let actions = ShortcutSearch.shared.filter(
-                    ShortcutAction.editable, query: filter, shortcuts: shortcuts, layout: model.keyLayout)
-                let others = ShortcutSearch.shared.filter(
-                    shortcuts.others, query: filter, layout: model.keyLayout)
+                    ShortcutAction.editable, query: filter, shortcuts: shortcuts)
+                let others = ShortcutSearch.shared.filterOthers(query: filter, shortcuts: shortcuts)
                 if actions.isEmpty, others.isEmpty {
                     VStack(spacing: 10) {
                         Text(String(localized: "No shortcuts match \u{201C}\(filter)\u{201D}."))
@@ -102,7 +101,7 @@ struct ShortcutsSettings: View {
                                         .foregroundStyle(Palette.primaryText)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                     ForEach(other.chords, id: \.self) { chord in
-                                        KeyCap(label: model.keyLayout.label(for: chord), minWidth: 52)
+                                        KeyCap(label: model.keyLayout.label(for: chord))
                                     }
                                 }
                                 .padding(.horizontal, 14)
@@ -127,7 +126,13 @@ struct ShortcutsSettings: View {
             isPresented: Binding(get: { pendingConflict != nil }, set: { if !$0 { pendingConflict = nil } }),
             presenting: pendingConflict
         ) { conflict in
-            Button("Use Anyway") { add(conflict.chord, to: conflict.action, allowingSystemConflict: true) }
+            Button("Use Anyway") {
+                if let owner = conflict.ownerToClear {
+                    move(conflict.chord, from: owner, to: conflict.action, allowingSystemConflict: true)
+                } else {
+                    add(conflict.chord, to: conflict.action, allowingSystemConflict: true)
+                }
+            }
             Button("Cancel", role: .cancel) {}
                 .keyboardShortcut(.defaultAction)
         } message: { _ in
@@ -148,33 +153,28 @@ struct ShortcutsSettings: View {
     private func keptDefaultRow(_ kept: KeptDefault) -> some View {
         let wanted = model.keyLayout.label(for: kept.wanted)
         let wantedInSentence = model.keyLayout.sentenceLabel(for: kept.wanted)
-        let owner = ShortcutAction.editable.first { $0.title == kept.owner }
+        let ownerAction = kept.owner.action
+        let ownerTitle = kept.owner.title
         return HStack(alignment: .center, spacing: 10) {
             NoticeGlyph(kind: .info)
             VStack(alignment: .leading, spacing: 2) {
-                Text("\(kept.action.title) has a new default, \(wantedInSentence), but \(kept.owner) uses it.")
+                Text("\(kept.action.title) has a new default, \(wantedInSentence), but \(ownerTitle) uses it.")
                     .font(.rowTitle)
                     .foregroundStyle(Palette.primaryText)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(keptText(kept, movable: owner != nil))
+                Text(keptText(kept, movable: ownerAction != nil))
                     .font(.detail)
                     .foregroundStyle(Palette.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if let owner {
+            if let ownerAction {
                 Button("Use \(wantedInSentence)") {
                     notice = nil
-                    // The owner can spell the same keys another way, such as `ctrl+alt-[` for `ctrl+alt-leftbracket`.
-                    for chord in model.shortcuts?.chords(for: owner) ?? []
-                    where model.keyLayout.conflicts(chord, kept.wanted) {
-                        model.removeShortcut(chord, from: owner)
-                    }
-                    add(kept.wanted, to: kept.action, allowingSystemConflict: false)
+                    move(kept.wanted, from: ownerAction, to: kept.action, allowingSystemConflict: false)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(Palette.accentFill)
-                .help("Move \(wantedInSentence) from \(kept.owner) to \(kept.action.title)")
+                .prominentButton()
+                .help("Move \(wantedInSentence) from \(ownerTitle) to \(kept.action.title)")
                 .accessibilityLabel("Use \(KeyCap.spoken(wanted)) for \(kept.action.title)")
             }
         }
@@ -280,7 +280,7 @@ struct ShortcutsSettings: View {
             kept.kept.isEmpty
             ? String(localized: "\(kept.action.title) has no shortcut now.") : String(localized: "Miri kept \(labels).")
         return movable
-            ? String(localized: "\(keptSentence) Using \(wanted) removes it from \(kept.owner).") : keptSentence
+            ? String(localized: "\(keptSentence) Using \(wanted) removes it from \(kept.owner.title).") : keptSentence
     }
 
     private func startRecording(_ action: ShortcutAction) {
@@ -310,27 +310,38 @@ struct ShortcutsSettings: View {
         case .modifiersChanged(let modifiers):
             heldModifiers = modifiers
         case .keyDown(let press):
-            if press.keyCode == kVK_Escape, press.modifiers.isEmpty {
+            switch press.resolve(in: model.keyLayout) {
+            case .cancelled:
                 notice = nil
                 stopRecording()
-                return
+            case .invalid(let message):
+                notice = Notice(action: action, text: message)
+            case .chord(let chord):
+                stopRecording()
+                add(chord, to: action, allowingSystemConflict: false)
             }
-            guard !press.modifiers.isDisjoint(with: [.control, .option, .command]) else {
-                notice = Notice(action: action, text: String(localized: "Include Control, Option, or Command."))
-                return
-            }
-            guard let name = model.keyLayout.name(for: press.keyCode) else {
-                notice = Notice(action: action, text: String(localized: "Miri cannot use this key in a shortcut."))
-                return
-            }
-            stopRecording()
-            add(Chord(press.modifiers, name), to: action, allowingSystemConflict: false)
         }
     }
 
     private func add(_ chord: Chord, to action: ShortcutAction, allowingSystemConflict: Bool) {
+        handleOutcome(
+            model.addShortcut(chord, to: action, allowingSystemConflict: allowingSystemConflict),
+            chord: chord, ownerToClear: nil, action: action)
+    }
+
+    private func move(
+        _ chord: Chord, from owner: ShortcutAction, to action: ShortcutAction, allowingSystemConflict: Bool
+    ) {
+        handleOutcome(
+            model.moveShortcut(chord, from: owner, to: action, allowingSystemConflict: allowingSystemConflict),
+            chord: chord, ownerToClear: owner, action: action)
+    }
+
+    private func handleOutcome(
+        _ outcome: AppModel.ShortcutAddOutcome, chord: Chord, ownerToClear: ShortcutAction?, action: ShortcutAction
+    ) {
         let label = model.keyLayout.label(for: chord)
-        switch model.addShortcut(chord, to: action, allowingSystemConflict: allowingSystemConflict) {
+        switch outcome {
         case .added:
             notice = nil
             AccessibilityNotification.Announcement(
@@ -341,14 +352,16 @@ struct ShortcutsSettings: View {
         case .rejected(.usedBy(let owner)):
             notice = Notice(
                 action: action,
-                text: String(localized: "\(model.keyLayout.sentenceLabel(for: chord)) is already used by \(owner)."))
+                text: String(
+                    localized: "\(model.keyLayout.sentenceLabel(for: chord)) is already used by \(owner.title)."))
         case .rejected(.alreadyAssigned):
             notice = Notice(
                 action: action,
                 text: String(
                     localized: "\(model.keyLayout.sentenceLabel(for: chord)) is already a shortcut for this action."))
         case .systemConflict(let shortcut):
-            pendingConflict = PendingConflict(chord: chord, action: action, shortcut: shortcut)
+            pendingConflict = PendingConflict(
+                chord: chord, ownerToClear: ownerToClear, action: action, shortcut: shortcut)
         }
     }
 }
@@ -361,11 +374,11 @@ struct ShortcutChip: View {
     let showsRemove: Bool
     let remove: () -> Void
     /// Runs when the remove button gets keyboard focus, so the preview panel can follow the keyboard.
-    var focused: () -> Void = {}
+    let focused: () -> Void
     @FocusState private var removeFocused: Bool
 
     var body: some View {
-        KeyCap(label: label, minWidth: 52)
+        KeyCap(label: label)
             .overlay(alignment: .topTrailing) {
                 Button(action: remove) {
                     Image(systemName: "xmark.circle.fill")

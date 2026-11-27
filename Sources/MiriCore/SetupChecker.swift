@@ -91,13 +91,13 @@ public enum SetupChecker {
         ("Magnet", ["com.crowdcafe.windowmagnet"]),
     ]
 
-    static let accessibilityURL = URL(
+    public static let accessibilityURL = URL(
         string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
     static let desktopURL = URL(string: "x-apple.systempreferences:com.apple.Desktop-Settings.extension")
     static let trackpadURL = URL(string: "x-apple.systempreferences:com.apple.Trackpad-Settings.extension")
 
     /// The pane under Privacy & Security that holds the Accessibility permission. macOS 27 renamed it.
-    static func accessibilityPane(_ observation: SetupObservation) -> String {
+    private static func accessibilityPane(_ observation: SetupObservation) -> String {
         observation.macOSMajorVersion >= 27
             ? String(localized: "Device Control and Data Access") : String(localized: "Accessibility")
     }
@@ -143,8 +143,7 @@ public enum SetupChecker {
         ]
     }
 
-    /// The names of running competing window managers.
-    static func runningCompetitors(_ observation: SetupObservation) -> [String] {
+    private static func runningCompetitors(_ observation: SetupObservation) -> [String] {
         competingManagers.filter {
             !$0.bundleIdentifiers.isDisjoint(with: observation.runningBundleIdentifiers)
                 || !$0.processNames.isDisjoint(with: observation.runningProcessNames)

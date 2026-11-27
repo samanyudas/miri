@@ -114,7 +114,7 @@ struct TOMLDocument: Sendable {
 /// Builds TOML documents while tracking which tables were defined by headers, dotted keys, or inline tables.
 struct TOMLParser {
     final class Table {
-        enum Origin { case implicit, header, dotted, inline }
+        enum Origin { case implicit, header, dotted }
         var origin: Origin
         var entries: [String: Entry] = [:]
 
@@ -297,7 +297,6 @@ struct TOMLParser {
                 table.entries[key] = .table(next)
                 table = next
             case .table(let next):
-                if next.origin == .inline { throw fail(String(localized: "Cannot extend the inline table \(key).")) }
                 table = next
             case .tableArray(let tables): table = tables[tables.count - 1]
             case .value: throw fail(String(localized: "The key \(key) is already defined as a value."))
@@ -475,7 +474,7 @@ struct TOMLParser {
 
     private mutating func parseInlineTable() throws(TOMLError) -> TOMLValue {
         index += 1
-        let table = Table(.inline)
+        let table = Table(.header)
         skipSpaces()
         if peek == "}" {
             index += 1
@@ -490,16 +489,10 @@ struct TOMLParser {
             case ",": index += 1
             case "}":
                 index += 1
-                freeze(table)
                 return table.value
             default: throw fail(String(localized: "Expected , or } in the inline table."))
             }
         }
-    }
-
-    private func freeze(_ table: Table) {
-        table.origin = .inline
-        for case .table(let child) in table.entries.values { freeze(child) }
     }
 
     private mutating func parseBasicString() throws(TOMLError) -> String {
@@ -535,7 +528,7 @@ struct TOMLParser {
             }
             if scalar == "\\" {
                 index += 1
-                if try skipLineEndingBackslash() { continue }
+                if skipLineEndingBackslash() { continue }
                 result.append(try parseEscape())
                 continue
             }
@@ -545,8 +538,7 @@ struct TOMLParser {
         }
     }
 
-    /// Handles a backslash at the end of a line in a multi-line basic string, which trims the following whitespace.
-    private mutating func skipLineEndingBackslash() throws(TOMLError) -> Bool {
+    private mutating func skipLineEndingBackslash() -> Bool {
         var offset = 0
         while let scalar = peek(offset), scalar == " " || scalar == "\t" { offset += 1 }
         guard peek(offset) == "\n" || (peek(offset) == "\r" && peek(offset + 1) == "\n") else { return false }

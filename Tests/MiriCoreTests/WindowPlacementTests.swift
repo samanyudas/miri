@@ -49,4 +49,22 @@ struct WindowPlacementTests {
         let oversized = CGRect(x: 100, y: -50, width: 1600, height: 1000)
         #expect(WindowPlacement.fitted(oversized, in: smallDisplay) == smallDisplay)
     }
+
+    @Test func enforcesMinimumSizeKeepingTheTopLeftCorner() {
+        let minimum = CGSize(width: 880, height: 640)
+        let large = CGRect(x: 444, y: 300, width: 900, height: 700)
+        #expect(WindowPlacement.enforcingMinimum(large, minimum: minimum) == large)
+
+        let small = CGRect(x: 444, y: 500, width: 700, height: 500)
+        let limited = WindowPlacement.enforcingMinimum(small, minimum: minimum)
+        #expect(limited == CGRect(x: 444, y: 360, width: 880, height: 640))
+        #expect(limited.maxY == small.maxY)
+
+        #expect(
+            WindowPlacement.enforcingMinimum(CGRect(x: 0, y: 0, width: 839, height: 700), minimum: minimum).size
+                == CGSize(width: 880, height: 700))
+        #expect(
+            WindowPlacement.enforcingMinimum(CGRect(x: 0, y: 0, width: 950, height: 560), minimum: minimum).size
+                == CGSize(width: 950, height: 640))
+    }
 }

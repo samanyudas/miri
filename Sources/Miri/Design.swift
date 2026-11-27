@@ -46,7 +46,7 @@ enum Palette {
     /// A glyph drawn on a status color: white on the deep light colors, near black on the bright dark ones.
     static let onStatus = dynamic(0xFFFFFF, 0x1D1D1F)
     /// The count badge behind white text, deep enough for 4.5:1 in both appearances.
-    static let badge = dynamic(0xC2410C, 0xC2410C)
+    static let badge = Color(nsColor: NSColor(rgb: 0xC2410C, alpha: 1))
 
     static let warningTint = dynamic(0xFFF7ED, 0x3B2A1C)
     static let warningBorder = dynamic(0xF6DCC3, 0x5A3E26)
@@ -163,7 +163,6 @@ extension SettingsPage where Trailing == EmptyView {
     }
 }
 
-/// A small uppercase label above a group, with an optional control at its trailing end.
 struct SectionLabel<Accessory: View>: View {
     let title: String
     @ViewBuilder var accessory: Accessory
@@ -171,10 +170,7 @@ struct SectionLabel<Accessory: View>: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(title)
-                .font(.small.weight(.semibold))
-                .tracking(0.66)
-                .textCase(.uppercase)
-                .foregroundStyle(Palette.secondaryText)
+                .eyebrowStyle(color: Palette.secondaryText)
                 .accessibilityAddTraits(.isHeader)
             Spacer(minLength: 0)
             accessory
@@ -189,7 +185,6 @@ extension SectionLabel where Accessory == EmptyView {
     }
 }
 
-/// A labelled section holding one group of rows.
 struct SettingsSection<Content: View>: View {
     let title: String
     @ViewBuilder var content: Content
@@ -207,7 +202,6 @@ struct SettingsSection<Content: View>: View {
     }
 }
 
-/// A rounded card that separates its rows with hairlines.
 struct SettingsGroup<Content: View>: View {
     @ViewBuilder var content: Content
 
@@ -227,7 +221,6 @@ struct SettingsGroup<Content: View>: View {
     }
 }
 
-/// One row of a group: a title with an optional explanation, and its control at the trailing end.
 struct SettingsRow<Control: View>: View {
     let title: String
     var detail: String?
@@ -256,9 +249,48 @@ struct SettingsRow<Control: View>: View {
     }
 }
 
-extension SettingsRow where Control == EmptyView {
-    init(title: String, detail: String? = nil, monospacedTitle: Bool = false) {
-        self.init(title: title, detail: detail, monospacedTitle: monospacedTitle, control: { EmptyView() })
+struct HeroCard<Illustration: View, Trailing: View>: View {
+    let eyebrow: String
+    let eyebrowColor: Color
+    let title: String
+    let detail: String
+    let statusValue: String
+    let tint: Color
+    var spacing: CGFloat = 26
+    @ViewBuilder var illustration: Illustration
+    @ViewBuilder var trailing: Trailing
+
+    var body: some View {
+        HStack(spacing: spacing) {
+            illustration
+            VStack(alignment: .leading, spacing: 4) {
+                Text(eyebrow)
+                    .eyebrowStyle(color: eyebrowColor)
+                Text(title)
+                    .font(.heroTitle)
+                    .foregroundStyle(Palette.primaryText)
+                    .modifier(StatusValue(value: statusValue))
+                Text(detail)
+                    .font(.detail)
+                    .foregroundStyle(Palette.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            trailing
+        }
+        .padding(20)
+        .background(tint, in: .rect(cornerRadius: 10))
+    }
+}
+
+extension HeroCard where Trailing == EmptyView {
+    init(
+        eyebrow: String, eyebrowColor: Color, title: String, detail: String, statusValue: String, tint: Color,
+        spacing: CGFloat = 26, @ViewBuilder illustration: () -> Illustration
+    ) {
+        self.init(
+            eyebrow: eyebrow, eyebrowColor: eyebrowColor, title: title, detail: detail, statusValue: statusValue,
+            tint: tint, spacing: spacing, illustration: illustration, trailing: { EmptyView() })
     }
 }
 
@@ -463,11 +495,9 @@ struct RowSwitch: View {
     }
 }
 
-/// A keyboard shortcut drawn as a key cap.
-/// VoiceOver reads it in words, such as "Control Option Left Arrow" for ⌃⌥←.
 struct KeyCap: View {
     let label: String
-    var minWidth: CGFloat = 40
+    var minWidth: CGFloat = 52
 
     var body: some View {
         Text(KeyLayout.isolated(label))
@@ -617,6 +647,18 @@ struct SearchField: View {
 }
 
 extension View {
+    func eyebrowStyle(color: Color) -> some View {
+        font(.small.weight(.semibold))
+            .tracking(0.66)
+            .textCase(.uppercase)
+            .foregroundStyle(color)
+    }
+
+    func prominentButton() -> some View {
+        buttonStyle(.borderedProminent)
+            .tint(Palette.accentFill)
+    }
+
     /// The box of a text field in the design's colors: a group fill, a ring, and at least 28 points of height.
     /// While the field has focus, the ring is the accent color, like the focus ring of the segmented control.
     func fieldBox(focused: Bool) -> some View {

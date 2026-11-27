@@ -4,8 +4,19 @@ import MiriCore
 import Observation
 import ServiceManagement
 
-/// The app's state: configuration, engine lifecycle, setup checks, and the saved stopped state.
 @Observable final class AppModel {
+    enum ScreenRecordingFeature: Hashable, CaseIterable {
+        case sharedEdgeSlices
+        case slideWindowPictures
+
+        var keyPath: WritableKeyPath<MiriSettings, Bool> {
+            switch self {
+            case .sharedEdgeSlices: \.sharedEdgeSlices
+            case .slideWindowPictures: \.slideWindowPictures
+            }
+        }
+    }
+
     static let stoppedKey = "managementStopped"
     static let setupPollInterval: Duration = .seconds(2)
     static let gestureVerificationKey = "gestureVerification"
@@ -20,10 +31,12 @@ import ServiceManagement
     private(set) var settings = MiriSettings() {
         didSet { showDockIcon(settings.showInDock) }
     }
+    var settingsPage: SettingsView.Page {
+        didSet { defaults.set(settingsPage.rawValue, forKey: SettingsView.pageKey) }
+    }
+    private(set) var screenNames: [String] = NSScreen.screens.map(\.localizedName)
     private(set) var configurationIssue: ConfigurationIssue?
-    /// The file's shortcuts, or `nil` while the file cannot be read correctly.
     private(set) var shortcuts: Shortcuts?
-    /// The defaults the last upgrade could not move to their new shortcut.
     private(set) var keptDefaults: [KeptDefault] = []
     private(set) var keyLayout: KeyLayout
     private(set) var setupChecks: [SetupCheck] = []
@@ -34,15 +47,10 @@ import ServiceManagement
     private(set) var stoppedByUser: Bool
     /// The confirmed gesture test. It is app state, so editing the configuration file cannot mark a swipe as tested.
     private(set) var gestureVerification: GestureVerification?
-    /// The macOS version and macOS gesture settings that a gesture test result depends on.
     private(set) var gestureEnvironment: GestureEnvironment
-    /// The bundled engine's source revision, for the version line and diagnostics.
-    let engineRevision: String
-    /// The finger count a running gesture test turned on.
+    let engineRevision: String?
     private(set) var gestureTestFingers: GestureFingers?
-    /// Miri turned the shared-edge switch off, or kept it off, because Screen Recording permission was missing.
-    private var screenRecordingRefused = false
-    private var slidePicturesRefused = false
+    private var refusedScreenRecordingFeatures: Set<ScreenRecordingFeature> = []
 
     @ObservationIgnored private let store: ConfigurationStore
     @ObservationIgnored private var supervisor: EngineSupervisor!
@@ -51,24 +59,25 @@ import ServiceManagement
     @ObservationIgnored private var gesturePoll: Task<Void, Never>?
     @ObservationIgnored private var stopShortcut: StopShortcut?
     @ObservationIgnored private let defaults = UserDefaults.standard
-    @ObservationIgnored private let screenRecording: any ScreenRecordingAccess = SystemScreenRecording()
 
     init(bundle: Bundle = .main) {
         let identifier = bundle.bundleIdentifier ?? "io.github.samanyudas.miri"
         let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "Miri"  // Not interface text
         let support = URL.applicationSupportDirectory.appending(path: name, directoryHint: .isDirectory)
         paths = EnginePaths(
-            executable: bundle.bundleURL.appending(path: "Contents/Helpers/miri-engine"), support: support,
+            executable: Self.engineExecutableURL(in: bundle), support: support,
             serviceName: identifier + ".engine")
         log = RotatingLog(url: paths.logs.appending(path: "engine.log"))
         let layout = KeyLayout.current
         keyLayout = layout
         store = ConfigurationStore(url: paths.configuration, appBundleIdentifier: identifier, layout: layout)
-        stoppedByUser = UserDefaults.standard.bool(forKey: Self.stoppedKey)
-        gestureVerification = UserDefaults.standard.data(forKey: Self.gestureVerificationKey).flatMap {
+        settingsPage =
+            defaults.string(forKey: SettingsView.pageKey).flatMap(SettingsView.Page.init(rawValue:)) ?? .general
+        stoppedByUser = defaults.bool(forKey: Self.stoppedKey)
+        gestureVerification = defaults.data(forKey: Self.gestureVerificationKey).flatMap {
             try? JSONDecoder().decode(GestureVerification.self, from: $0)
         }
-        engineRevision = Self.engineRevision(bundle: bundle)
+        engineRevision = Self.bundledEngineRevision(in: bundle)
         gestureEnvironment = GestureEnvironment(
             macOSVersion: ProcessInfo.processInfo.operatingSystemVersionString,
             gestureSettings: GestureSettingsSnapshot(threeFingerSwipe: nil, fourFingerSwipe: nil, threeFingerDrag: nil))
@@ -81,9 +90,25 @@ import ServiceManagement
         }
     }
 
+    static func engineExecutableURL(in bundle: Bundle = .main) -> URL {
+        bundle.bundleURL.appending(path: "Contents/Helpers/miri-engine")
+    }
+
+    static func engineRevisionURL(in bundle: Bundle = .main) -> URL {
+        bundle.bundleURL.appending(path: "Contents/Resources/engine-revision.txt")
+    }
+
+    static func bundledEngineRevision(in bundle: Bundle = .main) -> String? {
+        (try? String(contentsOf: engineRevisionURL(in: bundle), encoding: .utf8))?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    static var shortVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+    }
+
     var reduceMotion: Bool { NSWorkspace.shared.accessibilityDisplayShouldReduceMotion }
 
-    /// Loads the configuration, watches it, and starts management unless the user stopped it.
     func launch() {
         stopOrphanedEngines()
         stopShortcut = StopShortcut { [weak self] in self?.stopFromShortcut() }
@@ -94,6 +119,9 @@ import ServiceManagement
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification, object: nil, queue: .main
         ) { [weak self] _ in MainActor.assumeIsolated { self?.reloadConfiguration() } }
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
+        ) { [weak self] _ in MainActor.assumeIsolated { self?.screenNames = NSScreen.screens.map(\.localizedName) } }
         DistributedNotificationCenter.default().addObserver(
             forName: Notification.Name(kTISNotifySelectedKeyboardInputSourceChanged as String), object: nil,
             queue: .main
@@ -140,43 +168,56 @@ import ServiceManagement
         case failed
     }
 
-    /// Adds a shortcut unless another Miri binding uses its keys. A macOS conflict needs `allowingSystemConflict`.
     func addShortcut(_ chord: Chord, to action: ShortcutAction, allowingSystemConflict: Bool = false)
         -> ShortcutAddOutcome
     {
         guard let shortcuts else { return .failed }
-        if let rejection = shortcuts.rejection(adding: chord, to: action, layout: keyLayout) {
+        if let rejection = shortcuts.rejection(adding: chord, to: action) {
             return .rejected(rejection)
         }
         if !allowingSystemConflict,
-            let conflict = SystemShortcuts.load(layout: keyLayout).conflict(for: chord, layout: keyLayout)
+            let conflict = SystemShortcuts.load(layout: keyLayout).conflict(for: chord)
         {
             return .systemConflict(conflict)
         }
-        return apply(.add(chord, to: action)) ? .added : .failed
+        return apply(.add(chord, to: action))
+    }
+
+    func moveShortcut(
+        _ chord: Chord, from owner: ShortcutAction, to action: ShortcutAction, allowingSystemConflict: Bool = false
+    ) -> ShortcutAddOutcome {
+        guard shortcuts != nil else { return .failed }
+        if !allowingSystemConflict,
+            let conflict = SystemShortcuts.load(layout: keyLayout).conflict(for: chord)
+        {
+            return .systemConflict(conflict)
+        }
+        return apply(.move(chord, from: owner, to: action))
     }
 
     func removeShortcut(_ chord: Chord, from action: ShortcutAction) {
-        apply(.remove(chord, from: action))
+        _ = apply(.remove(chord, from: action))
     }
 
     func resetShortcuts() {
-        apply(.resetToDefaults)
+        _ = apply(.resetToDefaults)
     }
 
-    @discardableResult private func apply(_ edit: ShortcutEdit) -> Bool {
+    private func apply(_ edit: ShortcutEdit) -> ShortcutAddOutcome {
         do {
             try store.apply(edit)
             configurationIssue = nil
             shortcuts = store.shortcuts
             keptDefaults = store.keptDefaults
             stopShortcut?.register(store.stopChordsToRegister, layout: keyLayout)
-            return true
+            return .added
+        } catch let rejection as ShortcutRejection {
+            return .rejected(rejection)
         } catch {
             let issue = error as? ConfigurationIssue ?? .notEditable(String(describing: error))
             reloadConfiguration()
             configurationIssue = configurationIssue ?? issue
-            return false
+            return .failed
         }
     }
 
@@ -187,7 +228,6 @@ import ServiceManagement
             configurationIssue = nil
             dropStaleGestureVerification()
         } catch {
-            configurationIssue = error
             reloadConfiguration()
             configurationIssue = configurationIssue ?? error
         }
@@ -210,32 +250,29 @@ import ServiceManagement
         syncLoginItem()
     }
 
-    /// Whether Layout explains that the shared-edge switch is off for lack of Screen Recording permission.
-    var sharedEdgeSlicesNeedPermission: Bool { screenRecordingRefused && !settings.sharedEdgeSlices }
-
-    func setSharedEdgeSlices(_ wanted: Bool) {
-        let on = screenRecording.switchValue(wanting: wanted)
-        screenRecordingRefused = wanted && !on
-        update { $0.sharedEdgeSlices = on }
+    func needsScreenRecordingPermission(_ feature: ScreenRecordingFeature) -> Bool {
+        refusedScreenRecordingFeatures.contains(feature) && !settings[keyPath: feature.keyPath]
     }
 
-    /// Whether Layout explains that the picture slide switch is off for lack of Screen Recording permission.
-    var slideWindowPicturesNeedPermission: Bool { slidePicturesRefused && !settings.slideWindowPictures }
-
-    func setSlideWindowPictures(_ wanted: Bool) {
-        let on = screenRecording.switchValue(wanting: wanted)
-        slidePicturesRefused = wanted && !on
-        update { $0.slideWindowPictures = on }
+    func setScreenRecordingFeature(_ feature: ScreenRecordingFeature, wanted: Bool) {
+        let on = wanted && SetupProbe.requestScreenRecording()
+        if wanted && !on {
+            refusedScreenRecordingFeatures.insert(feature)
+        } else {
+            refusedScreenRecordingFeatures.remove(feature)
+        }
+        update { $0[keyPath: feature.keyPath] = on }
     }
 
     func refreshSetup() {
-        if screenRecording.revokes(settings.sharedEdgeSlices) {
-            screenRecordingRefused = true
-            update { $0.sharedEdgeSlices = false }
-        }
-        if screenRecording.revokes(settings.slideWindowPictures) {
-            slidePicturesRefused = true
-            update { $0.slideWindowPictures = false }
+        if !SetupProbe.screenRecordingGranted {
+            let revoked = ScreenRecordingFeature.allCases.filter { settings[keyPath: $0.keyPath] }
+            if !revoked.isEmpty {
+                refusedScreenRecordingFeatures.formUnion(revoked)
+                update { settings in
+                    for feature in revoked { settings[keyPath: feature.keyPath] = false }
+                }
+            }
         }
         let observation = SetupProbe.observe()
         let checks = SetupChecker.evaluate(observation)
@@ -287,7 +324,6 @@ import ServiceManagement
         case cancelled
     }
 
-    /// Turns on the selected swipe for a test. Returns the result to save if the user confirms it, dated now.
     func beginGestureTest() throws(GestureTestBlocked) -> GestureVerification {
         refreshSetup()
         if let blocker = gestureTestBlocker { throw GestureTestBlocked(message: blocker) }
@@ -301,9 +337,7 @@ import ServiceManagement
         case .off:
             throw GestureTestBlocked(message: String(localized: "Choose three or four fingers to test the swipe."))
         }
-        guard let fingers = settings.stripGesture.fingers else {
-            throw GestureTestBlocked(message: String(localized: "Choose three or four fingers to test the swipe."))
-        }
+        let fingers = settings.stripGesture.fingers!
         gestureTestFingers = fingers
         applyGestureFingers()
         return GestureVerification(
@@ -356,7 +390,8 @@ import ServiceManagement
 
     private func applyGestureFingers() {
         do {
-            try store.applyGestureFingers(reduceMotion: reduceMotion)
+            let wrote = try store.applyGestureFingers(reduceMotion: reduceMotion)
+            if wrote, store.issue == nil { configurationIssue = nil }
         } catch {
             configurationIssue = error
         }
@@ -412,6 +447,8 @@ import ServiceManagement
 
     /// Stops the engine and recovers windows before the app exits. It does not change the saved stopped state.
     func prepareToQuit(completion: @escaping () -> Void) {
+        gesturePoll?.cancel()
+        gesturePoll = nil
         cancelSetupPoll()
         supervisor.stop(completion: completion)
     }
@@ -419,17 +456,17 @@ import ServiceManagement
     func diagnostics() -> String {
         refreshSetup()
         let info = Bundle.main.infoDictionary ?? [:]
-        let version =
-            "\(info["CFBundleShortVersionString"] as? String ?? "?") (\(info["CFBundleVersion"] as? String ?? "?"))"
-        let revision = engineRevision
+        let version = "\(Self.shortVersion) (\(info["CFBundleVersion"] as? String ?? "?"))"
         let main = NSScreen.screens.first
+        let mainMaxY = main?.frame.maxY ?? 0
         let displays = NSScreen.screens.map { screen in
-            DiagnosticsReport.Display(
-                width: Int(screen.frame.width), height: Int(screen.frame.height), scale: screen.backingScaleFactor,
-                x: Int(screen.frame.minX), y: Int((main?.frame.maxY ?? 0) - screen.frame.maxY), isMain: screen == main)
+            let ax = SetupProbe.axFrame(for: screen.frame, mainMaxY: mainMaxY)
+            return DiagnosticsReport.Display(
+                width: Int(ax.width), height: Int(ax.height), scale: screen.backingScaleFactor,
+                x: Int(ax.minX), y: Int(ax.minY), isMain: screen == main)
         }
         let report = DiagnosticsReport(
-            appVersion: version, engineRevision: revision,
+            appVersion: version, engineRevision: engineRevision ?? "unknown",
             macOSVersion: ProcessInfo.processInfo.operatingSystemVersionString, architecture: "arm64",
             displays: displays, engineState: engineState, setupChecks: setupChecks,
             configurationIssue: configurationIssue, log: log.tail(maximum: 16_384))
@@ -437,12 +474,6 @@ import ServiceManagement
             homeDirectory: NSHomeDirectory(), userNames: [NSUserName(), NSFullUserName()],
             sensitiveStrings: WindowRestorer.openWindowTitles())
         return report.rendered(with: redactor)
-    }
-
-    private static func engineRevision(bundle: Bundle) -> String {
-        let url = bundle.bundleURL.appending(path: "Contents/Resources/engine-revision.txt")
-        return (try? String(contentsOf: url, encoding: .utf8))?.trimmingCharacters(in: .whitespacesAndNewlines)
-            ?? "unknown"
     }
 
     private func pollSetupUntilReady() {
@@ -504,6 +535,8 @@ final class ConfigurationWatcher {
     private let url: URL
     private let onChange: () -> Void
     private var source: DispatchSourceFileSystemObject?
+    private var pendingReload: Task<Void, Never>?
+    private var pendingReplace = false
 
     init(url: URL, onChange: @escaping () -> Void) {
         self.url = url
@@ -511,22 +544,37 @@ final class ConfigurationWatcher {
         watch()
     }
 
-    deinit { source?.cancel() }
+    deinit {
+        pendingReload?.cancel()
+        source?.cancel()
+    }
 
     private func watch() {
         source?.cancel()
         let descriptor = open(url.path, O_EVTONLY)
         guard descriptor >= 0 else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in self?.watch() }
+            pendingReload?.cancel()
+            pendingReload = Task { [weak self] in
+                try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled else { return }
+                self?.watch()
+            }
             return
         }
         let source = DispatchSource.makeFileSystemObjectSource(
             fileDescriptor: descriptor, eventMask: [.write, .extend, .delete, .rename], queue: .main)
         source.setEventHandler { [weak self] in
             guard let self else { return }
-            let replaced = !source.data.isDisjoint(with: [.delete, .rename])
+            if !source.data.isDisjoint(with: [.delete, .rename]) {
+                self.pendingReplace = true
+            }
+            self.pendingReload?.cancel()
             // Let the writer finish before reading.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            self.pendingReload = Task { [weak self] in
+                try? await Task.sleep(for: .milliseconds(200))
+                guard !Task.isCancelled, let self else { return }
+                let replaced = self.pendingReplace
+                self.pendingReplace = false
                 if replaced { self.watch() }
                 self.onChange()
             }

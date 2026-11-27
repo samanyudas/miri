@@ -28,35 +28,7 @@ extension AppModel {
     }
 
     func showLogsInFinder() {
-        let url = log.url
-        let reveal: @MainActor () -> Void = {
-            NSApp.yieldActivation(toApplicationWithBundleIdentifier: "com.apple.finder")
-            NSWorkspace.shared.activateFileViewerSelecting([url])
-            NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.finder")
-                .first?.activate(from: .current, options: [])
-        }
-        if NSApp.isActive {
-            reveal()
-            return
-        }
-        // Clicking a menu bar item while another app is frontmost leaves Miri inactive, so Finder cannot take focus
-        // under cooperative activation. Activate Miri first, then hand activation to Finder once Miri is active.
-        var revealed = false
-        nonisolated(unsafe) var observer: NSObjectProtocol?
-        let finish: @MainActor () -> Void = {
-            guard !revealed else { return }
-            revealed = true
-            if let observer { NotificationCenter.default.removeObserver(observer) }
-            observer = nil
-            reveal()
-        }
-        observer = NotificationCenter.default.addObserver(
-            forName: NSApplication.didBecomeActiveNotification, object: NSApp, queue: .main
-        ) { _ in
-            MainActor.assumeIsolated { finish() }
-        }
-        NSApp.activate(ignoringOtherApps: true)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { finish() }
+        SetupProbe.revealInFinder(log.url)
     }
 }
 
@@ -136,15 +108,6 @@ struct MenuContent: View {
     }
 }
 
-extension SetupCheck {
-    /// A gesture check only looks for conflicts. Only a gesture test turns the swipe on, so it never says Passed.
-    var isGestureCheck: Bool { id == .fourFingerGesture || id == .threeFingerGesture }
-
-    /// Whether the check found something the user should look at.
-    var needsAttention: Bool { status != .passed }
-}
-
-/// Previews the redacted report before anything reaches the clipboard.
 struct DiagnosticsView: View {
     let model: AppModel
     @State private var report = ""
@@ -210,8 +173,7 @@ struct DiagnosticsView: View {
         }
         .fixedSize()
         Button("Copy to Clipboard") { copy() }
-            .buttonStyle(.borderedProminent)
-            .tint(Palette.accentFill)
+            .prominentButton()
             .keyboardShortcut(.defaultAction)
             .fixedSize()
     }

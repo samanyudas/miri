@@ -50,21 +50,13 @@ public struct Chord: Hashable, Sendable, CustomStringConvertible {
     /// Like `init(engineText:)`, but keeps a printed character such as `=` as written, because only the keyboard
     /// layout says which key it names. `KeyLayout.conflicts` compares chords read this way.
     init?(exactEngineText engineText: String) {
-        let parts = engineText.unicodeScalars.split(separator: "-", omittingEmptySubsequences: false).map {
-            String($0).trimmingCharacters(in: EngineKey.whitespace)
-        }
-        guard (1...2).contains(parts.count), let last = parts.last, !last.isEmpty else { return nil }
+        guard let (modifierNames, key) = EngineKey.split(engineText), !key.isEmpty else { return nil }
         var modifiers = Set<ChordModifier>()
-        if parts.count == 2 {
-            for name in parts[0].unicodeScalars.split(separator: "+", omittingEmptySubsequences: false) {
-                guard let modifier = ChordModifier.parse(String(name).trimmingCharacters(in: EngineKey.whitespace))
-                else {
-                    return nil
-                }
-                modifiers.insert(modifier)
-            }
+        for name in modifierNames {
+            guard let modifier = ChordModifier.parse(name) else { return nil }
+            modifiers.insert(modifier)
         }
-        self.init(modifiers, last.lowercased())
+        self.init(modifiers, key.lowercased())
     }
 
     /// The engine's syntax, with modifiers in a fixed order.
@@ -227,7 +219,6 @@ struct DefaultBinding: Sendable {
                 LocalizedStringResource("Move column to display right"), "window_movedisplay_east", version: 2),
         ]
 
-    /// The newest version in the table or in `changed`. Miri records it after offering the defaults.
     static let currentVersion = (table.map(\.version) + changed.map(\.version)).max() ?? 0
 
     /// Defaults that `version` removed, with the command whose current default replaces each one. `offered` is the
@@ -411,9 +402,34 @@ struct DefaultBinding: Sendable {
         change.to.filter { !change.from.contains($0) }
     }
 
-    /// One chord as a string and several as an array, as Miri writes its defaults.
     static func encoded(_ chords: [Chord]) -> TOMLValue {
-        chords.count == 1 ? .string(chords[0].description) : .array(chords.map { .string($0.description) })
+        encodedTexts(chords.map(\.description))
+    }
+
+    static func encodedTexts(_ texts: [String]) -> TOMLValue {
+        texts.count == 1 ? .string(texts[0]) : .array(texts.map(TOMLValue.string))
+    }
+
+    static func shortcutTexts(in value: TOMLValue?) -> [String] {
+        switch value {
+        case .string(let text): [text]
+        case .array(let items): items.compactMap { if case .string(let text) = $0 { text } else { nil } }
+        default: []
+        }
+    }
+
+    static func validateShortcutTexts(in value: TOMLValue, path: String) throws(ConfigurationIssue) -> [String] {
+        let items: [TOMLValue] = if case .array(let items) = value { items } else { [value] }
+        var texts: [String] = []
+        for item in items {
+            guard case .string(let text) = item else {
+                throw .invalidValue(
+                    key: path,
+                    message: String(localized: "\(path) must be a shortcut string or an array of shortcut strings."))
+            }
+            texts.append(text)
+        }
+        return texts
     }
 
     /// The chords a new default must not take: every binding's, and Stop's, because an engine binding wins over Stop
@@ -444,21 +460,11 @@ struct DefaultBinding: Sendable {
         var droppedBindingIssue: ConfigurationIssue?
         for (command, value) in entries.sorted(by: { $0.key < $1.key }) {
             let path = "bindings.\(command)"
-            let values: [TOMLValue]
-            switch value {
-            case .array(let items): values = items
-            default: values = [value]
-            }
-            var texts: [String] = []
-            for value in values {
-                guard case .string(let text) = value else {
-                    return .rejected(
-                        .invalidValue(
-                            key: path,
-                            message: String(
-                                localized: "\(path) must be a shortcut string or an array of shortcut strings.")))
-                }
-                texts.append(text)
+            let texts: [String]
+            do {
+                texts = try validateShortcutTexts(in: value, path: path)
+            } catch {
+                return .rejected(error)
             }
             if !texts.isEmpty && EngineCommand.canonical(command) == nil {
                 droppedBindingIssue =
@@ -481,20 +487,10 @@ struct DefaultBinding: Sendable {
     /// A printed character such as `]` names whichever key types it in `layout`, so it keeps its spelling there.
     /// Only a character the layout cannot resolve falls back to its US key name.
     private static func boundChords(in bindings: TOMLValue?, layout: KeyLayout) -> [Chord] {
-        bindingTexts(in: bindings).compactMap { text in
+        guard case .table(let entries) = bindings else { return [] }
+        return entries.values.flatMap(shortcutTexts(in:)).compactMap { text in
             guard let exact = Chord(exactEngineText: text) else { return nil }
             return layout.keyCode(for: exact.key) == nil ? Chord(engineText: text) : exact
-        }
-    }
-
-    private static func bindingTexts(in bindings: TOMLValue?) -> [String] {
-        guard case .table(let entries) = bindings else { return [] }
-        return entries.values.flatMap { value -> [String] in
-            switch value {
-            case .string(let text): [text]
-            case .array(let items): items.compactMap { if case .string(let text) = $0 { text } else { nil } }
-            default: []
-            }
         }
     }
 }

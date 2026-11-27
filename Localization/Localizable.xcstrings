@@ -7350,136 +7350,6 @@
         }
       }
     },
-    "Cannot extend the inline table %@.": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "يتعذر توسيع الجدول المضمن %@."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Die Inline-Tabelle %@ kann nicht erweitert werden."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "No se puede ampliar la tabla en línea %@."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Impossible d’étendre la table en ligne %@."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "इनलाइन टेबल %@ को आगे नहीं बढ़ाया जा सकता।"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Tidak dapat memperluas tabel inline %@."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Impossibile estendere la tabella inline %@."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "インラインテーブル%@は拡張できません。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "인라인 테이블 %@을(를) 확장할 수 없습니다."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Kan de inline tabel %@ niet uitbreiden."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Nie można rozszerzyć tabeli wbudowanej %@."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Não é possível estender a tabela inline %@."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Não é possível expandir a tabela inline %@."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Нельзя расширить встроенную таблицу %@."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Det går inte att utöka den infogade tabellen %@."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "ไม่สามารถขยายตารางแบบอินไลน์ %@"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Satır içi tablo %@ genişletilemez."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Не можна розширити вбудовану таблицю %@."
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Không thể mở rộng bảng nội tuyến %@."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "无法扩展内联表 %@。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "無法擴充行內表格%@。"
-          }
-        }
-      }
-    },
     "Centre column": {
       "localizations": {
         "ar": {
@@ -40068,6 +39938,136 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "重新啟動引擎"
+          }
+        }
+      }
+    },
+    "Restart the engine to manage windows again. Settings > Diagnostics has the log.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "أعد تشغيل المحرك لإدارة النوافذ مجددًا. يتوفر السجل في الإعدادات > التشخيص."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Starte die Engine neu, um Fenster wieder zu verwalten. Das Protokoll findest du unter Einstellungen > Diagnose."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Reinicia el motor para volver a gestionar las ventanas. El registro está en Ajustes > Diagnóstico."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Redémarrez le moteur pour gérer à nouveau les fenêtres. Le journal se trouve dans Réglages > Diagnostic."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "विंडो फिर से प्रबंधित करने के लिए इंजन रीस्टार्ट करें। लॉग सेटिंग > डायग्नॉस्टिक्स में है।"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Mulai ulang mesin untuk mengelola jendela lagi. Log tersedia di Pengaturan > Diagnostik."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Riavvia il motore per gestire nuovamente le finestre. Il registro si trova in Impostazioni > Diagnostica."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ウィンドウを再び管理するにはエンジンを再起動してください。ログは「設定 > 診断」にあります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "창을 다시 관리하려면 엔진을 재시작하세요. 로그는 설정 > 진단에 있습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Herstart de engine om vensters weer te beheren. Het logboek staat in Instellingen > Diagnose."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Uruchom ponownie silnik, aby znów zarządzać oknami. Dziennik znajduje się w Ustawienia > Diagnostyka."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Reinicie o motor para gerenciar as janelas novamente. O registro está em Ajustes > Diagnóstico."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Reinicie o motor para voltar a gerir as janelas. O registo encontra-se em Definições > Diagnóstico."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Перезапустите движок, чтобы снова управлять окнами. Журнал находится в разделе Настройки > Диагностика."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Starta om motorn för att hantera fönster igen. Loggen finns i Inställningar > Diagnostik."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "เริ่มเอนจินใหม่เพื่อจัดการหน้าต่างอีกครั้ง บันทึกอยู่ที่ การตั้งค่า > การวินิจฉัย"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pencereleri yeniden yönetmek için motoru yeniden başlatın. Günlük, Ayarlar > Tanılama bölümündedir."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Перезапустіть рушій, щоб знову керувати вікнами. Журнал міститься в розділі Параметри > Діагностика."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Khởi động lại bộ máy để tiếp tục quản lý cửa sổ. Nhật ký nằm trong Cài đặt > Chẩn đoán."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "重新启动引擎以再次管理窗口。日志位于设置 > 诊断。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "重新啟動引擎以再次管理視窗。日誌位於設定 > 診斷。"
           }
         }
       }

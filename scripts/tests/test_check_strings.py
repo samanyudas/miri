@@ -128,6 +128,26 @@ let g = "Also shown"
         self.assertEqual((code, lines), (0, ["Sources/MiriCore/R.swift:9: Shown to people",
                                              "Sources/MiriCore/R.swift:15: Also shown"]))
 
+    def test_does_not_skip_prose_mentioning_log_or_nested_interpolation_text(self):
+        source = (
+            'let note = "Settings > Diagnostics has the log."\n'
+            'Text("Status: \\(ready ? "See the log." : "Still waiting")")\n'
+            'Text("""\n'
+            '    Check the log. \\(ready ? "Ready" : "Waiting")\n'
+            '    """)\n'
+        )
+        code, lines = self.run_checker({"Sources/Miri/N.swift": source})
+        self.assertEqual(code, 0)
+        self.assertEqual(lines, [
+            "Sources/Miri/N.swift:1: Settings > Diagnostics has the log.",
+            "Sources/Miri/N.swift:2: Status: %@",
+            "Sources/Miri/N.swift:2: See the log.",
+            "Sources/Miri/N.swift:2: Still waiting",
+            "Sources/Miri/N.swift:3: Check the log. %@",
+            "Sources/Miri/N.swift:4: Ready",
+            "Sources/Miri/N.swift:4: Waiting",
+        ])
+
 
 class TranslationCheckTest(unittest.TestCase):
     def check(self, strings: dict) -> tuple[int, list[str]]:

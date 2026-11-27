@@ -50,13 +50,36 @@ public struct ShortcutSearch: Sendable {
         }
     }
 
+    private enum Score {
+        static let primaryBonus = 15
+        static let exactTitle = 1000
+        static let prefixTitle = 900
+        static let wordStartTitle = 800
+        static let substringTitle = 700
+        static let exactWord = 640
+        static let prefixWord = 600
+        static let substringToken = 560
+        static let exactChord = 950
+        static let prefixChord = 850
+        static let substringChord = 750
+        static let subsequenceChord = 480
+        static let boundaryStart = 500
+        static let boundaryContiguousBonus = 8
+        static let boundaryJumpPenalty = 2
+        static let compactBase = 430
+        static let compactGapPenalty = 10
+        static let compactFloor = 300
+        static let typoBase = 530
+        static let typoDistancePenalty = 70
+    }
+
     /// The default index built from the running app bundle's compiled localizations.
     public static let shared = ShortcutSearch(bundle: .main)
 
     private let titlesByAction: [ShortcutAction: [IndexedText]]
 
     /// Indexes every editable action's title in the current locale, English, and every localization in `bundle`.
-    public init(bundle: Bundle = .main) {
+    init(bundle: Bundle = .main) {
         let localizations: [(Locale, Bundle)] = Self.languages(in: bundle).map { language in
             let lproj = bundle.path(forResource: language, ofType: "lproj").flatMap(Bundle.init(path:)) ?? bundle
             return (Locale(identifier: language), lproj)
@@ -79,7 +102,7 @@ public struct ShortcutSearch: Sendable {
     /// Returns the actions matching `query`, ranked best match first with ties in `actions` order.
     /// An empty or whitespace-only query returns `actions` unchanged.
     public func filter(
-        _ actions: [ShortcutAction], query: String, shortcuts: Shortcuts, layout: KeyLayout
+        _ actions: [ShortcutAction], query: String, shortcuts: Shortcuts
     ) -> [ShortcutAction] {
         guard let prepared = PreparedQuery(query) else { return actions }
         var scored: [(action: ShortcutAction, score: Int, index: Int)] = []
@@ -87,7 +110,7 @@ public struct ShortcutSearch: Sendable {
             let titles = titlesByAction[action] ?? [IndexedText(action.title, isPrimary: true)]
             var best = titles.compactMap { Self.scoreTitle(prepared, against: $0) }.max()
             for chord in shortcuts.chords(for: action) {
-                if let chordScore = Self.scoreChord(prepared, label: layout.label(for: chord)) {
+                if let chordScore = Self.scoreChord(prepared, label: shortcuts.layout.label(for: chord)) {
                     best = max(best ?? Int.min, chordScore)
                 }
             }
@@ -99,16 +122,14 @@ public struct ShortcutSearch: Sendable {
         return scored.map(\.action)
     }
 
-    /// Returns the unlisted engine bindings matching `query`, ranked best match first with ties in `others` order.
-    public func filter(
-        _ others: [Shortcuts.OtherBinding], query: String, layout: KeyLayout
-    ) -> [Shortcuts.OtherBinding] {
-        guard let prepared = PreparedQuery(query) else { return others }
+    /// Returns the unlisted engine bindings matching `query`, ranked best match first with ties in file order.
+    public func filterOthers(query: String, shortcuts: Shortcuts) -> [Shortcuts.OtherBinding] {
+        guard let prepared = PreparedQuery(query) else { return shortcuts.others }
         var scored: [(other: Shortcuts.OtherBinding, score: Int, index: Int)] = []
-        for (index, other) in others.enumerated() {
+        for (index, other) in shortcuts.others.enumerated() {
             var best = Self.scoreTitle(prepared, against: IndexedText(other.key, isPrimary: true))
             for chord in other.chords {
-                if let chordScore = Self.scoreChord(prepared, label: layout.label(for: chord)) {
+                if let chordScore = Self.scoreChord(prepared, label: shortcuts.layout.label(for: chord)) {
                     best = max(best ?? Int.min, chordScore)
                 }
             }
@@ -156,18 +177,18 @@ public struct ShortcutSearch: Sendable {
     // MARK: - Scoring
 
     private static func scoreTitle(_ query: PreparedQuery, against title: IndexedText) -> Int? {
-        let primaryBonus = title.isPrimary ? 15 : 0
+        let primaryBonus = title.isPrimary ? Score.primaryBonus : 0
         if title.normalized == query.normalized {
-            return 1000 + primaryBonus
+            return Score.exactTitle + primaryBonus
         }
         if title.normalized.hasPrefix(query.normalized) {
-            return 900 + primaryBonus
+            return Score.prefixTitle + primaryBonus
         }
         if containsAtWordStart(query.normalized, in: title) {
-            return 800 + primaryBonus
+            return Score.wordStartTitle + primaryBonus
         }
         if title.normalized.contains(query.normalized) {
-            return 700 + primaryBonus
+            return Score.substringTitle + primaryBonus
         }
 
         if query.tokens.count > 1 {
@@ -197,13 +218,13 @@ public struct ShortcutSearch: Sendable {
 
     private static func scoreToken(_ token: String, in title: IndexedText) -> Int? {
         if title.words.contains(token) {
-            return 640
+            return Score.exactWord
         }
         if title.words.contains(where: { $0.hasPrefix(token) }) {
-            return 600
+            return Score.prefixWord
         }
         if title.normalized.contains(token) {
-            return 560
+            return Score.substringToken
         }
         if let typoScore = matchWordTypo(token, in: title) {
             return typoScore
@@ -227,19 +248,19 @@ public struct ShortcutSearch: Sendable {
     private static func scoreChord(_ query: PreparedQuery, label: String) -> Int? {
         let normalizedLabel = normalize(label)
         if normalizedLabel == query.normalized {
-            return 950
+            return Score.exactChord
         }
         if normalizedLabel.hasPrefix(query.normalized) {
-            return 850
+            return Score.prefixChord
         }
         if normalizedLabel.contains(query.normalized) {
-            return 750
+            return Score.substringChord
         }
         let labelCharacters = Array(normalizedLabel)
         if query.compactCharacters.count >= 2,
             isSubsequence(query.compactCharacters, of: labelCharacters)
         {
-            return 480
+            return Score.subsequenceChord
         }
         return nil
     }
@@ -269,11 +290,11 @@ public struct ShortcutSearch: Sendable {
         let m = query.count
         let n = chars.count
 
-        // dp[j] holds the best score ending at candidate index j for the current query prefix, or nil if unreachable.
+        // `previous[j]` holds the best score ending at index `j` for the current query prefix, or nil if unreachable.
         var previous = [Int?](repeating: nil, count: n)
         var anyFirst = false
         for j in 0..<n where starts[j] && chars[j] == query[0] {
-            previous[j] = 500
+            previous[j] = Score.boundaryStart
             anyFirst = true
         }
         guard anyFirst else { return nil }
@@ -286,10 +307,10 @@ public struct ShortcutSearch: Sendable {
                 if chars[j] == query[i] {
                     var best: Int?
                     if j > 0, let contiguous = previous[j - 1] {
-                        best = contiguous + 8
+                        best = contiguous + Score.boundaryContiguousBonus
                     }
                     if starts[j], let jumped = bestBefore {
-                        best = max(best ?? Int.min, jumped - 2)
+                        best = max(best ?? Int.min, jumped - Score.boundaryJumpPenalty)
                     }
                     if let best {
                         current[j] = best
@@ -341,7 +362,7 @@ public struct ShortcutSearch: Sendable {
         }
         guard let bestSpan else { return nil }
         let totalGaps = bestSpan - query.count
-        return max(300, 430 - totalGaps * 10)
+        return max(Score.compactFloor, Score.compactBase - totalGaps * Score.compactGapPenalty)
     }
 
     private static func matchWordTypo(_ token: String, in title: IndexedText) -> Int? {
@@ -374,7 +395,7 @@ public struct ShortcutSearch: Sendable {
             }
         }
         guard let bestDistance else { return nil }
-        return 530 - bestDistance * 70
+        return Score.typoBase - bestDistance * Score.typoDistancePenalty
     }
 
     private static func containsUnspacedScript(_ characters: [Character]) -> Bool {
@@ -401,9 +422,7 @@ public struct ShortcutSearch: Sendable {
         return false
     }
 
-    /// Optimal string alignment distance (insertions, deletions, substitutions, and adjacent transpositions),
-    /// returning `nil` when the distance exceeds `maxDistance`.
-    static func damerauLevenshtein(_ first: [Character], _ second: [Character], maxDistance: Int) -> Int? {
+    private static func damerauLevenshtein(_ first: [Character], _ second: [Character], maxDistance: Int) -> Int? {
         let m = first.count
         let n = second.count
         if abs(m - n) > maxDistance { return nil }
