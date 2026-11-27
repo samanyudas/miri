@@ -1,6 +1,6 @@
 ---
 name: verify-miri
-description: Drive Miri Developer on Sam's real Mac desktop and prove a user-facing behavior end to end, such as a shortcut that focuses or moves a window, a Settings control, or a setup check. Use it to confirm a change works in the running app, to reproduce a bug before fixing it, or to verify an issue's acceptance criteria. For the TLA+ model check of engine start, stop, and quit, use verify-engine-lifecycle instead.
+description: Drive Miri Developer on Sam's Mac desktop to reproduce bugs or verify user-facing behavior end to end.
 ---
 
 # Verify Miri Developer

@@ -1,6 +1,6 @@
 ---
 name: verify-engine-lifecycle
-description: Model-check how Miri starts, stops, restarts, and quits its engine with the TLA+ model in verification/engine-lifecycle. Use when a change touches EngineSupervisor, CrashPolicy, AppModel start, stop, restart, or quit, the setup poll, the Stop shortcut, a control that starts or stops management, or applicationShouldTerminate, and before you fix one of the lifecycle findings below.
+description: Model-check Miri engine start, stop, restart, and quit with TLA+ when changing EngineSupervisor, CrashPolicy, or AppModel lifecycle.
 ---
 
 # Verify the engine lifecycle
