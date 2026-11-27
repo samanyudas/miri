@@ -2,7 +2,6 @@ import AppKit
 import MiriCore
 import SwiftUI
 
-/// Shows a configuration problem at the top of a page.
 struct ConfigurationIssueNotice: View {
     let model: AppModel
 
@@ -13,7 +12,7 @@ struct ConfigurationIssueNotice: View {
                 detail: String(localized: "\(issue.description) Miri does not change the file until it is fixed.")
             ) {
                 Button("Show Configuration File in Finder") {
-                    NSWorkspace.shared.activateFileViewerSelecting([model.paths.configuration])
+                    SetupProbe.revealInFinder(model.paths.configuration)
                 }
             }
         }
@@ -46,7 +45,7 @@ struct GeneralSettings: View {
                     NoticeRow(kind: .warning, text: error) {
                         if !AppModel.isInApplicationsFolder {
                             Button("Show Miri in Finder") {
-                                NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
+                                SetupProbe.revealInFinder(Bundle.main.bundleURL)
                             }
                         }
                     }
@@ -64,9 +63,7 @@ struct GeneralSettings: View {
                 ) {
                     RowSwitch(
                         label: String(localized: "Move the pointer to windows that Miri focuses"),
-                        isOn: Binding(
-                            get: { model.settings.mouseFollowsFocus },
-                            set: { value in model.update { $0.mouseFollowsFocus = value } }))
+                        isOn: model.setting(\.mouseFollowsFocus))
                 }
             }
             SettingsSection(String(localized: "Configuration file")) {
@@ -77,7 +74,7 @@ struct GeneralSettings: View {
                     monospacedTitle: true
                 ) {
                     Button("Show in Finder") {
-                        NSWorkspace.shared.activateFileViewerSelecting([model.paths.configuration])
+                        SetupProbe.revealInFinder(model.paths.configuration)
                     }
                     .fixedSize()
                 }
@@ -88,18 +85,24 @@ struct GeneralSettings: View {
     @ViewBuilder private var status: some View {
         switch model.engineState {
         case .running:
-            StatusHero(
+            HeroCard(
                 eyebrow: String(localized: "Running"), eyebrowColor: Palette.accentText, title: model.statusText,
-                detail: displaysSentence, tint: Palette.heroTint, faded: false)
+                detail: displaysSentence, statusValue: model.statusText, tint: Palette.heroTint
+            ) {
+                StripPicture(displayCount: model.screenNames.count, faded: false)
+            }
         case .restarting:
-            StatusHero(
+            HeroCard(
                 eyebrow: String(localized: "Restarting"), eyebrowColor: Palette.orange, title: model.statusText,
                 detail:
                     String(
                         localized:
                             "The engine stopped unexpectedly. Your windows are back on screen, and Miri restarts it in a moment."
                     ),
-                tint: Palette.warningTint, faded: true)
+                statusValue: model.statusText, tint: Palette.warningTint
+            ) {
+                StripPicture(displayCount: model.screenNames.count, faded: true)
+            }
         case .failed(let reason):
             Banner(
                 kind: .error, title: model.statusText, detail: reason,
@@ -107,23 +110,23 @@ struct GeneralSettings: View {
             ) {
                 Button("Show Logs in Finder") { model.showLogsInFinder() }
                 Button("Restart Engine") { model.restart() }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Palette.accentFill)
+                    .prominentButton()
             }
         case .stopped where !model.startBlockers.isEmpty:
-            Banner(
-                kind: .warning, title: String(localized: "Waiting for setup"),
-                detail:
-                    String(
-                        localized:
-                            "Waiting for the \u{201C}\(model.startBlockers.first?.title ?? "required")\u{201D} check. \(AppModel.startsWhenReadySentence)"
-                    ),
-                accessibilityValue: model.statusText
-            ) {
-                Button(AppModel.cancelAutomaticStartTitle) { model.stop() }
-                Button("Open Setup") { page = .setup }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Palette.accentFill)
+            if let blocker = model.startBlockers.first {
+                Banner(
+                    kind: .warning, title: String(localized: "Waiting for setup"),
+                    detail:
+                        String(
+                            localized:
+                                "Waiting for the \u{201C}\(blocker.title)\u{201D} check. \(AppModel.startsWhenReadySentence)"
+                        ),
+                    accessibilityValue: model.statusText
+                ) {
+                    Button(AppModel.cancelAutomaticStartTitle) { model.stop() }
+                    Button("Open Setup") { page = .setup }
+                        .prominentButton()
+                }
             }
         case .stopped:
             Banner(
@@ -135,62 +138,27 @@ struct GeneralSettings: View {
                 accessibilityValue: model.statusText
             ) {
                 Button("Start Window Management") { model.start() }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Palette.accentFill)
+                    .prominentButton()
             }
         }
     }
 
     /// Names the displays Miri manages, such as "Built-in Retina Display and LG 27UK850, one strip per Space."
     private var displaysSentence: String {
-        let names = NSScreen.screens.map(\.localizedName)
-        guard !names.isEmpty else { return String(localized: "One strip per Space.") }
-        return String(localized: "\(names.formatted(.list(type: .and))), one strip per Space.")
-    }
-}
-
-/// The status card at the top of General, with a small picture of the strips.
-private struct StatusHero: View {
-    let eyebrow: String
-    let eyebrowColor: Color
-    let title: String
-    let detail: String
-    let tint: Color
-    let faded: Bool
-
-    var body: some View {
-        HStack(spacing: 26) {
-            StripPicture(faded: faded)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(eyebrow)
-                    .font(.small.weight(.semibold))
-                    .tracking(0.66)
-                    .textCase(.uppercase)
-                    .foregroundStyle(eyebrowColor)
-                Text(title)
-                    .font(.heroTitle)
-                    .foregroundStyle(Palette.primaryText)
-                    .modifier(StatusValue(value: title))
-                Text(detail)
-                    .font(.detail)
-                    .foregroundStyle(Palette.secondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .padding(20)
-        .background(tint, in: .rect(cornerRadius: 10))
+        guard !model.screenNames.isEmpty else { return String(localized: "One strip per Space.") }
+        return String(localized: "\(model.screenNames.formatted(.list(type: .and))), one strip per Space.")
     }
 }
 
 /// A decorative sketch of one strip per display, up to two, with one column picked out in the accent color.
 private struct StripPicture: View {
+    let displayCount: Int
     let faded: Bool
 
     var body: some View {
         VStack(spacing: 6) {
             display(widths: [28, 62, 44, 44, 40], stacked: 2, highlighted: 1, height: 52)
-            if NSScreen.screens.count > 1 {
+            if displayCount > 1 {
                 display(widths: [94, 60, 50], stacked: nil, highlighted: nil, height: 40)
             }
         }
@@ -266,11 +234,7 @@ struct LayoutSettings: View {
                     NoticeRow(kind: .error, text: presetsError)
                 }
                 SettingsRow(title: String(localized: "Animate window movement"), detail: motionDetail) {
-                    RowSwitch(
-                        label: String(localized: "Animate window movement"),
-                        isOn: Binding(
-                            get: { model.settings.animations },
-                            set: { value in model.update { $0.animations = value } }))
+                    RowSwitch(label: String(localized: "Animate window movement"), isOn: model.setting(\.animations))
                 }
                 SettingsRow(
                     title: String(localized: "Slide pictures of windows"),
@@ -282,23 +246,10 @@ struct LayoutSettings: View {
                 ) {
                     RowSwitch(
                         label: String(localized: "Slide pictures of windows"),
-                        isOn: Binding(
-                            get: { model.settings.slideWindowPictures },
-                            set: { model.setSlideWindowPictures($0) }))
+                        isOn: screenRecordingBinding(.slideWindowPictures))
                 }
-                if model.slideWindowPicturesNeedPermission {
-                    NoticeRow(
-                        kind: .warning,
-                        text:
-                            String(
-                                localized:
-                                    "Off because Miri does not have Screen Recording permission. Turn on Miri there, then switch this on again."
-                            )
-                    ) {
-                        if let url = SystemScreenRecording.settingsURL {
-                            Button("Open Screen Recording Settings") { NSWorkspace.shared.open(url) }
-                        }
-                    }
+                if model.needsScreenRecordingPermission(.slideWindowPictures) {
+                    ScreenRecordingNoticeRow()
                 }
             }
             SettingsSection(String(localized: "Stacks")) {
@@ -310,7 +261,7 @@ struct LayoutSettings: View {
                                 "Up to \(mainDisplayFit) fit on the main display at the minimum height of \(StackLimit.minimumWindowHeight) points. A full stack sends the next window to a new column."
                         )
                 ) {
-                    Picker("Windows per stack", selection: stackLimit) {
+                    Picker("Windows per stack", selection: model.setting(\.stackLimit)) {
                         Text("Fit the display").tag(StackLimit.fit)
                         ForEach(
                             StackLimit.offeredCounts(fit: mainDisplayFit, configured: model.settings.stackLimit),
@@ -327,7 +278,8 @@ struct LayoutSettings: View {
                     detail: String(localized: "Restoring it returns it to the stack if there is room.")
                 ) {
                     SegmentedChoice(
-                        label: String(localized: "Maximized stacked window opens"), selection: maximizedWindowSide,
+                        label: String(localized: "Maximized stacked window opens"),
+                        selection: model.setting(\.maximizedWindowSide),
                         options: [
                             (String(localized: "Left of its stack"), .left),
                             (String(localized: "Right of its stack"), .right),
@@ -345,22 +297,10 @@ struct LayoutSettings: View {
                 ) {
                     RowSwitch(
                         label: String(localized: "Show window contents on edges next to another display"),
-                        isOn: Binding(
-                            get: { model.settings.sharedEdgeSlices }, set: { model.setSharedEdgeSlices($0) }))
+                        isOn: screenRecordingBinding(.sharedEdgeSlices))
                 }
-                if model.sharedEdgeSlicesNeedPermission {
-                    NoticeRow(
-                        kind: .warning,
-                        text:
-                            String(
-                                localized:
-                                    "Off because Miri does not have Screen Recording permission. Turn on Miri there, then switch this on again."
-                            )
-                    ) {
-                        if let url = SystemScreenRecording.settingsURL {
-                            Button("Open Screen Recording Settings") { NSWorkspace.shared.open(url) }
-                        }
-                    }
+                if model.needsScreenRecordingPermission(.sharedEdgeSlices) {
+                    ScreenRecordingNoticeRow()
                 }
             }
         }
@@ -403,14 +343,10 @@ struct LayoutSettings: View {
             : String(localized: "\(labels.formatted(.list(type: .or)))\u{00A0}cycles through them.")
     }
 
-    private var stackLimit: Binding<StackLimit> {
-        Binding(get: { model.settings.stackLimit }, set: { value in model.update { $0.stackLimit = value } })
-    }
-
-    private var maximizedWindowSide: Binding<MaximizedWindowSide> {
+    private func screenRecordingBinding(_ feature: AppModel.ScreenRecordingFeature) -> Binding<Bool> {
         Binding(
-            get: { model.settings.maximizedWindowSide },
-            set: { value in model.update { $0.maximizedWindowSide = value } })
+            get: { model.settings[keyPath: feature.keyPath] },
+            set: { model.setScreenRecordingFeature(feature, wanted: $0) })
     }
 
     /// How many windows fit in a column on the display with the menu bar, as the engine counts them.
@@ -425,7 +361,7 @@ struct LayoutSettings: View {
 
     private func gapRow(_ title: String, _ key: WritableKeyPath<MiriSettings, Int>) -> some View {
         SettingsRow(title: title) {
-            Stepper(value: gap(key), in: MiriSettings.gapRange) {
+            Stepper(value: model.setting(key), in: MiriSettings.gapRange) {
                 LiveText(String(localized: "\(model.settings[keyPath: key]) pt"))
                     .font(.rowTitle)
                     .monospacedDigit()
@@ -433,10 +369,6 @@ struct LayoutSettings: View {
             }
             .accessibilityLabel(title)
         }
-    }
-
-    private func gap(_ key: WritableKeyPath<MiriSettings, Int>) -> Binding<Int> {
-        Binding(get: { model.settings[keyPath: key] }, set: { value in model.update { $0[keyPath: key] = value } })
     }
 
     private func showPresets() {
@@ -449,23 +381,31 @@ struct LayoutSettings: View {
             presetsError = nil
             return
         }
-        let values = presetsText.split(separator: ",").map {
-            Double($0.trimmingCharacters(in: .whitespaces))
-        }
-        var candidate = model.settings
-        candidate.widthPresets = values.compactMap(\.self)
         do throws(ConfigurationIssue) {
-            guard !values.contains(nil) else {
-                throw ConfigurationIssue.invalidValue(
-                    key: "", message: String(localized: "Enter numbers separated by commas."))
-            }
-            try candidate.validate()
+            let parsed = try MiriSettings.parseWidthPresets(presetsText)
             presetsError = nil
-            if candidate.widthPresets != model.settings.widthPresets {
-                model.update { $0.widthPresets = candidate.widthPresets }
+            if parsed != model.settings.widthPresets {
+                model.update { $0.widthPresets = parsed }
             }
         } catch {
             presetsError = error.description
+        }
+    }
+}
+
+private struct ScreenRecordingNoticeRow: View {
+    var body: some View {
+        NoticeRow(
+            kind: .warning,
+            text:
+                String(
+                    localized:
+                        "Off because Miri does not have Screen Recording permission. Turn on Miri there, then switch this on again."
+                )
+        ) {
+            if let url = SetupProbe.screenRecordingSettingsURL {
+                Button("Open Screen Recording Settings") { NSWorkspace.shared.open(url) }
+            }
         }
     }
 }
@@ -517,21 +457,32 @@ struct SetupSettings: View {
             if !required.isEmpty {
                 SettingsSection(String(localized: "Required to start")) {
                     ForEach(required) { check in
-                        SetupCheckItem(check: check, openGestures: { page = .gestures }, inRequiredSection: true)
+                        SetupCheckItem(check: check, inRequiredSection: true)
                     }
                 }
             }
             if !recommended.isEmpty {
                 SettingsSection(String(localized: "Recommended")) {
-                    ForEach(recommended) { check in SetupCheckItem(check: check) { page = .gestures } }
+                    ForEach(recommended) { check in SetupCheckItem(check: check, openGestures: { page = .gestures }) }
                 }
             }
         }
         .onAppear { model.refreshSetup() }
+        .onDisappear {
+            resetChecked?.cancel()
+            resetChecked = nil
+            checked = false
+        }
     }
 }
 
-/// One setup check: its result as a colored symbol, what it found, and the ways to fix it below that.
+extension SetupCheck {
+    /// A gesture check only looks for conflicts. Only a gesture test turns the swipe on, so it never says Passed.
+    fileprivate var isGestureCheck: Bool { id == .fourFingerGesture || id == .threeFingerGesture }
+
+    fileprivate var needsAttention: Bool { status != .passed }
+}
+
 struct SetupCheckItem: View {
     let check: SetupCheck
     /// Opens Settings > Gestures for a gesture check. Set Up Miri lists only start blockers, so it passes nothing.
@@ -631,9 +582,14 @@ struct SetupCheckItem: View {
 // MARK: - Diagnostics
 
 struct DiagnosticsSettings: View {
+    private struct LogEntry: Equatable {
+        let prefix: String?
+        let message: String
+    }
+
     let model: AppModel
     @Environment(\.presenter) private var presenter
-    @State private var logTail: [String] = []
+    @State private var logTail: [LogEntry] = []
 
     var body: some View {
         SettingsPage(
@@ -643,8 +599,7 @@ struct DiagnosticsSettings: View {
             if case .failed(let reason) = model.engineState {
                 Banner(kind: .error, title: model.statusText, detail: reason) {
                     Button("Restart Engine") { model.restart() }
-                        .buttonStyle(.borderedProminent)
-                        .tint(Palette.accentFill)
+                        .prominentButton()
                 }
             }
             engineFacts
@@ -737,9 +692,9 @@ struct DiagnosticsSettings: View {
             Rectangle().fill(Palette.divider).frame(width: 1)
             fact(
                 String(localized: "Process"), value: processText, dot: nil,
-                muted: processText == String(localized: "None"))
+                muted: !model.engineState.isRunning)
             Rectangle().fill(Palette.divider).frame(width: 1)
-            fact(String(localized: "Displays"), value: "\(NSScreen.screens.count)", dot: nil)
+            fact(String(localized: "Displays"), value: "\(model.screenNames.count)", dot: nil)
         }
         .fixedSize(horizontal: false, vertical: true)
         .background(Palette.group, in: .rect(cornerRadius: 10))
@@ -785,16 +740,16 @@ struct DiagnosticsSettings: View {
     }
 
     /// One log line. A wrapped message stays indented under its own text, so it never reads as a new entry.
-    @ViewBuilder private func logLine(_ line: String) -> some View {
-        if let match = line.wholeMatch(of: /(\d{2}:\d{2}:\d{2}  \S+\s+)(.*)/) {
+    @ViewBuilder private func logLine(_ entry: LogEntry) -> some View {
+        if let prefix = entry.prefix {
             HStack(alignment: .firstTextBaseline, spacing: 0) {
-                Text(match.1).fixedSize()
-                Text(match.2).fixedSize(horizontal: false, vertical: true)
+                Text(prefix).fixedSize()
+                Text(entry.message).fixedSize(horizontal: false, vertical: true)
             }
             // VoiceOver reads the time and the message as one line.
             .accessibilityElement(children: .combine)
         } else {
-            Text(line).fixedSize(horizontal: false, vertical: true)
+            Text(entry.message).fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -803,26 +758,25 @@ struct DiagnosticsSettings: View {
         let lines = model.log.tail(maximum: 6_000)
             .split(separator: "\n", omittingEmptySubsequences: true)
             .suffix(40)
-            .map { Self.shortLine(String($0)) }
+            .map { Self.parseLogEntry(String($0)) }
         if Array(lines) != logTail { logTail = Array(lines) }
     }
 
     /// Keeps the local time, level, and message of an engine log line, and drops the date and the Rust source location.
     /// For example `2026-11-07T09:49:05.422397Z  INFO paneru::ecs: src/ecs.rs:17: Message` becomes
     /// `20:19:05  INFO  Message` in Melbourne. A line in another shape stays as it is.
-    static func shortLine(_ line: String) -> String {
+    private static func parseLogEntry(_ line: String) -> LogEntry {
         guard
             let match = line.wholeMatch(
                 of: /(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})\S*\s+(\w+)\s+\S+?:\s+(?:\S+\.rs:\d+:\s+)?(.*)/),
             let date = try? Date(String(match.1) + "Z", strategy: .iso8601)
-        else { return line }
+        else { return LogEntry(prefix: nil, message: line) }
         let time = date.formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits).second(.twoDigits))
         let level = String(match.2).padding(toLength: 5, withPad: " ", startingAt: 0)
-        return "\(time)  \(level) \(match.3)"
+        return LogEntry(prefix: "\(time)  \(level) ", message: String(match.3))
     }
 }
 
-/// The Show in Dock switch, in Settings > General and in the first-launch window.
 struct ShowInDockRow: View {
     let model: AppModel
 
@@ -831,9 +785,7 @@ struct ShowInDockRow: View {
             title: String(localized: "Show in Dock"),
             detail: String(localized: "When off, open Miri from its menu bar icon.")
         ) {
-            RowSwitch(
-                label: String(localized: "Show in Dock"),
-                isOn: Binding(get: { model.settings.showInDock }, set: { on in model.update { $0.showInDock = on } }))
+            RowSwitch(label: String(localized: "Show in Dock"), isOn: model.setting(\.showInDock))
         }
     }
 }

@@ -43,7 +43,7 @@ PY
 if [[ "${1:-}" == --check ]]; then
     if ! diff -u "$catalog" "$work/catalog/Localizable.xcstrings" >"$work/diff"; then
         head -40 "$work/diff" >&2
-        echo "$catalog is out of date. Run make strings and commit the result." >&2
+        echo "$catalog is out of date. Run make strings-update and commit the result." >&2
         exit 1
     fi
     echo "$catalog matches the strings in Sources."

@@ -18,7 +18,7 @@ retry() {
     for attempt in 1 2 3; do
         "$@" && return 0
         echo "package-dmg.sh: attempt $attempt failed: $*" >&2
-        sleep 3
+        [[ "$attempt" -lt 3 ]] && sleep 3
     done
     return 1
 }

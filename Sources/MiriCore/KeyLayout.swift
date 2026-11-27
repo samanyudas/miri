@@ -128,9 +128,7 @@ public struct KeyLayout: Equatable, Sendable {
 
     private func keyLabel(_ name: String) -> String {
         if let symbol = Self.keySymbols[name] { return symbol }
-        if name.count >= 2, name.first == "f", let number = Int(name.dropFirst()), (1...20).contains(number) {
-            return name.uppercased()
-        }
+        if EngineKey.isFunctionKey(name) { return name.uppercased() }
         if let code = keyCode(for: name), let character = keys.first(where: { $0.code == code })?.character,
             Self.isPrintable(character)
         {

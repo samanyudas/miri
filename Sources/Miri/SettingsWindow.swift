@@ -2,7 +2,6 @@ import AppKit
 import MiriCore
 import SwiftUI
 
-/// The Settings window: a sidebar with Miri's state and pages, and the page it selects.
 struct SettingsView: View {
     enum Page: String, CaseIterable {
         case setup, general, layout, shortcuts, gestures, diagnostics
@@ -33,18 +32,17 @@ struct SettingsView: View {
     /// The user defaults key that remembers the page, so Settings reopens where it was left.
     static let pageKey = "settingsTab"
 
-    let model: AppModel
-    @AppStorage(SettingsView.pageKey) private var page = Page.general
+    @Bindable var model: AppModel
 
     var body: some View {
         // The reader stays inside the safe area, so it measures the title bar that the content runs under.
         GeometryReader { window in
             HStack(spacing: 0) {
-                SettingsSidebar(model: model, page: $page)
+                SettingsSidebar(model: model, page: $model.settingsPage)
                 Group {
-                    switch page {
-                    case .setup: SetupSettings(model: model, page: $page)
-                    case .general: GeneralSettings(model: model, page: $page)
+                    switch model.settingsPage {
+                    case .setup: SetupSettings(model: model, page: $model.settingsPage)
+                    case .general: GeneralSettings(model: model, page: $model.settingsPage)
                     case .layout: LayoutSettings(model: model)
                     case .shortcuts: ShortcutsSettings(model: model)
                     case .gestures: GestureSettings(model: model)
@@ -54,7 +52,7 @@ struct SettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .environment(\.titleBarHeight, window.safeAreaInsets.top)
             }
-            // The window presenter sets the 880 by 640 frame. The view fills it, under the title bar too.
+            // The view fills the window frame set by WindowPresenter, under the title bar too.
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .ignoresSafeArea()
         }
@@ -173,10 +171,8 @@ struct SettingsSidebar: View {
     }
 
     private var versionLine: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
-        let revision = model.engineRevision
-        let engine = revision == "unknown" ? String(localized: "unknown") : String(revision.prefix(7))
-        return String(localized: "Version \(version) · Engine \(engine)")
+        let engine = model.engineRevision.map { String($0.prefix(7)) } ?? String(localized: "unknown")
+        return String(localized: "Version \(AppModel.shortVersion) · Engine \(engine)")
     }
 
     private func badge(for page: SettingsView.Page) -> Int {
@@ -244,6 +240,10 @@ private struct SidebarRow: View {
 }
 
 extension AppModel {
+    func setting<Value>(_ key: WritableKeyPath<MiriSettings, Value>) -> Binding<Value> {
+        Binding(get: { self.settings[keyPath: key] }, set: { value in self.update { $0[keyPath: key] = value } })
+    }
+
     /// How many setup checks to review: only the blockers while Miri waits for setup, otherwise every problem.
     /// The Setup badge and the menu use this count, so they never disagree with the waiting banner.
     var setupReviewCount: Int {
@@ -261,7 +261,7 @@ extension AppModel {
     var sidebarStatus: String {
         switch engineState {
         case .running:
-            let count = NSScreen.screens.count
+            let count = screenNames.count
             // The catalog holds the singular and plural forms.
             return String(localized: "Running · \(count) displays")
         case .restarting: return String(localized: "Restarting the engine")
@@ -283,9 +283,8 @@ extension AppModel {
 }
 
 extension WindowPresenter {
-    /// Opens Settings on `page`, such as Setup from the menu bar menu.
     func showSettings(_ page: SettingsView.Page) {
-        UserDefaults.standard.set(page.rawValue, forKey: SettingsView.pageKey)
+        model.settingsPage = page
         show(.settings)
     }
 }

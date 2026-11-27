@@ -1,4 +1,5 @@
 import AppKit
+import Carbon.HIToolbox
 import CoreGraphics
 import MiriCore
 
@@ -14,6 +15,23 @@ final class ShortcutRecorder {
         /// Control, Option, Shift, and Command. Miri never records fn, because the engine ignores it alongside
         /// other modifiers.
         let modifiers: Set<ChordModifier>
+
+        enum Resolution {
+            case cancelled
+            case chord(Chord)
+            case invalid(String)
+        }
+
+        func resolve(in layout: KeyLayout) -> Resolution {
+            if keyCode == kVK_Escape, modifiers.isEmpty { return .cancelled }
+            guard !modifiers.isDisjoint(with: [.control, .option, .command]) else {
+                return .invalid(String(localized: "Include Control, Option, or Command."))
+            }
+            guard let name = layout.name(for: keyCode) else {
+                return .invalid(String(localized: "Miri cannot use this key in a shortcut."))
+            }
+            return .chord(Chord(modifiers, name))
+        }
     }
 
     enum Event {

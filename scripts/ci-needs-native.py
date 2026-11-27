@@ -59,10 +59,6 @@ def needed_jobs(paths: list[str]) -> set[str]:
     return selected
 
 
-def needs_native(paths: list[str]) -> bool:
-    return bool(needed_jobs(paths))
-
-
 def main() -> int:
     if len(sys.argv) != 2:
         print("usage: ci-needs-native.py BASE_REVISION", file=sys.stderr)

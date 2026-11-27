@@ -76,7 +76,7 @@ final class PermissionExperiment {
         guard targetPid > 0, kill(targetPid, 0) == 0 else {
             throw ExperimentError.failure(String(localized: "The fixture process is unavailable."))
         }
-        let executable = Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/miri-engine")
+        let executable = AppModel.engineExecutableURL()
         guard FileManager.default.isExecutableFile(atPath: executable.path) else {
             throw ExperimentError.failure(String(localized: "The bundled engine is missing or is not executable."))
         }
@@ -167,8 +167,7 @@ final class PermissionExperiment {
             throw ExperimentError.failure(
                 String(localized: "The engine response has an unexpected identity or schema."))
         }
-        let revisionURL = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/engine-revision.txt")
-        let revision = try String(contentsOf: revisionURL, encoding: .utf8)
+        let revision = try String(contentsOf: AppModel.engineRevisionURL(), encoding: .utf8)
             .trimmingCharacters(in: .whitespacesAndNewlines)
         return Report(app: app, engine: engine, engineRevision: revision, bundlePath: Bundle.main.bundlePath)
     }

@@ -115,29 +115,29 @@ import Testing
     @Test func rejectsAChordAnotherActionUsesAndLeavesTheFileUnchanged() throws {
         let text = "[bindings]\nwindow_focus_west = \"ctrl+alt-h\"\nwindow_center = \"ctrl+alt-c\"\n"
         let file = try shortcuts(text)
-        #expect(throws: ShortcutRejection.usedBy("Focus column left")) {
-            try file.adding(Chord([.control, .option], "h"), to: .engine(command: "window_center"), layout: us)
+        #expect(throws: ShortcutRejection.usedBy(.action(focusWest))) {
+            try file.adding(Chord([.control, .option], "h"), to: .engine(command: "window_center"))
         }
         #expect(throws: ShortcutRejection.alreadyAssigned) {
-            try file.adding(Chord([.control, .option], "h"), to: focusWest, layout: us)
+            try file.adding(Chord([.control, .option], "h"), to: focusWest)
         }
-        #expect(throws: ShortcutRejection.usedBy("Stop window manager")) {
-            try file.adding(Chord([.control, .option], "q"), to: focusWest, layout: us)
+        #expect(throws: ShortcutRejection.usedBy(.action(.stop))) {
+            try file.adding(Chord([.control, .option], "q"), to: focusWest)
         }
         #expect(file.document.text == text)
     }
 
     @Test func aPrintedCharacterConflictsWithItsKeyName() throws {
         let file = try shortcuts("[bindings]\nwindow_step_grow = \"ctrl+alt-equal\"\n")
-        #expect(throws: ShortcutRejection.usedBy("Make column wider")) {
-            try file.adding(Chord([.control, .option], "="), to: focusWest, layout: us)
+        #expect(throws: ShortcutRejection.usedBy(.action(.engine(command: "window_step_grow")))) {
+            try file.adding(Chord([.control, .option], "="), to: focusWest)
         }
     }
 
     @Test func rejectsAChordACommandOutsideMirisListUses() throws {
         let file = try shortcuts("[bindings]\nwindow_virtual_2 = \"ctrl+alt+cmd-2\"\n")
-        #expect(throws: ShortcutRejection.usedBy("window_virtual_2")) {
-            try file.adding(Chord([.control, .option, .command], "2"), to: focusWest, layout: us)
+        #expect(throws: ShortcutRejection.usedBy(.other("window_virtual_2"))) {
+            try file.adding(Chord([.control, .option, .command], "2"), to: focusWest)
         }
     }
 
@@ -145,10 +145,10 @@ import Testing
         let hyper: Set<ChordModifier> = [.control, .option, .shift, .command]
         let text = "[bindings]\nwindow_swap_first = \"ctrl+alt+cmd+shift-h\"\n"
         let file = try shortcuts(text)
-        #expect(throws: ShortcutRejection.usedBy("Move column to first position")) {
-            try file.adding(Chord(hyper, "h"), to: focusWest, layout: us)
+        #expect(throws: ShortcutRejection.usedBy(.action(.engine(command: "window_swap_first")))) {
+            try file.adding(Chord(hyper, "h"), to: focusWest)
         }
-        let added = try file.adding(Chord(hyper, "u"), to: focusWest, layout: us)
+        let added = try file.adding(Chord(hyper, "u"), to: focusWest)
         #expect(added.text == text + "window_focus_west = \"ctrl+alt+cmd+shift-u\"\n")
         #expect(Shortcuts(document: added, layout: us).chords(for: focusWest) == [Chord(hyper, "u")])
         #expect(us.label(for: Chord(hyper, "u")) == "⌃⌥⇧⌘U")
@@ -156,19 +156,19 @@ import Testing
 
     @Test func addsToTheKeySpellingTheFileUses() throws {
         let file = try shortcuts("[bindings]\nwindow_grow = \"ctrl+alt-r\" # cycle\n")
-        let result = try file.adding(Chord([.control, .option, .shift], "r"), to: resize, layout: us)
+        let result = try file.adding(Chord([.control, .option, .shift], "r"), to: resize)
         #expect(result.text == "[bindings]\nwindow_grow = [\"ctrl+alt-r\", \"ctrl+alt+shift-r\"] # cycle\n")
     }
 
     @Test func createsAnAbsentKeyWithMirisCommandName() throws {
         let file = try shortcuts("[options]\nfocus_follows_mouse = true\n")
-        let result = try file.adding(Chord([.control, .option], "r"), to: resize, layout: us)
+        let result = try file.adding(Chord([.control, .option], "r"), to: resize)
         #expect(result.text == "[options]\nfocus_follows_mouse = true\n\n[bindings]\nwindow_resize = \"ctrl+alt-r\"\n")
     }
 
     @Test func addsAndRemovesStopShortcuts() throws {
         let added = try shortcuts("[miri]\ninner_gap = 8\n").adding(
-            Chord([.control, .command], "s"), to: .stop, layout: us)
+            Chord([.control, .command], "s"), to: .stop)
         #expect(added.text == "[miri]\ninner_gap = 8\nstop_shortcut = [\"ctrl+alt-q\", \"ctrl+cmd-s\"]\n")
         let one = try Shortcuts(document: added).removing(Chord([.control, .option], "q"), from: .stop)
         #expect(one.text == "[miri]\ninner_gap = 8\nstop_shortcut = \"ctrl+cmd-s\"\n")
@@ -218,7 +218,7 @@ import Testing
             \(defaults)# Custom set.
 
             [miri]
-            default_bindings_version = 6
+            default_bindings_version = \(DefaultBinding.currentVersion)
             inner_gap = 12
             """
         #expect(result.text == expected)
@@ -268,21 +268,25 @@ import Testing
         let file = try shortcuts(
             "[bindings]\nwindow_step_grow = \"ctrl+alt-=\"\n[miri]\nstop_shortcut = [\"ctrl+alt-equal\", \"ctrl+cmd-s\"]\n"
         )
-        #expect(file.stopChordsToRegister(layout: us) == [Chord([.control, .command], "s")])
+        #expect(file.stopChordsToRegister() == [Chord([.control, .command], "s")])
     }
 
     @Test func unknownCommandsAreIgnoredByOthersAndStopOwnership() throws {
         let file = try shortcuts("[bindings]\nwindow_missing = \"ctrl+alt-q\"\n")
         #expect(file.others.isEmpty)
-        #expect(file.stopChordsToRegister(layout: us) == [DefaultBinding.stopChord])
+        #expect(file.stopChordsToRegister() == [DefaultBinding.stopChord])
     }
 }
 
-@MainActor struct ShortcutStoreTests {
+@MainActor final class ShortcutStoreTests {
     private let directory = FileManager.default.temporaryDirectory.appending(
         path: "miri-shortcuts-\(UUID().uuidString)")
     private var url: URL { directory.appending(path: "config.toml") }
     private let us = KeyLayout(inputSourceID: "com.apple.keylayout.US")!
+
+    deinit {
+        try? FileManager.default.removeItem(at: directory)
+    }
 
     private func store(_ original: String, layout: KeyLayout? = nil) throws -> ConfigurationStore {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -336,10 +340,22 @@ import Testing
     @Test func aRejectedAddLeavesTheFileUnchanged() throws {
         let store = try store("")
         let before = try String(contentsOf: url, encoding: .utf8)
-        #expect(throws: ShortcutRejection.usedBy("Focus column left")) {
+        #expect(throws: ShortcutRejection.usedBy(.action(.engine(command: "window_focus_west")))) {
             try store.apply(.add(Chord([.control, .option], "h"), to: .stop))
         }
         #expect(try String(contentsOf: url, encoding: .utf8) == before)
+    }
+
+    @Test func moveAtomicallyReassignsAConflictingChord() throws {
+        let store = try store(
+            "[bindings]\nwindow_step_grow = \"ctrl+alt-=\"\n[miri]\ndefault_bindings_version = \(DefaultBinding.currentVersion)\n"
+        )
+        let equal = Chord([.control, .option], "equal")
+        let grow = ShortcutAction.engine(command: "window_step_grow")
+        let center = ShortcutAction.engine(command: "window_center")
+        try store.apply(.move(equal, from: grow, to: center))
+        #expect(store.shortcuts?.chords(for: grow) == [])
+        #expect(store.shortcuts?.chords(for: center).contains(equal) == true)
     }
 
     @Test func stopEditsUpdateTheChordsToRegister() throws {
@@ -365,6 +381,24 @@ import Testing
         #expect(store.stopChordsToRegister == [Chord([.control, .command], "s")])
         #expect(store.shortcuts == nil)
     }
+
+    @Test func moveThrowsShortcutRejectionAndLeavesFileUntouchedWhenAnotherBindingConflicts() throws {
+        let original = """
+            [bindings]
+            window_focus_west = "cmd-h"
+            window_focus_east = "cmd-h"
+            [miri]
+            default_bindings_version = \(DefaultBinding.currentVersion)
+            """
+        let store = try store(original)
+        let before = try String(contentsOf: url, encoding: .utf8)
+        let chord = Chord([.command], "h")
+        #expect(throws: ShortcutRejection.usedBy(.action(.engine(command: "window_focus_east")))) {
+            try store.apply(
+                .move(chord, from: .engine(command: "window_focus_west"), to: .engine(command: "window_focus_north")))
+        }
+        #expect(try String(contentsOf: url, encoding: .utf8) == before)
+    }
 }
 
 @MainActor struct SystemShortcutsTests {
@@ -385,7 +419,7 @@ import Testing
                 "998": ["enabled": false, "value": ["parameters": [107, 37, 1_572_864], "type": "standard"]],
                 "997": ["enabled": true, "value": ["parameters": [65_535, 65_535, 0], "type": "standard"]],
             ], layout: us)
-        func names(_ chord: Chord) -> String? { system.conflict(for: chord, layout: us)?.name }
+        func names(_ chord: Chord) -> String? { system.conflict(for: chord)?.name }
         #expect(names(Chord([.command], "space")) == nil)
         #expect(names(Chord([.control], "uparrow")) == nil)
         #expect(names(Chord([.control, .option], "m")) == "Mission Control")
@@ -399,16 +433,16 @@ import Testing
 
     @Test func findsDefaultAndAppShortcuts() {
         let system = SystemShortcuts.parse(symbolicHotKeys: [:], layout: us)
-        #expect(system.conflict(for: Chord([.command], "space"), layout: us)?.name == "Show Spotlight search")
-        #expect(system.conflict(for: Chord([.command], "q"), layout: us)?.name == "Quit the frontmost app")
-        #expect(system.conflict(for: Chord([.control, .command], "q"), layout: us)?.name == "Lock Screen")
-        #expect(system.conflict(for: Chord([.control, .option], "q"), layout: us) == nil)
+        #expect(system.conflict(for: Chord([.command], "space"))?.name == "Show Spotlight search")
+        #expect(system.conflict(for: Chord([.command], "q"))?.name == "Quit the frontmost app")
+        #expect(system.conflict(for: Chord([.control, .command], "q"))?.name == "Lock Screen")
+        #expect(system.conflict(for: Chord([.control, .option], "q")) == nil)
     }
 
     @Test func appShortcutsFollowTheLayout() throws {
         let azerty = try #require(KeyLayout(inputSourceID: "com.apple.keylayout.French"))
         let system = SystemShortcuts.parse(symbolicHotKeys: [:], layout: azerty)
         // ⌘Q on AZERTY is the key at the US A position.
-        #expect(system.conflict(for: Chord([.command], "q"), layout: azerty)?.keyCode == 0)
+        #expect(system.conflict(for: Chord([.command], "q"))?.keyCode == 0)
     }
 }

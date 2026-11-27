@@ -24,7 +24,7 @@ import Observation
     @ObservationIgnored private let model: AppModel
     @ObservationIgnored private var candidate: GestureVerification?
     @ObservationIgnored private var watcher: Task<Void, Never>?
-    @ObservationIgnored private var observers: [NSObjectProtocol] = []
+    @ObservationIgnored private var spaceObserver: NSObjectProtocol?
 
     init(model: AppModel) {
         self.model = model
@@ -46,7 +46,6 @@ import Observation
         watcher = Task { [weak self] in await self?.watch(paths) }
     }
 
-    /// The user saw the strip follow their fingers.
     func confirm() {
         guard phase == .passedAwaitingConfirmation, var verification = candidate else { return }
         verification.date = .now
@@ -55,13 +54,11 @@ import Observation
         model.finishGestureTest(.confirmed(verification))
     }
 
-    /// The user saw the strip not follow their fingers.
     func deny() {
         guard phase == .passedAwaitingConfirmation else { return }
         fail(.failed(String(localized: "You reported that the strip did not follow your fingers.")))
     }
 
-    /// Ends a running test without a result, as when the sheet closes.
     func cancel() {
         guard candidate != nil else { return }
         stop()
@@ -78,8 +75,8 @@ import Observation
     private func stop() {
         watcher?.cancel()
         watcher = nil
-        for observer in observers { NSWorkspace.shared.notificationCenter.removeObserver(observer) }
-        observers = []
+        if let spaceObserver { NSWorkspace.shared.notificationCenter.removeObserver(spaceObserver) }
+        spaceObserver = nil
         candidate = nil
     }
 
@@ -113,13 +110,11 @@ import Observation
     /// The horizontal macOS swipes that clash with the strip swipe all switch Spaces. An app switch is not one:
     /// the strip focuses the window it lands on, which activates that window's app.
     private func watchForMacOSActions() {
-        let center = NSWorkspace.shared.notificationCenter
-        observers = [
-            center.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) {
-                [weak self] _ in
-                MainActor.assumeIsolated { self?.macOSActed(String(localized: "macOS switched Spaces.")) }
-            }
-        ]
+        spaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.macOSActed(String(localized: "macOS switched Spaces.")) }
+        }
     }
 
     private func macOSActed(_ reason: String) {
@@ -141,9 +136,11 @@ import Observation
         process.standardError = FileHandle.nullDevice
         process.standardInput = FileHandle.nullDevice
         do { try process.run() } catch { return nil }
-        DispatchQueue.global().asyncAfter(deadline: .now() + 1) { if process.isRunning { process.terminate() } }
+        let timeout = DispatchWorkItem { process.terminate() }
+        DispatchQueue.global().asyncAfter(deadline: .now() + 1, execute: timeout)
         let data = output.fileHandleForReading.readDataToEndOfFile()
         process.waitUntilExit()
+        timeout.cancel()
         guard process.terminationStatus == 0 else { return nil }
         return try? EngineStateSnapshot(json: data)
     }

@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-27 on branch `fix/554-slow-resize-maximize-refusal`, based on `main` at `9b93e6bd`
+Updated: 2026-11-27 on branch `refactor/untangle-codebase`, based on `main` at `a364ec91`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,15 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Codebase untangling across Miri and Paneru on 27 November 2026
+
+Untangled hidden links, duplicated subsystems, surplus wrappers, restating comments, and weak tests across Miri (`refactor/untangle-codebase` from `a364ec91`) and Paneru ([engine PR #213](https://github.com/samanyudas/paneru/pull/213), head `27808cd7` on `miri/v0.5.2` `1af42c07`).
+In Miri, deleted six unused or redundant files (`SystemScreenRecording.swift`, `ScreenRecording.swift`, `OrphanedEngines.swift`, `Feedback.swift`, `WindowSizeLimits.swift`, and `WindowSizeLimitsTests.swift`), simplified `AppModel`, `ConfigurationStore`, `GestureSettings`, `GestureTest`, `SettingsPages`, `TOML`, `ShortcutSearch`, and `scripts/check-strings.py`, and synced `verification/engine-lifecycle/EngineLifecycle.tla`.
+In Paneru (`-1,981` net lines across 70 files in PR #213), extracted shared Cocoa helpers into `src/platform/cocoa_ui.rs`, unified ScreenCaptureKit filter and capture logic across `src/slice_screen.rs` and `src/cover_screen.rs`, replaced the `Moved` component with `position.set_changed()`, added analytic `Curve::slope`/`share_rate` and O(1) `Windows::parent_of`, fixed FFI/CoreFoundation ownership and edge-case bugs (haptics `CFRelease`, `AXUIElementGetPid`, safe notification/KVO reads, non-aliasing C callbacks, `OverlayManager` `RefCell` drop order, `ExistingMarker` cleanup, `ScriptValue` NaN `Eq`), and pruned restating doc comments and redundant test boilerplate.
+Passed three rounds of fresh independent code reviews (Round 3 clean on Paneru and final line-number sync on `EngineLifecycle.tla`).
+Verified with `make pre-push`, `make swift-test`, `make strings`, `make engine-lint`, `make engine-test`, `make verify-engine-lifecycle` (198 states, exit 0), `make build`, `make package`, `make e2e` (`observed-granted` and `recovered`), and live `verify-miri` runs `20261127-134807` and `20261127-134937` (Settings 6-page `cutoff` 0 cut off, focus west/east, maximize/restore, stack/unstack, resize grow, and `1.3 s` relaunch restore with 0 engine `ERROR`/`PANIC`).
+This branch keeps `vendor/paneru` pinned at `1af42c07` until [engine PR #213](https://github.com/samanyudas/paneru/pull/213) merges into `miri/v0.5.2`.
 
 ## Slow-resizing windows maximize refusal on 27 November 2026
 

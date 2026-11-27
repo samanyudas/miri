@@ -1,4 +1,5 @@
 import AppKit
+import MiriCore
 import SwiftUI
 
 struct ExperimentView: View {
@@ -39,9 +40,7 @@ struct ExperimentView: View {
             Spacer(minLength: 0)
             HStack {
                 Button("Open Accessibility Settings") {
-                    if let url = URL(
-                        string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
-                    {
+                    if let url = SetupChecker.accessibilityURL {
                         NSWorkspace.shared.open(url)
                     }
                 }

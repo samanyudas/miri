@@ -19,8 +19,8 @@ public final class ConfigurationStore {
 
         """
 
-    public let url: URL
-    public let appBundleIdentifier: String
+    let url: URL
+    let appBundleIdentifier: String
     public private(set) var settings = MiriSettings()
     public private(set) var issue: ConfigurationIssue?
     /// The keyboard layout that decides which chords press the same keys.
@@ -48,12 +48,12 @@ public final class ConfigurationStore {
         self.init(url: url, appBundleIdentifier: appBundleIdentifier, layout: .positional)
     }
 
-    /// The shortcuts in the file, when it was read correctly.
     public var shortcuts: Shortcuts? { document.map { Shortcuts(document: $0, layout: layout) } }
 
     /// Reads the file, creating it with defaults when it is missing, then writes any derived engine keys it lacks.
     public func load(reduceMotion: Bool) {
         document = nil
+        writtenGestureFingers = nil
         let text: String
         do {
             text = try read()
@@ -67,7 +67,7 @@ public final class ConfigurationStore {
             let bindings = DefaultBinding.inspect(in: parsed, layout: layout)
             let stopIssue = Shortcuts.stopShortcutIssue(in: parsed, layout: layout)
             if case .usable = bindings, stopIssue == nil {
-                stopChordsToRegister = Shortcuts(document: parsed, layout: layout).stopChordsToRegister(layout: layout)
+                stopChordsToRegister = Shortcuts(document: parsed, layout: layout).stopChordsToRegister()
             }
             let read = try MiriSettings(document: parsed)
             if let issue = bindings.issue ?? stopIssue { throw issue }
@@ -91,9 +91,12 @@ public final class ConfigurationStore {
     }
 
     /// Writes `[swipe.gesture].fingers_count` when `gestureFingers` now gives a different answer.
-    public func applyGestureFingers(reduceMotion: Bool) throws(ConfigurationIssue) {
-        guard document != nil, gestureFingers(settings) != writtenGestureFingers else { return }
+    /// Returns `true` when `gestureFingers` changed and a save was attempted.
+    @discardableResult
+    public func applyGestureFingers(reduceMotion: Bool) throws(ConfigurationIssue) -> Bool {
+        guard document != nil, gestureFingers(settings) != writtenGestureFingers else { return false }
         try write(settings, reduceMotion: reduceMotion, replacing: settings)
+        return true
     }
 
     /// Saves a change to the shortcuts. Throws `ShortcutRejection` when the chord is taken, or `ConfigurationIssue`.
@@ -106,8 +109,15 @@ public final class ConfigurationStore {
         let next: TOMLDocument
         do {
             switch edit {
-            case .add(let chord, let action): next = try shortcuts.adding(chord, to: action, layout: layout)
+            case .add(let chord, let action): next = try shortcuts.adding(chord, to: action)
             case .remove(let chord, let action): next = try shortcuts.removing(chord, from: action)
+            case .move(let chord, let owner, let action):
+                var cleaned = current
+                // The owner can spell the same keys another way, such as `ctrl+alt-[` for `ctrl+alt-leftbracket`.
+                for existing in shortcuts.chords(for: owner) where layout.conflicts(existing, chord) {
+                    cleaned = try Shortcuts(document: cleaned, layout: layout).removing(existing, from: owner)
+                }
+                next = try Shortcuts(document: cleaned, layout: layout).adding(chord, to: action)
             case .resetToDefaults: next = try shortcuts.resettingToDefaults()
             }
         } catch let error as TOMLEditError {
@@ -118,7 +128,7 @@ public final class ConfigurationStore {
             backingUpBefore: edit == .resetToDefaults ? String(localized: "resetting shortcuts") : nil)
         issue = nil
         refreshKeptDefaults(in: next)
-        stopChordsToRegister = Shortcuts(document: next, layout: layout).stopChordsToRegister(layout: layout)
+        stopChordsToRegister = Shortcuts(document: next, layout: layout).stopChordsToRegister()
     }
 
     private func read() throws(ConfigurationIssue) -> String {
@@ -154,11 +164,11 @@ public final class ConfigurationStore {
         let next: TOMLDocument
         do {
             let applied = try settings.applying(
-                to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier, layout: layout,
+                to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier,
                 gestureFingers: fingers)
             if let previous {
                 let before = try previous.applying(
-                    to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier, layout: layout,
+                    to: current, reduceMotion: reduceMotion, appBundleIdentifier: appBundleIdentifier,
                     gestureFingers: writtenGestureFingers)
                 // A key skipped both times still needs a write when the value Miri wants there changed.
                 let needed = applied.skipped.filter { path, wanted in
@@ -170,7 +180,7 @@ public final class ConfigurationStore {
             } else if let path = applied.skipped.keys.filter({ !$0.hasPrefix("miri.") }).sorted().first {
                 throw TOMLEditError.notEditable(path: path)
             }
-            next = applied.document
+            next = try DefaultBinding.adding(to: applied.document, layout: layout)
         } catch let error as TOMLEditError {
             throw .notEditable(error.description)
         } catch let error as ConfigurationIssue {
@@ -183,15 +193,15 @@ public final class ConfigurationStore {
         try commit(next, replacing: current, backingUpBefore: upgrades ? String(localized: "upgrading it") : nil)
         writtenGestureFingers = fingers
         refreshKeptDefaults(in: next)
-        stopChordsToRegister = Shortcuts(document: next, layout: layout).stopChordsToRegister(layout: layout)
+        stopChordsToRegister = Shortcuts(document: next, layout: layout).stopChordsToRegister()
     }
 
     /// Reports each changed default that kept its old chords, and each chord of a version 4 or later action that
     /// another binding holds.
     private func refreshKeptDefaults(in document: TOMLDocument) {
         let shortcuts = Shortcuts(document: document, layout: layout)
-        func owner(of chord: Chord, for action: ShortcutAction) -> String? {
-            guard case .usedBy(let owner) = shortcuts.rejection(adding: chord, to: action, layout: layout) else {
+        func owner(of chord: Chord, for action: ShortcutAction) -> ShortcutOwner? {
+            guard case .usedBy(let owner) = shortcuts.rejection(adding: chord, to: action) else {
                 return nil
             }
             return owner
@@ -222,13 +232,18 @@ public final class ConfigurationStore {
         keptDefaults = changes + additions
     }
 
-    /// Replaces the file with `next`, after backing up `current` when `backupReason` names why.
     private func commit(_ next: TOMLDocument, replacing current: TOMLDocument, backingUpBefore backupReason: String?)
         throws(ConfigurationIssue)
     {
         guard next.text != current.text else { return }
         // Refuse to replace a file that changed since Miri read it. The file watcher reloads it instead.
-        guard (try? String(contentsOf: url, encoding: .utf8)) == current.text else {
+        let onDisk: String
+        do {
+            onDisk = try String(contentsOf: url, encoding: .utf8)
+        } catch {
+            throw .unwritable(error.localizedDescription)
+        }
+        guard onDisk == current.text else {
             throw .unwritable(String(localized: "The file changed while Miri was saving. Miri reloaded it. Try again."))
         }
         if let backupReason { try backUp(current, before: backupReason) }

@@ -132,13 +132,24 @@ public struct MiriSettings: Equatable, Sendable {
     /// Display-edge padding. The edge window's own padding adds to it, so together they make the outer gap.
     public var edgePadding: Int { max(0, outerGap - windowPadding) }
 
+    public static func parseWidthPresets(_ text: String) throws(ConfigurationIssue) -> [Double] {
+        let parsed = text.split(separator: ",").map { Double($0.trimmingCharacters(in: .whitespaces)) }
+        guard !parsed.contains(nil) else {
+            throw .invalidValue(key: "", message: String(localized: "Enter numbers separated by commas."))
+        }
+        var candidate = MiriSettings()
+        candidate.widthPresets = parsed.compactMap(\.self)
+        try candidate.validate()
+        return candidate.widthPresets
+    }
+
     /// Writes these settings and the engine keys derived from them, changing only values that differ.
     /// `appBundleIdentifier` names Miri's own app, whose windows always float. `gestureFingers` is the strip swipe
     /// the engine intercepts, which is on only while it is tested or being tested. `nil` leaves macOS gestures alone.
     /// Leaves each key the file defines in a form Miri does not rewrite, such as an inline table, and returns each of
     /// those keys in `skipped` with the value Miri wanted there, or `nil` to remove it.
     func applying(
-        to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String, layout: KeyLayout = .positional,
+        to document: TOMLDocument, reduceMotion: Bool, appBundleIdentifier: String,
         gestureFingers: GestureFingers? = nil
     ) throws
         -> (document: TOMLDocument, skipped: [String: TOMLValue?])
@@ -212,7 +223,7 @@ public struct MiriSettings: Equatable, Sendable {
         for legacy in ["swipe_gesture_fingers", "swipe_gesture_direction"] {
             try edit(nil) { try result.removing(table: ["options"], key: legacy) }
         }
-        return (try DefaultBinding.adding(to: result, layout: layout), skipped)
+        return (result, skipped)
     }
 
     private static func gap(_ value: TOMLValue, key: String) throws(ConfigurationIssue) -> Int {
@@ -253,7 +264,7 @@ public struct MiriSettings: Equatable, Sendable {
 }
 
 /// How a strip swipe and a modifier-scroll wheel input move the strip, stored in `[miri].strip_scrolling`.
-public enum StripScrolling: String, CaseIterable, Sendable {
+public enum StripScrolling: String, Sendable {
     /// The strip follows the fingers or the wheel, then settles on a column.
     case continuous
     /// A strip swipe follows the fingers, then lands on one window, and each wheel input focuses the adjacent window:
@@ -263,7 +274,7 @@ public enum StripScrolling: String, CaseIterable, Sendable {
 
 /// Which strip a strip swipe or a modifier-scroll wheel input moves, stored in `[miri].swipe_target`. The raw value is
 /// the engine's `[swipe.gesture].target`. Keyboard commands always act on the focused strip.
-public enum SwipeTarget: String, CaseIterable, Sendable {
+public enum SwipeTarget: String, Sendable {
     /// The strip on the display under the pointer.
     case pointer
     /// The strip of the focused window, wherever the pointer is.
@@ -272,7 +283,7 @@ public enum SwipeTarget: String, CaseIterable, Sendable {
 
 /// The side of its stack where a maximized stacked window opens as a column of its own. The raw value is the engine's
 /// `[options].maximized_window_side`.
-public enum MaximizedWindowSide: String, CaseIterable, Sendable {
+public enum MaximizedWindowSide: String, Sendable {
     case left, right
 }
 

@@ -3,9 +3,13 @@ import Testing
 
 @testable import MiriCore
 
-struct DefaultBindingsTests {
+final class DefaultBindingsTests {
     private let directory = FileManager.default.temporaryDirectory.appending(path: "miri-bindings-\(UUID().uuidString)")
     private var url: URL { directory.appending(path: "config.toml") }
+
+    deinit {
+        try? FileManager.default.removeItem(at: directory)
+    }
 
     private func load(
         _ original: String? = nil, layout: KeyLayout = KeyLayout(keys: [.init(code: 0x18, character: "=")])
@@ -86,7 +90,8 @@ struct DefaultBindingsTests {
         let (_, document) = try load(original)
         #expect(document.text.hasPrefix("[miri]\ninner_gap = 8\n"))
         #expect(document.value(at: ["bindings", "window_manage"]) == .string("ctrl+alt-t"))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
+        #expect(
+            document.value(at: ["miri", "default_bindings_version"]) == .integer(Int64(DefaultBinding.currentVersion)))
     }
 
     @Test func rejectsAnInvalidVersionWithoutWriting() throws {
@@ -203,7 +208,8 @@ struct DefaultBindingsTests {
                     .string("ctrl+alt+cmd+shift-downarrow"), .string("ctrl+alt+cmd+shift-j"),
                     .string("ctrl+alt+cmd+shift-s"),
                 ]))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
+        #expect(
+            document.value(at: ["miri", "default_bindings_version"]) == .integer(Int64(DefaultBinding.currentVersion)))
     }
 
     @Test func deletedVersionOneResizeShortcutsStayDeletedAfterUpgrade() throws {
@@ -218,7 +224,8 @@ struct DefaultBindingsTests {
         #expect(
             document.value(at: ["bindings", "window_focusdisplay_north"])
                 == .array([.string("ctrl+alt+cmd-uparrow"), .string("ctrl+alt+cmd-k"), .string("ctrl+alt+cmd-w")]))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
+        #expect(
+            document.value(at: ["miri", "default_bindings_version"]) == .integer(Int64(DefaultBinding.currentVersion)))
     }
 
     @Test func keepsUnversionedUserBindingsThatMatchRetiredDefaults() throws {
@@ -238,7 +245,8 @@ struct DefaultBindingsTests {
         #expect(document.value(at: ["bindings", "window_vertical_shrink"]) == .string("ctrl+alt+shift-minus"))
         #expect(document.value(at: ["bindings", "window_step_grow"]) == nil)
         #expect(document.value(at: ["bindings", "window_vertical_step_grow"]) == nil)
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
+        #expect(
+            document.value(at: ["miri", "default_bindings_version"]) == .integer(Int64(DefaultBinding.currentVersion)))
     }
 
     @Test(arguments: [1, 2])
@@ -260,7 +268,8 @@ struct DefaultBindingsTests {
         #expect(bindings?["window_stack_east"] == .string("ctrl+alt-rightbracket"))
         #expect(bindings?["window_unstack_east"] == .string("ctrl+alt+shift-rightbracket"))
         #expect(bindings?["window_unstack_west"] == .string("ctrl+alt+shift-leftbracket"))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
+        #expect(
+            document.value(at: ["miri", "default_bindings_version"]) == .integer(Int64(DefaultBinding.currentVersion)))
         #expect(store.keptDefaults.isEmpty)
     }
 
@@ -296,7 +305,8 @@ struct DefaultBindingsTests {
             store.keptDefaults == [
                 KeptDefault(
                     action: .engine(command: "window_stack_west"), kept: [Chord([.control, .option], "rightbracket")],
-                    wanted: Chord([.control, .option], "leftbracket"), owner: "Stack focused window into right column")
+                    wanted: Chord([.control, .option], "leftbracket"),
+                    owner: .action(.engine(command: "window_stack_east")))
             ])
         store.load(reduceMotion: false)
         #expect(store.keptDefaults.count == 1)
@@ -344,7 +354,8 @@ struct DefaultBindingsTests {
             default_bindings_version = 2
             """)
         let (restarted, document) = try load()
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
+        #expect(
+            document.value(at: ["miri", "default_bindings_version"]) == .integer(Int64(DefaultBinding.currentVersion)))
         #expect(restarted.keptDefaults.count == 1)
         #expect(restarted.keptDefaults == first.keptDefaults)
     }
@@ -365,7 +376,7 @@ struct DefaultBindingsTests {
         #expect(document.value(at: ["bindings", "window_stack_east"]) == .string("ctrl+alt-leftbracket"))
         #expect(
             store.keptDefaults.map(\.owner) == [
-                "Stack focused window into right column", "Stack focused window into left column",
+                .action(.engine(command: "window_stack_east")), .action(.engine(command: "window_stack_west")),
             ])
     }
 
@@ -713,7 +724,8 @@ struct DefaultBindingsTests {
                 == .array([
                     .string("ctrl+alt-rightarrow"), .string("ctrl+alt-l"), .string("ctrl+alt-d"),
                 ]))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
+        #expect(
+            document.value(at: ["miri", "default_bindings_version"]) == .integer(Int64(DefaultBinding.currentVersion)))
     }
 
     @Test func anUpgradeLeavesAStopChordToStop() throws {
@@ -733,10 +745,11 @@ struct DefaultBindingsTests {
     }
 
     @Test func aVersionAboveTheCurrentOneAddsNothing() throws {
-        let (store, document) = try load("[miri]\ndefault_bindings_version = 7\n")
+        let next = DefaultBinding.currentVersion + 1
+        let (store, document) = try load("[miri]\ndefault_bindings_version = \(next)\n")
         #expect(store.issue == nil)
         #expect(document.value(at: ["bindings"]) == nil)
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(7))
+        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(Int64(next)))
     }
 
     @Test(arguments: [
@@ -906,7 +919,8 @@ struct DefaultBindingsTests {
         #expect(store.issue == nil)
         #expect(store.keptDefaults.isEmpty)
         #expect(document.value(at: ["bindings"]) == freshDocument.value(at: ["bindings"]))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
+        #expect(
+            document.value(at: ["miri", "default_bindings_version"]) == .integer(Int64(DefaultBinding.currentVersion)))
         let all = chords(in: document.value(at: ["bindings"]))
         #expect(Set(all).count == all.count)
     }
@@ -939,13 +953,14 @@ struct DefaultBindingsTests {
                 KeptDefault(
                     action: .engine(command: "window_focus_west"),
                     kept: [Chord([.control, .option], "leftarrow"), Chord([.control, .option], "h")],
-                    wanted: Chord([.control, .option], "a"), owner: "Cycle preset widths forward"),
+                    wanted: Chord([.control, .option], "a"), owner: .action(.cyclePresetWidths)),
                 KeptDefault(
                     action: .engine(command: "window_focusdisplay_west"),
                     kept: [
                         Chord([.control, .option, .command], "leftarrow"), Chord([.control, .option, .command], "a"),
                     ],
-                    wanted: Chord([.control, .option, .command], "h"), owner: "Centre column"),
+                    wanted: Chord([.control, .option, .command], "h"),
+                    owner: .action(.engine(command: "window_center"))),
             ])
         let all = chords(in: bindings)
         #expect(Set(all).count == all.count)
@@ -1056,7 +1071,8 @@ struct DefaultBindingsTests {
                 document.value(at: ["bindings", "window_swap_\(end)"])
                     == before.value(at: ["bindings", "window_moveedge_\(side)"]))
         }
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
+        #expect(
+            document.value(at: ["miri", "default_bindings_version"]) == .integer(Int64(DefaultBinding.currentVersion)))
         let all = chords(in: document.value(at: ["bindings"]))
         #expect(Set(all).count == all.count)
     }
@@ -1112,7 +1128,7 @@ struct DefaultBindingsTests {
                     kept: [
                         Chord([.control, .option, .command], "leftarrow"), Chord([.control, .option, .command], "a"),
                     ],
-                    wanted: Chord([.control, .option, .command], "h"), owner: "window_focusedge_west")
+                    wanted: Chord([.control, .option, .command], "h"), owner: .other("window_focusedge_west"))
             ])
         #expect(
             store.shortcuts?.others.contains(
@@ -1138,7 +1154,7 @@ struct DefaultBindingsTests {
         #expect(document.value(at: ["bindings", "window_focusdisplay_west"]) == .string("ctrl+alt+cmd-a"))
         #expect(document.value(at: ["bindings", "window_center"]) == .string("ctrl+alt+cmd-leftarrow"))
         #expect(store.stopChordsToRegister == [Chord([.control, .option, .command], "h")])
-        #expect(Set(store.keptDefaults.map(\.owner)) == ["Centre column", "Stop window manager"])
+        #expect(Set(store.keptDefaults.map(\.owner)) == [.action(.engine(command: "window_center")), .action(.stop)])
         let (restarted, _) = try load()
         #expect(restarted.issue == nil)
         #expect(restarted.keptDefaults == store.keptDefaults)
@@ -1155,7 +1171,8 @@ struct DefaultBindingsTests {
         #expect(
             document.value(at: ["bindings", "window_focus_first"])
                 == .array([.string("ctrl+alt+cmd-leftarrow"), .string("ctrl+alt+cmd-f")]))
-        #expect(Set(store.keptDefaults.map(\.owner)) == ["Focus first column", "Stop window manager"])
+        #expect(
+            Set(store.keptDefaults.map(\.owner)) == [.action(.engine(command: "window_focus_first")), .action(.stop)])
     }
 
     @Test func aVersion3FileKeepsAManuallyAddedVersion4EdgeDefault() throws {
@@ -1259,7 +1276,8 @@ struct DefaultBindingsTests {
         #expect(store.issue == nil)
         #expect(store.keptDefaults.isEmpty)
         #expect(document.value(at: ["bindings"]) == freshDocument.value(at: ["bindings"]))
-        #expect(document.value(at: ["miri", "default_bindings_version"]) == .integer(6))
+        #expect(
+            document.value(at: ["miri", "default_bindings_version"]) == .integer(Int64(DefaultBinding.currentVersion)))
         #expect(store.shortcuts?.others == [])
     }
 
@@ -1302,7 +1320,8 @@ struct DefaultBindingsTests {
                         Chord([.control, .option, .command, .shift], "h"),
                         Chord([.control, .option, .command, .shift], "a"),
                     ],
-                    wanted: Chord([.control, .option, .command, .shift], "leftarrow"), owner: "window_moveedge_west")
+                    wanted: Chord([.control, .option, .command, .shift], "leftarrow"),
+                    owner: .other("window_moveedge_west"))
             ])
     }
 

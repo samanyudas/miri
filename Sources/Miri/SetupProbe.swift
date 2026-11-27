@@ -3,8 +3,55 @@ import ApplicationServices
 import Darwin
 import MiriCore
 
-/// Reads the macOS state the setup checker needs. It only reads preferences and never writes them.
+/// Reads macOS permissions and preferences for setup checks, and hosts small AppKit system helpers.
+/// It never writes preferences.
 enum SetupProbe {
+    static let screenRecordingSettingsURL = URL(
+        string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")
+
+    /// Reads Screen Recording permission without prompting. Only turning a switch on prompts.
+    static var screenRecordingGranted: Bool { CGPreflightScreenCaptureAccess() }
+
+    /// Prompts macOS for Screen Recording permission when the user turns on a switch that needs it.
+    static func requestScreenRecording() -> Bool { CGRequestScreenCaptureAccess() }
+
+    /// Converts an AppKit (bottom-left origin) rectangle to Accessibility (top-left of main display) coordinates.
+    static func axFrame(for frame: CGRect, mainMaxY: CGFloat) -> CGRect {
+        CGRect(x: frame.minX, y: mainMaxY - frame.maxY, width: frame.width, height: frame.height)
+    }
+
+    /// Reveals `url` in Finder and brings Finder to the front even when invoked from the menu bar while inactive.
+    static func revealInFinder(_ url: URL) {
+        let reveal: @MainActor () -> Void = {
+            NSApp.yieldActivation(toApplicationWithBundleIdentifier: "com.apple.finder")
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+            NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.finder")
+                .first?.activate(from: .current, options: [])
+        }
+        if NSApp.isActive {
+            reveal()
+            return
+        }
+        // Clicking a menu bar item while another app is frontmost leaves Miri inactive, so Finder cannot take focus
+        // under cooperative activation. Activate Miri first, then hand activation to Finder once Miri is active.
+        var revealed = false
+        nonisolated(unsafe) var observer: NSObjectProtocol?
+        let finish: @MainActor () -> Void = {
+            guard !revealed else { return }
+            revealed = true
+            if let observer { NotificationCenter.default.removeObserver(observer) }
+            observer = nil
+            reveal()
+        }
+        observer = NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification, object: NSApp, queue: .main
+        ) { _ in
+            MainActor.assumeIsolated { finish() }
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { finish() }
+    }
+
     static func observe() -> SetupObservation {
         let trackpad = "com.apple.AppleMultitouchTrackpad"
         let workspace = NSWorkspace.shared

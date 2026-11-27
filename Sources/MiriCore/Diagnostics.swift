@@ -2,10 +2,10 @@ import Foundation
 
 /// Removes personal details from text before it leaves the Mac: window titles, user names, and document paths.
 public struct Redactor: Sendable {
-    public let homeDirectory: String
-    public let userNames: [String]
+    let homeDirectory: String
+    let userNames: [String]
     /// Exact strings to remove, such as the titles of open windows. Strings shorter than three characters are kept.
-    public let sensitiveStrings: [String]
+    let sensitiveStrings: [String]
 
     public init(homeDirectory: String, userNames: [String], sensitiveStrings: [String] = []) {
         self.homeDirectory = homeDirectory
@@ -27,6 +27,15 @@ public struct Redactor: Sendable {
     }
 }
 
+/// The GitHub pages where a person reports a bug or asks for a feature.
+/// Each address names only a page or a form and fills in no field, so opening one sends nothing from the Mac.
+public enum Feedback {
+    public static let formList = URL(string: "https://github.com/samanyudas/miri/issues/new/choose")!
+    static let bugReportForm = "bug_report.yml"
+    public static let bugReport = URL(
+        string: "https://github.com/samanyudas/miri/issues/new?template=\(bugReportForm)")!
+}
+
 /// The facts a diagnostics report contains. It never holds window titles, document paths, or raw configuration.
 public struct DiagnosticsReport: Sendable {
     public struct Display: Sendable {
@@ -42,15 +51,15 @@ public struct DiagnosticsReport: Sendable {
         }
     }
 
-    public var appVersion: String
-    public var engineRevision: String
-    public var macOSVersion: String
-    public var architecture: String
-    public var displays: [Display]
-    public var engineState: EngineState
-    public var setupChecks: [SetupCheck]
-    public var configurationIssue: ConfigurationIssue?
-    public var log: String
+    let appVersion: String
+    let engineRevision: String
+    let macOSVersion: String
+    let architecture: String
+    let displays: [Display]
+    let engineState: EngineState
+    let setupChecks: [SetupCheck]
+    let configurationIssue: ConfigurationIssue?
+    let log: String
 
     public init(
         appVersion: String, engineRevision: String, macOSVersion: String, architecture: String, displays: [Display],
@@ -106,7 +115,7 @@ public struct DiagnosticsReport: Sendable {
         return lines.joined(separator: "\n") + "\n"
     }
 
-    static func describe(_ state: EngineState, bundle: Bundle) -> String {
+    private static func describe(_ state: EngineState, bundle: Bundle) -> String {
         switch state {
         case .stopped: String(localized: "stopped", bundle: bundle)
         case .running: String(localized: "running", bundle: bundle)
@@ -115,7 +124,7 @@ public struct DiagnosticsReport: Sendable {
         }
     }
 
-    static func describe(_ status: SetupStatus, bundle: Bundle) -> String {
+    private static func describe(_ status: SetupStatus, bundle: Bundle) -> String {
         switch status {
         case .passed: String(localized: "passed", bundle: bundle)
         case .problem(let message): String(localized: "problem: \(message)", bundle: bundle)

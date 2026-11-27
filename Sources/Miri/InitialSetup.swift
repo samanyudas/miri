@@ -77,13 +77,11 @@ struct InitialSetupView: View {
             if canStart {
                 // Starting is the next step here, so it is the prominent button and Return presses it.
                 Button("Start Window Management") { model.start() }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Palette.accentFill)
+                    .prominentButton()
                     .keyboardShortcut(.defaultAction)
             } else if case .failed = model.engineState {
                 Button("Restart Engine") { model.restart() }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Palette.accentFill)
+                    .prominentButton()
                     .keyboardShortcut(.defaultAction)
             }
         }
@@ -118,7 +116,8 @@ struct InitialSetupView: View {
         switch model.engineState {
         case .running: String(localized: "Keyboard shortcuts work now.")
         case .restarting: String(localized: "The engine is restarting. Keyboard shortcuts resume when it is ready.")
-        case .failed: "Restart the engine to manage windows again. Settings > Diagnostics has the log."
+        case .failed:
+            String(localized: "Restart the engine to manage windows again. Settings > Diagnostics has the log.")
         case .stopped where !model.startBlockers.isEmpty: AppModel.startsWhenReadySentence
         case .stopped: String(localized: "Keyboard shortcuts work once Miri starts.")
         }
@@ -126,40 +125,15 @@ struct InitialSetupView: View {
 
     private var swipe: some View {
         SettingsSection(String(localized: "Strip swipe")) {
-            SettingsRow(
-                title: String(localized: "Fingers"),
-                detail: String(localized: "Four is recommended. Three fingers can clash with Three Finger Drag.")
-            ) {
-                SegmentedChoice(
-                    label: String(localized: "Fingers"),
-                    selection: Binding(
-                        get: { model.settings.stripGesture },
-                        set: { value in model.update { $0.stripGesture = value } }),
-                    options: [
-                        (String(localized: "Three"), .three), (String(localized: "Four"), .four),
-                        (String(localized: "Off"), .off),
-                    ])
-            }
+            StripSwipeFingersRow(model: model)
             // The swipe is on once three or four fingers are chosen. Only when Miri cannot read the macOS settings does
             // it need a test first.
             if case .needsTest = model.gestureState {
                 SettingsRow(title: String(localized: "Swipe test"), detail: testDetail) {
-                    Button("Test Gesture…") { testing = true }
-                        .disabled(model.gestureTestBlocker != nil)
-                        .accessibilityHint(model.gestureTestBlocker ?? "")
-                        .fixedSize()
-                        .padding(1)
-                        .contentShape(.rect)
-                        .help(model.gestureTestBlocker ?? "")
+                    GestureTestButton(blocker: model.gestureTestBlocker) { testing = true }
                 }
             }
-            if case .conflict(let message) = model.gestureState {
-                NoticeRow(kind: .warning, text: message) {
-                    if let url = model.settings.stripGesture.fingers.flatMap(model.gestureCheck)?.settingsURL {
-                        Button("Open Trackpad Settings") { NSWorkspace.shared.open(url) }
-                    }
-                }
-            }
+            StripSwipeConflictRow(model: model)
         }
     }
 
@@ -178,8 +152,7 @@ struct InitialSetupView: View {
                 Button("Done") { presenter?.close(.initialSetup) }
             } else {
                 Button("Done") { presenter?.close(.initialSetup) }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Palette.accentFill)
+                    .prominentButton()
                     .keyboardShortcut(.defaultAction)
             }
         }
