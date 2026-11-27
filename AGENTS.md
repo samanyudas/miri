@@ -1,7 +1,6 @@
 # Agent instructions
 
-Miri is a native macOS scrolling window manager with a bundled Paneru-based engine.
-Today the repository holds the product design and a menu bar app that supervises the engine.
+Miri is a native macOS scrolling window manager (`Miri Developer`, `io.github.samanyudas.miri.dev`) with a bundled Paneru-based engine.
 Read this map first, then the linked document for the area you touch.
 
 ## A note from Sam
@@ -15,125 +14,78 @@ Channel both "measure twice, cut once" and "yagni".
 Fight scope creep.
 Honor the developer's intent, minimally and realistically.
 
-The rest of this document is meant to help you navigate the codebase and make changes effectively.
-Think of these instructions less as "hard rules", more as "good defaults".
+Think of the instructions below less as "hard rules", more as "good defaults".
 The developer's preferences should be able to override anything here.
 
-## Start and end every session
+## Session handoff
 
-1. Read [PROGRESS.md](PROGRESS.md). The SessionStart hook prints it with the branch and uncommitted changes.
-2. Continue from its **Next** list instead of redoing items under **Done**.
-3. Before you stop, update PROGRESS.md and commit or list every change. Delete temporary files.
+1. Read [PROGRESS.md](PROGRESS.md) (printed by the Claude Code SessionStart hook) and continue from **Next** instead of redoing **Done**.
+2. Before you stop, update `PROGRESS.md`, commit or list every change, and delete temporary files.
 
-## Where things live
+## Non-obvious locations and ownership
 
-| Path | Contents |
+| Path | Role / gotcha |
 | --- | --- |
-| `Sources/Miri/` | SwiftUI and AppKit app. Builds as Miri Developer, `io.github.samanyudas.miri.dev`. |
-| `Sources/MiriCore/` | Testable logic: TOML editing, settings, engine supervision, window recovery, setup checks, diagnostics. |
-| `Tests/MiriCoreTests/` | Swift Testing suites for `MiriCore`. |
-| `Sources/AXFixture/` | Harmless window that the selftests read and move. |
-| `vendor/paneru/` | Engine submodule, pinned to a commit on `samanyudas/paneru` branch `miri/v0.5.2`. Engine PRs start from `miri/v0.5.2`, not from the `testing` branch that `vendor/paneru/AGENTS.md` names. |
-| `scripts/` | Build, packaging, selftest, and repository checks, with tests in `scripts/tests/`. |
-| `.claude/` | Project hooks: the command guard and the session-start handoff. |
-| `.github/` | CI and issue and PR templates. |
-| `decisions/` | Accepted product direction and open questions. |
-| `docs/adr/` | Architecture decisions. |
-| `verification/` | TLA+ models that a project skill in `.claude/skills/` checks, such as the engine lifecycle. |
-| `docs/specs/`, `docs/prototypes/` | The v1 specification and prototype records. |
-| `docs/acceptance-ledger.md` | The recorded result of every v1 acceptance check. |
-| `docs/limitations.md` | Every known limitation, with its evidence. Add a confirmed limitation here, and remove it when its fix is verified. |
-| `GLOSSARY.md` | Domain vocabulary. Use its terms. |
+| `Sources/AXFixture/` | Harmless window that selftests read and move. |
+| `vendor/paneru/` | Engine submodule pinned on `samanyudas/paneru` branch `miri/v0.5.2`. Start engine PRs from `miri/v0.5.2`, not from `testing` in `vendor/paneru/AGENTS.md`. |
+| `verification/` | TLA+ models checked via `.claude/skills/verify-engine-lifecycle/`. |
+| `docs/acceptance-ledger.md` | Recorded result of every v1 acceptance check. |
+| `docs/limitations.md` | Confirmed limitations with evidence; add when confirmed, remove when verified fixed. |
+| `GLOSSARY.md` | Domain vocabulary; use its terms. |
 
-Each fact has one owner.
-GitHub Issues own tasks and specs.
-`decisions/` owns product behavior, and `docs/adr/` owns architecture.
-PROGRESS.md owns only in-flight state and points to the others.
-Read `decisions/release-scope.md` and `decisions/design-tree-status.md` before you plan or build a feature.
-If your change contradicts an ADR, say so explicitly instead of overriding it.
+Each fact has one owner: GitHub Issues own tasks and specs, `decisions/` owns product behavior, `docs/adr/` owns architecture, and `PROGRESS.md` holds only in-flight state.
+Read `decisions/release-scope.md` and `decisions/design-tree-status.md` before planning or building a feature.
+If your change contradicts an ADR, state it explicitly instead of overriding it.
 
 ## Commands
 
 | Command | Runs |
 | --- | --- |
-| `make setup` | Engine checkout, pre-push hook, pinned Rust install, local signing identity, prerequisite report. |
-| `make pre-push` | `make lint`, Swift formatting, and engine formatting in seconds. The pre-push hook runs it. |
-| `make lint` | Docs links and style, harness tests, ShellCheck, actionlint, version compatibility. Works on Linux. |
-| `make native` | Swift and engine lint, build, Swift and engine unit tests, end-to-end selftests, DMG packaging. Needs macOS 27 arm64. |
-| `make check` | `make lint` and `make native`. This is the gate before a PR. |
-| `make build`, `make test`, `make e2e`, `make package` | One stage of `make native`. `make test` is `make swift-test` and `make engine-test`. |
+| `make setup` | Engine checkout, pre-push hook, pinned Rust, local signing identity, prerequisite report. |
+| `make pre-push` | `make lint`, Swift formatting, and engine formatting (run by the pre-push hook). |
+| `make lint` | Docs links/style, harness tests, ShellCheck, actionlint, version compatibility (works on Linux). |
+| `make native` | Swift/engine lint, build, unit tests, e2e selftests, DMG packaging (needs macOS 27 arm64). |
+| `make check` | `make lint` + `make native` (gate before a PR). |
+| `make build`, `make test`, `make e2e`, `make package` | Individual `make native` stages (`make test` = `make swift-test` + `make engine-test`). |
 | `make format` | Formats Swift sources with `.swift-format`. |
-| `make verify-engine-lifecycle` | Model-checks engine start, stop, restart, and quit. Use it when you change that code. |
+| `make verify-engine-lifecycle` | Model-checks engine start, stop, restart, and quit. |
 
-Run cargo from the repository root, also for the engine checks in `vendor/paneru/AGENTS.md` (`make engine-lint`, `make engine-test`, `cargo fmt --manifest-path vendor/paneru/Cargo.toml`), so `rust-toolchain.toml` and `.cargo/config.toml` apply instead of the engine's own `stable` toolchain.
-CI in `.github/workflows/ci.yml` runs the same make targets, with the macOS stages as parallel jobs.
-Fix what the pre-push hook reports instead of skipping it.
-Before any step that changes the real desktop, including `make e2e`, take the [live-test lock](docs/AI-CONTRIBUTIONS.md#take-the-live-test-lock).
+Run `cargo` from the repo root (including engine checks from `vendor/paneru/AGENTS.md`) so `rust-toolchain.toml` and `.cargo/config.toml` apply.
+Fix pre-push hook failures instead of skipping them.
+Before any step that touches the real desktop (including `make e2e`), take the [live-test lock](docs/AI-CONTRIBUTIONS.md#take-the-live-test-lock).
 
-## Issues
+## Issues and pull requests
 
-- File an issue only with one type label (`bug`, `enhancement`, `task`, or `decision`), a plain-sentence title, and every required section of `.github/ISSUE_TEMPLATE/`.
-  File a bug-related issue (never as a `task`) only after reproducing it yourself with exact steps, build commit, and failing output, or report it to Sam.
-- Before you change code for an issue, confirm that you can check each acceptance criterion.
-  For a bug, also reproduce it on the current `main` build.
-  If either check fails, comment with the gap, add `needs-info`, and stop.
-- [File an issue](CONTRIBUTING.md#file-an-issue) and [Take up an issue](CONTRIBUTING.md#take-up-an-issue) have the full rules.
-  The command guard reads the templates and blocks a `gh issue create` command that breaks these rules.
-
-## Pull requests
-
-- Conventional commit titles, plain language: fix(engine): stacked windows no longer go out of reach.
-- Body: the problem in a sentence or two, then how you fixed it.
-  End with the model and harness that did the work.
-- UI changes need before/after images.
-  Motion or timing needs a short video.
-- Upload PR evidence to GitHub, with only disposable windows in the picture, as [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#capture-evidence) describes.
-  Never commit PR-only screenshots or assets such as .github/pr-assets/.
-- One request is one PR.
-  Split it only when the maintainer asks.
-  Outside contributions follow the stricter one problem per PR rule.
-- Reference an issue the PR delivers with `Refs #N`, rather than closing keywords such as `Closes`, `Fixes`, or `Resolves`.
-  The [issue lifecycle](CONTRIBUTING.md#issue-lifecycle) explains why.
-- Use `Part of #N` for a PR that only records decisions, changes docs, or delivers part of the issue.
+- Follow [File an issue](CONTRIBUTING.md#file-an-issue) (one type label: `bug`, `enhancement`, `task`, or `decision`, all template sections, plain-sentence title; reproduce bugs on the user surface first) and [Take up an issue](CONTRIBUTING.md#take-up-an-issue) (confirm you can check every acceptance criterion and reproduce bugs on `main` before editing; otherwise comment, add `needs-info`, and stop).
+- PRs: conventional commit titles in plain language, problem-first body ending with the model and harness, one request per PR, `Refs #N` for delivered issues (not `Closes`/`Fixes`/`Resolves`) and `Part of #N` for partial or docs-only PRs.
+  UI changes need before/after images and motion needs short video, uploaded to GitHub with only disposable windows ([capture evidence](docs/AI-CONTRIBUTIONS.md#capture-evidence)); never commit PR-only media.
 
 ## Definition of done
 
-- The issue's acceptance criteria hold, and you observed them on the real artifact.
-- Verify and close completed issues under the [issue lifecycle](CONTRIBUTING.md#issue-lifecycle).
-  Tick each acceptance criterion's checkbox in the issue once you verify it, before you close the issue.
-- `make check` passes, or the PR names each skipped target and why.
-- A bug fix includes the failing output from before the fix and the passing output after it.
-- The PR description lists commands and results and names what remains untested, such as hardware or a manual permission grant.
-- PROGRESS.md is current.
+- Acceptance criteria hold on the real artifact, `make check` passes (or skipped targets are named with reasons), bug fixes include before/after output, `PROGRESS.md` is updated, and completed issues follow the [issue lifecycle](CONTRIBUTING.md#issue-lifecycle) (tick criteria checkboxes before closing).
+- Keep automated observations, manual permission grants, and hardware checks separate in reports.
 
-Automated observations, manual permission grants, and hardware checks are separate kinds of evidence.
-Never report one as another.
+## Hard boundaries
 
-## Rules the tools enforce
+`.claude/hooks/guard-command.py` blocks these in Claude Code, and all other agents must honor them without workarounds:
 
-`.claude/hooks/guard-command.py` blocks these commands for agents:
+- No pushing to `main`, force pushing, `--no-verify`, pushing tags, or deleting remote branches.
+- No `gh pr merge --admin`, `gh pr create` or `pull_request_create` without before/after media on product changes, release changes, or repository setting changes (Sam releases).
+- No `git reset --hard`, `git clean -f`, or `git branch -D`.
+- No `tccutil reset` or `defaults write` (Miri never changes privacy permissions or macOS settings).
+- No committing screen recordings anywhere or images outside `assets/` and `Sources/` without a `Media-approved-by: Sam` trailer after Sam approves those exact files.
 
-- Pushing to `main`, force pushing, pushing with `--no-verify`, pushing tags, and deleting remote branches.
-- `gh pr merge --admin`, `gh pr create` or the T3 Code `pull_request_create` tool without before/after media on product changes, release changes, and repository setting changes. Sam releases.
-- `git reset --hard`, `git clean -f`, and `git branch -D`.
-- `tccutil reset` and `defaults write`. Miri never changes privacy permissions or macOS settings.
-
-If you need one of these, stop and ask Sam.
-Do not work around the guard with another command.
-
-The pre-push hook rejects new commits that add a screen recording anywhere, or an image outside `assets/` and `Sources/`.
-Only a commit with a `Media-approved-by: Sam` trailer passes, and only after Sam viewed and approved those exact files.
-Share window evidence as [AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md#capture-evidence) describes.
+If you need any of these, stop and ask Sam.
 
 ## Writing rules
 
-- Never use the em dash character. `make docs` rejects it.
-- In Markdown, put each sentence on its own line.
+- Never use the em dash character (`make docs` rejects it).
+- Put each sentence on its own line in Markdown.
 - Never edit `CHANGELOG.md` or generated files by hand.
 
 ## Deeper docs
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) covers the workflow, review and merge, and the issue lifecycle.
-- [docs/AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md) covers evidence standards for agent work.
-- [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md), [triage labels](docs/agents/triage-labels.md), and [domain docs](docs/agents/domain.md) cover the tracker and vocabulary.
-- [docs/prototypes/helper-permission.md](docs/prototypes/helper-permission.md) covers the permission selftest and its manual procedure.
+- [CONTRIBUTING.md](CONTRIBUTING.md) - workflow, review/merge, issue lifecycle.
+- [docs/AI-CONTRIBUTIONS.md](docs/AI-CONTRIBUTIONS.md) - evidence standards and live-test lock.
+- [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md), [triage labels](docs/agents/triage-labels.md), and [domain docs](docs/agents/domain.md).
+- [docs/prototypes/helper-permission.md](docs/prototypes/helper-permission.md) - permission selftest and manual procedure.
