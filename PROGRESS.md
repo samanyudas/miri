@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-27 on branch `fix/skip-unknown-binding-commands`, based on `main` at `07713c6e`
+Updated: 2026-11-27 on branch `fix/554-slow-resize-maximize-refusal`, based on `main` at `9b93e6bd`
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -13,6 +13,15 @@ The app foundation, engine integration, configuration, default shortcuts, shortc
 The current milestone is the open v1 work, which the [`v1 blocker` label](https://github.com/samanyudas/miri/issues?q=is%3Aopen+label%3A%22v1+blocker%22) lists.
 Drag insertion passed Sam's hand checks on 31 October 2026, and the stack limit and stack overflow await their hardware checks.
 The public release path and the complete acceptance runs follow.
+
+## Slow-resizing windows maximize refusal on 27 November 2026
+
+Implemented [#554](https://github.com/samanyudas/miri/issues/554) in [engine PR #212](https://github.com/samanyudas/paneru/pull/212), merged into `miri/v0.5.2` as `1af42c07` (head `10e3765a`), which this branch pins.
+Previously, `hold_frames` in `vendor/paneru/src/ecs/maximize.rs` undid maximize after `REFUSALS = 2` quick narrower reads (~32 ms) on slow or asynchronous resizes (such as busy Chromium/Helium windows) and permanently attached `MaximizeRefused` with no path to clear it.
+`hold_frames` now requires a `350 ms` refusal grace window (`REFUSED_GRACE`) alongside `REFUSALS = 2`, and `MaximizeRefused` records `accepted_width` and clears whenever a confirmed frame width exceeds `accepted_width + REFUSED_SLACK` (in `adopt_native_size`, `hold_frames`, and non-pending `double_click_toggle` and `toggle_maximize`).
+Reviewed with `opus-loop` (2 rounds with Claude Opus 5.5 on `high`, verdict `APPROVE`; S1 late-width clear during restore `FrameHold` and S2 non-pending clear guard fixed).
+Verified live with `verify-miri` using a slow-resize fixture: on `main` (`9b93e6bd`, engine `8fbe8900`, run `20261127-084616`), a `150 ms` delay bounced back from `ctrl+alt-f` (`1276 -> 1276`), `ctrl+alt-equal` widened to `1404`, and the next `ctrl+alt-f` stayed locked out at `1404`; on the fix build (engine `10e3765a`, identical tree to `1af42c07`, run `20261127-100349`), the `150 ms` delay maximized cleanly to `2552` and restored to `1276`, and with a `600 ms` delay (run `20261127-121300`), `ctrl+alt-f` undid maximize after ~384 ms, `ctrl+alt-equal` widened to `1404`, and the next `ctrl+alt-f` maximized cleanly to `2552`.
+`make verify-engine-lifecycle` confirms all 7 lifecycle rules hold and all 3 mutants break (exit 3 only from pre-existing Swift changes after sync commit `e50e6e5c`; this change touches no lifecycle-covered file).
 
 ## Unknown [bindings] commands skipped on startup on 27 November 2026
 
