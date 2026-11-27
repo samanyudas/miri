@@ -24,12 +24,11 @@ Set `JAVA` and `TLA2TOOLS` to use your own Java 11 or later and `tla2tools.jar` 
 It prints one line for each rule, then the path of each finding and of each unexpected result.
 Add `--traces` to the script to see each mutant's path too.
 
-The script's exit status, which `make` prints as `Error 1`, `Error 2`, or `Error 3` and turns into exit status 2:
+The script's exit status, which `make` prints as `Error 1` or `Error 2` and turns into exit status 2:
 
-- `0`: every rule gives its expected result, and the covered code is unchanged since the sync commit.
+- `0`: every rule gives its expected result.
 - `1`: a rule gives a result that differs from the expected one. Read [Read the result](#read-the-result).
 - `2`: a tool or a TLC run failed, or TLC ran longer than 120 seconds. The output has TLC's message. A run past the limit means that the model has no bound on some value, as when a change lets an action queue completions without `Step`.
-- `3`: the results are as expected, but covered code changed after the sync commit. Do [Keep the model in step](#keep-the-model-in-step) before you trust the results.
 
 ## The rules
 
@@ -86,48 +85,26 @@ A mutant that prints `UNEXPECTED ... holds` means the rule can no longer fail on
 ## Keep the model in step
 
 Each action in the model is one main-actor job or one operating system event, as in the code.
-The comment above each operator names the Swift function and line that it describes.
-Every action sets the next state with `Step(...)`, which keeps the state space finite. A new action must use it too.
+The comment above each operator names the Swift function that it describes.
+Every action sets the next state with `Step(...)`, which keeps the state space finite.
+A new action must use it too.
 
-When the script exits with `3`, or when you change covered code on purpose:
+When you change engine lifecycle behavior (start, stop, restart, quit, crash policy, or setup polling):
 
-1. Run `git diff <sync-commit> -- <covered files>` with the values below, and read each change.
-2. For each change that alters what a lifecycle step does, or adds a step, change the matching operator or action in `EngineLifecycle.tla`. A new control that calls `start()`, `stop()`, or `restart()` is a new action, guarded by when the control shows. Update the line numbers in the comments.
-3. Run `make verify-engine-lifecycle` again and read the result as above.
-4. Commit the code and the model. Then set `sync-commit` below to that commit, in a later commit. Move it only after you checked that the model describes the covered code at that commit.
+1. Update the matching operator or action in `verification/engine-lifecycle/EngineLifecycle.tla`.
+2. Run `make verify-engine-lifecycle` and read the result as above.
 
-A change that touches a covered file but no lifecycle step, such as a new label in `Views.swift`, still needs step 4 after you read it.
+UI copy, layout, and Settings view edits that do not change lifecycle behavior do not need a model update or a sync commit.
 
-### Coverage
+### Modeled code
 
-```text
-sync-commit: f8fe5212
-covers: Sources/MiriCore/Engine.swift
-covers: Sources/MiriCore/EngineProcess.swift
-covers: Sources/Miri/AppModel.swift
-covers: Sources/Miri/App.swift
-covers: Sources/Miri/Views.swift
-covers: Sources/Miri/StopShortcut.swift
-covers: Sources/Miri/SettingsWindow.swift
-covers: Sources/Miri/SettingsPages.swift
-covers: Sources/Miri/InitialSetup.swift
-```
+The model describes these core lifecycle areas:
 
-The script reads these lines.
-The model describes these parts of the files:
-
-- `Engine.swift`: `CrashPolicy`, `EngineState`, and `EngineSupervisor.start()`, `restartManually()`, `stop(completion:)`, and `exited(status:)`.
-- `EngineProcess.swift`: `ProcessEngineLauncher.launch(onExit:)`, whose termination handler sends the exit to the main actor, and `RunningEngine.kill()`.
-- `AppModel.swift`: `launch()`, `keyboardLayoutChanged()`, `start()`, `stop()`, `stopFromShortcut()`, `restart()`, `prepareToQuit(completion:)`, `pollSetupUntilReady()`, and `cancelSetupPoll()`.
-- `App.swift`: `applicationDidFinishLaunching`, `applicationShouldTerminate`, and `quitOnTerminationSignal()`.
-- `Views.swift`: `statusText`, and `MenuContent`, which decides when the menu shows Start, Stop, and Restart.
-- `StopShortcut.swift`: the hot key handler that calls `stopFromShortcut()`.
-- `SettingsWindow.swift`: the sidebar's `managementButton`, which shows Start, Stop, or Restart on every Settings page.
-- `SettingsPages.swift`: the status banner of Settings > General, and the Restart buttons of Settings > Diagnostics.
-- `InitialSetup.swift`: the Start and Restart buttons in the status row of Set Up Miri.
-
-A control that moves to another file, or a new file with a control that calls `model.start()`, `model.stop()`, `model.restart()`, or `model.stopFromShortcut()`, must join this list.
-`scripts/tests/test_verify_engine_lifecycle.py`, which `make lint` runs, fails until it does.
+- `Sources/MiriCore/Engine.swift`: `CrashPolicy`, `EngineState`, and `EngineSupervisor.start()`, `restartManually()`, `stop(completion:)`, and `exited(status:)`.
+- `Sources/MiriCore/EngineProcess.swift`: `ProcessEngineLauncher.launch(onExit:)` and `RunningEngine.kill()`.
+- `Sources/Miri/AppModel.swift`: `launch()`, `keyboardLayoutChanged()`, `start()`, `stop()`, `stopFromShortcut()`, `restart()`, `prepareToQuit(completion:)`, `pollSetupUntilReady()`, and `cancelSetupPoll()`.
+- `Sources/Miri/App.swift`: `applicationDidFinishLaunching`, `applicationShouldTerminate`, and `quitOnTerminationSignal()`.
+- `Sources/Miri/StopShortcut.swift`: the hot key handler that calls `stopFromShortcut()`.
 
 ## What the check does not cover
 

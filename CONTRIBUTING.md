@@ -29,8 +29,6 @@ Do not file an unreproduced bug hypothesis from code reading or review as a `bug
 If the agent cannot reproduce the bug, it reports to Sam (or in the PR review) what it saw and what it tried, and it does not file the issue.
 A feature names who asked for it, or the decision or issue it comes from.
 
-In Claude Code sessions, `.claude/hooks/guard-command.py` reads the templates and blocks `gh issue create` without exactly one type label and every required section.
-
 ## Take up an issue
 
 Check the issue before you change code for it.

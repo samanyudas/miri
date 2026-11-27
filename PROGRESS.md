@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-27 on branch `docs/trim-agent-context`, based on `main` at `4865f1e7`
+Updated: 2026-11-27 on branch `chore/trim-guard-and-lifecycle-sync`, based on `main` at `171057b0`
 
 This file records in-flight state and session handoffs only.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, tasks in GitHub Issues, and older session history in git log.
@@ -40,5 +40,7 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 ## Last verification
 
 - **27 Nov 2026 (`#558`/`#559`, engine `6d7f6e7`):** Passed `make pre-push`, `make swift-test` (229 tests), `make strings`, `make engine-lint`, `make engine-test` (1,643 tests `--no-default-features`, 1,754 tests with `lua`), `make verify-engine-lifecycle` (198 states, exit 0), `make build`, `make package`, `make e2e`, and live `verify-miri` single- and dual-display runs.
+- **27 Nov 2026 (`chore/trim-guard-and-lifecycle-sync`):** Passed `make pre-push` (`check-docs`, 82 harness tests, ShellCheck, `actionlint`, `check-compat`, `swift-format`, `cargo fmt`) and `make verify-engine-lifecycle` (198 states, exit 0).
+  `make native` was skipped because no Swift or Rust product code changed.
 - **27 Nov 2026 (`docs/trim-agent-context`):** Passed `make lint` (`check-docs`, harness tests, ShellCheck, `actionlint`, `check-compat`) and `git diff --check`.
   `make native` was skipped because only Markdown documentation and skill frontmatter changed.

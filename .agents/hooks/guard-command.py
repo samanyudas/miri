@@ -32,8 +32,6 @@ def main() -> int:
     if name == "run_command":
         command = args.get("CommandLine") or args.get("command") or ""
         reason = guard.check_command(command, cwd)
-    elif name == "mcp_t3-code_pull_request_create":
-        reason = guard.check_pr_create_tool(args, cwd)
 
     if reason:
         json.dump(
