@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-27 on branch `refactor/untangle-codebase`, based on `main` at `a364ec91`
+Updated: 2026-11-27 on branch `chore/pin-paneru-untangle`, based on `main` (merge of #558)
 
 This file records in-flight state and the handoff between sessions.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, and tasks in GitHub Issues.
@@ -16,12 +16,11 @@ The public release path and the complete acceptance runs follow.
 
 ## Codebase untangling across Miri and Paneru on 27 November 2026
 
-Untangled hidden links, duplicated subsystems, surplus wrappers, restating comments, and weak tests across Miri (`refactor/untangle-codebase` from `a364ec91`) and Paneru ([engine PR #213](https://github.com/samanyudas/paneru/pull/213), head `27808cd7` on `miri/v0.5.2` `1af42c07`).
+Untangled hidden links, duplicated subsystems, surplus wrappers, restating comments, and weak tests across Miri ([#558](https://github.com/samanyudas/miri/pull/558)) and Paneru ([engine PR #213](https://github.com/samanyudas/paneru/pull/213), merged into `miri/v0.5.2` as `6d7f6e7`, head `7495ae9b`), which this branch pins.
 In Miri, deleted six unused or redundant files (`SystemScreenRecording.swift`, `ScreenRecording.swift`, `OrphanedEngines.swift`, `Feedback.swift`, `WindowSizeLimits.swift`, and `WindowSizeLimitsTests.swift`), simplified `AppModel`, `ConfigurationStore`, `GestureSettings`, `GestureTest`, `SettingsPages`, `TOML`, `ShortcutSearch`, and `scripts/check-strings.py`, and synced `verification/engine-lifecycle/EngineLifecycle.tla`.
-In Paneru (`-1,981` net lines across 70 files in PR #213), extracted shared Cocoa helpers into `src/platform/cocoa_ui.rs`, unified ScreenCaptureKit filter and capture logic across `src/slice_screen.rs` and `src/cover_screen.rs`, replaced the `Moved` component with `position.set_changed()`, added analytic `Curve::slope`/`share_rate` and O(1) `Windows::parent_of`, fixed FFI/CoreFoundation ownership and edge-case bugs (haptics `CFRelease`, `AXUIElementGetPid`, safe notification/KVO reads, non-aliasing C callbacks, `OverlayManager` `RefCell` drop order, `ExistingMarker` cleanup, `ScriptValue` NaN `Eq`), and pruned restating doc comments and redundant test boilerplate.
-Passed three rounds of fresh independent code reviews (Round 3 clean on Paneru and final line-number sync on `EngineLifecycle.tla`).
-Verified with `make pre-push`, `make swift-test`, `make strings`, `make engine-lint`, `make engine-test`, `make verify-engine-lifecycle` (198 states, exit 0), `make build`, `make package`, `make e2e` (`observed-granted` and `recovered`), and live `verify-miri` runs `20261127-134807` and `20261127-134937` (Settings 6-page `cutoff` 0 cut off, focus west/east, maximize/restore, stack/unstack, resize grow, and `1.3 s` relaunch restore with 0 engine `ERROR`/`PANIC`).
-This branch keeps `vendor/paneru` pinned at `1af42c07` until [engine PR #213](https://github.com/samanyudas/paneru/pull/213) merges into `miri/v0.5.2`.
+In Paneru (PR #213), extracted shared Cocoa helpers into `src/platform/cocoa_ui.rs`, unified ScreenCaptureKit filter and capture logic across `src/slice_screen.rs` and `src/cover_screen.rs`, replaced the `Moved` component with `position.set_changed()`, added analytic `Curve::slope`/`share_rate` and O(1) `Windows::parent_of`, fixed FFI/CoreFoundation ownership and edge-case bugs (haptics `CFRelease`, `AXUIElementGetPid`, safe notification/KVO reads, non-aliasing C callbacks, `OverlayManager` `RefCell` drop order, `ExistingMarker` cleanup, `ScriptValue` NaN `Eq`, `mouse_to_next_display`, Mission Control cover-slide refusal, edge-slice press waiting under a cover, and `join_column` fallback), preserved reverse-engineered SkyLight notes in `docs/skylight-notifications.md`, and added mutation-verified harness tests.
+Reviewed by Claude Opus 5.5 (both #558 and #213 approved).
+Verified with `make pre-push`, `make swift-test` (229 tests), `make strings`, `make engine-lint`, `make engine-test` (1,643 tests `--no-default-features` and 1,754 tests with `lua`), `make verify-engine-lifecycle` (198 states, exit 0), `make build`, `make package`, `make e2e`, and live `verify-miri` runs covering single-display Settings/focus/maximize/stack/resize/relaunch and dual-display monitor switches with `mouse_follows_focus` both off and on.
 
 ## Slow-resizing windows maximize refusal on 27 November 2026
 
