@@ -274,7 +274,7 @@ import Testing
     @Test func unknownCommandsAreIgnoredByOthersAndStopOwnership() throws {
         let file = try shortcuts("[bindings]\nwindow_missing = \"ctrl+alt-q\"\n")
         #expect(file.others.isEmpty)
-        #expect(file.stopChordsToRegister(layout: us) == [DefaultBinding.stopChord])
+        #expect(file.stopChordsToRegister() == [DefaultBinding.stopChord])
     }
 }
 
