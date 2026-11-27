@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-27 on branch `docs/trim-agent-context`, based on `main` at `4865f1e7`
+Updated: 2026-11-27 on branch `fix/close-window-focus-direction`, based on `main` at `171057b0`
 
 This file records in-flight state and session handoffs only.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, tasks in GitHub Issues, and older session history in git log.
@@ -14,6 +14,7 @@ The current milestone is the open v1 work under the [`v1 blocker` label](https:/
 ## Done
 
 - App foundation, engine integration, configuration, default shortcuts, shortcut customization, gesture controls, drag insertion (hand-checked 31 Oct 2026), swipe-target hand check (13 Nov 2026, `#212`), and TLA+ engine lifecycle verification (`verification/engine-lifecycle/`) are merged.
+- **27 Nov 2026 (Close and quit focus direction):** Fixed closing a window or quitting an app jumping to the leftmost column or dropping focus ([#562](https://github.com/samanyudas/miri/issues/562), [engine PR #214](https://github.com/samanyudas/paneru/pull/214), `8657eeb4`), and added the **When a window closes, focus** (**Left** / **Right**) setting in Settings > Layout (`[options].focus_on_close`).
 - **27 Nov 2026 (Codebase untangling):** Merged [#558](https://github.com/samanyudas/miri/pull/558) and [#559](https://github.com/samanyudas/miri/pull/559) (pinning [engine PR #213](https://github.com/samanyudas/paneru/pull/213), `6d7f6e7`), deleting unused Swift files, simplifying Miri/MiriCore/Paneru subsystems, fixing FFI/overlay/edge-slice bugs, and syncing `EngineLifecycle.tla`.
 - **27 Nov 2026 (Maximize refusal and unknown bindings):** Merged [#557](https://github.com/samanyudas/miri/pull/557) ([#554](https://github.com/samanyudas/miri/issues/554), [engine PR #212](https://github.com/samanyudas/paneru/pull/212), `1af42c07`) adding a `350 ms` refusal grace window and `MaximizeRefused` recovery, and [#556](https://github.com/samanyudas/miri/pull/556) ([#555](https://github.com/samanyudas/miri/issues/555), [engine PR #211](https://github.com/samanyudas/paneru/pull/211), `8fbe890`) skipping unknown `[bindings]` commands on startup while reporting the notice.
 - **25-26 Nov 2026 (Recent fixes):** Auto-floating mounted DMG installer windows ([#550](https://github.com/samanyudas/miri/issues/550), [engine PR #210](https://github.com/samanyudas/paneru/pull/210)), preserving stacked column width on relaunch ([#517](https://github.com/samanyudas/miri/issues/517), [engine PR #209](https://github.com/samanyudas/paneru/pull/209)), multilingual and fuzzy shortcut search across 22 `.lproj` localizations, menu bar Show Logs in Finder activation ([#534](https://github.com/samanyudas/miri/issues/534)), and trackpad resting thumb and palm rejection ([engine PR #208](https://github.com/samanyudas/paneru/pull/208)).
@@ -39,6 +40,7 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 ## Last verification
 
+- **27 Nov 2026 (`fix/close-window-focus-direction`, engine `8657eeb4`):** Passed `make check` (`make lint`, `make compat`, `make swift-lint`, `make strings` across 22 languages, `make engine-lint`, `make build`, `make swift-test`, `make engine-test`, `make e2e`, `make package`) and live `verify-miri` runs (`20261127-185203`, `20261127-185350`) covering close-window (Left), quit-app (Left and Right), Settings > Layout toggle, and `verify-miri cutoff`.
 - **27 Nov 2026 (`#558`/`#559`, engine `6d7f6e7`):** Passed `make pre-push`, `make swift-test` (229 tests), `make strings`, `make engine-lint`, `make engine-test` (1,643 tests `--no-default-features`, 1,754 tests with `lua`), `make verify-engine-lifecycle` (198 states, exit 0), `make build`, `make package`, `make e2e`, and live `verify-miri` single- and dual-display runs.
 - **27 Nov 2026 (`docs/trim-agent-context`):** Passed `make lint` (`check-docs`, harness tests, ShellCheck, `actionlint`, `check-compat`) and `git diff --check`.
   `make native` was skipped because only Markdown documentation and skill frontmatter changed.
