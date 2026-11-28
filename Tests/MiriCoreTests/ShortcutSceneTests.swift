@@ -33,6 +33,10 @@ struct ShortcutSceneTests {
     @Test(arguments: ShortcutAction.editable) func sceneFollowsTheKeybindingReference(_ action: ShortcutAction) throws {
         let scene = try #require(action.scene)
         let (before, after) = (scene.before, scene.after)
+        if action == .findWindow {
+            #expect(before.displays == after.displays && before.focused != after.focused)
+            return
+        }
         guard case .engine(let command) = action else {
             // Stop leaves every window where it is.
             #expect(before.displays == after.displays && !after.managed)

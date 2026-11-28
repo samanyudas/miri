@@ -88,6 +88,8 @@ struct MenuContent: View {
             Button("Start Window Management") { model.start() }
         }
         Divider()
+        Button("Find a Window…") { presenter.windowPicker.show() }
+            .disabled(!model.engineState.isRunning)
         Button("Settings…") { presenter.show(.settings) }
             .keyboardShortcut(",")
         if model.startBlockers.isEmpty {

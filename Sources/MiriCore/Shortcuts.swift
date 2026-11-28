@@ -6,20 +6,31 @@ public enum ShortcutAction: Hashable, Sendable {
     case engine(command: String)
     /// Stop window manager, which Miri registers itself from `[miri].stop_shortcut`.
     case stop
+    case findWindow
 
     /// Miri's actions in the keybinding reference's order, then Stop.
     public static let editable: [ShortcutAction] =
-        DefaultBinding.table.map { .engine(command: EngineCommand.canonical($0.command)!) } + [.stop]
+        DefaultBinding.table.map { .engine(command: EngineCommand.canonical($0.command)!) } + [.findWindow, .stop]
 
     /// Cycle preset widths forward, which the Layout settings page names below the width presets.
     public static let cyclePresetWidths = ShortcutAction.engine(command: EngineCommand.canonical("window_resize")!)
 
+    var applicationKey: String? {
+        switch self {
+        case .engine: nil
+        case .stop: "stop_shortcut"
+        case .findWindow: "find_window_shortcut"
+        }
+    }
+
+    private static let findWindowTitle = LocalizedStringResource("Find a window")
     private static let stopTitleResource = LocalizedStringResource("Stop window manager")
 
     public var title: String {
         switch self {
         case .engine(let command): DefaultBinding.row(for: command)?.action ?? command
         case .stop: String(localized: Self.stopTitleResource)
+        case .findWindow: String(localized: Self.findWindowTitle)
         }
     }
 
@@ -27,6 +38,7 @@ public enum ShortcutAction: Hashable, Sendable {
         switch self {
         case .engine(let command): DefaultBinding.row(for: command)?.titleResource
         case .stop: Self.stopTitleResource
+        case .findWindow: Self.findWindowTitle
         }
     }
 }
@@ -113,10 +125,9 @@ public struct Shortcuts: Sendable {
             (keysByCommand[command] ?? []).flatMap {
                 Self.chords(in: document.value(at: ["bindings", $0]), layout: layout) ?? []
             }
-        case .stop:
-            document.value(at: ["miri", "stop_shortcut"]).map { Self.chords(in: $0, layout: layout) ?? [] } ?? [
-                DefaultBinding.stopChord
-            ]
+        case .stop, .findWindow:
+            document.value(at: ["miri", action.applicationKey!]).map { Self.chords(in: $0, layout: layout) ?? [] }
+                ?? (action == .stop ? [DefaultBinding.stopChord] : [])
         }
     }
 
@@ -141,9 +152,10 @@ public struct Shortcuts: Sendable {
             }
             let texts = DefaultBinding.shortcutTexts(in: document.value(at: ["bindings", key])) + [chord.description]
             return try document.setting(DefaultBinding.encodedTexts(texts), table: ["bindings"], key: key)
-        case .stop:
-            let texts = chords(for: .stop).map(\.description) + [chord.description]
-            return try document.setting(DefaultBinding.encodedTexts(texts), table: ["miri"], key: "stop_shortcut")
+        case .stop, .findWindow:
+            let texts = chords(for: action).map(\.description) + [chord.description]
+            return try document.setting(
+                DefaultBinding.encodedTexts(texts), table: ["miri"], key: action.applicationKey!)
         }
     }
 
@@ -163,10 +175,11 @@ public struct Shortcuts: Sendable {
                     : try result.setting(DefaultBinding.encodedTexts(kept), table: ["bindings"], key: key)
             }
             return result
-        case .stop:
-            let kept = chords(for: .stop).filter { $0 != chord }.map(\.description)
+        case .stop, .findWindow:
+            let kept = chords(for: action).filter { $0 != chord }.map(\.description)
             return try document.setting(
-                kept.isEmpty ? .array([]) : DefaultBinding.encodedTexts(kept), table: ["miri"], key: "stop_shortcut")
+                kept.isEmpty ? .array([]) : DefaultBinding.encodedTexts(kept), table: ["miri"],
+                key: action.applicationKey!)
         }
     }
 
@@ -184,26 +197,30 @@ public struct Shortcuts: Sendable {
         for row in DefaultBinding.table where !row.chords.isEmpty {
             result = try result.setting(DefaultBinding.encoded(row.chords), table: ["bindings"], key: row.command)
         }
-        result = try result.removing(table: ["miri"], key: "stop_shortcut")
+        for action in [ShortcutAction.stop, .findWindow] {
+            result = try result.removing(table: ["miri"], key: action.applicationKey!)
+        }
         return try result.setting(
             .integer(Int64(DefaultBinding.currentVersion)), table: ["miri"], key: "default_bindings_version")
     }
 
-    /// The Stop chords Miri registers. A `[bindings]` entry on the same keys wins, because the engine takes the key
-    /// press first.
-    func stopChordsToRegister() -> [Chord] {
+    /// An engine binding takes the key press first. Stop takes precedence over Find a window.
+    func chordsToRegister(for action: ShortcutAction) -> [Chord] {
         let engineChords =
             keysByCommand.values.joined().flatMap {
                 Self.chords(in: document.value(at: ["bindings", $0]), layout: layout) ?? []
             }
             + others.flatMap(\.chords)
-        return chords(for: .stop).filter { stop in !engineChords.contains { layout.conflicts($0, stop) } }
+        let reserved = action == .findWindow ? engineChords + chords(for: .stop) : engineChords
+        return chords(for: action).filter { chord in !reserved.contains { layout.conflicts($0, chord) } }
     }
 
-    /// The problem with `[miri].stop_shortcut`, if any. Miri reads it itself, so the engine never reports it.
-    static func stopShortcutIssue(in document: TOMLDocument, layout: KeyLayout = .positional) -> ConfigurationIssue? {
-        let key = "miri.stop_shortcut"
-        guard let value = document.value(at: ["miri", "stop_shortcut"]) else { return nil }
+    /// Checks a binding Miri reads itself.
+    static func applicationShortcutIssue(
+        _ action: ShortcutAction, in document: TOMLDocument, layout: KeyLayout = .positional
+    ) -> ConfigurationIssue? {
+        guard let name = action.applicationKey, let value = document.value(at: ["miri", name]) else { return nil }
+        let key = "miri.\(name)"
         let texts: [String]
         do {
             texts = try DefaultBinding.validateShortcutTexts(in: value, path: key)

@@ -6,6 +6,7 @@ extension ShortcutAction {
     public var scene: ShortcutScene? {
         switch self {
         case .stop: Scenes.stop
+        case .findWindow: Scenes.findWindow
         // Settings names an action by the engine's canonical command, and the scenes use the default table's spelling.
         case .engine(let command): Scenes.forCommand(DefaultBinding.row(for: command)?.command ?? command)
         }
@@ -43,6 +44,10 @@ private enum Scenes {
     static func forCommand(_ command: String) -> ShortcutScene? {
         let three = [Column("a"), Column("b"), Column("c")]
         switch command {
+        case "window_focus_previous":
+            return scene(
+                StripSketch([Display(three)], focused: "c"), StripSketch([Display(three)], focused: "a"),
+                String(localized: "Focus returns to the previous window. Press again to switch back."))
         case "window_focus_west":
             return scene(
                 StripSketch([Display(three)], focused: "b"), StripSketch([Display(three)], focused: "a"),
@@ -338,6 +343,10 @@ private enum Scenes {
                     "Focus moves to column \(number) of the strip. The strip scrolls if that column is off the display."
             ))
     }
+
+    static let findWindow = scene(
+        strip(Column("a"), Column("b"), focused: "a"), strip(Column("a"), Column("b"), focused: "b"),
+        String(localized: "Search by window title or app name, then focus the selected window."))
 
     static let stop = scene(
         strip(Column("a"), Column("b"), Column("c"), focused: "b"),

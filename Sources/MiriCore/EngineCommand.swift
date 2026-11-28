@@ -28,7 +28,12 @@ enum EngineCommand {
         switch verb {
         case "focus":
             guard let argument else { return nil }
-            if argument == "unmanaged" || argument == "managed" { return [verb, argument] }
+            if ["unmanaged", "managed", "previous"].contains(argument) { return [verb, argument] }
+            if argument == "id", words.count > 2,
+                let id = number(words[2], max: UInt64(Int32.max)), id > 0
+            {
+                return [verb, argument, String(id)]
+            }
             return positional(argument).map { [verb, $0] }
         case "raise": return argument == "floating" ? [verb, "floating"] : nil
         case "swap": return argument.flatMap(direction).map { [verb, $0] }

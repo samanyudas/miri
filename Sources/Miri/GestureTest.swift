@@ -124,24 +124,8 @@ import Observation
         }
     }
 
-    /// Runs `miri-engine query state --json` against Miri's engine. A query that takes longer than a second is
-    /// ended, so a stuck engine cannot stall the test past its timeout.
-    @concurrent private static func readState(_ paths: EnginePaths) async -> EngineStateSnapshot? {
-        let process = Process()
-        process.executableURL = paths.executable
-        process.arguments = ["query", "state", "--json"]
-        process.environment = paths.environment(from: ProcessInfo.processInfo.environment)
-        let output = Pipe()
-        process.standardOutput = output
-        process.standardError = FileHandle.nullDevice
-        process.standardInput = FileHandle.nullDevice
-        do { try process.run() } catch { return nil }
-        let timeout = DispatchWorkItem { process.terminate() }
-        DispatchQueue.global().asyncAfter(deadline: .now() + 1, execute: timeout)
-        let data = output.fileHandleForReading.readDataToEndOfFile()
-        process.waitUntilExit()
-        timeout.cancel()
-        guard process.terminationStatus == 0 else { return nil }
+    private static func readState(_ paths: EnginePaths) async -> EngineStateSnapshot? {
+        guard let data = await paths.request(["query", "state", "--json"]) else { return nil }
         return try? EngineStateSnapshot(json: data)
     }
 }

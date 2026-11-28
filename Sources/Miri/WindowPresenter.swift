@@ -7,6 +7,7 @@ final class WindowPresenter {
     enum Kind { case settings, diagnostics, permissionExperiment, initialSetup }
 
     let model: AppModel
+    lazy var windowPicker = WindowPicker(model: model)
     private let experiment: PermissionExperiment
     private var windows: [Kind: NSWindow] = [:]
     private var terminating = false

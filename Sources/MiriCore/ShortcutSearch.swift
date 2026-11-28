@@ -141,6 +141,28 @@ public struct ShortcutSearch: Sendable {
         return scored.map(\.other)
     }
 
+    /// Ranks items using the same title matching as shortcut actions.
+    static func rank<T>(_ items: [T], query: String, text: (T) -> [String]) -> [T] {
+        guard let prepared = PreparedQuery(query) else { return items }
+        return items.enumerated().compactMap { index, item in
+            text(item).compactMap { text -> Int? in
+                let target = IndexedText(text, isPrimary: false)
+                if let score = scoreTitle(prepared, against: target) { return score }
+                if prepared.tokens.allSatisfy({ token in
+                    if scoreToken(token, in: target) != nil { return true }
+                    let characters = Array(token)
+                    return characters.count >= 2 && isSubsequence(characters, of: target.characters)
+                }) {
+                    return Score.compactFloor - 1
+                }
+                return nil
+            }
+            .max().map { (item: item, score: $0, index: index) }
+        }
+        .sorted { $0.score != $1.score ? $0.score > $1.score : $0.index < $1.index }
+        .map(\.item)
+    }
+
     // MARK: - Indexing
 
     private static func languages(in bundle: Bundle) -> [String] {

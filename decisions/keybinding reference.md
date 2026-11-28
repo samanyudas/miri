@@ -55,10 +55,21 @@ Sam chose this rule in [issue #79](https://github.com/samanyudas/miri/issues/79)
 These actions have no default shortcut, and Settings lists them for custom shortcuts:
 
 - Focus first column, and Focus last column.
+- Focus previous window, and Find a window.
 - Move column to display left, and Move column to display right.
 
 Numbered jumps select columns rather than individual windows.
 Within a stack, the selected column's last-focused window receives focus.
+
+**Focus previous window** returns to the last available window that had focus.
+Press the shortcut again to switch back.
+It skips closed, hidden, and minimized windows.
+
+**Find a window** opens a picker from the menu bar or a shortcut assigned in Settings.
+Type part of an app name or window title, then press Return to focus the selected window.
+Use the up and down arrow keys to select a different result, or Escape to close the picker.
+The picker shortcut uses Control, Option, Shift, and Command as modifiers.
+The picker includes tiled windows beyond the visible part of a strip and floating windows known to the engine.
 
 Focus display left, right, above, and below focus the neighboring display at once, from any column in the current strip.
 A focused display gives focus to its last-focused visible window, otherwise to its most visible window.
