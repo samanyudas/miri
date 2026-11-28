@@ -17,6 +17,7 @@ struct WindowSearchTests {
         #expect(search.matching("").map(\.id) == [2, 1])
         #expect(search.matching("rln").first?.id == 1)
         #expect(search.matching("edit notes").map(\.id) == [1])
+        #expect(search.matching("edit rln").map(\.id) == [1])
         #expect(search.matching("terminal").first?.id == 2)
         #expect(search.matching("zzzz").isEmpty)
     }

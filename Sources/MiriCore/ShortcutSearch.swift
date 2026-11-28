@@ -148,9 +148,11 @@ public struct ShortcutSearch: Sendable {
             text(item).compactMap { text -> Int? in
                 let target = IndexedText(text, isPrimary: false)
                 if let score = scoreTitle(prepared, against: target) { return score }
-                if prepared.tokens.count == 1, prepared.compactCharacters.count >= 2,
-                    isSubsequence(prepared.compactCharacters, of: target.characters)
-                {
+                if prepared.tokens.allSatisfy({ token in
+                    if scoreToken(token, in: target) != nil { return true }
+                    let characters = Array(token)
+                    return characters.count >= 2 && isSubsequence(characters, of: target.characters)
+                }) {
                     return Score.compactFloor - 1
                 }
                 return nil

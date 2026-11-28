@@ -15,7 +15,10 @@ final class WindowPicker: NSObject, NSWindowDelegate {
 
     func show() {
         guard case .running(let pid) = model.engineState else { return }
-        guard panel == nil else { return }
+        if panel != nil {
+            close()
+            return
+        }
         let panel = PickerPanel(
             contentRect: NSRect(x: 0, y: 0, width: 520, height: 376),
             styleMask: [.titled, .fullSizeContentView, .nonactivatingPanel],
@@ -32,6 +35,7 @@ final class WindowPicker: NSObject, NSWindowDelegate {
             self?.focus(window, enginePid: pid)
         }
         panel.moveSelection = { session.moveSelection(by: $0) }
+        panel.submit = { session.submit() }
 
         // A nonactivating panel can be key while another app is active. Name its AppKit field explicitly so
         // it can begin editing without waiting for SwiftUI's focus state to follow app activation.
@@ -42,9 +46,8 @@ final class WindowPicker: NSObject, NSWindowDelegate {
         field.font = .preferredFont(forTextStyle: .title3)
         field.isBordered = false
         field.drawsBackground = false
+        field.cell?.sendsActionOnEndEditing = false
         field.delegate = session
-        field.target = session
-        field.action = #selector(PickerSession.submit)
 
         let results = NSHostingView(rootView: WindowPickerView(session: session))
         guard let content = panel.contentView else { return }
@@ -62,7 +65,12 @@ final class WindowPicker: NSObject, NSWindowDelegate {
             results.bottomAnchor.constraint(equalTo: content.bottomAnchor),
         ])
         panel.initialFirstResponder = field
-        panel.center()
+        if let area = (NSScreen.main ?? NSScreen.screens.first)?.visibleFrame {
+            panel.setFrameOrigin(
+                NSPoint(x: area.midX - panel.frame.width / 2, y: area.midY - panel.frame.height / 2))
+        } else {
+            panel.center()
+        }
         self.panel = panel
         panel.makeKeyAndOrderFront(nil)
         panel.makeFirstResponder(field)
@@ -90,11 +98,12 @@ final class WindowPicker: NSObject, NSWindowDelegate {
     private final class PickerPanel: NSPanel {
         var cancel: () -> Void = {}
         var moveSelection: (Int) -> Void = { _ in }
+        var submit: () -> Void = {}
 
         override func cancelOperation(_ sender: Any?) { cancel() }
 
         override func sendEvent(_ event: NSEvent) {
-            // The search field's editor consumes arrow keys. Let it keep them while an input method composes text.
+            // The search field's editor consumes navigation keys. Let it keep them while an input method composes text.
             if event.type == .keyDown,
                 event.modifierFlags.intersection([.shift, .control, .option, .command]).isEmpty,
                 (firstResponder as? NSTextView)?.hasMarkedText() != true
@@ -102,6 +111,7 @@ final class WindowPicker: NSObject, NSWindowDelegate {
                 switch Int(event.keyCode) {
                 case kVK_UpArrow: moveSelection(-1)
                 case kVK_DownArrow: moveSelection(1)
+                case kVK_Return, kVK_ANSI_KeypadEnter: submit()
                 case kVK_Escape: cancel()
                 default: super.sendEvent(event)
                 }
@@ -155,7 +165,7 @@ final class WindowPicker: NSObject, NSWindowDelegate {
         if let field = notification.object as? NSTextField { query = field.stringValue }
     }
 
-    @objc func submit() {
+    func submit() {
         if let selectedWindow { select(selectedWindow) }
     }
 }
