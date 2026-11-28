@@ -934,7 +934,9 @@ def capture_targets(run: dict, args) -> tuple[str, list[str]]:
                 display_ids.append(row["display_id"])
     if args.settings:
         listing = tool("axdo", str(run["test_pid"]), "windows")
-        windows += [line.split()[0] for line in listing.splitlines() if " layer=0 " in line]
+        windows += [
+            line.split()[0] for line in listing.splitlines() if " layer=0 " in line or " layer=3 " in line
+        ]
     if not windows:
         raise Failure(
             "No visible fixture window to capture. Open one with `fixture`, or pass --settings or --disposable-window."
