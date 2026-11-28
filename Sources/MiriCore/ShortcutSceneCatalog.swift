@@ -345,7 +345,10 @@ private enum Scenes {
     }
 
     static let findWindow = scene(
-        strip(Column("a"), Column("b"), focused: "a"), strip(Column("a"), Column("b"), focused: "b"),
+        StripSketch(
+            [Display([Column("a"), Column("b"), Column("c"), Column("d")])], focused: "a", showsPicker: true),
+        StripSketch(
+            [Display([Column("a"), Column("b"), Column("c"), Column("d")], offset: -0.27)], focused: "d"),
         String(localized: "Search by window title or app name, then focus the selected window."))
 
     static let stop = scene(

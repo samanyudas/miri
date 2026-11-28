@@ -8,11 +8,14 @@ public struct StripSketch: Equatable, Sendable {
     public var focused: String?
     /// False after Stop, when Miri no longer arranges the windows.
     public var managed = true
+    /// True while the Find a window search picker sits over the display.
+    public var showsPicker = false
 
-    init(_ displays: [SketchDisplay], focused: String?, managed: Bool = true) {
+    init(_ displays: [SketchDisplay], focused: String?, managed: Bool = true, showsPicker: Bool = false) {
         self.displays = displays
         self.focused = focused
         self.managed = managed
+        self.showsPicker = showsPicker
     }
 
     public var windows: [String] {

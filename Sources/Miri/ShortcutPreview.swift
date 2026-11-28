@@ -89,8 +89,56 @@ private struct SketchView: View {
                         }
                         .zIndex(floating ? 1 : 0)
                 }
+                if let box = layout.displays.first {
+                    pickerOverlay(in: box)
+                        .opacity(sketch.showsPicker ? 1 : 0)
+                        .scaleEffect(sketch.showsPicker ? 1 : 0.94)
+                        .position(x: box.midX, y: box.midY)
+                        .zIndex(2)
+                }
             }
         }
+    }
+
+    private func pickerOverlay(in box: CGRect) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 3) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 7, weight: .semibold))
+                    .foregroundStyle(Palette.secondaryText)
+                Capsule()
+                    .fill(Palette.primaryText.opacity(0.45))
+                    .frame(width: box.width * 0.22, height: 2.5)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 5)
+            .padding(.top, 5)
+            Rectangle()
+                .fill(Palette.heroTileBorder)
+                .frame(height: 0.75)
+            VStack(alignment: .leading, spacing: 2.5) {
+                HStack {
+                    Capsule()
+                        .fill(Color.white.opacity(0.9))
+                        .frame(width: box.width * 0.28, height: 2.5)
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, 4)
+                .padding(.vertical, 3.5)
+                .background(Palette.accent, in: RoundedRectangle(cornerRadius: 2.5))
+                Capsule()
+                    .fill(Palette.heroTile)
+                    .frame(width: box.width * 0.22, height: 2.5)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 2)
+            }
+            .padding(.horizontal, 4)
+            .padding(.bottom, 5)
+        }
+        .frame(width: box.width * 0.62)
+        .background(Palette.group, in: RoundedRectangle(cornerRadius: 4))
+        .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Palette.heroTileBorder, lineWidth: 0.75))
+        .shadow(color: .black.opacity(0.22), radius: 3, y: 1.5)
     }
 
     private func fill(for window: String) -> Color {
