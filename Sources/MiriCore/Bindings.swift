@@ -213,6 +213,7 @@ struct DefaultBinding: Sendable {
             DefaultBinding(LocalizedStringResource("Float or unfloat focused window"), "window_manage", ctrlAlt("t")),
             DefaultBinding(LocalizedStringResource("Focus first column"), "window_focus_first"),
             DefaultBinding(LocalizedStringResource("Focus last column"), "window_focus_last"),
+            DefaultBinding(LocalizedStringResource("Focus previous window"), "window_focus_previous"),
             DefaultBinding(
                 LocalizedStringResource("Move column to display left"), "window_movedisplay_west", version: 2),
             DefaultBinding(
@@ -432,16 +433,16 @@ struct DefaultBinding: Sendable {
         return texts
     }
 
-    /// The chords a new default must not take: every binding's, and Stop's, because an engine binding wins over Stop
-    /// on the same chord.
+    /// The chords that already belong to an engine or app action.
     private static func takenChords(in document: TOMLDocument, layout: KeyLayout) -> [Chord] {
-        var taken = boundChords(in: document.value(at: ["bindings"]), layout: layout)
-        if let stop = document.value(at: ["miri", "stop_shortcut"]) {
-            taken += boundChords(in: .table(["stop_shortcut": stop]), layout: layout)
-        } else {
-            taken.append(stopChord)
-        }
-        return taken
+        let bindings = boundChords(in: document.value(at: ["bindings"]), layout: layout)
+        let stop =
+            document.value(at: ["miri", "stop_shortcut"])
+            .map { boundChords(in: .table(["stop_shortcut": $0]), layout: layout) } ?? [stopChord]
+        let search =
+            document.value(at: ["miri", "find_window_shortcut"])
+            .map { boundChords(in: .table(["find_window_shortcut": $0]), layout: layout) } ?? []
+        return bindings + stop + search
     }
 
     /// Each bound command in the engine's own spelling, so that an alias such as `window_resize` counts as

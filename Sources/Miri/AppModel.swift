@@ -57,7 +57,8 @@ import ServiceManagement
     @ObservationIgnored private var watcher: ConfigurationWatcher?
     @ObservationIgnored private var setupPoll: Task<Void, Never>?
     @ObservationIgnored private var gesturePoll: Task<Void, Never>?
-    @ObservationIgnored private var stopShortcut: StopShortcut?
+    @ObservationIgnored private let applicationShortcuts = ApplicationShortcuts()
+    @ObservationIgnored private var findWindow: () -> Void = {}
     @ObservationIgnored private let defaults = UserDefaults.standard
 
     init(bundle: Bundle = .main) {
@@ -109,9 +110,9 @@ import ServiceManagement
 
     var reduceMotion: Bool { NSWorkspace.shared.accessibilityDisplayShouldReduceMotion }
 
-    func launch() {
+    func launch(findWindow: @escaping () -> Void) {
+        self.findWindow = findWindow
         stopOrphanedEngines()
-        stopShortcut = StopShortcut { [weak self] in self?.stopFromShortcut() }
         // The first write of the file needs the gesture settings and conflicts, so the swipe stays on across launches.
         refreshSetup()
         reloadConfiguration()
@@ -146,8 +147,16 @@ import ServiceManagement
         configurationIssue = store.issue
         shortcuts = store.shortcuts
         keptDefaults = store.keptDefaults
-        stopShortcut?.register(store.stopChordsToRegister, layout: keyLayout)
+        registerApplicationShortcuts()
         dropStaleGestureVerification()
+    }
+
+    private func registerApplicationShortcuts() {
+        let stop = store.stopChordsToRegister.map { chord -> (Chord, () -> Void) in
+            (chord, { [weak self] in self?.stopFromShortcut() })
+        }
+        let find = store.findWindowChordsToRegister.map { ($0, findWindow) }
+        applicationShortcuts.register(stop + find, layout: keyLayout)
     }
 
     private func keyboardLayoutChanged() {
@@ -209,7 +218,7 @@ import ServiceManagement
             configurationIssue = nil
             shortcuts = store.shortcuts
             keptDefaults = store.keptDefaults
-            stopShortcut?.register(store.stopChordsToRegister, layout: keyLayout)
+            registerApplicationShortcuts()
             return .added
         } catch let rejection as ShortcutRejection {
             return .rejected(rejection)

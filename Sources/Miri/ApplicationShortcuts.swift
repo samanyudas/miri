@@ -1,32 +1,33 @@
 import Carbon.HIToolbox
 import MiriCore
 
-/// Miri's global shortcuts for Stop window manager. A Carbon hot key needs no Accessibility permission, so they work
-/// whether or not the engine is running. The app keeps one instance for its whole life.
-final class StopShortcut {
-    private let action: () -> Void
+/// Global shortcuts that Miri handles, rather than sending directly to the engine.
+final class ApplicationShortcuts {
+    private static let signature = OSType(0x4D_69_72_69)
+    private var actions: [UInt32: () -> Void] = [:]
+    private var nextID: UInt32 = 1
     private var hotKeys: [EventHotKeyRef] = []
     private var handler: EventHandlerRef?
 
-    init(action: @escaping () -> Void) {
-        self.action = action
-    }
-
     /// Replaces the registered shortcuts. A chord with fn, or with a key the layout cannot place, is skipped, because
     /// Carbon hot keys have no fn modifier.
-    func register(_ chords: [Chord], layout: KeyLayout) {
+    func register(_ shortcuts: [(chord: Chord, action: () -> Void)], layout: KeyLayout) {
         for hotKey in hotKeys { UnregisterEventHotKey(hotKey) }
         hotKeys = []
-        guard !chords.isEmpty, installHandler() else { return }
-        for (index, chord) in chords.enumerated() {
+        actions = [:]
+        guard !shortcuts.isEmpty, installHandler() else { return }
+        for shortcut in shortcuts {
+            let chord = shortcut.chord
             guard !chord.modifiers.contains(.function), let keyCode = layout.keyCode(for: chord.key) else { continue }
-            let identifier = EventHotKeyID(signature: OSType(0x4D_69_72_69), id: UInt32(index + 1))
+            let identifier = EventHotKeyID(signature: Self.signature, id: nextID)
+            nextID &+= 1
             var hotKey: EventHotKeyRef?
             if RegisterEventHotKey(
                 UInt32(keyCode), Self.carbonModifiers(chord.modifiers), identifier, GetEventDispatcherTarget(), 0,
                 &hotKey) == noErr, let hotKey
             {
                 hotKeys.append(hotKey)
+                actions[identifier.id] = shortcut.action
             }
         }
     }
@@ -37,14 +38,29 @@ final class StopShortcut {
         let context = Unmanaged.passUnretained(self).toOpaque()
         let status = InstallEventHandler(
             GetEventDispatcherTarget(),
-            { _, _, context in
-                guard let context else { return OSStatus(eventNotHandledErr) }
+            { _, event, context in
+                guard let context, let event else { return OSStatus(eventNotHandledErr) }
+                var identifier = EventHotKeyID()
+                let status = GetEventParameter(
+                    event, EventParamName(kEventParamDirectObject), EventParamType(typeEventHotKeyID),
+                    nil, MemoryLayout<EventHotKeyID>.size, nil, &identifier)
+                guard status == noErr else { return status }
                 // The application event target dispatches on the main thread.
-                MainActor.assumeIsolated { Unmanaged<StopShortcut>.fromOpaque(context).takeUnretainedValue().action() }
-                return noErr
+                return MainActor.assumeIsolated {
+                    let shortcuts = Unmanaged<ApplicationShortcuts>.fromOpaque(context).takeUnretainedValue()
+                    return shortcuts.handle(identifier)
+                }
             }, 1, &type, context, &handler)
         if status != noErr { handler = nil }
         return status == noErr
+    }
+
+    private func handle(_ identifier: EventHotKeyID) -> OSStatus {
+        guard identifier.signature == Self.signature, let action = actions[identifier.id] else {
+            return OSStatus(eventNotHandledErr)
+        }
+        action()
+        return noErr
     }
 
     private static func carbonModifiers(_ modifiers: Set<ChordModifier>) -> UInt32 {

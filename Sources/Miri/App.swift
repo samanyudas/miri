@@ -28,7 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let arguments = Array(CommandLine.arguments.dropFirst())
         // Arguments that start with a single dash are user defaults overrides, such as `-managementStopped YES`.
         guard let command = arguments.first, command.hasPrefix("--") else {
-            model.launch()
+            model.launch { [weak self] in self?.presenter.windowPicker.show() }
             if model.needsInitialSetup {
                 model.recommendStripGesture()
                 presenter.show(.initialSetup)

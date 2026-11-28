@@ -177,6 +177,18 @@ import Testing
         #expect(Shortcuts(document: none).chords(for: .stop) == [])
     }
 
+    @Test func pickerShortcutPersistsAndResetsWithoutTakingTheStopShortcut() throws {
+        let original = try shortcuts("[miri]\ninner_gap = 8\n")
+        let chord = Chord([.control, .command], "p")
+        #expect(original.chordsToRegister(for: .findWindow).isEmpty)
+        #expect(original.rejection(adding: DefaultBinding.stopChord, to: .findWindow) == .usedBy(.action(.stop)))
+        let added = try Shortcuts(document: original.adding(chord, to: .findWindow))
+        #expect(added.chordsToRegister(for: .findWindow) == [chord])
+        #expect(added.chordsToRegister(for: .stop) == [DefaultBinding.stopChord])
+        let reset = try Shortcuts(document: added.resettingToDefaults())
+        #expect(reset.chordsToRegister(for: .findWindow).isEmpty)
+    }
+
     @Test func removingTheLastChordRemovesTheKey() throws {
         let file = try shortcuts(
             "[bindings]\nwindow_focus_west = [\"ctrl+alt-leftarrow\", \"ctrl+alt-h\"]\nquit = \"f5\"\n")
@@ -247,7 +259,7 @@ import Testing
         ("stop_shortcut = [\"hyper-q\"]", "miri.stop_shortcut: \"hyper-q\" names the modifier \"hyper\""),
     ])
     func reportsAStopShortcutMiriCannotRead(line: String, message: String) throws {
-        let issue = Shortcuts.stopShortcutIssue(in: try TOMLDocument("[miri]\n\(line)\n"))
+        let issue = Shortcuts.applicationShortcutIssue(.stop, in: try TOMLDocument("[miri]\n\(line)\n"))
         guard case .invalidValue(let key, let text) = issue else {
             Issue.record("expected an invalid value, got \(String(describing: issue))")
             return
@@ -260,7 +272,8 @@ import Testing
         for line in [
             "stop_shortcut = []", "stop_shortcut = \"ctrl+cmd-s\"", "stop_shortcut = [\"ctrl+alt-q\", \"f5\"]",
         ] {
-            #expect(Shortcuts.stopShortcutIssue(in: try TOMLDocument("[miri]\n\(line)\n")) == nil, "\(line)")
+            #expect(
+                Shortcuts.applicationShortcutIssue(.stop, in: try TOMLDocument("[miri]\n\(line)\n")) == nil, "\(line)")
         }
     }
 
@@ -268,13 +281,13 @@ import Testing
         let file = try shortcuts(
             "[bindings]\nwindow_step_grow = \"ctrl+alt-=\"\n[miri]\nstop_shortcut = [\"ctrl+alt-equal\", \"ctrl+cmd-s\"]\n"
         )
-        #expect(file.stopChordsToRegister() == [Chord([.control, .command], "s")])
+        #expect(file.chordsToRegister(for: .stop) == [Chord([.control, .command], "s")])
     }
 
     @Test func unknownCommandsAreIgnoredByOthersAndStopOwnership() throws {
         let file = try shortcuts("[bindings]\nwindow_missing = \"ctrl+alt-q\"\n")
         #expect(file.others.isEmpty)
-        #expect(file.stopChordsToRegister() == [DefaultBinding.stopChord])
+        #expect(file.chordsToRegister(for: .stop) == [DefaultBinding.stopChord])
     }
 }
 

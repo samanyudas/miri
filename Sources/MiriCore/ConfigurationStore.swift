@@ -33,6 +33,7 @@ public final class ConfigurationStore {
     /// The Stop shortcuts Miri registers: `[miri].stop_shortcut` without the chords a `[bindings]` entry uses.
     /// When the engine would reject `[bindings]`, this keeps its previous value, as the engine keeps its old bindings.
     public private(set) var stopChordsToRegister = [DefaultBinding.stopChord]
+    public private(set) var findWindowChordsToRegister: [Chord] = []
     /// The default chords that an upgrade could not give an action, because another binding holds them.
     public private(set) var keptDefaults: [KeptDefault] = []
     /// The current file, when it was read correctly. Writes require it.
@@ -65,12 +66,15 @@ public final class ConfigurationStore {
             let parsed: TOMLDocument
             do { parsed = try TOMLDocument(text) } catch { throw .invalidTOML(error) }
             let bindings = DefaultBinding.inspect(in: parsed, layout: layout)
-            let stopIssue = Shortcuts.stopShortcutIssue(in: parsed, layout: layout)
-            if case .usable = bindings, stopIssue == nil {
-                stopChordsToRegister = Shortcuts(document: parsed, layout: layout).stopChordsToRegister()
+            let stopIssue = Shortcuts.applicationShortcutIssue(.stop, in: parsed, layout: layout)
+            let findIssue = Shortcuts.applicationShortcutIssue(.findWindow, in: parsed, layout: layout)
+            if case .usable = bindings {
+                let shortcuts = Shortcuts(document: parsed, layout: layout)
+                if stopIssue == nil { stopChordsToRegister = shortcuts.chordsToRegister(for: .stop) }
+                if findIssue == nil { findWindowChordsToRegister = shortcuts.chordsToRegister(for: .findWindow) }
             }
             let read = try MiriSettings(document: parsed)
-            if let issue = bindings.issue ?? stopIssue { throw issue }
+            if let issue = bindings.issue ?? stopIssue ?? findIssue { throw issue }
             document = parsed
             settings = read
             issue = nil
@@ -128,7 +132,9 @@ public final class ConfigurationStore {
             backingUpBefore: edit == .resetToDefaults ? String(localized: "resetting shortcuts") : nil)
         issue = nil
         refreshKeptDefaults(in: next)
-        stopChordsToRegister = Shortcuts(document: next, layout: layout).stopChordsToRegister()
+        let updatedShortcuts = Shortcuts(document: next, layout: layout)
+        stopChordsToRegister = updatedShortcuts.chordsToRegister(for: .stop)
+        findWindowChordsToRegister = updatedShortcuts.chordsToRegister(for: .findWindow)
     }
 
     private func read() throws(ConfigurationIssue) -> String {
@@ -193,7 +199,9 @@ public final class ConfigurationStore {
         try commit(next, replacing: current, backingUpBefore: upgrades ? String(localized: "upgrading it") : nil)
         writtenGestureFingers = fingers
         refreshKeptDefaults(in: next)
-        stopChordsToRegister = Shortcuts(document: next, layout: layout).stopChordsToRegister()
+        let updatedShortcuts = Shortcuts(document: next, layout: layout)
+        stopChordsToRegister = updatedShortcuts.chordsToRegister(for: .stop)
+        findWindowChordsToRegister = updatedShortcuts.chordsToRegister(for: .findWindow)
     }
 
     /// Reports each changed default that kept its old chords, and each chord of a version 4 or later action that

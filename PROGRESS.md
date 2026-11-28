@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-28 on branch `chore/upgrade-paneru-v0.5.3`, based on `main` at `333755b2`
+Updated: 2026-11-28 on branch `feat/window-navigation`, based on `main` at `c2502e79`
 
 This file records in-flight state and session handoffs only.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, tasks in GitHub Issues, and older session history in git log.
@@ -22,6 +22,11 @@ The current milestone is the open v1 work under the [`v1 blocker` label](https:/
 
 ## Next
 
+- Window navigation is in development in this worktree.
+  The previous-window action and the title search picker share Paneru's exact-window focus path.
+  Both actions can be bound in Settings and the picker can also open from the menu bar.
+  Run the live keyboard checks and publish the engine change before opening a Miri PR.
+
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
 
@@ -40,6 +45,10 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 - Developer ID enrollment is pending and blocks signed, notarized releases.
 
 ## Last verification
+
+- **28 Nov 2026 (Window navigation, engine `095311fe`):** Built and signed Miri Developer and passed 231 Swift tests, 1,682 Paneru tests, strict Swift and engine lint, and the localization check for 22 languages.
+  Compatibility confirms the parser mirror and reports that the new engine commit is still local.
+  The live preflight stopped before changing the desktop because macOS showed recent input.
 
 - **28 Nov 2026 (`chore/upgrade-paneru-v0.5.3`, engine `45003652`):** Passed `make pre-push` (`make lint`, `check-compat`, `swift-format`, `cargo fmt`), `make swift-lint`, `make engine-lint`, default-feature `cargo clippy --all-targets -- -D warnings`, `make engine-test` (1,680 tests `--no-default-features`), `cargo test` with `lua` (1,781 tests), `make build`, `make swift-test` (229 tests), `make e2e`, `make package`, and live `verify-miri` run (`20261128-024419`) verifying keyboard focus east/west, stack/unstack with `v0.5.3` `column`/`row` state, dual-display `movedisplay` (display 3 to display 1), and clean exit recovery.
 
