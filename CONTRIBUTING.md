@@ -51,7 +51,7 @@ The issue states the outcome, acceptance criteria, and the verification level.
 Read [release scope](decisions/release-scope.md) and [design tree status](decisions/design-tree-status.md) before you propose product behavior.
 Some features are deliberately deferred to v2.
 
-Engine changes start on the fork's `miri/v0.5.2` branch in `samanyudas/paneru`.
+Engine changes start on the fork's `miri/v0.5.3` branch in `samanyudas/paneru`.
 Contribute compatibility fixes upstream where possible, then repin `vendor/paneru`.
 Upgrade the engine one Paneru release tag at a time.
 

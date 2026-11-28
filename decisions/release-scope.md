@@ -17,7 +17,7 @@ V1 focuses on getting the window manager running through an app.
 Miri bundles a pinned Paneru-based engine.
 Changes to the engine focus on app integration, isolation, and verified compatibility fixes.
 Compatibility fixes are contributed upstream where possible instead of establishing a permanent Paneru fork.
-Miri pins the latest Paneru release tag, which is `v0.5.2` on 14 October 2026, plus any Miri patches.
+Miri pins the latest Paneru release tag, updated to `v0.5.3` (originally `v0.5.2` on 14 October 2026), plus any Miri patches.
 Miri upgrades one release tag at a time, after a multi-monitor regression check on Sam's hardware.
 The engine runs as a separate helper process inside `Miri.app`, as recorded in [ADR 0009](../docs/adr/0009-run-the-engine-as-a-helper-process.md).
 

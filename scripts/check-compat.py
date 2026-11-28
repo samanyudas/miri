@@ -9,8 +9,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ENGINE = ROOT / "vendor/paneru"
-ENGINE_BASE = "b1b6abbd3f1a4be138152b6f0389c9ff1b27a269"
-ENGINE_BRANCH = "miri/v0.5.2"
+ENGINE_BASE = "24edaa97c52b785d8d1ce88d1359a088c5a865c2"
+ENGINE_BRANCH = "miri/v0.5.3"
 SUPPORTED_MACOS = "15.0"
 RELEASE_APP_ID = "io.github.samanyudas.miri"
 DEVELOPER_APP_ID = "io.github.samanyudas.miri.dev"
@@ -91,7 +91,7 @@ def main() -> int:
     else:
         git("fetch", "--quiet", "origin", f"{ENGINE_BRANCH}:refs/remotes/origin/{ENGINE_BRANCH}")
         if git("merge-base", "--is-ancestor", ENGINE_BASE, pin).returncode != 0:
-            problems.append(f"engine pin {pin} does not descend from the v0.5.2 base {ENGINE_BASE}")
+            problems.append(f"engine pin {pin} does not descend from the v0.5.3 base {ENGINE_BASE}")
         if git("merge-base", "--is-ancestor", pin, f"origin/{ENGINE_BRANCH}").returncode != 0:
             problems.append(f"engine pin {pin} is not published on the fork's {ENGINE_BRANCH} branch")
 
