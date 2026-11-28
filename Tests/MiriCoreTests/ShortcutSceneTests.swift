@@ -34,7 +34,8 @@ struct ShortcutSceneTests {
         let scene = try #require(action.scene)
         let (before, after) = (scene.before, scene.after)
         if action == .findWindow {
-            #expect(before.displays == after.displays && before.focused != after.focused)
+            #expect(before.windows == after.windows && before.showsPicker && !after.showsPicker)
+            #expect(before.focused != after.focused)
             return
         }
         guard case .engine(let command) = action else {
