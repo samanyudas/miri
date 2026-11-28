@@ -25,7 +25,7 @@ The current milestone is the open v1 work under the [`v1 blocker` label](https:/
 - Window navigation is in development in this worktree.
   The previous-window action and the title search picker share Paneru's exact-window focus path.
   Both actions can be bound in Settings and the picker can also open from the menu bar.
-  Run the live keyboard checks and publish the engine change before opening a Miri PR.
+  Publish the engine change before opening a Miri PR.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
@@ -46,9 +46,13 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 ## Last verification
 
-- **28 Nov 2026 (Window navigation, engine `095311fe`):** Built and signed Miri Developer and passed 231 Swift tests, 1,682 Paneru tests, strict Swift and engine lint, and the localization check for 22 languages.
+- **28 Nov 2026 (Window navigation, engine `095311fe`):** Built and signed Miri Developer and passed 232 Swift tests, 1,682 Paneru tests, strict Swift and engine lint, and the localization check for 22 languages.
   Compatibility confirms the parser mirror and reports that the new engine commit is still local.
-  The live preflight stopped before changing the desktop because macOS showed recent input.
+  Live run `20261128-122452` reproduced a picker that opened but captured no text.
+  An AppKit first responder fixed text input, and using window IDs for row and scroll identity fixed the stale result observed in run `20261128-123309`.
+  Live run `20261128-123533` confirmed previous-window focus in both directions, fuzzy search and Return, Down-arrow selection, and Escape on two disposable windows.
+  The setup readiness check warned at 20 seconds, but the running engine answered before the assertions.
+  The run restored the exact configuration and session and released the live-test lock.
 
 - **28 Nov 2026 (`chore/upgrade-paneru-v0.5.3`, engine `45003652`):** Passed `make pre-push` (`make lint`, `check-compat`, `swift-format`, `cargo fmt`), `make swift-lint`, `make engine-lint`, default-feature `cargo clippy --all-targets -- -D warnings`, `make engine-test` (1,680 tests `--no-default-features`), `cargo test` with `lua` (1,781 tests), `make build`, `make swift-test` (229 tests), `make e2e`, `make package`, and live `verify-miri` run (`20261128-024419`) verifying keyboard focus east/west, stack/unstack with `v0.5.3` `column`/`row` state, dual-display `movedisplay` (display 3 to display 1), and clean exit recovery.
 

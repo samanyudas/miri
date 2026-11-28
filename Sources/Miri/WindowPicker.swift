@@ -32,10 +32,40 @@ final class WindowPicker: NSObject, NSWindowDelegate {
             self?.focus(window, enginePid: pid)
         }
         panel.moveSelection = { session.moveSelection(by: $0) }
-        panel.contentViewController = NSHostingController(rootView: WindowPickerView(session: session))
+
+        // A nonactivating panel can be key while another app is active. Name its AppKit field explicitly so
+        // it can begin editing without waiting for SwiftUI's focus state to follow app activation.
+        let field = NSTextField(string: "")
+        let prompt = String(localized: "Search window titles or app names")
+        field.placeholderString = prompt
+        field.setAccessibilityLabel(prompt)
+        field.font = .preferredFont(forTextStyle: .title3)
+        field.isBordered = false
+        field.drawsBackground = false
+        field.delegate = session
+        field.target = session
+        field.action = #selector(PickerSession.submit)
+
+        let results = NSHostingView(rootView: WindowPickerView(session: session))
+        guard let content = panel.contentView else { return }
+        for view in [field, results] {
+            view.translatesAutoresizingMaskIntoConstraints = false
+            content.addSubview(view)
+        }
+        NSLayoutConstraint.activate([
+            field.topAnchor.constraint(equalTo: content.topAnchor, constant: 24),
+            field.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 16),
+            field.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -16),
+            results.topAnchor.constraint(equalTo: field.bottomAnchor, constant: 16),
+            results.leadingAnchor.constraint(equalTo: content.leadingAnchor),
+            results.trailingAnchor.constraint(equalTo: content.trailingAnchor),
+            results.bottomAnchor.constraint(equalTo: content.bottomAnchor),
+        ])
+        panel.initialFirstResponder = field
         panel.center()
         self.panel = panel
         panel.makeKeyAndOrderFront(nil)
+        panel.makeFirstResponder(field)
     }
 
     func windowDidResignKey(_ notification: Notification) {
@@ -82,7 +112,7 @@ final class WindowPicker: NSObject, NSWindowDelegate {
     }
 }
 
-@Observable private final class PickerSession {
+@Observable private final class PickerSession: NSObject, NSTextFieldDelegate {
     let paths: EnginePaths
     let select: (WindowSearch.Window) -> Void
 
@@ -97,6 +127,10 @@ final class WindowPicker: NSObject, NSWindowDelegate {
     private(set) var loading = true
     private(set) var failed = false
     private var search: WindowSearch?
+
+    var selectedWindow: WindowSearch.Window? {
+        results.indices.contains(selection) ? results[selection] : nil
+    }
 
     init(paths: EnginePaths, select: @escaping (WindowSearch.Window) -> Void) {
         self.paths = paths
@@ -117,23 +151,20 @@ final class WindowPicker: NSObject, NSWindowDelegate {
         selection = min(max(selection + step, 0), results.count - 1)
     }
 
-    func submit() {
-        if results.indices.contains(selection) { select(results[selection]) }
+    func controlTextDidChange(_ notification: Notification) {
+        if let field = notification.object as? NSTextField { query = field.stringValue }
+    }
+
+    @objc func submit() {
+        if let selectedWindow { select(selectedWindow) }
     }
 }
 
 private struct WindowPickerView: View {
-    @Bindable var session: PickerSession
-    @FocusState private var searching: Bool
+    let session: PickerSession
 
     var body: some View {
         VStack(spacing: 0) {
-            TextField("Search window titles or app names", text: $session.query)
-                .textFieldStyle(.plain)
-                .font(.title3)
-                .padding(16)
-                .focused($searching)
-                .onSubmit { session.submit() }
             Divider()
             if session.results.isEmpty {
                 status
@@ -143,28 +174,25 @@ private struct WindowPickerView: View {
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack(spacing: 2) {
-                            ForEach(Array(session.results.enumerated()), id: \.element.id) { index, window in
+                            ForEach(session.results) { window in
                                 Button {
                                     session.select(window)
                                 } label: {
-                                    row(window, selected: index == session.selection)
+                                    row(window, selected: window.id == session.selectedWindow?.id)
                                 }
                                 .buttonStyle(.plain)
-                                .id(index)
+                                .id(window.id)
                             }
                         }
                         .padding(8)
                     }
-                    .onChange(of: session.selection) { proxy.scrollTo(session.selection) }
+                    .onChange(of: session.selectedWindow?.id) {
+                        if let id = session.selectedWindow?.id { proxy.scrollTo(id) }
+                    }
                 }
             }
         }
-        .padding(.top, 8)
-        .frame(width: 520, height: 376)
-        .task {
-            searching = true
-            await session.load()
-        }
+        .task { await session.load() }
     }
 
     @ViewBuilder private var status: some View {

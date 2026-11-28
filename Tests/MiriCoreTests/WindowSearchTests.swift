@@ -20,4 +20,16 @@ struct WindowSearchTests {
         #expect(search.matching("terminal").first?.id == 2)
         #expect(search.matching("zzzz").isEmpty)
     }
+
+    @Test func partialTitleWithANumberKeepsTheMatchingWindowIdentity() throws {
+        let json = """
+            {"virtual_workspaces":[{"windows":[
+              {"window_id":1,"bundle_id":"org.example.fixture1","app_name":"AXFixture fixture-1","title":"Miri harmless Accessibility fixture - fixture-1","focused":false,"floating":false,"column":0},
+              {"window_id":2,"bundle_id":"org.example.fixture2","app_name":"AXFixture fixture-2","title":"Miri harmless Accessibility fixture - fixture-2","focused":true,"floating":false,"column":1}
+            ]}]}
+            """
+        let search = try WindowSearch(json: Data(json.utf8), excludingBundle: nil)
+        #expect(search.matching("").map(\.id) == [2, 1])
+        #expect(search.matching("fxtur1").map(\.id) == [1])
+    }
 }
