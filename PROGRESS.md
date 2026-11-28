@@ -13,6 +13,7 @@ The current milestone is the open v1 work under the [`v1 blocker` label](https:/
 
 ## Done
 
+- **28 Nov 2026 (Window navigation):** Added **Focus previous window** (`window_focus_previous`) and **Find a window** (menu bar + `[miri].find_window_shortcut`, pinning [engine PR #216](https://github.com/samanyudas/paneru/pull/216), `b6963094`), with fuzzy title/app search, nonactivating AppKit search field, and keyboard navigation.
 - App foundation, engine integration, configuration, default shortcuts, shortcut customization, gesture controls, drag insertion (hand-checked 31 Oct 2026), swipe-target hand check (13 Nov 2026, `#212`), and TLA+ engine lifecycle verification (`verification/engine-lifecycle/`) are merged.
 - **28 Nov 2026 (Paneru v0.5.3 upgrade):** Merged upstream Paneru `v0.5.3` (`24edaa97`) into new fork branch `miri/v0.5.3` (`45003652`), preserving Miri's swipe physics, thumb rejection, `focus_on_close`, and `PendingWidthSettlement`, and updated Miri's submodule pin, compatibility checks, build script, and docs.
 - **27 Nov 2026 (Close and quit focus direction):** Fixed closing a window or quitting an app jumping to the leftmost column or dropping focus ([#562](https://github.com/samanyudas/miri/issues/562), [engine PR #214](https://github.com/samanyudas/paneru/pull/214), `8657eeb4`), and added the **When a window closes, focus** (**Left** / **Right**) setting in Settings > Layout (`[options].focus_on_close`).
@@ -21,11 +22,6 @@ The current milestone is the open v1 work under the [`v1 blocker` label](https:/
 - **25-26 Nov 2026 (Recent fixes):** Auto-floating mounted DMG installer windows ([#550](https://github.com/samanyudas/miri/issues/550), [engine PR #210](https://github.com/samanyudas/paneru/pull/210)), preserving stacked column width on relaunch ([#517](https://github.com/samanyudas/miri/issues/517), [engine PR #209](https://github.com/samanyudas/paneru/pull/209)), multilingual and fuzzy shortcut search across 22 `.lproj` localizations, menu bar Show Logs in Finder activation ([#534](https://github.com/samanyudas/miri/issues/534)), and trackpad resting thumb and palm rejection ([engine PR #208](https://github.com/samanyudas/paneru/pull/208)).
 
 ## Next
-
-- Window navigation is in development in this worktree.
-  The previous-window action and the title search picker share Paneru's exact-window focus path.
-  Both actions can be bound in Settings and the picker can also open from the menu bar.
-  Publish the engine change before opening a Miri PR.
 
 Each phase lands as its own PR or PRs.
 Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger.md).
@@ -46,13 +42,8 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 ## Last verification
 
-- **28 Nov 2026 (Window navigation, engine `095311fe`):** Built and signed Miri Developer and passed 232 Swift tests, 1,682 Paneru tests, strict Swift and engine lint, and the localization check for 22 languages.
-  Compatibility confirms the parser mirror and reports that the new engine commit is still local.
-  Live run `20261128-122452` reproduced a picker that opened but captured no text.
-  An AppKit first responder fixed text input, and using window IDs for row and scroll identity fixed the stale result observed in run `20261128-123309`.
-  Live run `20261128-123533` confirmed previous-window focus in both directions, fuzzy search and Return, Down-arrow selection, and Escape on two disposable windows.
-  The setup readiness check warned at 20 seconds, but the running engine answered before the assertions.
-  The run restored the exact configuration and session and released the live-test lock.
+- **28 Nov 2026 (Window navigation, engine `b6963094`):** Merged [engine PR #216](https://github.com/samanyudas/paneru/pull/216), fixed picker end-editing submit regression, active-screen centering, shortcut toggle, multi-word fuzzy matching, hidden-app floating window filtering, same-frame frontmost focus handling, and rejected-focus history cleanup.
+  Live run `20261128-131439` confirmed previous-window round trip, typed query + Escape cancellation without submitting, fuzzy query + Return, Down-arrow selection + Return, shortcut toggle closed, and picker UI screenshot inspection, then restored configuration and session and released the live-test lock.
 
 - **28 Nov 2026 (`chore/upgrade-paneru-v0.5.3`, engine `45003652`):** Passed `make pre-push` (`make lint`, `check-compat`, `swift-format`, `cargo fmt`), `make swift-lint`, `make engine-lint`, default-feature `cargo clippy --all-targets -- -D warnings`, `make engine-test` (1,680 tests `--no-default-features`), `cargo test` with `lua` (1,781 tests), `make build`, `make swift-test` (229 tests), `make e2e`, `make package`, and live `verify-miri` run (`20261128-024419`) verifying keyboard focus east/west, stack/unstack with `v0.5.3` `column`/`row` state, dual-display `movedisplay` (display 3 to display 1), and clean exit recovery.
 
