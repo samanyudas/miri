@@ -346,6 +346,25 @@ class VerifyMiriTest(unittest.TestCase):
         with self.assertRaisesRegex(self.vm.Failure, "not a visible managed window"):
             self._run_capture_targets(state, [], [999])
 
+    def test_capture_targets_includes_floating_miri_windows_with_settings(self):
+        vm = self.vm
+        saved_query, saved_tool = vm.query, vm.tool
+        with tempfile.TemporaryDirectory() as home:
+            run = {"dir": home, "test_pid": 99, "fixtures": []}
+            args = type("Args", (), {"display": None, "settings": True, "disposable_window": []})()
+            vm.query = lambda kind, pid=None: {"virtual_workspaces": []}
+            vm.tool = lambda name, *a: (
+                "501 layer=3 frame=[100, 100, 880, 640] title=Miri Settings\n"
+                "502 layer=25 frame=[0, 0, 24, 24] title=\n"
+                "503 layer=3 frame=[200, 200, 520, 376] title=Find a Window\n"
+            )
+            try:
+                display, windows = vm.capture_targets(run, args)
+            finally:
+                vm.query, vm.tool = saved_query, saved_tool
+        self.assertEqual(display, "1")
+        self.assertEqual(windows, ["501", "503"])
+
 
 if __name__ == "__main__":
     unittest.main()
