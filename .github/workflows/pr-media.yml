@@ -1,0 +1,28 @@
+name: PR media
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-media-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-media:
+    name: PR media for UI changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # A pull request checks out its merge commit, whose first parent is the base branch.
+          fetch-depth: 2
+      - name: Check PR media for UI changes
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: python3 scripts/check-pr-media.py HEAD^1
