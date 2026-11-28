@@ -46,6 +46,7 @@ final class WindowPicker: NSObject, NSWindowDelegate {
         field.font = .preferredFont(forTextStyle: .title3)
         field.isBordered = false
         field.drawsBackground = false
+        field.focusRingType = .none
         field.cell?.sendsActionOnEndEditing = false
         field.delegate = session
 
