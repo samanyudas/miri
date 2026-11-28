@@ -1,9 +1,9 @@
 /// The engine's reading of a `[bindings]` key, so that two spellings of one command compare equal.
 ///
 /// The engine splits a key on `_` (`vendor/paneru/src/config.rs` line 1214), parses the words with `parse_command`
-/// (`vendor/paneru/src/types/argv.rs` lines 43-173), and ignores words after the ones a command needs. Several keys
+/// (`vendor/paneru/src/types/argv.rs` lines 43-191), and ignores words after the ones a command needs. Several keys
 /// therefore name one command, such as `window_grow`, `window_resize`, and `window_resize_grow`. This mirrors that
-/// parser at the pinned engine and writes the result in the engine's own encoding (`to_argv`, argv.rs lines 175-266).
+/// parser at the pinned engine and writes the result in the engine's own encoding (`to_argv`, argv.rs lines 200-300).
 enum EngineCommand {
     /// The engine's own spelling of the command a key names, such as `window_resize_grow` for `window_grow`.
     /// Returns `nil` for a key the engine rejects.
@@ -17,8 +17,16 @@ enum EngineCommand {
         case "printstate", "quit", "restart": [words[0]]
         case "showmenu", "hidemenu": words.count == 1 ? [words[0]] : nil
         case "window": operation(Array(words.dropFirst())).map { ["window"] + $0 }
-        case "mouse": words.count > 1 && words[1] == "nextdisplay" ? ["mouse", "nextdisplay"] : nil
+        case "mouse": mouseMove(Array(words.dropFirst())).map { ["mouse"] + $0 }
         default: nil
+        }
+    }
+
+    private static func mouseMove(_ words: [String]) -> [String]? {
+        switch words.first {
+        case "nextdisplay": return ["nextdisplay"]
+        case "display": return words.count > 1 ? displayId(words[1]).map { ["display", $0] } : nil
+        default: return nil
         }
     }
 
@@ -46,19 +54,21 @@ enum EngineCommand {
         case "focusdisplay", "movedisplay": return argument.flatMap(compass).map { [verb, $0] }
         case "stack": return side(argument, default: "west").map { [verb, $0] }
         case "unstack": return side(argument, default: "east").map { [verb, $0] }
-        // These take a side with no default (argv.rs lines 110-111).
+        // These take a side with no default (argv.rs lines 121-122).
         case "focusedge", "moveedge": return argument.flatMap { ["west", "east"].contains($0) ? [verb, $0] : nil }
-        // `fullwidth` is the engine's older name for `maximize` (argv.rs line 99).
+        // `fullwidth` is the engine's older name for `maximize` (argv.rs line 106).
         case "fullwidth": return ["maximize"]
-        case "center", "maximize", "manage", "equalize", "balance", "tabbeddisplay", "nextdisplay",
-            "nextdisplaysend", "snap", "copyrule", "virtualadd", "togglefloatlayer":
+        case "center", "maximize", "manage", "equalize", "balance", "consume", "expel", "tabbeddisplay",
+            "nextdisplay", "nextdisplaysend", "snap", "copyrule", "virtualadd", "togglefloatlayer":
             return [verb]
+        case "displaymove", "displaysend":
+            return argument.flatMap(displayId).map { [verb, $0] }
         case "virtualfocus": return argument.flatMap(direction).map { [verb, $0] }
         case "virtualnum", "virtualmovenum", "virtualsendnum":
             return argument.flatMap(workspace).map { [verb, $0] }
         case "virtual", "virtualmove", "virtualsend":
             guard let argument else { return nil }
-            // A number selects the `num` form, so `window_virtual_2` is `window_virtualnum_2` (argv.rs line 160).
+            // A number selects the `num` form, so `window_virtual_2` is `window_virtualnum_2` (argv.rs line 171).
             if number(argument, max: UInt64(UInt32.max)) != nil {
                 return workspace(argument).map { [verb + "num", $0] }
             }
@@ -87,6 +97,11 @@ enum EngineCommand {
     private static func workspace(_ word: String) -> String? {
         guard let value = number(word, max: UInt64(UInt32.max)), value > 0 else { return nil }
         return String(value)
+    }
+
+    /// `parse_display_id` (argv.rs line 178).
+    private static func displayId(_ word: String) -> String? {
+        number(word, max: UInt64(UInt32.max)).map(String.init)
     }
 
     /// `ResizeDirection::parse` (commands.rs line 226), with `grow` when the word is absent (argv.rs line 145).

@@ -1,6 +1,6 @@
 # Progress
 
-Updated: 2026-11-28 on branch `feat/window-navigation`, based on `main` at `007e4bc8`
+Updated: 2026-11-28 on branch `chore/pin-paneru-upstream-backports`, based on `main` at `48ec25fa`
 
 This file records in-flight state and session handoffs only.
 Product decisions live in `decisions/`, architecture in `docs/adr/`, tasks in GitHub Issues, and older session history in git log.
@@ -13,6 +13,7 @@ The current milestone is the open v1 work under the [`v1 blocker` label](https:/
 
 ## Done
 
+- **28 Nov 2026 (Paneru upstream backports):** Merged [engine PR #217](https://github.com/samanyudas/paneru/pull/217) and [engine PR #218](https://github.com/samanyudas/paneru/pull/218) into `miri/v0.5.3` (`6740b197`) and pinned them in Miri, mirroring `window_consume`, `window_expel`, `window_displaymove_<id>`, `window_displaysend_<id>`, and `mouse_display_<id>` in `EngineCommand.swift`.
 - **28 Nov 2026 (Window navigation):** Added **Focus previous window** (`window_focus_previous`) and **Find a window** (menu bar + `[miri].find_window_shortcut`, pinning [engine PR #216](https://github.com/samanyudas/paneru/pull/216), `b6963094`), with fuzzy title/app search, nonactivating AppKit search field, and keyboard navigation.
 - App foundation, engine integration, configuration, default shortcuts, shortcut customization, gesture controls, drag insertion (hand-checked 31 Oct 2026), swipe-target hand check (13 Nov 2026, `#212`), and TLA+ engine lifecycle verification (`verification/engine-lifecycle/`) are merged.
 - **28 Nov 2026 (Settings menu focus):** Fixed choosing **Settings…** from the menu bar leaving keyboard focus in another app ([#565](https://github.com/samanyudas/miri/issues/565), [engine PR #215](https://github.com/samanyudas/paneru/pull/215), `af6dc443`) by counting visible floating windows as surviving focused windows and restricting the no-focused-survivor fallback in `window_destroyed_trigger` to active-strip windows.
@@ -46,6 +47,10 @@ Record every acceptance result in the [acceptance ledger](docs/acceptance-ledger
 
 ## Last verification
 
+- **28 Nov 2026 (`chore/pin-paneru-upstream-backports`, engine `6740b197`):** Merged [engine PR #217](https://github.com/samanyudas/paneru/pull/217) (`cd6ce0d3`) and [engine PR #218](https://github.com/samanyudas/paneru/pull/218) (`6740b197`) into `miri/v0.5.3`.
+  Passed `make pre-push` (`check-docs`, 83 harness tests, ShellCheck, `actionlint`, `check-compat`, `swift-format`, `cargo fmt`), `make strings` across 22 languages, `make swift-test` (232 tests), `make engine-lint`, `make engine-test` (1,728 tests `--no-default-features`), `make build`, `make e2e`, and `make package`.
+  Live `verify-miri` run `20261128-230257` confirmed `window consume`, `window tabbeddisplay`, and `window expel` (including raising and focusing the remaining tabbed sibling in both the engine and macOS) with fixture captures and video.
+  Live `verify-miri` run `20261128-230442` confirmed `window displaymove` (display 3 to 1 and back with focus following), `window displaysend` (display 3 to 1 while keeping focus on display 3), and `mouse display` round-trip, restoring the 8-window session cleanly and releasing the live-test lock.
 - **28 Nov 2026 (Window navigation, engine `b6963094`):** Merged [engine PR #216](https://github.com/samanyudas/paneru/pull/216), fixed picker end-editing submit regression, active-screen centering, shortcut toggle, multi-word fuzzy matching, hidden-app floating window filtering, same-frame frontmost focus handling, and rejected-focus history cleanup.
   Live run `20261128-131439` confirmed previous-window round trip, typed query + Escape cancellation without submitting, fuzzy query + Return, Down-arrow selection + Return, shortcut toggle closed, and picker UI screenshot inspection, then restored configuration and session and released the live-test lock.
 - **28 Nov 2026 (`fix/565-settings-focus-on-menu-close`, engine `af6dc443`):** Reproduced [#565](https://github.com/samanyudas/miri/issues/565) on unmodified `main` (`c2502e79`, engine `45003652`, `verify-miri` run `20261128-114611`) with both Accessibility and pointer menu selection, confirmed it disappeared with the engine stopped (`20261128-114719`), and verified it fixed on the rebuilt bundle (`20261128-115240` and `20261128-115357`, covering visible control AX and pointer, partly off-screen AX recovery, and direct `cmd-w` keyboard delivery without another click).
